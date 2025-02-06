@@ -67,10 +67,10 @@ export default function ImageViewer(props:{
             enqueueSnackbar("Image deleted!",{variant:'success'})
             if(imageApi.count===0){
                 setSelectedImage(undefined)
-            } else if( selectedIndex() === 0 ){
-                onRight();
+            } else if( selectedIndex() >= imageApi.count-1 ){
+                onLeft()
             } else {
-                onLeft();
+                onRight();
             }
             imageApi.removeImage(selectedImage ?? {} as GeneratedImage)
         },()=>{
@@ -119,7 +119,7 @@ export default function ImageViewer(props:{
             {showBrewing && queue.map(p=><QueuedImageTile prompt={p} onCancel={()=>cancel(p.id)}/>)}
             {showBrewing && activeJob && <>
                 <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0)=== 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} onClick={()=>{SetInterruptOpen(true)}} progress={(progress?.progress ?? 0) * 100}/>
-                <PromptEditorModal onOk={()=>{}} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Current Job" preview progress={progress}/>
+                <PromptEditorModal onOk={()=>{}} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress}/>
             </>}
             {showBrewing && currentUpload && <>
                 <BrewingImageTile imageSrc={uploadBrewBlob ?? ""} progress={uploadProgress}/>
