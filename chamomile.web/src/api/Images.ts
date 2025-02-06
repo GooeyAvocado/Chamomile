@@ -1,0 +1,88 @@
+import { objectToQueryString } from "../components/shared/Utils";
+import { Progress } from "../model/Automatic1111/Progress";
+import { FilterOptions } from "../model/FilterOptions";
+import { GeneratedImage } from "../model/GeneratedImage";
+import { Prompt } from "../model/Prompt";
+import { API_PREFIX, Delete, Get, Post, Put, Upload } from "./Common";
+
+const ENDPOINT = API_PREFIX + "images/"
+
+export const imageUrl = (id: number) => ENDPOINT + `${id}/image`
+
+//#region 
+export const uploadExistingImage = (
+    setLoading: (value: boolean) => void,
+    setProgress: (value: number) => void,
+    onSuccess: (val?:GeneratedImage) => void,
+    onError: (value: any) => void,
+    file: File,
+) => Upload(setLoading, setProgress, onSuccess, onError, "POST", ENDPOINT, file)
+
+export const enqueuePrompt = (
+    setLoading: (value: boolean) => void,
+    setItem: (val? : {jobId : string}) => void,
+    onError: (value: any) => void,
+    val: Prompt
+) => Post(setLoading, setItem, onError, ENDPOINT + "generate", val)
+
+export const getQueue = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: Prompt[]) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "queue");
+
+export const cancelJob = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: Prompt[]) => void,
+    onError: (value: any) => void,
+    id:number
+) => Get(setLoading, setItem, onError, ENDPOINT + "cancel/" + id);
+
+export const getProgress = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: Progress) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "progress");
+
+export const interruptGeneration = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: Progress) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "interrupt");
+
+export const getImages = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: GeneratedImage[]) => void,
+    onError: (value: any) => void,
+    filter: FilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + objectToQueryString(filter) );
+
+export const getImageCount = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: {count:number}) => void,
+    onError: (value: any) => void,
+    filter: FilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + "count" + objectToQueryString(filter) );
+
+export const getImage = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: GeneratedImage) => void,
+    onError: (value: any) => void,
+    id:number
+) => Get(setLoading, setItem, onError, ENDPOINT + id );
+
+export const favImage = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: GeneratedImage) => void,
+    onError: (value: any) => void,
+    image:GeneratedImage
+) => Put(setLoading, setItem, onError, ENDPOINT, image);
+
+export const deleteImage = (
+    setLoading: (value: boolean) => void,
+    onSuccess: () => void,
+    onError: (value: any) => void,
+    id: number,
+) => Delete(setLoading, onSuccess, onError, ENDPOINT + id)
+
+

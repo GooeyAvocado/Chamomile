@@ -1,0 +1,6 @@
+@Chamomile.API_HostAddress = http://localhost:5109
+
+GET {{Chamomile.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

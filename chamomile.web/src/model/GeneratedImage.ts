@@ -1,0 +1,16 @@
+export class GeneratedImage {
+    id: number = 0;
+    prompt: string = "";
+    negativePrompt: string = "";
+    steps: number = 30;
+    sampler: string = "";
+    scheduleType: string = "";
+    cfgScale: number = 7;
+    seed: number = -1;
+    height: number = 1024;
+    width: number = 1024;
+    loras: string[] = [];
+    model: string = "";
+    favorite: boolean = false;
+    created: Date = new Date();
+}

@@ -1,0 +1,143 @@
+﻿using Automatic1111.API;
+using Chamomile.API.Utils;
+using Chamomile.API.Workers;
+using Chamomile.Common;
+using Chamomile.Data;
+using Chamomile.Data.Utils;
+using Hue.Common;
+using MetadataExtractor;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Chamomile.API.Controllers {
+
+    [ApiController]
+    [Route("api/images")]
+    public class ImageController : ControllerBase {
+
+        readonly ImagesDAO dao;
+        readonly A111Api api;
+        readonly ImageGeneratorWorker worker;
+
+        public ImageController(ImageGeneratorWorker worker) {
+            this.worker = worker;
+            dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
+            api = new(new EnvironmentKey("SD_URL", () => throw new InvalidOperationException("")).ToString());
+        }
+
+        #region CREATE
+
+        [HttpPost]
+        public async Task<IActionResult> Create(IFormFile file) {
+            if (file == null || file.Length == 0) { return BadRequest("No data!"); }
+            if (file.Length > 5 * 1024 * 1024) { return BadRequest("File Too Large!"); }
+            if (!ImageDownload.AcceptableMimeTypeExtensions.ContainsKey(file.ContentType)) {
+                return BadRequest("Unacceptable type, must be an image!");
+            }
+
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            var fileBytes = memoryStream.ToArray();
+            
+            var img = await dao.CreateImage(fileBytes);
+
+            return Ok(img);
+
+        }
+
+        [HttpPost("generate")]
+        public IActionResult Generate([FromBody] Prompt prompt) {
+            return Ok(new Dictionary<string, object>() {
+                { "jobId", worker.EnqueuePrompt(prompt) }
+            });
+        }
+
+        #endregion
+
+        #region READ
+
+        [HttpGet("queue")]
+        public IActionResult GetQueue() {
+            return Ok(worker.GetAllPrompts());
+        }
+
+        [HttpGet("cancel/{id}")]
+        public IActionResult CancelJob(long id) {
+            return Ok(worker.CancelPrompt(id));
+        }
+
+        [HttpGet("progress")]
+        public async Task<IActionResult> CurrentProgress() {
+            return Ok(await api.GetProgress());
+        }
+
+        [HttpGet("interrupt")]
+        public async Task<IActionResult> Interrupt() {
+            await api.InterruptGeneration();
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] FilterOptions options) {
+            return Ok(await dao.GetAll(options, options.Page ?? 0));
+        }
+
+        [HttpGet("count")]
+        public async Task<IActionResult> GetAllCount([FromQuery] FilterOptions options) {
+            var count = await dao.GetAllCount(options);
+            return Ok(new Dictionary<string,object>() { { "count", count } });
+        }
+
+        [HttpGet("{ID}")]
+        public async Task<IActionResult> Get(int ID) {
+            return Ok(await dao.Get(ID));
+        }
+
+        [HttpGet("{ID}/image")]
+        public async Task<IActionResult> GetImage(int ID, [FromQuery] bool NoCache = false) {
+            var file = await dao.GetImage(ID);
+
+            if (file == null || file.Data == null || file.Mime == null) return NotFound();
+
+            Response.Headers.Append("Content-Disposition", "inline; filename=" + new string(file.FullFilename.Where(c => c < 128).ToArray()));
+            Response.Headers.CacheControl = NoCache ? "no-cache" : "public, max-age=90000";
+            Response.Headers.Vary = "Cookie";
+            Response.Headers.ETag = file.Hash;
+
+            // Not modified
+            return Request.Headers.IfNoneMatch == file.Hash ? StatusCode(304) : File(file.Data, file.Mime);
+        }
+
+        [HttpGet("{ID}/image.png")]
+        public async Task<IActionResult> GetImageDownload(int ID) {
+            var file = await dao.GetImage(ID);
+
+            if (file == null || file.Data == null || file.Mime == null) return NotFound();
+
+            // Not modified
+            return File(file.Data, file.Mime, new string(file.FullFilename.Where(c => c < 128).ToArray()));
+        }
+
+        #endregion
+
+
+
+        #region UPDATE
+
+        [HttpPut]
+        public async Task<IActionResult> Favorite([FromBody] GeneratedImage image) {
+            return Ok(await dao.Favorite(image.Id, image.Favorite));
+        }
+
+        #endregion
+
+        #region DELETE
+        [HttpDelete("{ID}")]
+        public async Task<IActionResult> Delete(int ID) {
+            await dao.Delete(ID);
+            return Ok();
+        }
+        #endregion
+
+
+    }
+}
