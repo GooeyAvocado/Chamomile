@@ -99,7 +99,10 @@ export default function ImageViewer(props:{
 
     const onRight = () => {
         const index = selectedIndex();
-        if(index=== imageApi.images.length-1) return;
+        if(index=== imageApi.images.length-1) return; //If this is the last image do nothing
+        if(index=== imageApi.images.length-2) { //If is the second to last image
+            if(imageApi.hasMore) imageApi.showMore();
+        };
         setSelectedImage(imageApi.images[index+1]);
     }
 
