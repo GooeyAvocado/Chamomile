@@ -1,7 +1,7 @@
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useState } from "react";
-import { CalendarMonth, ExpandLess, ExpandMore, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
+import { CalendarMonth, Close, ExpandLess, ExpandMore, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
 import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 
@@ -31,6 +31,11 @@ export default function FilterBuilder(props: {
                     input: {
                         startAdornment: <InputAdornment position="start"><Search /></InputAdornment>,
                         endAdornment: <InputAdornment position="end">
+                            <Tooltip title="Clear filter">
+                                <IconButton onClick={() => { setFilter({
+                                    favorite: false, fromDate: "", toDate:"", lora:'', model:'',page:0,query:''
+                                } as FilterOptions) }}><Close/></IconButton>
+                            </Tooltip>
                             <Tooltip title="More Options">
                                 <IconButton onClick={() => { setExpanded(!expanded) }}>{expanded ? <ExpandLess /> : <ExpandMore />}</IconButton>
                             </Tooltip>
