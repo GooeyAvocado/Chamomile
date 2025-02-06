@@ -79,10 +79,16 @@ export const availableVars = (prompt:Prompt) => {
         return [...new Set(matches)];
 }
 
-export const hydratePrompt = (prompt:Prompt, variables:any) => {
+export const hydratePrompt = (prompt:Prompt, variables:any, index?: number) => {
      let hydrated = prompt.positivePrompt;
      Object.keys(variables).forEach(key=>{
-          hydrated = hydrated.replaceAll("\%" + key + "\%", variables[key])
+          const val =   variables[key].split('|')
+          let replaceVal = val[0]
+          if(val.length > 0 && index){
+            console.log(index % val.length)
+            replaceVal = val[index % val.length]
+          }
+          hydrated = hydrated.replaceAll("\%" + key + "\%", replaceVal)
      });
      
      return {...prompt, positivePrompt:hydrated.replace(/(?<=^|\s)#.*|\/\/.*|\/\*[\s\S]*?\*\//g, "").trim()} as Prompt;

@@ -45,7 +45,7 @@ export default function PromptBuilder(props: {
         for (let index = 0; index < orderAmount; index++) {
             brewApi.fetch(() => {}, () => {
                 enqueueSnackbar("Could not queue image!", { variant: 'error' })
-            }, hydratePrompt(prompt,variables))
+            }, hydratePrompt(prompt,variables, index))
         }
 
         enqueueSnackbar(`${orderAmount} orders placed!`, { variant: 'success' })
