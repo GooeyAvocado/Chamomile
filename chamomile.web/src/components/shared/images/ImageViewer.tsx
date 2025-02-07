@@ -118,7 +118,11 @@ export default function ImageViewer(props:{
     useEffect(()=>{SetInterruptOpen(false)},[activeJob])
 
     return <>
-        <div style={{display:"flex", flexWrap:"wrap", gap:"20px", justifyContent:'space-between'}}>
+        <div style={{
+            display:'grid',
+            gridTemplateColumns:'repeat(auto-fit, minmax(192px, 1fr))',
+            gap:'20px'
+        }}>
             {showBrewing && queue.map(p=><QueuedImageTile prompt={p} onCancel={()=>cancel(p.id)}/>)}
             {showBrewing && activeJob && <>
                 <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0)=== 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} onClick={()=>{SetInterruptOpen(true)}} progress={(progress?.progress ?? 0) * 100}/>

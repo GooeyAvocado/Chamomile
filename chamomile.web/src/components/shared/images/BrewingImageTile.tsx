@@ -1,4 +1,5 @@
-import { Card, CardActionArea, LinearProgress } from "@mui/material";
+import { CardActionArea, LinearProgress } from "@mui/material";
+import BaseImageTile from "./BaseImageTile";
 
 export default function BrewingImageTile(props:{
     imageSrc : string
@@ -9,7 +10,7 @@ export default function BrewingImageTile(props:{
 
     const {imageSrc, onClick, progress,eta} = props;
 
-    return <Card elevation={10} style={{ maxWidth: '10vw', width: '400px', maxHeight:'10vw', height:"400px", flexGrow:"1", position:"relative" }}>
+    return <BaseImageTile>
                 <CardActionArea onClick={onClick} style={{height:"100%", position:"relative"}}>
                     {imageSrc.length > 0 && <img src={imageSrc} style={{width:"100%", height:"100%", objectFit:'cover', objectPosition:'center top', position:'absolute', left:'0', top:'0'}}/>}
                     <div style={{position:"absolute", left:0, top:0, width:"100%", height:"100%", background:"rgba(128,128,128,0.5)", display:"flex", flexDirection:"column", justifyContent:'center', alignItems:'center'}}>
@@ -20,7 +21,7 @@ export default function BrewingImageTile(props:{
                         <LinearProgress value={progress} variant="determinate" style={{width:"100%"}}/>
                     </div>
                 </CardActionArea>
-            </Card>
+            </BaseImageTile>
 
 
 }
