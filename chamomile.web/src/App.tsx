@@ -29,9 +29,9 @@ export default function App() {
   },[queue,progress])
   
 
-  const { vertical } = useWindowDimensions();
+  const { vertical, height } = useWindowDimensions();
 
-  return <div style={{ height: vertical ? undefined : "100vh", width: "80vw", maxWidth: "1400px", overflow: 'hidden', display: "flex", flexDirection: "column", alignItems: 'center', margin: "0 auto", paddingTop: "20px" }}>
+  return <div style={{ height: vertical || height < 768 ? undefined : "100vh", width: "80vw", maxWidth: "1400px", overflow: 'hidden', display: "flex", flexDirection: "column", alignItems: 'center', margin: "0 auto", paddingTop: "20px" }}>
     <ChamomileLogo />
     <div style={{ width: "100%", marginTop: "20px" }}>
       <PromptBuilder />
