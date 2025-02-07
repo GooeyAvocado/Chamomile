@@ -8,6 +8,8 @@ import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
+import { usePingPong } from '../../hooks/usePingPong';
+import { Tooltip } from '@mui/material';
 
 export default function PromptButton(props: {
     onBrew: () => void
@@ -19,6 +21,7 @@ export default function PromptButton(props: {
     const {onBrew,onLoad,onSave, fullWidth} = props
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef<HTMLDivElement>(null);
+    const {pong} = usePingPong()
 
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
@@ -35,7 +38,7 @@ export default function PromptButton(props: {
                 ref={anchorRef}
                 fullWidth = {fullWidth}
             >
-                <Button  onClick={onBrew}>Brew</Button>
+                <Tooltip title={!pong?.SD ? 'Kitchen\'s closed\n(Could not contact SD)' : 'Click to start brewing images'}><Button  onClick={onBrew} disabled={!pong?.SD}>Brew</Button></Tooltip>
                 <Button size="small" style={{width:'40px'}} onClick={handleToggle} >
                     <ArrowDropDownIcon />
                 </Button>

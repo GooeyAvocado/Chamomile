@@ -60,7 +60,7 @@ export const PingPongProvider = (props: { children: any }) => {
 
 
 
-    if (pingPongApi.data && (pingPongApi.data?.DB === false || pingPongApi.data?.SD == false)) {
+    if (pingPongApi.data && pingPongApi.data?.DB === false) {
         return <CenteredCard image="/images/pingpongissue.png">
             <b>A dependency is unavailable! </b>
             <div>
