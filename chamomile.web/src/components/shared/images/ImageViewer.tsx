@@ -37,7 +37,7 @@ export default function ImageViewer(props:{
     const [interruptOpen,SetInterruptOpen] = useState(false);
     
     const {enqueueSnackbar} = useSnackbar();
-    const {isMobile, agent} = useUserAgent();
+    const {isMobile} = useUserAgent();
     const {currentUpload,lastSuccess, progress: uploadProgress} = useImageUpload();
 
     const {activeJob,cancel,progress,queue} = useQueue((val)=>{
