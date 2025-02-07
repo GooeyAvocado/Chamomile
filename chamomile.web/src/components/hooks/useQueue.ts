@@ -41,7 +41,7 @@ export const useQueue = (onImageDone : (val:GeneratedImage)=>void, showSnackbar?
     });
     
     useSignalR("JobCompleted", (jobId:number,prompt:Prompt,queue:Prompt[],image:GeneratedImage) => {
-        console.log("Generation finished for job " + jobId)
+        console.log("Generation finished for job " + jobId, prompt)
         if(showSnackbar) enqueueSnackbar("Image brewed!",{variant:'success'})
 
         setQueue(queue)

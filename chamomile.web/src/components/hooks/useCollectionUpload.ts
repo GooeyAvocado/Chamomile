@@ -60,10 +60,10 @@ export default function useCollectionUpload<T,U>(
     const [lastSuccess, setLastSuccess] = useState(undefined as T|undefined)
     const [progress, setProgress] = useState(0)
 
-    const defaultOnSuccess = (val:T)=>{};
+    const defaultOnSuccess = (val:T)=>{console.log(val)};
     const [onSuccess, setOnSuccess] = useState(defaultOnSuccess as any)
 
-    const defaultOnError = (val:any)=>{}
+    const defaultOnError = (val:any)=>{console.log(val)}
     const [onError, setOnError] = useState(defaultOnError as any)
 
     useEffect(()=>{
