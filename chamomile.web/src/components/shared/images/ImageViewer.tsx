@@ -15,6 +15,7 @@ import WelcomePane from "../welcome/WelcomePane";
 import { useQueue } from "../../hooks/useQueue";
 import QueuedImageTile from "./QueuedImageTile";
 import PromptEditorModal from "../prompt/PromptEditorModal";
+import useUserAgent from "../../hooks/useUserAgent";
 
 export default function ImageViewer(props:{
     filter:FilterOptions
@@ -34,7 +35,9 @@ export default function ImageViewer(props:{
     const [uploadBrewBlob, setUploadBrewBlob] = useState(undefined as string|undefined)
     const [selectedImage, setSelectedImage] = useState(undefined as undefined | GeneratedImage)
     const [interruptOpen,SetInterruptOpen] = useState(false);
+    
     const {enqueueSnackbar} = useSnackbar();
+    const {isMobile, agent} = useUserAgent();
     const {currentUpload,lastSuccess, progress: uploadProgress} = useImageUpload();
 
     const {activeJob,cancel,progress,queue} = useQueue((val)=>{
@@ -120,7 +123,7 @@ export default function ImageViewer(props:{
     return <>
         <div style={{
             display:'grid',
-            gridTemplateColumns:'repeat(auto-fit, minmax(192px, 1fr))',
+            gridTemplateColumns:`repeat(auto-fit, minmax(${isMobile ? '128' : '192'}px, 1fr))`,
             gap:'20px'
         }}>
             {showBrewing && queue.map(p=><QueuedImageTile prompt={p} onCancel={()=>cancel(p.id)}/>)}
