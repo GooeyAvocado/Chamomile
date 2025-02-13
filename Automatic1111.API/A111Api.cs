@@ -127,5 +127,43 @@ namespace Automatic1111.API {
             }
         }
 
+        public async Task<List<Upscaler>> AvailableUpscalers() {
+            var client = new HttpClient();
+            var response = await client.GetStringAsync(api + "/sdapi/v1/upscalers");
+
+            return JsonSerializer.Deserialize<List<Upscaler>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No Loras found");
+        }
+
+        public async Task<ExtrasResponse> HiResImage(HiResParameters parameters) {
+            string apiUrl = api + "/sdapi/v1/extra-single-image";
+            using var client = new HttpClient();
+
+
+            // Step 2: Serialize parameters (handling null values correctly)
+
+            var jsonContent = new StringContent(JsonSerializer.Serialize(parameters, PROMPT_SERIALZIER_OPTIONS), Encoding.UTF8, "application/json");
+
+            // Step 3: Send the request and get the response
+            var response = await client.PostAsync(apiUrl, jsonContent);
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode) {
+                throw new InvalidOperationException($"Failed to generate image. Status: {response.StatusCode}. Response: {jsonResponse}");
+            }
+
+            ExtrasResponse? returnResponse;
+            try {
+                returnResponse = JsonSerializer.Deserialize<ExtrasResponse>(jsonResponse, IMAGE_DESERIALIZER_OPTIONS);
+            }
+            catch (JsonException e) {
+                Console.Write(e);
+                returnResponse = null;
+            }
+
+            // Step 4: Deserialize response, handling nulls safely
+            return returnResponse ?? throw new InvalidOperationException("Uhhh....");
+
+        }
+
     }
 }
