@@ -11,7 +11,7 @@ import { createPrompt } from "../../../api/Prompts";
 import { useSnackbar } from "notistack";
 import PromptSelectorModal from "./PromptSelectorModal";
 import VariableEditor from "../variables/VariableEditor";
-import { enqueuePrompt } from "../../../api/Images";
+import { enqueuePrompts } from "../../../api/Images";
 import { hydratePrompt } from "../Utils";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 
@@ -29,7 +29,7 @@ export default function PromptBuilder(props: {
     const [expanded, setExpanded] = useState(false)
     const [modelsOpen, setModelsOpen] = useState(false)
     const [varsOpen, setVarsOpen] = useState(false)
-    const brewApi = useApi(enqueuePrompt)
+    const brewApi = useApi(enqueuePrompts)
 
     const createPromptApi = useApi(createPrompt)
     const { enqueueSnackbar } = useSnackbar();
@@ -42,13 +42,22 @@ export default function PromptBuilder(props: {
     const setPrompt = setPromptOverride ?? setGlobalPrompt
 
     const onBrew = () => {
+        const allPrompts = []
         for (let index = 0; index < orderAmount; index++) {
-            brewApi.fetch(() => {}, () => {
-                enqueueSnackbar("Could not queue image!", { variant: 'error' })
-            }, hydratePrompt(prompt,variables, index))
+            allPrompts.push(hydratePrompt(prompt,variables, index));
         }
 
-        enqueueSnackbar(`${orderAmount} orders placed!`, { variant: 'success' })
+        brewApi.fetch((val) => {
+            if(orderAmount!==val?.jobIds.length){
+                enqueueSnackbar(`Only ${val?.jobIds.length} orders placed!`, { variant: 'warning' })
+            } else {
+                enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
+            }
+            
+        }, () => {
+            enqueueSnackbar("Could not queue images!", { variant: 'error' })
+        }, allPrompts)
+
     }
     const onSave = (val: Prompt) => {
         createPromptApi.fetch(() => {

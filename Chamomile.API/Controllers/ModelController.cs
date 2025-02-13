@@ -23,6 +23,13 @@ namespace Chamomile.API.Controllers {
             return Ok(await dao.GetAll());
         }
 
+        [HttpGet("upscalers")]
+        public async Task<IActionResult> GetAllUpscalers() {
+            return Ok(new Dictionary<string, object>() {
+                { "upscalers", (await api.AvailableUpscalers()).Select(a=>a.name).ToList() }
+            });
+        }
+
         [HttpGet("current")]
         public async Task<IActionResult> GetCurrent() {
             var model = await api.GetCurrentModel();

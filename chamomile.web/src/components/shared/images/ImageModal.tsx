@@ -8,6 +8,7 @@ import { usePrompt } from "../../hooks/usePrompt";
 import { Prompt } from "../../../model/Prompt";
 import { useSnackbar } from "notistack";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
+import HiResPanel from "../upscaler/HiResPanel";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -18,9 +19,10 @@ export default function ImageModal(props: {
     onDeleteForce?: () => void,
     onLeft?: () => void,
     onRight?: () => void,
+    onUpscale: (val: GeneratedImage) => void
 }) {
 
-    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce } = props;
+    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale } = props;
 
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
@@ -88,8 +90,10 @@ export default function ImageModal(props: {
             }
         }}>
         <div style={vertical ? {display:'flex', flexDirection:'column', height: "100vh", overflowY: 'hidden'} : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
+            
+            {/* Image side */}
             <div style={{ textAlign: 'center', flex: "1", maxHeight:vertical ? '50vh' : undefined , position:'relative'}}>
-                <img src={imageUrl(image?.id ?? 0)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain' }} />
+                <img src={imageUrl(image?.id ?? 0, image?.hiResAvailable)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain' }} />
                 {onLeft && <div style={{position:'absolute', left:'20px', top:0, height:'100%', display:'flex', flexDirection:'column', alignContent:'center',justifyContent:'center'}}>
                     <IconButton onClick={onLeft}><ArrowBack/></IconButton>
                 </div>}
@@ -97,8 +101,12 @@ export default function ImageModal(props: {
                     <IconButton onClick={onRight}><ArrowForward/></IconButton>
                 </div>}
             </div>
+
+            {/* info Panel */}
             <Card style={vertical ? {width:'100%'} : { maxWidth: "500px", width: "50vw" }}>
                 <div style={{ height: vertical ? "50vh" :"100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
+                    
+                    {/* Buttons */}
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px" }}>
                         <div style={{ display: "flex", gap: "10px" }} >
                             <IconButton onClick={() => { setOpen(false) }}><ArrowBack /></IconButton>
@@ -110,24 +118,36 @@ export default function ImageModal(props: {
                             {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}
                         </div>
                     </div>
+
+                    {/* Info */}
                     <div style={{ flex: "1", overflowY: 'auto' }}>
+
+                        {/* Prompt */}
                         <div style={{ marginTop: "20px" }}><b>Prompt</b></div>
                         <div style={{ fontSize: ".7em", fontFamily: 'monospace' }}>{image?.prompt}</div>
 
+                        {/* Negative Prompt */}
                         {(image?.negativePrompt?.trim().length ?? 0) !== 0 && <>
                             <div style={{ marginTop: "20px" }}><b>Negative Prompt</b></div>
                             <div style={{ fontSize: ".7em", fontFamily: 'monospace' }}>{image?.negativePrompt}</div>
                         </>}
 
+                        {/* Model */}
                         <div style={{ marginTop: "20px" }}><b>Model</b></div>
                         <ModelCard modelTitle={image?.model ?? ""} currentImage={image} />
 
+                        {/* LORAs */}
                         {(image?.loras?.length ?? 0) !== 0 && <>
                             <div style={{ marginTop: "20px" }}><b>Loras</b></div>
                             {image?.loras.map(a => <LoraCard loraAlias={a} currentImage={image} />)}
                         </>}
+                        
+                        {/* HiRes Options */}
+                         <div style={{ marginTop: "20px" }}><b>Upscaling</b></div>
+                        <HiResPanel image={image} updateImage={onUpscale} />
 
-                        <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em" }}>
+                        {/* Metadata */}
+                        <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop:'10px' }}>
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Seed</b></div>
                                 <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.seed}</div>
@@ -152,6 +172,7 @@ export default function ImageModal(props: {
 
                         </div>
                         
+                        {/* Creation Date */}
                         <div style={{ minWidth: "75px", flex: "1", fontSize:'.8em' }}>
                                 <div style={{ marginTop: "20px" }}><b>Created</b></div>
                                 <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{new Date(image?.created ?? 0).toLocaleString()}</div>

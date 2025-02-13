@@ -3,6 +3,8 @@ using Chamomile.API.Utils;
 using Chamomile.Common;
 using Hue.Common;
 using MetadataExtractor;
+using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using static Chamomile.Data.Utils.AdoTemplate;
 using static Chamomile.Data.Utils.Constants;
@@ -28,6 +30,7 @@ namespace Chamomile.Data {
                 Favorite = reader.GetBoolean(IMAGES_FAV_IN),
                 Created = reader.GetDateTime(CRE_TS),
                 Model = reader.GetString(MODEL_TITLE),
+                HiResAvailable = reader.GetBoolean(IMAGES_HIRES_IN),
                 Loras = await adoTemplate.Query(
                     SelectSql(
                         [LORA_ALIAS],
@@ -40,56 +43,6 @@ namespace Chamomile.Data {
         }
 
         #region CREATE
-
-        public async Task<List<GeneratedImage>> SaveImage(Txt2ImgResponse response, string currentModel) {
-
-            List<GeneratedImage> images = [];
-
-            List<string> loras = Regex
-                    .Matches(response.parameters.prompt, @"<lora:([^>:]+):([\d.]+)>")
-                    .Select(a => a.Groups[1].Value).ToList();
-
-            foreach (var image in response.images) {
-
-                var img = await adoTemplate.QuerySingle(InsertSql([
-                IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
-                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
-                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE
-            ], IMAGES_TABLE, string.Join(", ", [
-                IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
-                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
-                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
-                MODEL_TITLE, CRE_TS
-            ])), (cmd) => {
-                cmd.SetString(IMAGES_PROMPT, response.parameters.prompt);
-                cmd.SetString(IMAGES_NEG_PROMPT, response.parameters.negative_prompt);
-                cmd.SetInt(IMAGES_STEPS, response.parameters.steps);
-                cmd.SetString(IMAGES_SAMPLER, response.parameters.sampler_name);
-                cmd.SetString(IMAGES_SCHEDULE_TP, response.parameters.scheduler);
-                cmd.SetDouble(IMAGES_CFG_SCL, response.parameters.cfg_scale);
-                cmd.SetLong(IMAGES_SEED, response.parameters.seed);
-                cmd.SetInt(IMAGES_HEIGHT, response.parameters.height);
-                cmd.SetInt(IMAGES_WIDTH, response.parameters.width);
-                cmd.SetBytea(IMAGES_BYTES, Convert.FromBase64String(image));
-                cmd.SetString(MODEL_TITLE, currentModel);
-            }, ImageRM);
-
-                if (img == null) continue;
-
-                img.Loras = loras;
-
-                images.Add(img);
-
-                await adoTemplate.ExecuteBatch(InsertSql([IMAGES_ID, LORA_ALIAS], IMAGES_LORA_MAP), (cmd, lora) => {
-                    cmd.SetInt(IMAGES_ID, img.Id);
-                    cmd.SetString(LORA_ALIAS, lora);
-                }, loras);
-
-
-            }
-
-            return images;
-        }
 
         public static string? ExtractStableDiffusionMetadata(Stream stream) {
             var directories = ImageMetadataReader.ReadMetadata(stream);
@@ -107,8 +60,7 @@ namespace Chamomile.Data {
 
         public async Task<GeneratedImage?> CreateImage(byte[] imageBytes) {
 
-            var metadata = ExtractStableDiffusionMetadata(new MemoryStream(imageBytes));
-            if (metadata == null) { throw new InvalidOperationException("Image is missing parameters!"); }
+            var metadata = ExtractStableDiffusionMetadata(new MemoryStream(imageBytes)) ?? throw new InvalidOperationException("Image is missing parameters!");
             var image = ParseUtils.ParametersToImage(metadata);
 
             var loras = await loraDao.GetAll();
@@ -135,7 +87,7 @@ namespace Chamomile.Data {
             ], IMAGES_TABLE, string.Join(", ", [
                 IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
-                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
+                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
                 MODEL_TITLE, CRE_TS
             ])), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
@@ -227,7 +179,7 @@ namespace Chamomile.Data {
                     IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                     IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                     IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
-                    MODEL_TITLE, CRE_TS
+                    MODEL_TITLE, CRE_TS, IMAGES_HIRES_IN,
                 ],
                     IMAGES_TABLE,
                     new WhereConditionGroup(ConditionsFromFilter(filter)),
@@ -250,7 +202,7 @@ namespace Chamomile.Data {
                     IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                     IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                     IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
-                    MODEL_TITLE ,CRE_TS
+                    MODEL_TITLE ,CRE_TS, IMAGES_HIRES_IN,
                 ],
                     IMAGES_TABLE,
                     new WhereConditionGroup([new(IMAGES_ID)])
@@ -278,6 +230,25 @@ namespace Chamomile.Data {
             });
         }
 
+        public async Task<ImageDownload?> GetHiResImage(int id) {
+
+            var sql = SelectSql(
+                columns: [IMAGES_HIRES_BYTES],
+                table: IMAGES_TABLE,
+                new WhereConditionGroup([
+                    new(IMAGES_ID),
+                ])
+            );
+
+            return await adoTemplate.QuerySingle(sql, (cmd) => {
+                cmd.SetInt(IMAGES_ID, id);
+            }, (reader) => new ImageDownload() {
+                Filename = id + "",
+                Mime = "image/png",
+                Data = reader.GetOptionalBytea(IMAGES_HIRES_BYTES),
+            });
+        }
+
         #endregion
 
         #region UPDATE
@@ -293,6 +264,21 @@ namespace Chamomile.Data {
 
             img.Favorite = true;
             return img;
+        }
+
+        public async Task<GeneratedImage?> SaveHiResImage(int id, byte[] image) {
+            return await adoTemplate.QuerySingle(
+                UpdateSql([IMAGES_HIRES_BYTES], IMAGES_TABLE, new([new(IMAGES_ID)])) +
+                " RETURNING " + string.Join(", ", [
+                    IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
+                    IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
+                    IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
+                    MODEL_TITLE, CRE_TS
+                ])
+            , (cmd) => {
+                cmd.SetBytea(IMAGES_HIRES_BYTES, image);
+                cmd.SetInt(IMAGES_ID, id);
+            }, ImageRM);
         }
 
         #endregion

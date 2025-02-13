@@ -10,6 +10,8 @@
         public long Seed { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }
+        public bool HiResAvailable { get; set; }
+
         public List<string> Loras { get; set; } = [];
         public string Model { get; set; } = "";
         public bool Favorite { get; set; } = false;

@@ -10,6 +10,7 @@ import { LoraProvider } from './components/contexts/LoraContext.tsx'
 import PromptProvider from './components/contexts/PromptContext.tsx'
 import { ImageUploadProvider } from './components/contexts/ImageUploadContext.tsx'
 import FullPageDropzone from './components/shared/FullPageDropzone.tsx'
+import { UpscalersProvider } from './components/contexts/UpscalersContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -20,13 +21,15 @@ createRoot(document.getElementById('root')!).render(
           <PromptProvider>
             <ModelProvider>
               <LoraProvider>
-                <ImageUploadProvider>
-                  <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} >
-                    <FullPageDropzone>
-                    <App />
-                    </FullPageDropzone>
-                  </SnackbarProvider>
-                </ImageUploadProvider>
+                <UpscalersProvider>
+                  <ImageUploadProvider>
+                    <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} >
+                      <FullPageDropzone>
+                        <App />
+                      </FullPageDropzone>
+                    </SnackbarProvider>
+                  </ImageUploadProvider>
+                </UpscalersProvider>
               </LoraProvider>
             </ModelProvider>
           </PromptProvider>

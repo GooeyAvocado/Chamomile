@@ -80,6 +80,7 @@ export default function ImageViewer(props:{
             enqueueSnackbar("Image could not be deleted!",{variant:'error'})
         }, selectedImage?.id)
     }
+
     const onFavorite = () => {
         if(!selectedImage) return;
         selectedImage.favorite = !selectedImage?.favorite;
@@ -88,6 +89,11 @@ export default function ImageViewer(props:{
         },()=>{
             enqueueSnackbar("Image could not be favorited!",{variant:'error'})
         }, selectedImage)
+    }
+
+    const onUpscale = (val:GeneratedImage) => {
+        imageApi.updateImage(val ?? selectedImage)
+        setSelectedImage(val);
     }
 
     const selectedIndex = () => {
@@ -136,7 +142,7 @@ export default function ImageViewer(props:{
             </>}
             {imageApi.images?.map(a=> <ImageTile image={a} onClick={onClick ? ()=>{onClick(a)} : ()=>{setSelectedImage(a); setOpen(true)}}/>)}
             {!onClick && <>
-                <ImageModal open={open} setOpen={setOpen} image={selectedImage} onDelete={()=>setDeleteAys(true)} onDeleteForce={onDelete} onFavorite={onFavorite} onLeft={onLeft} onRight={onRight}/>
+                <ImageModal open={open} setOpen={setOpen} image={selectedImage} onDelete={()=>setDeleteAys(true)} onDeleteForce={onDelete} onFavorite={onFavorite} onLeft={onLeft} onRight={onRight} onUpscale={onUpscale}/>
                 <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
                     Are you sure you want to delete this image?
                 </AreYouSureModal>

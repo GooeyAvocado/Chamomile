@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle, InputAdornment, TextField } from "@mui/material"
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, TextField } from "@mui/material"
 import { usePrompt } from "../../hooks/usePrompt"
 import { Terminal } from "@mui/icons-material"
 import { availableVars, hydratePrompt } from "../Utils"
@@ -43,6 +43,9 @@ export default function VariableEditor(props:{
 
             </div>
         </DialogContent>
+        <DialogActions>
+            <Button onClick={()=>setOpen(false)}>OK</Button>
+        </DialogActions>
     </Dialog>
 
 }

@@ -30,6 +30,9 @@
         public static readonly string IMAGES_WIDTH       = "image_wdth_num";
         public static readonly string IMAGES_FAV_IN      = "image_fav_in";
         public static readonly string IMAGES_BYTES       = "image_bytes_tx";
+        public static readonly string IMAGES_HIRES_IN    = "image_hires_in";
+        public static readonly string IMAGES_HIRES_BYTES = "image_hires_bytes_tx";
+
 
         public static readonly string IMAGES_LORA_MAP = $"{SCHEMA}.images_lora_map";
 

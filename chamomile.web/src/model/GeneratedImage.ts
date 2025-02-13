@@ -13,4 +13,5 @@ export class GeneratedImage {
     model: string = "";
     favorite: boolean = false;
     created: Date = new Date();
+    hiResAvailable: boolean = false;
 }

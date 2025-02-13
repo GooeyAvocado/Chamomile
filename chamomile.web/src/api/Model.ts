@@ -10,6 +10,12 @@ export const getModels = (
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT)
 
+export const getUpscalers = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: {upscalers:string[]}) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "upscalers")
+
 export const refreshModels = (
     setLoading: (value: boolean) => void,
     setItem: (value?: Model[]) => void,

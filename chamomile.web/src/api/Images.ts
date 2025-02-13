@@ -2,12 +2,13 @@ import { objectToQueryString } from "../components/shared/Utils";
 import { Progress } from "../model/Automatic1111/Progress";
 import { FilterOptions } from "../model/FilterOptions";
 import { GeneratedImage } from "../model/GeneratedImage";
+import { HiResRequest } from "../model/HiResRequest";
 import { Prompt } from "../model/Prompt";
 import { API_PREFIX, Delete, Get, Post, Put, Upload } from "./Common";
 
 const ENDPOINT = API_PREFIX + "images/"
 
-export const imageUrl = (id: number) => ENDPOINT + `${id}/image`
+export const imageUrl = (id: number, hiResAvailable?:boolean) => ENDPOINT + `${id}/image` + (hiResAvailable ? "/HiRes" : "")
 
 //#region 
 export const uploadExistingImage = (
@@ -24,6 +25,13 @@ export const enqueuePrompt = (
     onError: (value: any) => void,
     val: Prompt
 ) => Post(setLoading, setItem, onError, ENDPOINT + "generate", val)
+
+export const enqueuePrompts = (
+    setLoading: (value: boolean) => void,
+    setItem: (val? : {jobIds : number[]}) => void,
+    onError: (value: any) => void,
+    val: Prompt[]
+) => Post(setLoading, setItem, onError, ENDPOINT + "generateMany", val)
 
 export const getQueue = (
     setLoading: (value: boolean) => void,
@@ -77,6 +85,14 @@ export const favImage = (
     onError: (value: any) => void,
     image:GeneratedImage
 ) => Put(setLoading, setItem, onError, ENDPOINT, image);
+
+export const hiResImage = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: GeneratedImage) => void,
+    onError: (value: any) => void,
+    request:HiResRequest
+) => Post(setLoading, setItem, onError, ENDPOINT + "hiRes", request);
+
 
 export const deleteImage = (
     setLoading: (value: boolean) => void,

@@ -1,11 +1,10 @@
 ﻿using Automatic1111.API;
-using Chamomile.API.Utils;
+using Automatic1111.Common;
 using Chamomile.API.Workers;
 using Chamomile.Common;
 using Chamomile.Data;
 using Chamomile.Data.Utils;
 using Hue.Common;
-using MetadataExtractor;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Chamomile.API.Controllers {
@@ -48,6 +47,22 @@ namespace Chamomile.API.Controllers {
         public IActionResult Generate([FromBody] Prompt prompt) {
             return Ok(new Dictionary<string, object>() {
                 { "jobId", worker.EnqueuePrompt(prompt) }
+            });
+        }
+
+        [HttpPost("generateMany")]
+        public IActionResult GenerateMany([FromBody] List<Prompt> prompts) {
+            List<long> jobIds = [];
+            
+            foreach (var prompt in prompts) {
+                try {
+                    jobIds.Add(worker.EnqueuePrompt(prompt)) ;
+                }
+                catch {}
+            }
+
+            return Ok(new Dictionary<string, object>() {
+                { "jobIds", jobIds  }
             });
         }
 
@@ -107,11 +122,30 @@ namespace Chamomile.API.Controllers {
             return Request.Headers.IfNoneMatch == file.Hash ? StatusCode(304) : File(file.Data, file.Mime);
         }
 
-        [HttpGet("{ID}/image.png")]
-        public async Task<IActionResult> GetImageDownload(int ID) {
-            var file = await dao.GetImage(ID);
+        [HttpGet("{ID}/image/HiRes")]
+        public async Task<IActionResult> GetHiResImage(int ID, [FromQuery] bool NoCache = false) {
+            var file = await dao.GetHiResImage(ID);
 
             if (file == null || file.Data == null || file.Mime == null) return NotFound();
+
+            Response.Headers.Append("Content-Disposition", "inline; filename=" + new string(file.FullFilename.Where(c => c < 128).ToArray()));
+            Response.Headers.CacheControl = NoCache ? "no-cache" : "public, max-age=90000";
+            Response.Headers.Vary = "Cookie";
+            Response.Headers.ETag = file.Hash;
+
+            // Not modified
+            return Request.Headers.IfNoneMatch == file.Hash ? StatusCode(304) : File(file.Data, file.Mime);
+        }
+
+        [HttpGet("{ID}/image.png")]
+        public async Task<IActionResult> GetImageDownload(int ID) {
+            var file = await dao.GetHiResImage(ID);
+
+
+            if (file == null) return NotFound();
+            if (file.Data == null) file = await dao.GetImage(ID); //Try and grab the non-hi res
+            if (file == null || file.Data==null) return NotFound();
+
 
             // Not modified
             return File(file.Data, file.Mime, new string(file.FullFilename.Where(c => c < 128).ToArray()));
@@ -119,13 +153,25 @@ namespace Chamomile.API.Controllers {
 
         #endregion
 
-
-
         #region UPDATE
 
         [HttpPut]
         public async Task<IActionResult> Favorite([FromBody] GeneratedImage image) {
             return Ok(await dao.Favorite(image.Id, image.Favorite));
+        }
+
+        [HttpPost("hiRes")]
+        public async Task<IActionResult> HiRes([FromBody] HiResRequest options) {
+            var hiResParameters = new HiResParameters() { 
+                upscaler_1 = options.Upscaler,
+                upscaling_resize = options.ResizeFactor,
+                image = Convert.ToBase64String((await dao.GetImage(options.ImageID))?.Data ?? throw new ArgumentNullException("Image doesn't exist"))
+            };
+
+            var hiRes = await api.HiResImage(hiResParameters);
+            return hiRes == null
+                ? throw new InvalidOperationException("Waos")
+                : Ok(await dao.SaveHiResImage(options.ImageID, Convert.FromBase64String(hiRes.image)));
         }
 
         #endregion
