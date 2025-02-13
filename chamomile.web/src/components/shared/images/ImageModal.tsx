@@ -19,7 +19,7 @@ export default function ImageModal(props: {
     onDeleteForce?: () => void,
     onLeft?: () => void,
     onRight?: () => void,
-    onUpscale: (val: GeneratedImage) => void
+    onUpscale?: (val: GeneratedImage) => void
 }) {
 
     const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale } = props;
@@ -143,8 +143,10 @@ export default function ImageModal(props: {
                         </>}
                         
                         {/* HiRes Options */}
-                         <div style={{ marginTop: "20px" }}><b>Upscaling</b></div>
-                        <HiResPanel image={image} updateImage={onUpscale} />
+                        {!!onUpscale && <>
+                            <div style={{ marginTop: "20px" }}><b>Upscaling</b></div>
+                            <HiResPanel image={image} updateImage={onUpscale} />
+                        </>}
 
                         {/* Metadata */}
                         <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop:'10px' }}>

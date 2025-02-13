@@ -20,6 +20,6 @@ export default function ImageModalFromId(props: {
     },[image,open])
 
     if(!imageApi.data) return <></>
-    return <ImageModal open={open} setOpen={setOpen} image={imageApi.data}/>
+    return <ImageModal open={open} setOpen={setOpen} image={imageApi.data} />
 
 }
