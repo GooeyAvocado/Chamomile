@@ -1,4 +1,4 @@
-import { Button, Card, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Button, Card, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useUpscalers } from "../../hooks/useUpscalers";
 import useApi from "../../hooks/useApi";
@@ -8,7 +8,7 @@ import { HiResRequest } from "../../../model/HiResRequest";
 
 export default function HiResPanel(props: {
     image?: GeneratedImage
-    updateImage: (val: GeneratedImage) => void
+    updateImage?: (val: GeneratedImage) => void
 }) {
 
     const { image, updateImage } = props
@@ -23,7 +23,7 @@ export default function HiResPanel(props: {
         upscaleApi.fetch(val => {
             enqueueSnackbar("Image upscaled!", { variant: 'success' })
             console.log(val)
-            if (val) updateImage(val);
+            if (val) updateImage?.(val);
         }, () => {
             enqueueSnackbar("Image failed to be upscaled", { variant: 'error' })
         }, {
@@ -33,32 +33,35 @@ export default function HiResPanel(props: {
         } as HiResRequest);
     }
 
+
     return <Card elevation={7}>
-        <div style={{ padding: '10px' }}>
-            <div style={{ display: 'flex', gap: '10px', marginTop:'5px' }}>
+        <div style={{ padding: '10px', height: "100px", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: upscaleApi.loading ? 'center' : '' }}>
+            {upscaleApi.loading ? <>
+                <CircularProgress/>
+            </> : <>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
 
-                <FormControl fullWidth>
-                    <InputLabel>Upscaler</InputLabel>
-                    <Select 
-                        value={selectedUpscaler} onChange={(e)=>setSelectedUpscaler(e.target.value)} size="small" label='Upscaler'
-                        slotProps={{root:{style:{fontSize:'.8em'}}}}
-                    >
-                        {upscalers?.map((u)=><MenuItem value={u} style={{fontSize:'.8em'}}>{u}</MenuItem>)}
-                    </Select>
-                </FormControl>
+                    <FormControl fullWidth>
+                        <InputLabel>Upscaler</InputLabel>
+                        <Select
+                            value={selectedUpscaler} onChange={(e) => setSelectedUpscaler(e.target.value)} size="small" label='Upscaler'
+                            slotProps={{ root: { style: { fontSize: '.8em' } } }}
+                        >
+                            {upscalers?.map((u) => <MenuItem value={u} style={{ fontSize: '.8em' }}>{u}</MenuItem>)}
+                        </Select>
+                    </FormControl>
 
-                <TextField
-                    size="small" variant="outlined" label='Scale' type="number"
-                    value={upscaleScale} onChange={(e) => setUpscaleScale(Number.parseFloat(e.target.value))}
-                    slotProps={{ htmlInput: { step: '.5', style:{fontSize:'.8em'} } }} style={{width:"100px"}}
-                />
-            </div>
-            <div style={{display:'flex', justifyContent:'space-between', marginTop:'5px', alignItems:'center'}}>
-                <div style={{ fontSize: '.8em' }}>{image?.hiResAvailable ? "✅ Image has been upsacled!" : "❌ Image has not been upscaled!"}</div>
-                <Button size="small" onClick={onUpscale}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
-            </div>
-
-
+                    <TextField
+                        size="small" variant="outlined" label='Scale' type="number"
+                        value={upscaleScale} onChange={(e) => setUpscaleScale(Number.parseFloat(e.target.value))}
+                        slotProps={{ htmlInput: { step: '.5', style: { fontSize: '.8em' } } }} style={{ width: "100px" }}
+                    />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px', alignItems: 'center' }}>
+                    <div style={{ fontSize: '.8em' }}>{image?.hiResAvailable ? "✅ Image has been upsacled!" : "❌ Image has not been upscaled!"}</div>
+                    <Button size="small" onClick={onUpscale} disabled={!updateImage}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
+                </div>
+            </>}
         </div>
     </Card>
 
