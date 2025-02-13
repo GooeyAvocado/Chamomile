@@ -37,7 +37,7 @@ export const PingPongProvider = (props: { children: any }) => {
         return <CenteredCard image="/images/pingpongerror.png">
             <b>We couldn't connect to the backend </b>
             <div style={{ fontSize: ".8em" }}>
-                Something might be wrong with your configuration. Check if your API_URL is correct, and if the backend is running
+                Something might be wrong with your configuration. Check if your VITE_BACKEND_URL is correct, and if the backend is running
             </div>
         </CenteredCard>
     }
