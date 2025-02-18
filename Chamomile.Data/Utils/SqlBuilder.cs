@@ -40,7 +40,7 @@
             public WhereCondition(string column) : this(column, WhereConditionOperator.EQUALS, $"@{column}") { }
             public WhereCondition(string column, WhereConditionOperator operation) : this(column, operation, $"@{column}") { }
             public WhereCondition(string column, List<string> vals) : this(column, WhereConditionOperator.IN,
-                "(" + string.Join(",", vals) + ")"
+                "(" + string.Join(",", vals.Select(a=>"'" + a + "'").ToList()  ) + ")"
                 ) { }
             public WhereCondition(string column, List<int> vals) : this(column, WhereConditionOperator.IN,
                 "(" + string.Join(",", vals) + ")"
