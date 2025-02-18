@@ -50,7 +50,10 @@ namespace Chamomile.API.Controllers {
                 var availableModels = await api.GetModels();
                 await dao.UpdateAll(availableModels);
             }
-            catch (Exception) {Console.WriteLine("SD is offline, returning existing models");}
+            catch (Exception e) {
+                Console.WriteLine(e);
+                Console.WriteLine("SD is offline, returning existing models");
+            }
             return Ok(await dao.GetAll());
         }
 

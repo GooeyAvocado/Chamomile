@@ -29,7 +29,10 @@ namespace Chamomile.API.Controllers {
                 var availableLoras = await api.GetLoras();
                 await dao.UpdateAll(availableLoras);
             }
-            catch (Exception) { Console.WriteLine("SD is offline, returning existing models"); }
+            catch (Exception E) {
+                Console.WriteLine(E);
+                Console.WriteLine("SD is offline, returning existing models"); 
+            }
             return Ok(await dao.GetAll());
         }
 

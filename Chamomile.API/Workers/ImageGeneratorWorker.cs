@@ -101,11 +101,12 @@ namespace Chamomile.API.Workers {
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
                         }
-                        catch (Exception) {
+                        catch (Exception e) {
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this
-                            _hubContext.Clients.All.SendAsync("JobFailed", jobId, prompt, GetAllPrompts());
+                            Console.WriteLine(e);
+                            _hubContext.Clients.All.SendAsync("JobFailed", jobId, prompt, GetAllPrompts(),e.Message);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
 

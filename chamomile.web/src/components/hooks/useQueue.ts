@@ -51,11 +51,12 @@ export const useQueue = (onImageDone : (val:GeneratedImage)=>void, showSnackbar?
         setLastSuccessfulImage(image);
     });
 
-    useSignalR("JobFailed", (jobId: number, prompt: Prompt, queue: Prompt[]) => {
+    useSignalR("JobFailed", (jobId: number, prompt: Prompt, queue: Prompt[], message:string) => {
         console.error(`Job ${jobId} has failed`)
         console.error(prompt)
+        console.error(message)
 
-        if(showSnackbar) enqueueSnackbar("An image has failed to brew",{variant:'error'})
+        if(showSnackbar) enqueueSnackbar("An image has failed to brew: " + message,{variant:'error'})
         
         setQueue(queue)
         setCurrentProgress(undefined)
