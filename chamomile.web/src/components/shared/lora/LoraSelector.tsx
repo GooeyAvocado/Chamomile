@@ -28,7 +28,7 @@ export default function LoraSelector(props:{
             alias:'',
             bannerImage : undefined,
             name:'All'
-        } as Lora, ...loras] : loras ?? []}
+        } as Lora, ...loras] : loras.filter(a => a.isAvailable) ?? []}
         style={style}
         onChange={(_, value) => { onSelect(value as Lora) }}
         renderOption={(props, option) => {
