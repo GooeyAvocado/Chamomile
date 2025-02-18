@@ -55,7 +55,9 @@ namespace Automatic1111.API {
 
         public async Task<Txt2ImgResponse?> GenerateImage(Parameters parameters) {
             string apiUrl = api + "/sdapi/v1/txt2img";
-            using var client = new HttpClient();
+            using var client = new HttpClient() { 
+                Timeout = TimeSpan.FromMinutes(10)
+            };
 
             
             // Step 2: Serialize parameters (handling null values correctly)
