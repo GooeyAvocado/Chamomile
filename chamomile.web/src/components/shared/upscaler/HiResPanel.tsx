@@ -5,11 +5,14 @@ import useApi from "../../hooks/useApi";
 import { hiResImage } from "../../../api/Images";
 import { useSnackbar } from "notistack";
 import { HiResRequest } from "../../../model/HiResRequest";
+import { usePingPong } from "../../hooks/usePingPong";
 
 export default function HiResPanel(props: {
     image?: GeneratedImage
     updateImage?: (val: GeneratedImage) => void
 }) {
+
+    const {pong} = usePingPong();
 
     const { image, updateImage } = props
     const { selectedUpscaler, setSelectedUpscaler, setUpscaleScale, upscaleScale, upscalers } = useUpscalers()
@@ -41,7 +44,7 @@ export default function HiResPanel(props: {
             </> : <>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
 
-                    <FormControl fullWidth>
+                    <FormControl fullWidth disabled = {!pong?.SD}>
                         <InputLabel>Upscaler</InputLabel>
                         <Select
                             value={selectedUpscaler} onChange={(e) => setSelectedUpscaler(e.target.value)} size="small" label='Upscaler'
@@ -59,7 +62,7 @@ export default function HiResPanel(props: {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px', alignItems: 'center' }}>
                     <div style={{ fontSize: '.8em' }}>{image?.hiResAvailable ? "✅ Image has been upsacled!" : "❌ Image has not been upscaled!"}</div>
-                    <Button size="small" onClick={onUpscale} disabled={!updateImage}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
+                    <Button size="small" onClick={onUpscale} disabled={!updateImage || !pong?.SD}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
                 </div>
             </>}
         </div>
