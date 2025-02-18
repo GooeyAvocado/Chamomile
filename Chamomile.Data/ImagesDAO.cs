@@ -262,7 +262,8 @@ namespace Chamomile.Data {
                 cmd.SetInt(IMAGES_ID, id);
             });
 
-            img.Favorite = true;
+            img.Favorite = fav;
+
             return img;
         }
 
