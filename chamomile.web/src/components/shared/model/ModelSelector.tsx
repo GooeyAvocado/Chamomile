@@ -30,7 +30,7 @@ export default function ModelSelector(props:{
             title:'',
             bannerImage : undefined,
             name: 'All'
-        } as Model, ...models] : models.filter(a => a.isAvailable) ?? []}
+        } as Model, ...(models ?? [])] : models?.filter(a => a.isAvailable) ?? []}
         style={style}
         onChange={(_, value) => { onSelect(value as Model) }}
         renderOption={(props, option) => {
