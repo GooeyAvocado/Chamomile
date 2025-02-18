@@ -129,7 +129,7 @@ export default function ImageViewer(props:{
     return <>
         <div style={{
             display:'grid',
-            gridTemplateColumns:`repeat(auto-fit, minmax(${isMobile ? '128' : '192'}px, 1fr))`,
+            gridTemplateColumns:`repeat(auto-fill, minmax(${isMobile ? '128' : '192'}px, 1fr))`,
             gap:'20px'
         }}>
             {showBrewing && queue.map(p=><QueuedImageTile prompt={p} onCancel={()=>cancel(p.id)}/>)}
