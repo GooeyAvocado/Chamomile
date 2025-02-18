@@ -22,6 +22,13 @@ export default function FilterBuilder(props: {
         setQuery(filter.query ?? "");
     }, [filter])
 
+    const filterEmpty = filter.favorite === false 
+        && filter.fromDate==='' 
+        && filter.toDate===''
+        && filter.lora===''
+        && filter.model===''
+        && filter.query?.trim()===''
+
     return <>
         <div style={{ width: "100%", display: 'flex', gap: "20px", marginBottom: "10px", marginTop: "10px", flexWrap: "wrap", justifyContent: 'space-between' }}>
             <TextField value={query} onChange={(e) => { setQuery(e.target.value) }} placeholder="Search" onBlur={() => {
@@ -31,11 +38,12 @@ export default function FilterBuilder(props: {
                     input: {
                         startAdornment: <InputAdornment position="start"><Search /></InputAdornment>,
                         endAdornment: <InputAdornment position="end">
-                            <Tooltip title="Clear filter">
-                                <IconButton onClick={() => { setFilter({
-                                    favorite: false, fromDate: "", toDate:"", lora:'', model:'',page:0,query:''
-                                } as FilterOptions) }}><Close/></IconButton>
-                            </Tooltip>
+                            {!filterEmpty && <Tooltip title="Clear filter">
+                                <IconButton 
+                                    onClick={() => { setFilter({favorite: false, fromDate: "", toDate:"", lora:'', model:'',page:0,query:''} as FilterOptions) }}>
+                                        <Close/>
+                                </IconButton>
+                            </Tooltip>}
                             <Tooltip title="More Options">
                                 <IconButton onClick={() => { setExpanded(!expanded) }}>{expanded ? <ExpandLess /> : <ExpandMore />}</IconButton>
                             </Tooltip>
