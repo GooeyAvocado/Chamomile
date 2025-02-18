@@ -21,7 +21,7 @@ export const useImages = (filter: FilterOptions | undefined) => {
         showMore(0, []);
     }
 
-    const hasMore = countApi.data ? countApi.data.count !== (images?.length ?? 0) : false
+    const hasMore = countApi.data ? countApi.data.count > (images?.length ?? 0) : false
 
     const showMore = (pageOverride?: number, commsOverride?: GeneratedImage[]) => {
 
