@@ -1,4 +1,6 @@
+import { GeneratedImage } from "../../model/GeneratedImage";
 import { Prompt } from "../../model/Prompt";
+
 
 export function stringToColor(string: string) {
     let hash = 0;
@@ -106,3 +108,18 @@ export const currencies = {
     MEX: "MX$",
     AUD: "AU$",
 } as any
+
+export const imageToPrompt = (image?:GeneratedImage, reuseSeed?:boolean) : Prompt => {
+    return {
+        cfgScale: image?.cfgScale,
+        height: image?.height,
+        width: image?.width,
+        negativePrompt: image?.negativePrompt,
+        positivePrompt: image?.prompt,
+        sampler: image?.sampler,
+        seed: reuseSeed ? image?.seed : -1,
+        scheduleType: image?.scheduleType,
+        steps: image?.steps,
+        sampleImage: image?.id
+    } as Prompt
+}

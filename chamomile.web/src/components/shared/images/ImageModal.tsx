@@ -9,6 +9,8 @@ import { Prompt } from "../../../model/Prompt";
 import { useSnackbar } from "notistack";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
+import PromptReorderButton from "../prompt/PromptReorderButton";
+import { imageToPrompt } from "../Utils";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -31,18 +33,7 @@ export default function ImageModal(props: {
     const onUsePrompt = () => {
         setOpen(false)
         enqueueSnackbar("Prompt loaded!", { variant: 'success' })
-        setPrompt({
-            cfgScale: image?.cfgScale,
-            height: image?.height,
-            width: image?.width,
-            negativePrompt: image?.negativePrompt,
-            positivePrompt: image?.prompt,
-            sampler: image?.sampler,
-            seed: -1,
-            scheduleType: image?.scheduleType,
-            steps: image?.steps,
-            sampleImage: image?.id
-        } as Prompt)
+        setPrompt(imageToPrompt(image))
     }
 
     // window.open(imageUrl(image?.id ?? 0) + ".png");
@@ -114,6 +105,7 @@ export default function ImageModal(props: {
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }} >
+                            <PromptReorderButton prompt={imageToPrompt(image)}/>
                             <Tooltip title='Use this prompt'><IconButton onClick={onUsePrompt}><Terminal /></IconButton></Tooltip>
                             {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}
                         </div>

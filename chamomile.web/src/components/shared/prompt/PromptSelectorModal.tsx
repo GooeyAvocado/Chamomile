@@ -8,6 +8,7 @@ import PromptCard from "./PromptCard";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { useSnackbar } from "notistack";
 import PromptEditorModal from "./PromptEditorModal";
+import PromptReorderButton from "./PromptReorderButton";
 
 export default function PromptSelectorModal(props:{
     open:boolean,
@@ -66,7 +67,8 @@ export default function PromptSelectorModal(props:{
                 a.positivePrompt.toLowerCase().includes(query.toLowerCase())
             )
                 .map(a=><div style={{display:'flex', gap:'5px'}}>
-                <Card style={{display:'flex',flexDirection:'column', width:'60px', flexShrink:'0', alignItems:"center", justifyContent:'center', gap:'20px'}}>
+                <Card style={{display:'flex',flexDirection:'column', width:'60px', flexShrink:'0', alignItems:"center", justifyContent:'center', gap:'5px', padding:"10px 0px"}}>
+                    <PromptReorderButton prompt={a}/>
                     <IconButton onClick={()=>setEditPrompt(a)}><Edit/></IconButton>
                     <IconButton onClick={()=>setDelPrompt(a)}><Delete/></IconButton>
                 </Card>
