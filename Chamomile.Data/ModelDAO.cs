@@ -45,6 +45,12 @@ namespace Chamomile.Data {
 
         public async Task UpdateAll(List<Automatic1111.Common.Model> models) {
             var existingModels = await GetAll();
+
+            models = models.Select(a => {
+                a.title = a.title.Split(" ")[0];
+                return a;
+            }).ToList();
+
             var existingTitles = existingModels.Select(a=>a.Title).ToList();
             var availableTitles = models.Select(a => a.title).ToList();
 
