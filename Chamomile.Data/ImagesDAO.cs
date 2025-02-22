@@ -71,9 +71,13 @@ namespace Chamomile.Data {
                     .Where(a => loras.Any(b => b.Alias == a)) //Only with LORAs we have
                     .ToList() ;
 
-            
 
-            var model = image.Model.Split(" ")[0];
+
+            var model = await adoTemplate.QuerySingle(SelectSql([MODEL_TITLE], MODELS_TABLE,
+                new WhereConditionGroup([new(MODEL_NAME)])),
+                (cmd) => cmd.SetString(MODEL_NAME, image.Model),
+                (reader) => reader.GetOptionalString(MODEL_TITLE)
+            );
 
             var img = await adoTemplate.QuerySingle(InsertSql([
                 IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
