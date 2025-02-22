@@ -5,7 +5,6 @@ import { ArrowBack, ArrowForward, Delete, Star, StarBorder, Terminal } from "@mu
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
-import { Prompt } from "../../../model/Prompt";
 import { useSnackbar } from "notistack";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
