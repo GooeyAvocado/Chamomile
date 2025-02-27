@@ -87,7 +87,7 @@ namespace Chamomile.API.Workers {
                                 scheduler = prompt.ScheduleType ?? null,
                                 seed = prompt.Seed ?? -1,
                                 steps = prompt.Steps ?? 30,
-                                save_images = true,
+                                save_images = false,
                                 send_images = true,
                             }) ?? throw new InvalidOperationException("Image failed to return");
 
