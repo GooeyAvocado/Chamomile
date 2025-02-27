@@ -11,6 +11,7 @@ import PromptProvider from './components/contexts/PromptContext.tsx'
 import { ImageUploadProvider } from './components/contexts/ImageUploadContext.tsx'
 import FullPageDropzone from './components/shared/FullPageDropzone.tsx'
 import { UpscalersProvider } from './components/contexts/UpscalersContext.tsx'
+import QueueWatcher from './components/services/QueueWatcher.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -24,9 +25,11 @@ createRoot(document.getElementById('root')!).render(
                 <UpscalersProvider>
                   <ImageUploadProvider>
                     <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} >
-                      <FullPageDropzone>
-                        <App />
-                      </FullPageDropzone>
+                      <QueueWatcher>
+                        <FullPageDropzone>
+                          <App />
+                        </FullPageDropzone>
+                      </QueueWatcher>
                     </SnackbarProvider>
                   </ImageUploadProvider>
                 </UpscalersProvider>
