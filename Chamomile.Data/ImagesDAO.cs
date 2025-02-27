@@ -74,8 +74,8 @@ namespace Chamomile.Data {
 
 
             var model = await adoTemplate.QuerySingle(SelectSql([MODEL_TITLE], MODELS_TABLE,
-                new WhereConditionGroup([new(MODEL_NAME)])),
-                (cmd) => cmd.SetString(MODEL_NAME, image.Model),
+                new WhereConditionGroup([new(MODEL_NAME,WhereConditionOperator.ILIKE)])),
+                (cmd) => cmd.SetString(MODEL_NAME, "%" + image.Model + "%"),
                 (reader) => reader.GetOptionalString(MODEL_TITLE)
             );
 
