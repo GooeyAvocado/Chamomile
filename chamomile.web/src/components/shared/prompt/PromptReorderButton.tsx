@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, ListItemIcon, MenuItem, Tooltip } from "@mui/material";
 import { Prompt } from "../../../model/Prompt";
 import { usePingPong } from "../../hooks/usePingPong";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -9,10 +9,12 @@ import useApi from "../../hooks/useApi";
 import { useSnackbar } from "notistack";
 
 export default function PromptReorderButton(props:{
-    prompt:Prompt
+    prompt:Prompt,
+    menuButonMode?:boolean
+    onClick?:()=>void
 }){
 
-    const {prompt} = props
+    const {prompt,menuButonMode,onClick} = props
     const {orderAmount, variables} = usePrompt()
     const brewApi = useApi(enqueuePrompts)
     const {enqueueSnackbar} = useSnackbar();
@@ -38,11 +40,23 @@ export default function PromptReorderButton(props:{
     }
 
     if(!pong?.SD||!prompt) return <></>
+    if(menuButonMode) {
+        return <MenuItem onClick={()=>{
+            onBrew();
+            onClick?.()
+        }}>
+            <ListItemIcon><Coffee/></ListItemIcon>
+            Brew {orderAmount} more
+        </MenuItem>
+    }
     return <Tooltip title={<>
             <div>Reorder this prompt with the current model</div>
             <div>This will place {orderAmount} order(s)</div>    
         </>}>
-        <IconButton onClick={onBrew}>
+        <IconButton onClick={()=>{
+            onBrew();
+            onClick?.()
+        }}>
         <Coffee/>
     </IconButton>
     </Tooltip>
