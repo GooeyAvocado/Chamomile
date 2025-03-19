@@ -5,9 +5,10 @@ using System.Collections.Concurrent;
 using Chamomile.Common;
 using Microsoft.AspNetCore.SignalR;
 using Chamomile.API.Hubs;
+using System.Text.RegularExpressions;
 
 namespace Chamomile.API.Workers {
-    public class ImageGeneratorWorker {
+    public partial class ImageGeneratorWorker {
         private readonly ImagesDAO dao;
         private readonly A111Api api;
 
@@ -78,8 +79,8 @@ namespace Chamomile.API.Workers {
                             var img = await api.GenerateImage(new() {
                                 batch_size = 1,
                                 cfg_scale = prompt.CFGScale ?? 7.0,
-                                prompt = prompt.PositivePrompt,
-                                negative_prompt = prompt.NegativePrompt ?? "",
+                                prompt = CommentsPattern().Replace(prompt.PositivePrompt, ""),
+                                negative_prompt = CommentsPattern().Replace(prompt.NegativePrompt ?? "", ""),
                                 width = prompt.Width ?? 1024,
                                 height = prompt.Height ?? 1024,
                                 n_iter = 1,
@@ -127,6 +128,8 @@ namespace Chamomile.API.Workers {
             _cts.Cancel();
             _workerTask.Wait();
         }
-    
+
+        [GeneratedRegex(@"(?<=^|\s)#.*|\/\/.*|\/\*[\s\S]*?\*\/")]
+        public static partial Regex CommentsPattern();
     }
 }

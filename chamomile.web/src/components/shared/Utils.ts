@@ -93,7 +93,7 @@ export const hydratePrompt = (prompt:Prompt, variables:any, index?: number) => {
           hydrated = hydrated.replaceAll("\%" + key + "\%", replaceVal)
      });
      
-     return {...prompt, positivePrompt:hydrated.replace(/(?<=^|\s)#.*|\/\/.*|\/\*[\s\S]*?\*\//g, "").trim()} as Prompt;
+     return {...prompt, positivePrompt:hydrated.trim()} as Prompt;
 }
 
 export const objectToQueryString = (obj: any) => obj ? "?" + Object.keys(obj)
