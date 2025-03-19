@@ -167,5 +167,12 @@ namespace Automatic1111.API {
 
         }
 
+        public async Task<Dictionary<string, List<string>>> GetWildcards() {
+            var client = new HttpClient();
+            var response = await client.GetStringAsync(api + "/sd-wildcard-browser/wildcards");
+
+            return JsonSerializer.Deserialize<Dictionary<string, List<string>>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No wildcards found");
+        }
+
     }
 }

@@ -2,6 +2,7 @@
 using Chamomile.Data;
 using Microsoft.AspNetCore.Mvc;
 using Chamomile.Common;
+using Automatic1111.API;
 
 namespace Chamomile.API.Controllers {
 
@@ -10,9 +11,11 @@ namespace Chamomile.API.Controllers {
     public class PromptsController : ControllerBase {
 
         readonly PromptsDAO dao;
+        readonly A111Api api;
 
         public PromptsController() {
             dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
+            api = new(new EnvironmentKey("SD_URL", () => throw new InvalidOperationException("")).ToString());
         }
 
         #region CREATE
@@ -33,6 +36,11 @@ namespace Chamomile.API.Controllers {
         [HttpGet("{ID}")]
         public async Task<IActionResult> Get(int ID) {
             return Ok(await dao.Get(ID));
+        }
+
+        [HttpGet("wildcards")]
+        public async Task<IActionResult> GetWildcards() {
+            return Ok(await api.GetWildcards());
         }
 
         #endregion
