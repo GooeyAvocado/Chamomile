@@ -62,11 +62,12 @@ export default function PromptSelectorModal(props:{
                 placeholder="Search" fullWidth 
                 slotProps={{input:{startAdornment:<InputAdornment position="start"><Search/></InputAdornment>}}}
             />
+            <div style={{flex:'1', overflowY:'auto', display:'flex', flexDirection:'column', gap:'15px'}}>
             {promptsApi.data?.filter(a=>query.trim().length=== 0 ? true : 
                 a.name.toLowerCase().includes(query.toLowerCase()) ||
                 a.positivePrompt.toLowerCase().includes(query.toLowerCase())
             )
-                .map(a=><div style={{display:'flex', gap:'5px'}}>
+                .map(a=><div style={{display:'flex', gap:'10px', alignItems:'center'}}>
                 <Card style={{display:'flex',flexDirection:'column', width:'60px', flexShrink:'0', alignItems:"center", justifyContent:'center', gap:'5px', padding:"10px 0px"}}>
                     <PromptReorderButton prompt={a}/>
                     <IconButton onClick={()=>setEditPrompt(a)}><Edit/></IconButton>
@@ -74,6 +75,7 @@ export default function PromptSelectorModal(props:{
                 </Card>
                 <div style={{flex:'1'}}><PromptCard onClick={()=>onOk(a)} prompt={a}/></div>
             </div>)}
+            </div>
         </DialogContent>
 
         <AreYouSureModal open={!!delPrompt} setOpen={()=>setDelPrompt(undefined)} onYes={onDelete} loading={delPromptApi.loading} title="Delete this prompt?">
