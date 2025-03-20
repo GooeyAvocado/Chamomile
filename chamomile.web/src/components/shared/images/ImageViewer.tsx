@@ -41,7 +41,7 @@ export default function ImageViewer(props:{
     const {isMobile} = useUserAgent();
     const {currentUpload,lastSuccess, progress: uploadProgress} = useImageUpload();
 
-    const {activeJob,cancel,progress,groupedQueue,queue} = useQueue((val)=>{
+    const {activeJob,cancel,progress,groupedQueue} = useQueue((val)=>{
         if(showBrewing){
             //Check if we're on index 0
             if(selectedIndex()===0) setSelectedImage(val)
