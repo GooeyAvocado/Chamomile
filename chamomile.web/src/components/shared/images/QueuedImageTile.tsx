@@ -3,6 +3,8 @@ import { Prompt } from "../../../model/Prompt";
 import { useState } from "react";
 import PromptEditorModal from "../prompt/PromptEditorModal";
 import BaseImageTile from "./BaseImageTile";
+import ContextMenu from "../ContextMenu";
+import { Cancel } from "@mui/icons-material";
 
 export default function QueuedImageTile(props: {
     prompt: Prompt
@@ -12,7 +14,8 @@ export default function QueuedImageTile(props: {
     const { prompt, onCancel } = props;
     const [previewOpen,setPreviewOpen] = useState(false);
 
-    return <BaseImageTile>
+    return <ContextMenu options={[{icon:<Cancel/>, text:"Cancel", onClick:onCancel}]}>
+        <BaseImageTile>
         <CardActionArea onClick={() => {setPreviewOpen(true)}} style={{ height: "100%", position: "relative" }}>
             <img src={'/outline.png'} style={{ width: "50%", height: "50%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0', margin: '25%', opacity: '0.6' }} />
             <Typography sx={{
@@ -36,6 +39,7 @@ export default function QueuedImageTile(props: {
             setPreviewOpen(false);
         }} prompt={prompt} setOpen={setPreviewOpen} preview cancelable/>
     </BaseImageTile>
+    </ContextMenu>
 
 
 }

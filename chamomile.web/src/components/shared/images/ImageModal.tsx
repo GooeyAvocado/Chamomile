@@ -152,7 +152,7 @@ export default function ImageModal(props: {
                         {/* Negative Prompt */}
                         {(image?.negativePrompt?.trim().length ?? 0) !== 0 && <>
                             <div style={{ marginTop: "20px" }}><b>Negative Prompt</b></div>
-                            <div style={{ fontSize: ".7em", fontFamily: 'monospace' }}>{image?.negativePrompt}</div>
+                            <div style={{ fontSize: ".7em", fontFamily: 'monospace',  whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{image?.negativePrompt}</div>
                         </>}
 
                         {/* Model */}

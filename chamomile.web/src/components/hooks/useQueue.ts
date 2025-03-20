@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Prompt } from "../../model/Prompt";
 import useApi from "./useApi";
 import { cancelJob, getProgress, getQueue, interruptGeneration } from "../../api/Images";
@@ -12,6 +12,7 @@ import { Progress } from "../../model/Automatic1111/Progress";
 export const useQueue = (onImageDone : (val:GeneratedImage)=>void, showSnackbar?: boolean) => {
 
     const [queue, setQueue] = useState([] as Prompt[])
+    const [groupedQueue, setGroupedQueue] = useState([] as Prompt[][])
     const interruptApi = useApi(interruptGeneration)
     const cancelApi = useApi(cancelJob)
     useApi(getQueue, true, (val:Prompt[] | undefined)=>{setQueue(val ?? [])})
@@ -23,6 +24,29 @@ export const useQueue = (onImageDone : (val:GeneratedImage)=>void, showSnackbar?
     const [activeJob, setActiveJob] = useState(undefined as undefined | Prompt)
     const [lastSuccessfulImage, setLastSuccessfulImage] = useState(undefined as undefined| GeneratedImage)
     
+    useEffect(()=>{
+        const groups = [] as Prompt[][];
+        let currentGroup = [] as Prompt[]
+
+        queue.forEach((image) => {
+            if (currentGroup.length === 0 || currentGroup[0].positivePrompt === image.positivePrompt) {
+              console.log("waos")
+              currentGroup.push(image);
+            } else {
+              console.log("owas")
+              groups.push([...currentGroup]);
+              currentGroup = [image];
+            }
+          });
+          //Push the last remaining grou
+          groups.push(currentGroup)
+
+          console.log(groups)
+
+        setGroupedQueue(groups)
+
+    },[queue])
+
     usePolling(()=>{
         getProgressApi.fetch((val)=>{
             setCurrentProgress(val)
@@ -65,7 +89,8 @@ export const useQueue = (onImageDone : (val:GeneratedImage)=>void, showSnackbar?
 
 
     return { 
-        queue: queue, 
+        queue: queue,
+        groupedQueue:groupedQueue,
         activeJob: activeJob, 
         progress: activeJob ? currentProgress : undefined ,
         lastSuccessfulImage: lastSuccessfulImage,

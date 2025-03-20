@@ -1,7 +1,7 @@
 import { Card } from "@mui/material";
 import { ReactNode } from "react";
 
-export default function BaseImageTile(props:{children:ReactNode}){
+export default function BaseImageTile(props:{children?:ReactNode}){
 
     //const max = '256px';
     //const min = '128px'

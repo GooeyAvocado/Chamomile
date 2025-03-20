@@ -16,6 +16,7 @@ export class ContextMenuOption {
 export default function ContextMenu(props:{
     children:React.ReactNode
     options: ContextMenuOption[]
+    style?: React.CSSProperties
 }) {
   const [contextMenu, setContextMenu] = React.useState<{
     mouseX: number;
@@ -42,7 +43,7 @@ export default function ContextMenu(props:{
   };
 
   return (
-    <div onContextMenu={handleContextMenu} style={{ cursor: 'context-menu' }}>
+    <div onContextMenu={handleContextMenu} style={{ ...props.style, cursor: 'context-menu' }}>
       {props.children}
       
       <Menu

@@ -16,6 +16,7 @@ import { useQueue } from "../../hooks/useQueue";
 import QueuedImageTile from "./QueuedImageTile";
 import PromptEditorModal from "../prompt/PromptEditorModal";
 import useUserAgent from "../../hooks/useUserAgent";
+import QueuedGroupImageTile from "./QueuedGroupImageTile";
 
 export default function ImageViewer(props:{
     filter:FilterOptions
@@ -40,7 +41,7 @@ export default function ImageViewer(props:{
     const {isMobile} = useUserAgent();
     const {currentUpload,lastSuccess, progress: uploadProgress} = useImageUpload();
 
-    const {activeJob,cancel,progress,queue} = useQueue((val)=>{
+    const {activeJob,cancel,progress,groupedQueue,queue} = useQueue((val)=>{
         if(showBrewing){
             //Check if we're on index 0
             if(selectedIndex()===0) setSelectedImage(val)
@@ -68,15 +69,16 @@ export default function ImageViewer(props:{
         setDeleteAys(false)
         delApi.fetch(()=>{
             enqueueSnackbar("Image deleted!",{variant:'success'})
-            if(!selectedImage) return
-            if(imageApi.count===0){
-                setSelectedImage(undefined)
-            } else if( selectedIndex() >= imageApi.count-1 ){
-                onLeft()
-            } else {
-                onRight();
+            if(selectedImage) {
+                if(imageApi.count===0){
+                    setSelectedImage(undefined)
+                } else if( selectedIndex() >= imageApi.count-1 ){
+                    onLeft()
+                } else {
+                    onRight();
+                }
             }
-            imageApi.removeImage(selectedImage ?? {} as GeneratedImage)
+            imageApi.removeImage(override ?? selectedImage ?? {} as GeneratedImage)
         },()=>{
             enqueueSnackbar("Image could not be deleted!",{variant:'error'})
         }, (override ?? selectedImage)?.id)
@@ -134,7 +136,11 @@ export default function ImageViewer(props:{
             gridTemplateColumns:`repeat(auto-fill, minmax(${isMobile ? '128' : '192'}px, 1fr))`,
             gap:'20px'
         }}>
-            {showBrewing && queue.map(p=><QueuedImageTile prompt={p} onCancel={()=>cancel(p.id)}/>)}
+            {showBrewing && groupedQueue.map(p=>
+                p.length=== 0 ? <></> : 
+                p.length===1 ? <QueuedImageTile prompt={p[0]} onCancel={()=>cancel(p[0].id)}/>:
+                <QueuedGroupImageTile prompts={p} onCancel={cancel}/>
+            )}
             {showBrewing && activeJob && <>
                 <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0)=== 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} onClick={()=>{SetInterruptOpen(true)}} progress={(progress?.progress ?? 0) * 100}/>
                 <PromptEditorModal onOk={()=>{}} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress}/>
