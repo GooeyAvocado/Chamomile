@@ -1,9 +1,10 @@
-import { Autocomplete, Box, CircularProgress, InputAdornment, TextField } from "@mui/material";
+import { Autocomplete, Box, CircularProgress, IconButton, InputAdornment, TextField } from "@mui/material";
 import { useModels } from "../../hooks/useModels";
 import { Model } from "../../../model/Model";
-import { ModelTraining } from "@mui/icons-material";
+import { GridView, ModelTraining } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
-import React from "react";
+import React, { useState } from "react";
+import ModelBrowserModal from "./ModelBrowserModal";
 
 export default function ModelSelector(props:{
     model:string,
@@ -16,6 +17,7 @@ export default function ModelSelector(props:{
 
     const {model, setModel, style,showNone, disabled, loading : externalLoading} = props;
     const { loading, models } = useModels();
+    const [browserOpen, setBrowserOpen] = useState(false)
     
 
     const onSelect = (model: Model) => {
@@ -23,7 +25,8 @@ export default function ModelSelector(props:{
     }
 
 
-    return <Autocomplete disabled={disabled}
+    return <>
+    <Autocomplete disabled={disabled}
         freeSolo loading={loading || externalLoading} loadingText={loading ? "Loading..." : "Type to begin"}
         getOptionLabel={(option) => (option as Model)?.name ?? ""}
         options={showNone ? [{
@@ -64,11 +67,19 @@ export default function ModelSelector(props:{
                             </InputAdornment>
                         ),
                         endAdornment: (<InputAdornment position="end">
+                            <IconButton onClick={()=>setBrowserOpen(true)}>
+                                <GridView/>
+                            </IconButton>
                         </InputAdornment>),
                         disableUnderline: true
                     }
                 }} />}
 
     />
+    <ModelBrowserModal onOk={(val)=>{
+        onSelect(val)
+        setBrowserOpen(false)
+    }} open={browserOpen} setOpen={setBrowserOpen}/>
+    </>
 
 }

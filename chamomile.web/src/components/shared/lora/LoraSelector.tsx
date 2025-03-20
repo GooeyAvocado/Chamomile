@@ -1,9 +1,10 @@
-import { Autocomplete, Box, CircularProgress, InputAdornment, TextField } from "@mui/material";
-import { ModelTraining } from "@mui/icons-material";
+import { Autocomplete, Box, CircularProgress, IconButton, InputAdornment, TextField } from "@mui/material";
+import { GridView, ModelTraining } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
-import React from "react";
+import React, { useState } from "react";
 import { Lora } from "../../../model/Lora";
 import { useLoras } from "../../hooks/useLoras";
+import LoraBrowserModal from "./LoraBrowserModal";
 
 export default function LoraSelector(props:{
     lora:string,
@@ -15,13 +16,15 @@ export default function LoraSelector(props:{
     const {lora, setLora, style,showNone} = props;
     const { loading, loras } = useLoras();
     
+    const [browserOpen, setBrowserOpen] = useState(false)
 
     const onSelect = (lora: Lora) => {
         setLora(lora)
     }
 
 
-    return <Autocomplete
+    return <>
+    <Autocomplete
         freeSolo loading={loading} loadingText={loading ? "Loading..." : "Type to begin"}
         getOptionLabel={(option) => (option as Lora)?.name ?? ""}
         options={showNone ? [{
@@ -62,11 +65,19 @@ export default function LoraSelector(props:{
                             </InputAdornment>
                         ),
                         endAdornment: (<InputAdornment position="end">
+                             <IconButton onClick={()=>setBrowserOpen(true)}>
+                                <GridView/>
+                            </IconButton>
                         </InputAdornment>),
                         disableUnderline: true
                     }
                 }} />}
 
     />
+    <LoraBrowserModal onOk={(val)=>{
+            onSelect(val)
+            setBrowserOpen(false)
+        }} open={browserOpen} setOpen={setBrowserOpen}/>
+    </>
 
 }

@@ -3,7 +3,7 @@ import { deletePrompt, getPrompts, updatePrompt } from "../../../api/Prompts";
 import { Prompt } from "../../../model/Prompt";
 import useApi from "../../hooks/useApi";
 import { Card, Dialog, DialogContent, DialogTitle, IconButton, InputAdornment, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { Coffee, Delete, Edit, GridView, Search, ViewList } from "@mui/icons-material";
+import { Delete, Edit, GridView, Search, ViewList } from "@mui/icons-material";
 import PromptCard from "./PromptCard";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { useSnackbar } from "notistack";
