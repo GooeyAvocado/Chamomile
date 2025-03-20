@@ -20,6 +20,7 @@
         public static readonly string IMAGES_TABLE       = $"{SCHEMA}.images";
         public static readonly string IMAGES_ID          = "image_id";
         public static readonly string IMAGES_PROMPT      = "image_prompt_tx";
+        public static readonly string IMAGES_BASE_PROMPT = "image_base_prompt_tx";
         public static readonly string IMAGES_NEG_PROMPT  = "image_neg_prompt_tx";
         public static readonly string IMAGES_STEPS       = "image_step_cnt";
         public static readonly string IMAGES_SAMPLER     = "image_sampler_tx";

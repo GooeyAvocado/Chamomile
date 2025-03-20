@@ -2,6 +2,7 @@
     public class GeneratedImage {
         public int Id { get; set; }
         public string Prompt { get; set; } = string.Empty;
+        public string? BasePrompt { get; set; } = string.Empty;
         public string NegativePrompt {  get; set; } = string.Empty;
         public int Steps { get; set; }
         public string Sampler { get; set; } = string.Empty;

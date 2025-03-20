@@ -10,11 +10,12 @@ import { useSnackbar } from "notistack";
 
 export default function PromptReorderButton(props:{
     prompt:Prompt,
+    iconOverride?: React.ReactNode
     menuButonMode?:boolean
     onClick?:()=>void
 }){
 
-    const {prompt,menuButonMode,onClick} = props
+    const {prompt,menuButonMode,onClick,iconOverride} = props
     const {orderAmount, variables} = usePrompt()
     const brewApi = useApi(enqueuePrompts)
     const {enqueueSnackbar} = useSnackbar();
@@ -45,7 +46,7 @@ export default function PromptReorderButton(props:{
             onBrew();
             onClick?.()
         }}>
-            <ListItemIcon><Coffee/></ListItemIcon>
+            <ListItemIcon>{iconOverride ?? <Coffee/>}</ListItemIcon>
             Brew {orderAmount} more
         </MenuItem>
     }
@@ -57,7 +58,7 @@ export default function PromptReorderButton(props:{
             onBrew();
             onClick?.()
         }}>
-        <Coffee/>
+        {iconOverride ?? <Coffee/>}
     </IconButton>
     </Tooltip>
 

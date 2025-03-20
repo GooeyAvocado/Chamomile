@@ -94,7 +94,8 @@ namespace Chamomile.API.Workers {
 
                             Console.WriteLine($"[Completed] Image generated for Job {jobId}");
 
-                            var savedImg = await dao.CreateImage(Convert.FromBase64String(img.images[0]));
+                            //We don't replace the comments here because we want to preserve all of it
+                            var savedImg = await dao.CreateImage(Convert.FromBase64String(img.images[0]), prompt.PositivePrompt);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this

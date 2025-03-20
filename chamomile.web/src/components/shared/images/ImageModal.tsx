@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Card, Dialog, IconButton, Tooltip } from "@mui/material";
+import { Card, Dialog, IconButton, Tab, Tabs, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { ArrowBack, ArrowForward, Delete, Star, StarBorder, Terminal } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, CoffeeOutlined, Delete, Star, StarBorder, Terminal, TerminalOutlined, TerminalRounded } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -10,6 +10,7 @@ import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
+import { useEffect, useState } from "react";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -28,6 +29,12 @@ export default function ImageModal(props: {
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
     const {vertical} = useWindowDimensions()
+
+    const [promptMode, setPromptMode] = useState(0)
+
+    useEffect(()=>{
+        if( (image?.basePrompt?.trim()?.length ?? 0) === 0) setPromptMode(0)
+    },[image])
 
     const onUsePrompt = () => {
         setOpen(false)
@@ -104,8 +111,12 @@ export default function ImageModal(props: {
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }} >
-                            <PromptReorderButton prompt={imageToPrompt(image)}/>
-                            <Tooltip title='Use this prompt'><IconButton onClick={onUsePrompt}><Terminal /></IconButton></Tooltip>
+                            <PromptReorderButton prompt={imageToPrompt(image,promptMode===1)} iconOverride={promptMode=== 1 ? <CoffeeOutlined/> : undefined}/>
+                            <Tooltip title={promptMode===1 ? 'Use this base prompt' : 'Use this prompt'}>
+                                <IconButton onClick={onUsePrompt}>
+                                    {promptMode===1 ? <TerminalOutlined /> : <Terminal />}
+                                </IconButton>
+                            </Tooltip>
                             {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}
                         </div>
                     </div>
@@ -114,8 +125,16 @@ export default function ImageModal(props: {
                     <div style={{ flex: "1", overflowY: 'auto' }}>
 
                         {/* Prompt */}
-                        <div style={{ marginTop: "20px" }}><b>Prompt</b></div>
-                        <div style={{ fontSize: ".7em", fontFamily: 'monospace' }}>{image?.prompt}</div>
+                        <Card elevation={5}>
+                        <Tabs value={promptMode} onChange={(_,val)=> setPromptMode(val)}>
+                            <Tab sx={{textTransform:'none'}} label="Prompt"/>
+                            {(image?.basePrompt?.trim().length ?? 0) !== 0 && <Tab sx={{textTransform:'none'}}  label="Base Prompt"/>}
+                        </Tabs>
+                        <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding:"10px" }}>{
+                            promptMode===0 ? image?.prompt : image?.basePrompt
+                        }</div>
+                        
+                        </Card>
 
                         {/* Negative Prompt */}
                         {(image?.negativePrompt?.trim().length ?? 0) !== 0 && <>

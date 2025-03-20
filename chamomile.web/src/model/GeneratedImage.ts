@@ -1,6 +1,7 @@
 export class GeneratedImage {
     id: number = 0;
     prompt: string = "";
+    basePrompt: string = "";
     negativePrompt: string = "";
     steps: number = 30;
     sampler: string = "";

@@ -11,14 +11,15 @@ using static Chamomile.Data.Utils.Constants;
 using static Chamomile.Data.Utils.SqlBuilder;
 
 namespace Chamomile.Data {
-    public class ImagesDAO(string connectionString) : BaseDAO(connectionString) {
+    public partial class ImagesDAO(string connectionString) : BaseDAO(connectionString) {
 
-        private LoraDAO loraDao = new(connectionString);
+        private readonly LoraDAO loraDao = new(connectionString);
 
         private async Task<GeneratedImage> ImageRM(Getter reader) {
             return new() {
                 Id = reader.GetInt(IMAGES_ID),
                 Prompt = reader.GetString(IMAGES_PROMPT),
+                BasePrompt = reader.GetOptionalString(IMAGES_BASE_PROMPT),
                 NegativePrompt = reader.GetString(IMAGES_NEG_PROMPT),
                 Steps = reader.GetInt(IMAGES_STEPS),
                 Sampler = reader.GetString(IMAGES_SAMPLER),
@@ -58,15 +59,14 @@ namespace Chamomile.Data {
             return null; // No metadata found
         }
 
-        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes) {
+        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, string basePrompt = "") {
 
             var metadata = ExtractStableDiffusionMetadata(new MemoryStream(imageBytes)) ?? throw new InvalidOperationException("Image is missing parameters!");
             var image = ParseUtils.ParametersToImage(metadata);
 
             var loras = await loraDao.GetAll();
 
-            image.Loras = Regex
-                    .Matches(image.Prompt, @"<lora:([^>:]+):([\d.]+)>")
+            image.Loras = LoraRegex().Matches(image.Prompt)
                     .Select(a => a.Groups[1].Value)
                     .Where(a => loras.Any(b => b.Alias == a)) //Only with LORAs we have
                     .ToList() ;
@@ -80,16 +80,17 @@ namespace Chamomile.Data {
             );
 
             var img = await adoTemplate.QuerySingle(InsertSql([
-                IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
+                IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE
             ], IMAGES_TABLE, string.Join(", ", [
-                IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
+                IMAGES_ID, IMAGES_PROMPT,IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
                 MODEL_TITLE, CRE_TS
             ])), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
+                cmd.SetString(IMAGES_BASE_PROMPT, basePrompt);
                 cmd.SetString(IMAGES_NEG_PROMPT, image.NegativePrompt);
                 cmd.SetInt(IMAGES_STEPS, image.Steps);
                 cmd.SetString(IMAGES_SAMPLER, image.Sampler);
@@ -123,6 +124,7 @@ namespace Chamomile.Data {
             if (!string.IsNullOrEmpty(filter.Query)) {
                 conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
                     new(IMAGES_PROMPT,WhereConditionOperator.ILIKE),
+                    new(IMAGES_BASE_PROMPT,WhereConditionOperator.ILIKE),
                     new(IMAGES_NEG_PROMPT,WhereConditionOperator.ILIKE)
                 ])));
             }
@@ -175,7 +177,7 @@ namespace Chamomile.Data {
         public async Task<List<GeneratedImage>> GetAll(FilterOptions filter, int page) {
             return await adoTemplate.Query(
                 SelectSql([
-                    IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
+                    IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                     IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                     IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
                     MODEL_TITLE, CRE_TS, IMAGES_HIRES_IN,
@@ -198,7 +200,7 @@ namespace Chamomile.Data {
         public async Task<GeneratedImage?> Get(int id) {
             return await adoTemplate.QuerySingle(
                 SelectSql([
-                    IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
+                    IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                     IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                     IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
                     MODEL_TITLE ,CRE_TS, IMAGES_HIRES_IN,
@@ -270,7 +272,7 @@ namespace Chamomile.Data {
             return await adoTemplate.QuerySingle(
                 UpdateSql([IMAGES_HIRES_BYTES], IMAGES_TABLE, new([new(IMAGES_ID)])) +
                 " RETURNING " + string.Join(", ", [
-                    IMAGES_ID, IMAGES_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
+                    IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                     IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                     IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
                     MODEL_TITLE, CRE_TS
@@ -297,6 +299,9 @@ namespace Chamomile.Data {
             await adoTemplate.Execute(DeleteSql(IMAGES_LORA_MAP, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
             await adoTemplate.Execute(DeleteSql(IMAGES_TABLE, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
         }
+
+        [GeneratedRegex(@"<lora:([^>:]+):([\d.]+)>")]
+        public static partial Regex LoraRegex();
 
         #endregion
 
