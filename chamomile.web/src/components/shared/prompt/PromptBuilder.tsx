@@ -14,6 +14,7 @@ import VariableEditor from "../variables/VariableEditor";
 import { enqueuePrompts } from "../../../api/Images";
 import { hydratePrompt } from "../Utils";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
+import SizePresetSelector from "./SizePresetSelector";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -35,6 +36,7 @@ export default function PromptBuilder(props: {
     const { enqueueSnackbar } = useSnackbar();
     const {vertical} = useWindowDimensions();
 
+    const [sizePresetOpen, setSizePresetOpen] = useState(false)
     const [saveOpen, setSaveOpen] = useState(false)
     const [loadOpen, setLoadOpen] = useState(false)
 
@@ -146,7 +148,9 @@ export default function PromptBuilder(props: {
                     placeholder="Width"
                     fullWidth slotProps={{
                         input: {
-                            startAdornment: (<InputAdornment position="start"> <Height sx={{ transform: 'rotate(90deg)' }} /> </InputAdornment>),
+                            startAdornment: (<InputAdornment position="start"> 
+                                <IconButton onClick={()=>setSizePresetOpen(true)}><Height sx={{ transform: 'rotate(90deg)', margin:"-7px" }} /> </IconButton>
+                            </InputAdornment>),
                             endAdornment: (<InputAdornment position="end">px</InputAdornment>)
                         }
                     }}
@@ -158,7 +162,9 @@ export default function PromptBuilder(props: {
                     placeholder="Height"
                     fullWidth slotProps={{
                         input: {
-                            startAdornment: (<InputAdornment position="start"> <Height /> </InputAdornment>),
+                            startAdornment: (<InputAdornment position="start"> 
+                                 <IconButton onClick={()=>setSizePresetOpen(true)}><Height style={{margin:"-7px"}} /> </IconButton>
+                            </InputAdornment>),
                             endAdornment: (<InputAdornment position="end">px</InputAdornment>)
                         }
                     }}
@@ -218,6 +224,10 @@ export default function PromptBuilder(props: {
 
         <VariableEditor open={varsOpen} setOpen={setVarsOpen}/>
         <PromptModelSelectorModal open={modelsOpen} setOpen={setModelsOpen} noBrew={noBrew} prompt={promptOverride} setPrompt={setPromptOverride} />
+        <SizePresetSelector 
+            open={sizePresetOpen} setOpen={setSizePresetOpen} 
+            setSize={(width,height)=>{setPrompt({ ...prompt, width:width, height: height })}}
+        />
 
         {!noBrew && <>
             <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSave} title="Save Recipe" />

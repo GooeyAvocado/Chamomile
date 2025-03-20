@@ -18,7 +18,7 @@ export default function LoraBrowserModal(props: {
     const [tempQuery, setTempQuery] = useState("")
     
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
-        <DialogTitle>Select a Recipe</DialogTitle>
+        <DialogTitle>Select a LoRA</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: "75vh" }}>
             <div style={{ display: 'flex', gap: '10px' }}>
                 <TextField
