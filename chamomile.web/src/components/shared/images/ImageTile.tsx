@@ -1,5 +1,5 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Button, CardActionArea, ClickAwayListener, Paper, Popper } from "@mui/material";
+import { CardActionArea } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
