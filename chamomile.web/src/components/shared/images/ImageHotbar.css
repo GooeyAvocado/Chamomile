@@ -1,0 +1,8 @@
+.hover-hotbar {
+    opacity: 20%;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.hover-hotbar:hover {
+    opacity:85%;
+}

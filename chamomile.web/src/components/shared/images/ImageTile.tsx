@@ -19,7 +19,7 @@ export default function ImageTile(props:{
     const {setPrompt} = usePrompt();
 
     return <ContextMenu options={[
-        {text: image.favorite ? "Unfavorite" : "Favorite", icon:image.favorite ? <StarOutline/> : <Star/>, onClick:()=>{onFavorite(image)}},
+        {text: image.favorite ? "Unfavorite" : "Favorite", icon:image.favorite ? <Star/> : <StarOutline/>, onClick:()=>{onFavorite(image)}},
         {type:"divider"},
         {type:"custom", customContent:(onClose)=><PromptReorderButton prompt={imageToPrompt(image)} menuButonMode onClick={onClose}/>},
         {type:"custom", customContent:(onClose)=><PromptReorderButton prompt={imageToPrompt(image, true)} iconOverride={<CoffeeOutlined/>} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={(image.basePrompt?.trim()?.length ?? 0) === 0}/>},

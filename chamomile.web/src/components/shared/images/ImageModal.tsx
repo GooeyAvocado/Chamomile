@@ -11,6 +11,9 @@ import HiResPanel from "../upscaler/HiResPanel";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { useEffect, useState } from "react";
+import ImageHotbar from "./ImageHotbar";
+import useUserAgent from "../../hooks/useUserAgent";
+import { Prompt } from "../../../model/Prompt";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -28,18 +31,19 @@ export default function ImageModal(props: {
 
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
-    const {vertical} = useWindowDimensions()
+    const { vertical } = useWindowDimensions()
+    const {isMobile} = useUserAgent();
 
     const [promptMode, setPromptMode] = useState(0)
 
-    useEffect(()=>{
-        if( (image?.basePrompt?.trim()?.length ?? 0) === 0) setPromptMode(0)
-    },[image])
+    useEffect(() => {
+        if ((image?.basePrompt?.trim()?.length ?? 0) === 0) setPromptMode(0)
+    }, [image])
 
-    const onUsePrompt = () => {
+    const onUsePrompt = (promptOverride?:Prompt) => {
         setOpen(false)
         enqueueSnackbar("Prompt loaded!", { variant: 'success' })
-        setPrompt(imageToPrompt(image))
+        setPrompt(promptOverride ?? imageToPrompt(image, promptMode===1))
     }
 
     // window.open(imageUrl(image?.id ?? 0) + ".png");
@@ -47,7 +51,7 @@ export default function ImageModal(props: {
     const saveImage = async () => {
         try {
             const a = document.createElement('a');
-            a.href = imageUrl(image?.id ?? 0) + ".png";            
+            a.href = imageUrl(image?.id ?? 0) + ".png";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -86,35 +90,44 @@ export default function ImageModal(props: {
                     break;
             }
         }}>
-        <div style={vertical ? {display:'flex', flexDirection:'column', height: "100vh", overflowY: 'hidden'} : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
-            
+        <div style={vertical ? { display: 'flex', flexDirection: 'column', height: "100vh", overflowY: 'hidden' } : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
+
             {/* Image side */}
-            <div style={{ textAlign: 'center', flex: "1", maxHeight:vertical ? '50vh' : undefined , position:'relative'}}>
+            <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative' }}>
                 <img src={imageUrl(image?.id ?? 0, image?.hiResAvailable)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain' }} />
-                {onLeft && <div style={{position:'absolute', left:'20px', top:0, height:'100%', display:'flex', flexDirection:'column', alignContent:'center',justifyContent:'center'}}>
-                    <IconButton onClick={onLeft}><ArrowBack/></IconButton>
-                </div>}
-                {onRight && <div style={{position:'absolute', right:'20px', top:0, height:'100%', display:'flex', flexDirection:'column', alignContent:'center',justifyContent:'center'}}>
-                    <IconButton onClick={onRight}><ArrowForward/></IconButton>
-                </div>}
+                {isMobile && <>
+                    {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
+                        <IconButton onClick={onLeft}><ArrowBack /></IconButton>
+                    </div>}
+                    {onRight && <div style={{ position: 'absolute', right: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
+                        <IconButton onClick={onRight}><ArrowForward /></IconButton>
+                    </div>}
+                </>}
+                <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center' }}>
+                    <ImageHotbar 
+                        image={image} onUsePrompt={onUsePrompt}
+                        onLeft={onLeft} onRight={onRight} 
+                        onDelete={onDeleteForce} onFavorite={()=>{onFavorite?.()}}
+                    />
+                </div>
             </div>
 
             {/* info Panel */}
-            <Card style={vertical ? {width:'100%'} : { maxWidth: "500px", width: "50vw" }}>
-                <div style={{ height: vertical ? "50vh" :"100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
-                    
+            <Card style={vertical ? { width: '100%' } : { maxWidth: "500px", width: "50vw" }}>
+                <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
+
                     {/* Buttons */}
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom:'10px' }}>
                         <div style={{ display: "flex", gap: "10px" }} >
                             <IconButton onClick={() => { setOpen(false) }}><ArrowBack /></IconButton>
-                            {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={onFavorite}>{image?.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>}
+                            {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={()=>{onFavorite()}}>{image?.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>}
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }} >
-                            <PromptReorderButton prompt={imageToPrompt(image,promptMode===1)} iconOverride={promptMode=== 1 ? <CoffeeOutlined/> : undefined}/>
-                            <Tooltip title={promptMode===1 ? 'Use this base prompt' : 'Use this prompt'}>
-                                <IconButton onClick={onUsePrompt}>
-                                    {promptMode===1 ? <TerminalOutlined /> : <Terminal />}
+                            <PromptReorderButton prompt={imageToPrompt(image, promptMode === 1)} iconOverride={promptMode === 1 ? <CoffeeOutlined /> : undefined} />
+                            <Tooltip title={promptMode === 1 ? 'Use this base prompt' : 'Use this prompt'}>
+                                <IconButton onClick={()=>onUsePrompt()}>
+                                    {promptMode === 1 ? <TerminalOutlined /> : <Terminal />}
                                 </IconButton>
                             </Tooltip>
                             {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}
@@ -126,14 +139,14 @@ export default function ImageModal(props: {
 
                         {/* Prompt */}
                         <Card elevation={5}>
-                        <Tabs value={promptMode} onChange={(_,val)=> setPromptMode(val)}>
-                            <Tab sx={{textTransform:'none'}} label="Prompt"/>
-                            {(image?.basePrompt?.trim().length ?? 0) !== 0 && <Tab sx={{textTransform:'none'}}  label="Base Prompt"/>}
-                        </Tabs>
-                        <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding:"10px" }}>{
-                            promptMode===0 ? image?.prompt : image?.basePrompt
-                        }</div>
-                        
+                            <Tabs value={promptMode} onChange={(_, val) => setPromptMode(val)}>
+                                <Tab sx={{ textTransform: 'none' }} label="Prompt" />
+                                {(image?.basePrompt?.trim().length ?? 0) !== 0 && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
+                            </Tabs>
+                            <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>{
+                                promptMode === 0 ? image?.prompt : image?.basePrompt
+                            }</div>
+
                         </Card>
 
                         {/* Negative Prompt */}
@@ -151,7 +164,7 @@ export default function ImageModal(props: {
                             <div style={{ marginTop: "20px" }}><b>Loras</b></div>
                             {image?.loras.map(a => <LoraCard loraAlias={a} currentImage={image} />)}
                         </>}
-                        
+
                         {/* HiRes Options */}
                         {!!onUpscale && <>
                             <div style={{ marginTop: "20px" }}><b>Upscaling</b></div>
@@ -159,7 +172,7 @@ export default function ImageModal(props: {
                         </>}
 
                         {/* Metadata */}
-                        <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop:'10px' }}>
+                        <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Seed</b></div>
                                 <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.seed}</div>
@@ -183,12 +196,12 @@ export default function ImageModal(props: {
                             </div>
 
                         </div>
-                        
+
                         {/* Creation Date */}
-                        <div style={{ minWidth: "75px", flex: "1", fontSize:'.8em' }}>
-                                <div style={{ marginTop: "20px" }}><b>Created</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{new Date(image?.created ?? 0).toLocaleString()}</div>
-                            </div>
+                        <div style={{ minWidth: "75px", flex: "1", fontSize: '.8em' }}>
+                            <div style={{ marginTop: "20px" }}><b>Created</b></div>
+                            <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{new Date(image?.created ?? 0).toLocaleString()}</div>
+                        </div>
                     </div>
 
                 </div>
