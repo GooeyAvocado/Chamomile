@@ -12,10 +12,12 @@ export default function PromptReorderButton(props:{
     prompt:Prompt,
     iconOverride?: React.ReactNode
     menuButonMode?:boolean
+    textSuffix?:string
+    disabled?:boolean
     onClick?:()=>void
 }){
 
-    const {prompt,menuButonMode,onClick,iconOverride} = props
+    const {prompt,menuButonMode,onClick,iconOverride, textSuffix, disabled} = props
     const {orderAmount, variables} = usePrompt()
     const brewApi = useApi(enqueuePrompts)
     const {enqueueSnackbar} = useSnackbar();
@@ -42,19 +44,20 @@ export default function PromptReorderButton(props:{
 
     if(!pong?.SD||!prompt) return <></>
     if(menuButonMode) {
-        return <MenuItem onClick={()=>{
+        return <MenuItem disabled={disabled} onClick={()=>{
             onBrew();
             onClick?.()
         }}>
             <ListItemIcon>{iconOverride ?? <Coffee/>}</ListItemIcon>
-            Brew {orderAmount} more
+            Brew {orderAmount} {textSuffix}
         </MenuItem>
     }
     return <Tooltip title={<>
             <div>Reorder this prompt with the current model</div>
             <div>This will place {orderAmount} order(s)</div>    
+            {textSuffix && <div>{textSuffix}</div>}
         </>}>
-        <IconButton onClick={()=>{
+        <IconButton disabled={disabled} onClick={()=>{
             onBrew();
             onClick?.()
         }}>

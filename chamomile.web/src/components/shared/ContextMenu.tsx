@@ -6,6 +6,7 @@ import { Divider, ListItemIcon } from '@mui/material';
 export class ContextMenuOption {
     text?: React.ReactNode = "";
     customContent?:(onClose:()=>void) => React.ReactNode
+    disabled?:boolean
     onClick?: () => void = ()=>{};
     type?: "item"|"divider"|"custom" = "item"
     icon?: React.ReactNode;
@@ -54,8 +55,8 @@ export default function ContextMenu(props:{
             : undefined
         }
       >
-        {props.options.map(a=> a.type==="custom"? a.customContent?.(handleClose) : a.type==="divider" ? <Divider/> :
-            <MenuItem onClick={()=>{
+        {props.options.filter(a=>!!a).map(a=> a.type==="custom"? a.customContent?.(handleClose) : a.type==="divider" ? <Divider/> :
+            <MenuItem disabled={a.disabled} onClick={()=>{
                 handleClose();
                 a.onClick?.();
             }}>

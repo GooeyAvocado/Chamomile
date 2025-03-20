@@ -64,10 +64,11 @@ export default function ImageViewer(props:{
         if(currentUpload) setUploadBrewBlob(URL.createObjectURL(currentUpload))
     },[currentUpload])
 
-    const onDelete = () => {
+    const onDelete = (override?:GeneratedImage) => {
         setDeleteAys(false)
         delApi.fetch(()=>{
             enqueueSnackbar("Image deleted!",{variant:'success'})
+            if(!selectedImage) return
             if(imageApi.count===0){
                 setSelectedImage(undefined)
             } else if( selectedIndex() >= imageApi.count-1 ){
@@ -78,17 +79,18 @@ export default function ImageViewer(props:{
             imageApi.removeImage(selectedImage ?? {} as GeneratedImage)
         },()=>{
             enqueueSnackbar("Image could not be deleted!",{variant:'error'})
-        }, selectedImage?.id)
+        }, (override ?? selectedImage)?.id)
     }
 
-    const onFavorite = () => {
-        if(!selectedImage) return;
-        selectedImage.favorite = !selectedImage?.favorite;
+    const onFavorite = (override?:GeneratedImage) => {
+        if(!override && !selectedImage) return;
+        const img = override ?? selectedImage ?? {} as GeneratedImage //This is to cover a condition eslint thinks exists, but really doesn't
+        img.favorite = !img?.favorite;
         favApi.fetch((val)=>{
-            imageApi.updateImage(val ?? selectedImage)
+            imageApi.updateImage(val ?? override ?? selectedImage ?? {} as GeneratedImage)
         },()=>{
             enqueueSnackbar("Image could not be favorited!",{variant:'error'})
-        }, selectedImage)
+        }, img)
     }
 
     const onUpscale = (val:GeneratedImage) => {
@@ -140,7 +142,7 @@ export default function ImageViewer(props:{
             {showBrewing && currentUpload && <>
                 <BrewingImageTile imageSrc={uploadBrewBlob ?? ""} progress={uploadProgress}/>
             </>}
-            {imageApi.images?.map(a=> <ImageTile image={a} onClick={onClick ? ()=>{onClick(a)} : ()=>{setSelectedImage(a); setOpen(true)}}/>)}
+            {imageApi.images?.map(a=> <ImageTile image={a} onDelete={onDelete}  onFavorite={onFavorite} onClick={onClick ? ()=>{onClick(a)} : ()=>{setSelectedImage(a); setOpen(true)}}/>)}
             {!onClick && <>
                 <ImageModal open={open} setOpen={setOpen} image={selectedImage} onDelete={()=>setDeleteAys(true)} onDeleteForce={onDelete} onFavorite={onFavorite} onLeft={onLeft} onRight={onRight} onUpscale={onUpscale}/>
                 <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>

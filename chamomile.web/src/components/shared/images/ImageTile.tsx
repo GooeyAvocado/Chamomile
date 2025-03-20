@@ -2,20 +2,41 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { CardActionArea } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
+import ContextMenu from "../ContextMenu";
+import { CoffeeOutlined, Delete, Photo, Star, StarOutline, Terminal, TerminalOutlined } from "@mui/icons-material";
+import PromptReorderButton from "../prompt/PromptReorderButton";
+import { imageToPrompt } from "../Utils";
+import { usePrompt } from "../../hooks/usePrompt";
 
 export default function ImageTile(props:{
     image:GeneratedImage
     onClick: ()=>void
+    onFavorite: (val?:GeneratedImage) => void,
+    onDelete: (val?:GeneratedImage) => void,
 }){
 
-    const {image, onClick} = props;
+    const {image, onClick,onDelete,onFavorite} = props;
+    const {setPrompt} = usePrompt();
 
-    return <BaseImageTile>
+    return <ContextMenu options={[
+        {text: image.favorite ? "Unfavorite" : "Favorite", icon:image.favorite ? <StarOutline/> : <Star/>, onClick:()=>{onFavorite(image)}},
+        {type:"divider"},
+        {type:"custom", customContent:(onClose)=><PromptReorderButton prompt={imageToPrompt(image)} menuButonMode onClick={onClose}/>},
+        {type:"custom", customContent:(onClose)=><PromptReorderButton prompt={imageToPrompt(image, true)} iconOverride={<CoffeeOutlined/>} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={(image.basePrompt?.trim()?.length ?? 0) === 0}/>},
+        {type:"divider"},
+        {text: "Use this prompt", icon:<Terminal/>, onClick:()=>{setPrompt(imageToPrompt(image))}},
+        {text: "Use this base prompt", icon:<TerminalOutlined/>, onClick:()=>{setPrompt(imageToPrompt(image,true))}, disabled:(image.basePrompt?.trim()?.length ?? 0) === 0},
+        {type:"divider"},
+        {text: "Delete", icon:<Delete/>, onClick:()=>{onDelete(image)}},
+    ]}>
+        <BaseImageTile>
                 <CardActionArea onClick={onClick} style={{height:"100%", position:"relative"}}>
                 <img src={'/outline.png'} style={{width:"50%", height:"50%", objectFit:'cover', objectPosition:'center top', position:'absolute', left:'0', top:'0', margin:'25%'}} />
                 <img src={imageUrl(image.id)} style={{width:"100%", height:"100%", objectFit:'cover', objectPosition:'center top', position:'absolute', left:'0', top:'0'}} />
+                {image.favorite && <div style={{position:'absolute', top:5, left:5}}><Star/></div>}
                 </CardActionArea>
             </BaseImageTile>
+    </ContextMenu>
 
 
 }
