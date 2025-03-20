@@ -4,7 +4,7 @@ import ModelSelector from "../model/ModelSelector";
 import useApi from "../../hooks/useApi";
 import { currentModel, setModel } from "../../../api/Model";
 import { Model } from "../../../model/Model";
-import {  useState } from "react";
+import {  useEffect, useState } from "react";
 import { Add, Close } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
@@ -12,6 +12,8 @@ import LoraSelector from "../lora/LoraSelector";
 import { useSnackbar } from "notistack";
 import { ModelRequest } from "../../../model/ModelRequest";
 import { Prompt } from "../../../model/Prompt";
+import { useLoras } from "../../hooks/useLoras";
+import { useModels } from "../../hooks/useModels";
 
 export default function PromptModelSelectorModal(props:{
     open: boolean,
@@ -24,6 +26,8 @@ export default function PromptModelSelectorModal(props:{
     const {open,setOpen, noBrew, prompt : promptOverride, setPrompt : setPromptOverride} = props
 
     const [addOpen, setAddOpen] = useState(false)
+    const {refresh:refreshLoras} = useLoras()
+    const {refresh:refreshModels} = useModels()
 
     const {prompt : globalPrompt, setPrompt : setGlobalPrompt} = usePrompt();
     const currentModelApi = useApi(currentModel, true)
@@ -32,6 +36,11 @@ export default function PromptModelSelectorModal(props:{
 
     const prompt = promptOverride ?? globalPrompt;
     const setPrompt = setPromptOverride ?? setGlobalPrompt
+
+    useEffect(()=>{
+        refreshModels();
+        refreshLoras();
+    },[open])
 
     const usedLoras = () => {
         const loraPattern = /<lora:([^>]*):\d*\.*\d*>/g;
