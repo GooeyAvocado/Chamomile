@@ -3,7 +3,7 @@ import { CardActionArea } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CoffeeOutlined, Delete, Photo, Star, StarOutline, Terminal, TerminalOutlined } from "@mui/icons-material";
+import { CoffeeOutlined, Delete, Star, StarOutline, Terminal, TerminalOutlined } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";

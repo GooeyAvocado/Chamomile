@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Card, Dialog, IconButton, Tab, Tabs, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { ArrowBack, ArrowForward, CoffeeOutlined, Delete, Star, StarBorder, Terminal, TerminalOutlined, TerminalRounded } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, CoffeeOutlined, Delete, Star, StarBorder, Terminal, TerminalOutlined } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
