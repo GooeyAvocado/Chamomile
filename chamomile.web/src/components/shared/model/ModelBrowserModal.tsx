@@ -9,9 +9,10 @@ export default function ModelBrowserModal(props: {
     open: boolean,
     setOpen: (val: boolean) => void,
     onOk: (val: Model) => void
+    showNone?:boolean
 }) {
 
-    const { onOk, open, setOpen } = props;
+    const { onOk, open, setOpen, showNone } = props;
     const {models} = useModels();
 
     const [query, setQuery] = useState("")
@@ -26,10 +27,9 @@ export default function ModelBrowserModal(props: {
                     placeholder="Search" fullWidth
                     slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search /></InputAdornment> } }}
                 />
-
             </div>
             <div style={{ flex: '1', overflowY: 'auto' }}>
-                <GridViewMode data={models} onOk={onOk} query={query}/>
+                <GridViewMode data={models} onOk={onOk} query={query} showNone={showNone}/>
             </div>
 
         </DialogContent>
@@ -38,15 +38,19 @@ export default function ModelBrowserModal(props: {
 
 }
 
-function GridViewMode(props: { data: Model[], query: string, onOk: (val: Model) => void }) {
-    const { data, query, onOk } = props
+function GridViewMode(props: { data: Model[], query: string, onOk: (val: Model) => void, showNone?:boolean}) {
+    const { data, query, onOk , showNone} = props
 
     return <div style={{
                 display:'grid',
                 gridTemplateColumns:`repeat(auto-fill, minmax(${'128'}px, 1fr))`,
                 gap:'20px'
             }}>
-                {data?.filter(a => query.trim().length === 0 ? true :a.name.toLowerCase().includes(query.toLowerCase()))
+                {(showNone ? [{
+                            title:'',
+                            bannerImage : undefined,
+                            name: 'All'
+                        } as Model,...(data ?? [])] : (data ?? []).filter(a=>a.isAvailable))?.filter(a => query.trim().length === 0 ? true :a.name.toLowerCase().includes(query.toLowerCase()))
                     .map(a=> <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
                     <ModelTile model={a} onClick={() => onOk(a)}/>
                 </div> )}

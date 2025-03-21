@@ -79,7 +79,7 @@ export default function ModelSelector(props:{
     <ModelBrowserModal onOk={(val)=>{
         onSelect(val)
         setBrowserOpen(false)
-    }} open={browserOpen} setOpen={setBrowserOpen}/>
+    }} open={browserOpen} setOpen={setBrowserOpen} showNone={showNone}/>
     </>
 
 }
