@@ -77,7 +77,7 @@ export default function LoraSelector(props:{
     <LoraBrowserModal onOk={(val)=>{
             onSelect(val)
             setBrowserOpen(false)
-        }} open={browserOpen} setOpen={setBrowserOpen}/>
+        }} open={browserOpen} setOpen={setBrowserOpen} showNone={showNone}/>
     </>
 
 }

@@ -8,15 +8,16 @@ import LoraTile from "./LoraTile";
 export default function LoraBrowserModal(props: {
     open: boolean,
     setOpen: (val: boolean) => void,
-    onOk: (val: Lora) => void
+    onOk: (val: Lora) => void,
+    showNone?: boolean
 }) {
 
-    const { onOk, open, setOpen } = props;
-    const {loras} = useLoras();
+    const { onOk, open, setOpen, showNone } = props;
+    const { loras } = useLoras();
 
     const [query, setQuery] = useState("")
     const [tempQuery, setTempQuery] = useState("")
-    
+
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
         <DialogTitle>Select a LoRA</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: "75vh" }}>
@@ -29,7 +30,7 @@ export default function LoraBrowserModal(props: {
 
             </div>
             <div style={{ flex: '1', overflowY: 'auto' }}>
-                <GridViewMode data={loras} onOk={onOk} query={query}/>
+                <GridViewMode data={loras} onOk={onOk} query={query} showNone={showNone} />
             </div>
 
         </DialogContent>
@@ -38,18 +39,22 @@ export default function LoraBrowserModal(props: {
 
 }
 
-function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) => void }) {
-    const { data, query, onOk } = props
+function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) => void, showNone?: boolean }) {
+    const { data, query, onOk, showNone } = props
 
     return <div style={{
-                display:'grid',
-                gridTemplateColumns:`repeat(auto-fill, minmax(${'128'}px, 1fr))`,
-                gap:'20px'
-            }}>
-                {data?.filter(a => query.trim().length === 0 ? true :a.name.toLowerCase().includes(query.toLowerCase()))
-                    .map(a=> <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
-                    <LoraTile lora={a} onClick={() => onOk(a)}/>
-                </div> )}
-            </div>
+        display: 'grid',
+        gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
+        gap: '20px'
+    }}>
+        {(showNone ? [{
+            alias:'',
+            bannerImage : undefined,
+            name:'All'
+        } as Lora, ...(data ?? [])] : (data ?? []).filter(a => a.isAvailable))?.filter(a => query.trim().length === 0 ? true : a.name.toLowerCase().includes(query.toLowerCase()))
+            .map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <LoraTile lora={a} onClick={() => onOk(a)} />
+            </div>)}
+    </div>
 
 }
