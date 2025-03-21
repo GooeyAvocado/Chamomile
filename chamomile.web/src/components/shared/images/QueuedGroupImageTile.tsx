@@ -20,7 +20,7 @@ export default function QueuedGroupImageTile(props: {
 
     return <ContextMenu options={[
         {icon:<Cancel/>, text:"Cancel All", onClick: ()=> cancelAll()}
-    ]} style={{ position: 'relative' }}>
+    ]} style={{ position: 'relative', width:"100%", aspectRatio:1 }}>
         <div style={{ position: "absolute", top: 0, left: 0, width: '80%' }}>
             <BaseImageTile>
                 <div style={{ padding: "5px", fontSize: '.9em', fontFamily: 'monospace' }}>x{prompts.length}</div>
