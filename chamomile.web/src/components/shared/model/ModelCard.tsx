@@ -9,6 +9,7 @@ import { useSnackbar } from "notistack";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import ImageModalFromId from "../images/ImageModalFromId";
+import ModelTypePill from "./ModelType.tsx/ModelTypePill";
 
 export default function ModelCard(props: {
     modelTitle: string
@@ -74,7 +75,13 @@ export default function ModelCard(props: {
                     <img src={model?.bannerImage ? imageUrl(model.bannerImage) : '/outline.png'} style={{ width: '64px', height: '64px', objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px', background: '#555' }} />
                     <Typography style={{ fontSize: '1em' }}>
                         <div style={{ flex: '1' }}>
-                            <div><b>{model.name}</b></div>
+                            <div style={{display:'flex', gap:'5px', alignItems:'center'}}>
+                                {model?.type?.length > 0 && <ModelTypePill type={model?.type}/>}
+                                <div style={{display:'flex', gap:'5px', alignItems:'flex-end'}}>
+                                    <b>{model.name}</b>
+                                    {!model?.isAvailable && <div style={{fontSize:'.7em'}}>(Unavailable)</div>}
+                                </div>
+                            </div>
                             <div style={{ fontSize: '.8em' }}>{model.title}</div>
                         </div>
                     </Typography>

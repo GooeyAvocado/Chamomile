@@ -5,6 +5,7 @@ import { GridView, ModelTraining } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
 import React, { useState } from "react";
 import ModelBrowserModal from "./ModelBrowserModal";
+import ModelTypePill from "./ModelType.tsx/ModelTypePill";
 
 export default function ModelSelector(props:{
     model:string,
@@ -47,7 +48,13 @@ export default function ModelSelector(props:{
                 >
                     <img src={option.bannerImage ? imageUrl(option.bannerImage) : "/outlinepadded.png"} style={{width:"96px", height:"96px", objectFit:'cover', objectPosition:'center top', borderRadius:'5px'}}/>
                     <div>
-                        <div><b>{option.name}</b></div>
+                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                            {option?.type?.length > 0 && <ModelTypePill type={option?.type} />}
+                            <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
+                                <b>{option.name}</b>
+                                {!option?.isAvailable && <div style={{ fontSize: '.7em' }}>(Unavailable)</div>}
+                            </div>
+                        </div>
                         <div>{option.title}</div>
                     </div>
 

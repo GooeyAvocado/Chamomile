@@ -9,6 +9,7 @@ import { updateLora } from "../../../api/Loras";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useSnackbar } from "notistack";
 import ImageModalFromId from "../images/ImageModalFromId";
+import ModelTypePill from "../model/ModelType.tsx/ModelTypePill";
 
 export default function LoraCard(props: {
     loraAlias: string
@@ -75,7 +76,13 @@ export default function LoraCard(props: {
                     <img src={lora?.bannerImage ? imageUrl(lora.bannerImage) : '/outline.png'} style={{ width: '64px', height: '64px', objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px', background: '#555' }} />
                     <Typography style={{ fontSize: '1em' }}>
                         <div style={{ flex: '1' }}>
-                            <div><b>{lora.name}</b></div>
+                            <div style={{display:'flex', gap:'5px', alignItems:'center'}}>
+                                {lora?.type?.length > 0 && <ModelTypePill type={lora?.type}/>}
+                                <div style={{display:'flex', gap:'5px', alignItems:'flex-end'}}>
+                                    <b>{lora.name}</b>
+                                    {!lora?.isAvailable && <div style={{fontSize:'.7em'}}>(Unavailable)</div>}
+                                </div>
+                            </div>
                             <div style={{ fontSize: '.8em' }}>{lora.alias}</div>
                         </div>
                     </Typography>

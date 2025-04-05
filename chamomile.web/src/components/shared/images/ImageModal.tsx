@@ -12,7 +12,6 @@ import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { useEffect, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
-import useUserAgent from "../../hooks/useUserAgent";
 import { Prompt } from "../../../model/Prompt";
 
 export default function ImageModal(props: {
@@ -32,7 +31,6 @@ export default function ImageModal(props: {
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
     const { vertical } = useWindowDimensions()
-    const {isMobile} = useUserAgent();
 
     const [promptMode, setPromptMode] = useState(0)
 
@@ -95,14 +93,14 @@ export default function ImageModal(props: {
             {/* Image side */}
             <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative' }}>
                 <img src={imageUrl(image?.id ?? 0, image?.hiResAvailable)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain' }} />
-                {isMobile && <>
+                
                     {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
                         <IconButton onClick={onLeft}><ArrowBack /></IconButton>
                     </div>}
                     {onRight && <div style={{ position: 'absolute', right: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
                         <IconButton onClick={onRight}><ArrowForward /></IconButton>
                     </div>}
-                </>}
+                
                 <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center' }}>
                     <ImageHotbar 
                         image={image} onUsePrompt={onUsePrompt}

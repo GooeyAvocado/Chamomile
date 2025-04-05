@@ -21,6 +21,7 @@ CREATE TABLE chamomille.models (
 	model_nm text not null,
 	model_desc_tx text not null,
 	model_avail_in boolean not null,
+	model_type_tx varchar null, 
 	image_id int4 null,
 	CONSTRAINT pk_model PRIMARY KEY (model_title_tx),
 	CONSTRAINT fk_model_image FOREIGN KEY (image_id) REFERENCES chamomille.images(image_id)
@@ -32,7 +33,8 @@ CREATE TABLE chamomille.lora (
 	lora_nm               text,
 	lora_desc_tx          text,
 	lora_sample_prompt_tx text,
-	model_avail_in        boolean not null,
+	lora_avail_in        boolean not null,
+	lora_type_cd          varchar,
 	image_id int4 null,
 	CONSTRAINT pk_lora PRIMARY KEY (lora_alias_tx),
 	CONSTRAINT fk_lora_image FOREIGN KEY (image_id) REFERENCES chamomille.images(image_id)

@@ -1,6 +1,7 @@
 import { Card, CardActionArea, Typography } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { Lora } from "../../../model/Lora";
+import ModelTypePill from "../model/ModelType.tsx/ModelTypePill";
 
 export default function LoraTile(props: {
     lora: Lora
@@ -24,6 +25,9 @@ export default function LoraTile(props: {
                         WebkitLineClamp: 1,
                         fontSize:'.8em',
                     }}>{lora.name}</Typography>
+                </div>
+                <div style={{top:'5px', left:'5px', position:'absolute'}}>
+                    {lora.type?.length > 0 && <ModelTypePill type={lora.type} bgColor="rgba(0,0,0,.7)"/>}
                 </div>
             </div>
         </CardActionArea>

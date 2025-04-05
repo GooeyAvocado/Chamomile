@@ -10,7 +10,7 @@ namespace Chamomile.Data {
         public async Task<List<Model>> GetAll() {
             return await adoTemplate.Query(
                 SelectSql([
-                    MODEL_NAME, MODEL_TITLE, MODEL_AVAIL_IN,MODEL_DESC,IMAGES_ID],
+                    MODEL_NAME, MODEL_TITLE, MODEL_AVAIL_IN,MODEL_DESC,IMAGES_ID,MODEL_TYPE_CD],
                     MODELS_TABLE,
                     new([]),
                     [new OrderBy(MODEL_NAME)]
@@ -18,6 +18,7 @@ namespace Chamomile.Data {
                 (_) => { }, (reader) => new Model() {
                     Title = reader.GetString(MODEL_TITLE),
                     Name = reader.GetString(MODEL_NAME),
+                    Type = reader.GetOptionalString(MODEL_TYPE_CD),
                     Description = reader.GetString(MODEL_DESC),
                     IsAvailable = reader.GetBoolean(MODEL_AVAIL_IN),
                     BannerImage = reader.GetOptionalInt(IMAGES_ID)
@@ -33,12 +34,13 @@ namespace Chamomile.Data {
         public async Task Update(Model model) {
             await adoTemplate.Execute(
                 UpdateSql(
-                    [MODEL_DESC, IMAGES_ID],
+                    [MODEL_DESC, IMAGES_ID, MODEL_TYPE_CD],
                     MODELS_TABLE,
                     new([new(MODEL_TITLE)])
                 ), (cmd) => {
                     cmd.SetString(MODEL_DESC, model.Description);
                     cmd.SetInt(IMAGES_ID, model.BannerImage);
+                    cmd.SetString(MODEL_TYPE_CD, model.Type);
                     cmd.SetString(MODEL_TITLE, model.Title);
                 });
         }

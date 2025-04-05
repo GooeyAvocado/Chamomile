@@ -12,7 +12,7 @@ namespace Chamomile.Data {
         public async Task<List<Lora>> GetAll() {
             return await adoTemplate.Query(
                 SelectSql([
-                    LORA_NAME, LORA_ALIAS, LORA_AVAIL_IN,LORA_DESC, LORA_SAMPLE_PROMPT,IMAGES_ID],
+                    LORA_NAME, LORA_ALIAS, LORA_AVAIL_IN,LORA_DESC, LORA_SAMPLE_PROMPT,IMAGES_ID, LORA_TYPE_CD],
                     LORA_TABLE,
                     new([]),
                     [new OrderBy(LORA_NAME)]
@@ -23,7 +23,8 @@ namespace Chamomile.Data {
                     Description = reader.GetString(LORA_DESC),
                     IsAvailable = reader.GetBoolean(LORA_AVAIL_IN),
                     SamplePrompt = reader.GetString(LORA_SAMPLE_PROMPT),
-                    BannerImage = reader.GetOptionalInt(IMAGES_ID)
+                    BannerImage = reader.GetOptionalInt(IMAGES_ID),
+                    Type = reader.GetOptionalString(LORA_TYPE_CD)
                 }
             );
         
@@ -36,7 +37,7 @@ namespace Chamomile.Data {
         public async Task Update(Lora lora) {
             await adoTemplate.Execute(
                 UpdateSql(
-                    [LORA_DESC, LORA_SAMPLE_PROMPT, IMAGES_ID],
+                    [LORA_DESC, LORA_SAMPLE_PROMPT, IMAGES_ID, LORA_TYPE_CD],
                     LORA_TABLE,
                     new([new(LORA_ALIAS)])
                 ), (cmd) => {
@@ -44,6 +45,7 @@ namespace Chamomile.Data {
                     cmd.SetString(LORA_SAMPLE_PROMPT, lora.SamplePrompt);
                     cmd.SetInt(IMAGES_ID, lora.BannerImage);
                     cmd.SetString(LORA_ALIAS, lora.Alias);
+                    cmd.SetString(LORA_TYPE_CD, lora.Type);
                 });
         }
 

@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { Lora } from "../../../model/Lora";
 import { useLoras } from "../../hooks/useLoras";
 import LoraBrowserModal from "./LoraBrowserModal";
+import ModelTypePill from "../model/ModelType.tsx/ModelTypePill";
 
 export default function LoraSelector(props:{
     lora:string,
@@ -45,7 +46,13 @@ export default function LoraSelector(props:{
                 >
                     <img src={option.bannerImage ? imageUrl(option.bannerImage) : "/outlinepadded.png"} style={{width:"96px", height:"96px", objectFit:'cover', objectPosition:'center top', borderRadius:'5px'}}/>
                     <div>
-                        <div><b>{option.name}</b></div>
+                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                            {option?.type?.length > 0 && <ModelTypePill type={option?.type} />}
+                            <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
+                                <b>{option.name}</b>
+                                {!option?.isAvailable && <div style={{ fontSize: '.7em' }}>(Unavailable)</div>}
+                            </div>
+                        </div>
                         <div>{option.alias}</div>
                     </div>
 

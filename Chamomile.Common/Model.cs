@@ -10,6 +10,7 @@
         /// <summary>Use this one for display purposes</summary>
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string? Type { get; set; } = string.Empty;
         public bool IsAvailable { get; set; } = true;
         public int? BannerImage { get; set; }
     }

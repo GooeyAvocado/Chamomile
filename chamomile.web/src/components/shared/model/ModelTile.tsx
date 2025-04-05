@@ -1,6 +1,7 @@
 import { Card, CardActionArea, Typography } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { Model } from "../../../model/Model";
+import ModelTypePill from "./ModelType.tsx/ModelTypePill";
 
 export default function ModelTile(props: {
     model: Model
@@ -25,6 +26,9 @@ export default function ModelTile(props: {
                         fontSize:'.8em',
                     }}>{model.name}</Typography>
                 </div>
+                <div style={{top:'5px', left:'5px', position:'absolute'}}>
+                                    {model.type?.length > 0 && <ModelTypePill type={model.type} bgColor="rgba(0,0,0,.7)"/>}
+                                </div>
             </div>
         </CardActionArea>
     </Card>

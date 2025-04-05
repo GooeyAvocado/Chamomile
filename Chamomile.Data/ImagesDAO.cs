@@ -1,10 +1,7 @@
-﻿using Automatic1111.Common;
-using Chamomile.API.Utils;
+﻿using Chamomile.API.Utils;
 using Chamomile.Common;
 using Hue.Common;
 using MetadataExtractor;
-using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using static Chamomile.Data.Utils.AdoTemplate;
 using static Chamomile.Data.Utils.Constants;
@@ -157,6 +154,7 @@ namespace Chamomile.Data {
         private static void SetterFromFilter(Setter cmd, FilterOptions filter) {
             if (!string.IsNullOrEmpty(filter.Query)) {
                 cmd.SetString(IMAGES_PROMPT, "%" + filter.Query + "%");
+                cmd.SetString(IMAGES_BASE_PROMPT, "%" + filter.Query + "%");
                 cmd.SetString(IMAGES_NEG_PROMPT, "%" + filter.Query + "%");
             }
 
