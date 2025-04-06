@@ -2,15 +2,23 @@ import { Card, CardActionArea, Typography } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { Lora } from "../../../model/Lora";
 import ModelTypePill from "../model/ModelType.tsx/ModelTypePill";
+import ContextMenu from "../ContextMenu";
 
 export default function LoraTile(props: {
     lora: Lora
     onClick: () => void
+    onEdit?: () => void
+    onViewImage?: () => void
 }) {
 
-    const { lora, onClick } = props
+    const { lora, onClick, onEdit, onViewImage } = props
 
     return <Card>
+        <ContextMenu options={[
+                    {text: 'Edit', onClick: onEdit },
+                    {type: 'divider'},
+                    {text: 'View Image', onClick: onViewImage, disabled: lora.bannerImage === undefined },
+               ]}>
         <CardActionArea onClick={onClick}>
             <div style={{ alignItems:'center', position:'relative' }}>
                 <img
@@ -31,6 +39,7 @@ export default function LoraTile(props: {
                 </div>
             </div>
         </CardActionArea>
+        </ContextMenu>
     </Card>
 
 }

@@ -1,4 +1,4 @@
-import { Card, CardActionArea, Menu, MenuItem, Typography } from "@mui/material";
+import { Card, CardActionArea, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { useLoras } from "../../hooks/useLoras";
 import { Lora } from "../../../model/Lora";
@@ -10,6 +10,8 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useSnackbar } from "notistack";
 import ImageModalFromId from "../images/ImageModalFromId";
 import ModelTypePill from "../model/ModelType.tsx/ModelTypePill";
+import { MoreVert } from "@mui/icons-material";
+import LoraEditorModal from "./LoraEditorModal";
 
 export default function LoraCard(props: {
     loraAlias: string
@@ -21,6 +23,7 @@ export default function LoraCard(props: {
     const { loras, refresh } = useLoras();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [editorOpen, setEditorOpen] = useState(false)
     const [updateAys, setUpdateAys] = useState(false)
     const [imageOpen, setImageOpen] = useState(false)
     
@@ -69,9 +72,21 @@ export default function LoraCard(props: {
         } as Lora)
     }
 
+    const onEditorOk = (val : Lora) => {
+        setEditorOpen(false)
+        updateApi.fetch(()=>{
+            refresh()
+            enqueueSnackbar("Lora updated!", {variant:'success'})
+        },()=>{
+            enqueueSnackbar("Error while updating Lora", {variant:'error'})
+        },val)
+    }
+
+    const openEditor = ()=>setEditorOpen(true)
+
     return <>
-        <Card>
-            <CardActionArea onClick={onClick ?? openMenu}>
+        <Card style={{display:'flex', alignItems:'center'}}>
+            <CardActionArea onClick={onClick ?? (loraUnavailable() ? openMenu : openEditor) }>
                 <div style={{ display: 'flex', padding: "10px", gap: '20px', alignItems: 'center' }}>
                     <img src={lora?.bannerImage ? imageUrl(lora.bannerImage) : '/outline.png'} style={{ width: '64px', height: '64px', objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px', background: '#555' }} />
                     <Typography style={{ fontSize: '1em' }}>
@@ -88,10 +103,15 @@ export default function LoraCard(props: {
                     </Typography>
                 </div>
             </CardActionArea>
+            {!loraUnavailable() && <IconButton onClick={openMenu}><MoreVert/></IconButton>}
         </Card>
+
+        {!loraUnavailable() && <LoraEditorModal open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk} lora={lora} />}
 
         {!onClick && !loraUnavailable() && <>
             <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
+                <MenuItem onClick={openEditor} disabled={loraUnavailable()}>Edit Lora</MenuItem>
+                <Divider/>
                 <MenuItem onClick={viewImage} disabled={!lora.bannerImage || lora.bannerImage===currentImage?.id} >View sample image</MenuItem>
                 <MenuItem onClick={updateImage} disabled={!currentImage}>Set this as sample image</MenuItem>
             </Menu>

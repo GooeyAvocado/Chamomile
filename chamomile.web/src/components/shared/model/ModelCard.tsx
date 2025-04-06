@@ -1,4 +1,4 @@
-import { Card, CardActionArea, Menu, MenuItem, Typography } from "@mui/material";
+import { Card, CardActionArea, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import { Model } from "../../../model/Model";
 import { useModels } from "../../hooks/useModels";
 import { imageUrl } from "../../../api/Images";
@@ -10,6 +10,8 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import ImageModalFromId from "../images/ImageModalFromId";
 import ModelTypePill from "./ModelType.tsx/ModelTypePill";
+import { MoreVert } from "@mui/icons-material";
+import ModelEditorModal from "./ModelEditorModal";
 
 export default function ModelCard(props: {
     modelTitle: string
@@ -23,6 +25,7 @@ export default function ModelCard(props: {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [updateAys, setUpdateAys] = useState(false)
     const [imageOpen, setImageOpen] = useState(false)
+    const [editorOpen, setEditorOpen] = useState(false)
     
     const updateApi = useApi(updateModel)
     const {enqueueSnackbar} = useSnackbar();
@@ -68,9 +71,21 @@ export default function ModelCard(props: {
         } as Model)
     }
 
+        const onEditorOk = (val : Model) => {
+            setEditorOpen(false)
+            updateApi.fetch(()=>{
+                refresh()
+                enqueueSnackbar("Model updated!", {variant:'success'})
+            },()=>{
+                enqueueSnackbar("Error while updating model", {variant:'error'})
+            },val)
+        }
+    
+        const openEditor = ()=>setEditorOpen(true)
+
     return <>
-        <Card>
-            <CardActionArea onClick={onClick ?? openMenu}>
+        <Card style={{display:'flex', alignItems:'center'}}>
+            <CardActionArea onClick={onClick ?? (modelUnavailable() ? openMenu : openEditor) }>
                 <div style={{ display: 'flex', padding: "10px", gap: '20px', alignItems: 'center' }}>
                     <img src={model?.bannerImage ? imageUrl(model.bannerImage) : '/outline.png'} style={{ width: '64px', height: '64px', objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px', background: '#555' }} />
                     <Typography style={{ fontSize: '1em' }}>
@@ -87,10 +102,15 @@ export default function ModelCard(props: {
                     </Typography>
                 </div>
             </CardActionArea>
+            {!modelUnavailable() && <IconButton onClick={openMenu}><MoreVert/></IconButton>}
         </Card>
+
+        {!modelUnavailable() && <ModelEditorModal open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk} model={model} />}
 
         {!onClick && !modelUnavailable() && <>
             <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
+                <MenuItem onClick={openEditor} disabled={modelUnavailable()}>Edit Model</MenuItem>
+                <Divider/>
                 <MenuItem onClick={viewImage} disabled={!model.bannerImage || model.bannerImage===currentImage?.id} >View sample image</MenuItem>
                 <MenuItem onClick={updateImage} disabled={!currentImage}>Set this as sample image</MenuItem>
             </Menu>
