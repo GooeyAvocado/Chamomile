@@ -19,7 +19,7 @@ export default function PromptProvider(props: { children: any }) {
       const [orderAmount, setOrderAmount] = useState(1)
       
       const [prompt, setPrompt] = useState({
-        cfgScale : 7.0,
+        cfgScale : 4.0,
         width : 1024,
         height : 1024,
         positivePrompt : "",
