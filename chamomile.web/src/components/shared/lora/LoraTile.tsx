@@ -1,7 +1,7 @@
 import { Card, CardActionArea, Typography } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { Lora } from "../../../model/Lora";
-import ModelTypePill from "../model/ModelType.tsx/ModelTypePill";
+import ModelTypePill from "../model/ModelType/ModelTypePill";
 import ContextMenu from "../ContextMenu";
 
 export default function LoraTile(props: {

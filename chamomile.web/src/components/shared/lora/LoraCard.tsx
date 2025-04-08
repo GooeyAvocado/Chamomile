@@ -9,7 +9,7 @@ import { updateLora } from "../../../api/Loras";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useSnackbar } from "notistack";
 import ImageModalFromId from "../images/ImageModalFromId";
-import ModelTypePill from "../model/ModelType.tsx/ModelTypePill";
+import ModelTypePill from "../model/ModelType/ModelTypePill";
 import { MoreVert } from "@mui/icons-material";
 import LoraEditorModal from "./LoraEditorModal";
 
@@ -43,6 +43,7 @@ export default function LoraCard(props: {
     const lora = getLora();
 
     const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+        handleClose();
         setAnchorEl(event.currentTarget);
     };
 

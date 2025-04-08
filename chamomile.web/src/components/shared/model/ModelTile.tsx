@@ -1,7 +1,7 @@
 import { Card, CardActionArea, Typography } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { Model } from "../../../model/Model";
-import ModelTypePill from "./ModelType.tsx/ModelTypePill";
+import ModelTypePill from "./ModelType/ModelTypePill";
 import ContextMenu from "../ContextMenu";
 
 export default function ModelTile(props: {

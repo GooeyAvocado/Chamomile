@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Lora } from "../../../model/Lora";
 import { useLoras } from "../../hooks/useLoras";
 import LoraBrowserModal from "./LoraBrowserModal";
-import ModelTypePill from "../model/ModelType.tsx/ModelTypePill";
+import ModelTypePill from "../model/ModelType/ModelTypePill";
 
 export default function LoraSelector(props:{
     lora:string,

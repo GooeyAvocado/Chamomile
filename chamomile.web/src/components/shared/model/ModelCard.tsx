@@ -9,7 +9,7 @@ import { useSnackbar } from "notistack";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import ImageModalFromId from "../images/ImageModalFromId";
-import ModelTypePill from "./ModelType.tsx/ModelTypePill";
+import ModelTypePill from "./ModelType/ModelTypePill";
 import { MoreVert } from "@mui/icons-material";
 import ModelEditorModal from "./ModelEditorModal";
 
@@ -42,6 +42,7 @@ export default function ModelCard(props: {
     const model = getModel();
 
     const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+      handleClose();
       setAnchorEl(event.currentTarget);
     };
 

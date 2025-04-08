@@ -5,7 +5,7 @@ import { GridView, ModelTraining } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
 import React, { useState } from "react";
 import ModelBrowserModal from "./ModelBrowserModal";
-import ModelTypePill from "./ModelType.tsx/ModelTypePill";
+import ModelTypePill from "./ModelType/ModelTypePill";
 
 export default function ModelSelector(props:{
     model:string,

@@ -2,8 +2,9 @@ import { Button, Card, CardActionArea, Dialog, DialogActions, DialogContent, Dia
 import { useEffect, useState } from "react";
 import { imageUrl } from "../../../api/Images";
 import ImageBrowserModal from "../images/ImageBrowserModal";
-import ModelTypePill from "./ModelType.tsx/ModelTypePill";
+import ModelTypePill from "./ModelType/ModelTypePill";
 import { Model } from "../../../model/Model";
+import ModelTypeSelector from "./ModelType/ModelTypeSelector";
 
 export default function ModelEditorModal(props: {
     open: boolean,
@@ -37,21 +38,7 @@ export default function ModelEditorModal(props: {
                 <img src={model?.bannerImage ? imageUrl(model.bannerImage) : '/outline.png'} style={{ width: '100%', height: '150px', objectFit: 'contain', objectPosition: 'center top' }} />
             </CardActionArea></Card>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <FormControl fullWidth>
-                    <InputLabel>Base Model Type</InputLabel>
-                    <Select
-                        value={internalModel.type ?? ""}
-                        label="Base Model Type"
-                        onChange={(e)=>setInternalModel({ ...internalModel, type: e.target.value })}
-                    >
-                        <MenuItem value={""}>Unknown</MenuItem>
-                        <MenuItem value={"SD"}>Stable Diffusion</MenuItem>
-                        <MenuItem value={"SDXL"}>Stable Diffusion XL</MenuItem>
-                        <MenuItem value={"PONY"}>PonyXL</MenuItem>
-                        <MenuItem value={"IL"}>Illustrious</MenuItem>
-                        <MenuItem value={"NAI"}>NoobAI</MenuItem>   
-                    </Select>
-                </FormControl>
+                <ModelTypeSelector modelType={internalModel.type} setModelType={(e)=>setInternalModel({ ...internalModel, type: e })}/>
                 <TextField
                     label="Notes"
                     value={internalModel.description}
