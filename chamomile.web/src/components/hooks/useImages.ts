@@ -30,7 +30,7 @@ export const useImages = (filter: FilterOptions | undefined) => {
                 setImages([...(commsOverride ?? images), ...moreComms])
                 setPage((pageOverride ?? page) + 1)
             }
-        }, undefined, { ...filter, Page: pageOverride ?? page } as FilterOptions)
+        }, undefined, { ...filter, page: pageOverride ?? page } as FilterOptions)
 
     }
 
@@ -46,7 +46,7 @@ export const useImages = (filter: FilterOptions | undefined) => {
     return { images: images, hasMore, showMore: () => showMore(), refresh, loading: imagesApi.loading || countApi.loading, count: countApi.data?.count, reset: reset, 
         appendImage: (val: GeneratedImage) => setImages((prevImages) => [val, ...prevImages]),
         updateImage: (val:GeneratedImage)=> setImages((prevImages) =>[...prevImages].map((a)=>a.id===val.id ? val : a)),
-        removeImage: (val:GeneratedImage)=>setImages((prevImages) =>[...prevImages].filter(a=>a.id!==val.id))
+        removeImage: (val:GeneratedImage)=>setImages((prevImages) =>[...prevImages].filter(a=>a.id!==val.id)), page:page
     };
 
 }
