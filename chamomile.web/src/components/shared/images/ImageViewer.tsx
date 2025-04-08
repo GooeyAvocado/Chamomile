@@ -44,7 +44,7 @@ export default function ImageViewer(props:{
     const {activeJob,cancel,progress,groupedQueue} = useQueue((val)=>{
         if(showBrewing){
             //Check if we're on index 0
-            if(selectedIndex()===0) setSelectedImage(val)
+            //if(selectedIndex()===0) setSelectedImage(val)
             imageApi.appendImage(val)
         }
     }, showQueueSnackbars)
@@ -172,6 +172,7 @@ export default function ImageViewer(props:{
             <div style={{textAlign:'center', marginTop:"20px"}}>
                 <Button size="small" onClick={()=>imageApi.showMore()} disabled={imageApi.loading}> {imageApi.loading ? <CircularProgress size={24}/> : "Show More"}</Button>
                 <div style={{fontSize:".7em"}}>Showing {imageApi.images.length.toLocaleString()} of {imageApi.count.toLocaleString()} images</div>
+                <div style={{fontSize:'.6em', color:"#888"}}>Page {imageApi.page}</div>
             </div>
         </>} 
     </>
