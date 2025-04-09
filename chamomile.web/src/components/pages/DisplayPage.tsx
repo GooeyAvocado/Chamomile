@@ -130,12 +130,12 @@ function BrewingImageHUD(props:{
 
     const {progress,queue,activeJob,collapsed} = props
 
-    return <div style={{position:'absolute', left:"20px", top:'20px', zIndex:'1', opacity:collapsed ? 1 : 0, transition:'opacity 0.2s ease-in-out'}}>
+    return <div style={{position:'absolute', left:"20px", top:'20px', zIndex:'1', opacity:collapsed && activeJob ? 1 : 0, transition:'opacity 0.2s ease-in-out'}}>
          <Accordion expanded={activeJob !== undefined} >
         <AccordionSummary expandIcon={ activeJob ? <ExpandMore /> : <></>}>
             <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
                 {activeJob && <CircularProgress size={16} variant={progress ? "determinate" : "indeterminate"} value={(progress?.progress ?? 0) * 100}/>}
-                <div>{queue.length > 0 ? `Brewing ${queue.length + 1} images` : activeJob ? 'Brewing an image': 'Ready' }</div>
+                <div>{queue.length > 0 ? `Brewing ${queue.length + 1} images` : activeJob ? 'Brewing an image': '' }</div>
             </div>
         </AccordionSummary>
         <AccordionDetails>
