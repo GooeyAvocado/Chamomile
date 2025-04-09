@@ -9,7 +9,7 @@ import AreYouSureModal from "../shared/modals/AreYouSureModal"
 import BrewingImageTile from "../shared/images/BrewingImageTile"
 import { Prompt } from "../../model/Prompt"
 import { Progress } from "../../model/Automatic1111/Progress"
-import { Accordion, AccordionDetails, AccordionSummary, Card, CircularProgress } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary, CircularProgress } from "@mui/material"
 import { ExpandMore } from "@mui/icons-material"
 
 export default function DisplayPage() {
