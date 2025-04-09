@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import FilterBuilder from "./components/shared/filter/FilterBuilder";
-import ImageViewer from "./components/shared/images/ImageViewer";
-import PromptBuilder from "./components/shared/prompt/PromptBuilder";
-import UploadPanel from "./components/shared/upload/UploadPanel";
-import { FilterOptions } from "./model/FilterOptions";
-import ChamomileLogo from "./components/shared/ChamomileLogo";
-import { useWindowDimensions } from "./components/hooks/useWindowDimensions";
-import { useQueue } from "./components/hooks/useQueue";
-import { usePageTitle } from "./components/hooks/useTitle";
+import FilterBuilder from "../shared/filter/FilterBuilder";
+import ImageViewer from "../shared/images/ImageViewer";
+import PromptBuilder from "../shared/prompt/PromptBuilder";
+import UploadPanel from "../shared/upload/UploadPanel";
+import { FilterOptions } from "../../model/FilterOptions";
+import ChamomileLogo from "../shared/ChamomileLogo";
+import { useWindowDimensions } from "../hooks/useWindowDimensions";
+import { useQueue } from "../hooks/useQueue";
+import { usePageTitle } from "../hooks/useTitle";
 
-export default function App() {
+export default function Home() {
 
   const [filter, setFilter] = useState({
     favorite: false,

@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Card, Dialog, IconButton, Tab, Tabs, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { ArrowBack, ArrowForward, CoffeeOutlined, Delete, Star, StarBorder, Terminal, TerminalOutlined } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, CoffeeOutlined, Delete, Menu, Star, StarBorder, Terminal, TerminalOutlined } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -24,14 +24,18 @@ export default function ImageModal(props: {
     onLeft?: () => void,
     onRight?: () => void,
     onUpscale?: (val: GeneratedImage) => void
+    collapseDefault?:boolean
+    imageChildren?: (collapse:boolean) => JSX.Element
+    infoChildren?: JSX.Element
 }) {
 
-    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale } = props;
+    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale,collapseDefault } = props;
 
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
     const { vertical } = useWindowDimensions()
 
+    const [collapse, setCollapse] = useState(collapseDefault)
     const [promptMode, setPromptMode] = useState(0)
 
     useEffect(() => {
@@ -91,9 +95,13 @@ export default function ImageModal(props: {
         <div style={vertical ? { display: 'flex', flexDirection: 'column', height: "100vh", overflowY: 'hidden' } : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
 
             {/* Image side */}
-            <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative' }}>
+            <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative', backgroundColor:collapse ?'black' : '#333', transition:'background-color 0.5s ease' }}>
                 <img src={imageUrl(image?.id ?? 0, image?.hiResAvailable)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain' }} />
-                
+                    
+                    <div style={{position:'absolute', right:'20px', top:'20px', zIndex:1, opacity:collapse ? 1 : 0, transition:'opacity 0.5s ease'}}>
+                        <IconButton onClick={()=>setCollapse(false)}><Menu/></IconButton>
+                    </div>
+
                     {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
                         <IconButton onClick={onLeft}><ArrowBack /></IconButton>
                     </div>}
@@ -108,16 +116,21 @@ export default function ImageModal(props: {
                         onDelete={onDeleteForce} onFavorite={()=>{onFavorite?.()}}
                     />
                 </div>
+
+                {props.imageChildren?.(!!collapse) ?? <></>}
             </div>
 
             {/* info Panel */}
-            <Card style={vertical ? { width: '100%' } : { maxWidth: "500px", width: "50vw" }}>
+            <Card style={vertical ? { width: '100%' } : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease" }}>
                 <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
 
                     {/* Buttons */}
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom:'10px' }}>
                         <div style={{ display: "flex", gap: "10px" }} >
-                            <IconButton onClick={() => { setOpen(false) }}><ArrowBack /></IconButton>
+                            <IconButton onClick={() => { 
+                                if(collapseDefault) setCollapse(!collapse)
+                                else setOpen(false)
+                            }}><ArrowBack /></IconButton>
                             {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={()=>{onFavorite()}}>{image?.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>}
                         </div>
 
@@ -201,6 +214,8 @@ export default function ImageModal(props: {
                             <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{new Date(image?.created ?? 0).toLocaleString()}</div>
                         </div>
                     </div>
+
+                    {props.infoChildren}
 
                 </div>
             </Card>

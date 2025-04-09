@@ -83,7 +83,10 @@ export default function LoraCard(props: {
         },val)
     }
 
-    const openEditor = ()=>setEditorOpen(true)
+    const openEditor = ()=>{
+        handleClose()
+        setEditorOpen(true)
+    }
 
     return <>
         <Card style={{display:'flex', alignItems:'center'}}>

@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { SnackbarProvider } from 'notistack'
 import ThemeWrapper from './ThemeWrapper.tsx'
-import App from './App.tsx'
+import Home from './components/pages/Home.tsx'
 import { PingPongProvider } from './components/contexts/PingPongContext.tsx'
 import DimensionsProvider from './components/contexts/DimensionsContext.tsx'
 import { ModelProvider } from './components/contexts/ModelsContext.tsx'
@@ -12,6 +12,8 @@ import { ImageUploadProvider } from './components/contexts/ImageUploadContext.ts
 import FullPageDropzone from './components/shared/FullPageDropzone.tsx'
 import { UpscalersProvider } from './components/contexts/UpscalersContext.tsx'
 import QueueWatcher from './components/services/QueueWatcher.tsx'
+import { HashRouter, Route, Routes } from 'react-router-dom'
+import DisplayPage from './components/pages/DisplayPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -25,11 +27,19 @@ createRoot(document.getElementById('root')!).render(
                 <UpscalersProvider>
                   <ImageUploadProvider>
                     <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} >
-                      <QueueWatcher>
-                        <FullPageDropzone>
-                          <App />
-                        </FullPageDropzone>
-                      </QueueWatcher>
+                      <HashRouter>
+                        <Routes>
+                          <Route path="*" element={
+                            <QueueWatcher>
+                              <FullPageDropzone>
+                                <Home />
+                              </FullPageDropzone>
+                            </QueueWatcher>
+                          }
+                          />
+                          <Route path="/display" element={< DisplayPage/>} />
+                        </Routes>
+                      </HashRouter>
                     </SnackbarProvider>
                   </ImageUploadProvider>
                 </UpscalersProvider>
