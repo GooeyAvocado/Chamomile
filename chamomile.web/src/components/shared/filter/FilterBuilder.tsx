@@ -40,7 +40,7 @@ export default function FilterBuilder(props: {
                         endAdornment: <InputAdornment position="end">
                             {!filterEmpty && <Tooltip title="Clear filter">
                                 <IconButton 
-                                    onClick={() => { setFilter({favorite: false, fromDate: "", toDate:"", lora:'', model:'',page:0,query:''} as FilterOptions) }}>
+                                    onClick={() => { setFilter({favorite: false, fromDate: "", toDate:"", lora:'', model:'',lastImage:0,query:''} as FilterOptions) }}>
                                         <Close/>
                                 </IconButton>
                             </Tooltip>}

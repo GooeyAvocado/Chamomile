@@ -115,7 +115,7 @@ namespace Chamomile.Data {
 
         #region READ
 
-        private static List<WhereCondition> ConditionsFromFilter(FilterOptions filter) {
+        private static List<WhereCondition> ConditionsFromFilter(FilterOptions filter, int? lastImage) {
             var conditions = new List<WhereCondition>();
 
             if (!string.IsNullOrEmpty(filter.Query)) {
@@ -148,6 +148,10 @@ namespace Chamomile.Data {
                 conditions.Add(new(CRE_TS, WhereConditionOperator.LESS_THAN, "@TO_DATE"));
             }
 
+            if (lastImage != null && lastImage > 0) {
+                conditions.Add(new(IMAGES_ID, WhereConditionOperator.LESS_THAN, lastImage + ""));
+            }
+
             return conditions;
         }
 
@@ -172,7 +176,7 @@ namespace Chamomile.Data {
 
         private const int PAGE_SIZE = 54;
 
-        public async Task<List<GeneratedImage>> GetAll(FilterOptions filter, int page) {
+        public async Task<List<GeneratedImage>> GetAll(FilterOptions filter, int lastImage) {
             return await adoTemplate.Query(
                 SelectSql([
                     IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
@@ -181,16 +185,16 @@ namespace Chamomile.Data {
                     MODEL_TITLE, CRE_TS, IMAGES_HIRES_IN,
                 ],
                     IMAGES_TABLE,
-                    new WhereConditionGroup(ConditionsFromFilter(filter)),
+                    new WhereConditionGroup(ConditionsFromFilter(filter,lastImage)),
                     [new OrderBy(CRE_TS, SortOrder.DESC)],
-                    PAGE_SIZE, PAGE_SIZE * page
+                    PAGE_SIZE, 0
                 ),
                 (cmd) => SetterFromFilter(cmd, filter), ImageRM
             );
         }
 
         public async Task<int> GetAllCount(FilterOptions filter) {
-            return await adoTemplate.QuerySingle(SelectSql(["count(*)"], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter))),
+            return await adoTemplate.QuerySingle(SelectSql(["count(*)"], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter,null))),
                     (cmd) => SetterFromFilter(cmd, filter), (reader) => reader.GetInt(0)
                 );
         }

@@ -93,7 +93,7 @@ namespace Chamomile.API.Controllers {
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] FilterOptions options) {
-            return Ok(await dao.GetAll(options, options.Page ?? 0));
+            return Ok(await dao.GetAll(options, options.LastImage ?? 0));
         }
 
         [HttpGet("count")]

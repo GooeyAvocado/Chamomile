@@ -5,5 +5,5 @@ export class FilterOptions {
     favorite?: boolean = false;
     fromDate?:string = "";
     toDate?:string = "";
-    page?: number = 0;
+    lastImage?: number = 0;
 }
