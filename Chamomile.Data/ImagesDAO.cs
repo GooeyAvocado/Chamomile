@@ -56,8 +56,7 @@ namespace Chamomile.Data {
             return null; // No metadata found
         }
 
-        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, string basePrompt = "") {
-
+        public async Task<GeneratedImage> ParseImage(byte[] imageBytes, string basePrompt = "") {
             var metadata = ExtractStableDiffusionMetadata(new MemoryStream(imageBytes)) ?? throw new InvalidOperationException("Image is missing parameters!");
             var image = ParseUtils.ParametersToImage(metadata);
 
@@ -66,15 +65,19 @@ namespace Chamomile.Data {
             image.Loras = LoraRegex().Matches(image.Prompt)
                     .Select(a => a.Groups[1].Value)
                     .Where(a => loras.Any(b => b.Alias == a)) //Only with LORAs we have
-                    .ToList() ;
+                    .ToList();
 
-
-
-            var model = await adoTemplate.QuerySingle(SelectSql([MODEL_TITLE], MODELS_TABLE,
-                new WhereConditionGroup([new(MODEL_NAME,WhereConditionOperator.ILIKE)])),
+            image.Model = await adoTemplate.QuerySingle(SelectSql([MODEL_TITLE], MODELS_TABLE,
+                new WhereConditionGroup([new(MODEL_NAME, WhereConditionOperator.ILIKE)])),
                 (cmd) => cmd.SetString(MODEL_NAME, "%" + image.Model + "%"),
                 (reader) => reader.GetOptionalString(MODEL_TITLE)
-            );
+            ) ?? "";
+
+            return image;
+        }
+
+        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, string basePrompt = "") {
+            var image = await ParseImage(imageBytes, basePrompt);
 
             var img = await adoTemplate.QuerySingle(InsertSql([
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
@@ -97,7 +100,7 @@ namespace Chamomile.Data {
                 cmd.SetInt(IMAGES_HEIGHT, image.Height);
                 cmd.SetInt(IMAGES_WIDTH, image.Width);
                 cmd.SetBytea(IMAGES_BYTES, imageBytes);
-                cmd.SetString(MODEL_TITLE, model);
+                cmd.SetString(MODEL_TITLE, image.Model);
             }, ImageRM);
 
 

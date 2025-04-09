@@ -18,13 +18,14 @@ import SizePresetSelector from "./SizePresetSelector";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
+    fullHeight?:boolean
     setPrompt?: (val: Prompt) => void
     alwaysExpand?: boolean,
     noBrew?: boolean,
     preview?: boolean
 }) {
 
-    const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview } = props
+    const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight } = props
 
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount, variables } = usePrompt()
     const [expanded, setExpanded] = useState(false)
@@ -79,7 +80,7 @@ export default function PromptBuilder(props: {
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <TextField disabled={preview}
                 value={prompt.positivePrompt} onChange={(e) => setPrompt({ ...prompt, positivePrompt: e.target.value })}
-                placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : undefined}
+                placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
                 onKeyUp={(e)=>{
                     if(noBrew) return;
                     if(e.ctrlKey && e.key=='Enter') onBrew()
@@ -147,6 +148,9 @@ export default function PromptBuilder(props: {
                     value={prompt.width} onChange={(e) => setPrompt({ ...prompt, width: parseInt(e.target.value) })}
                     placeholder="Width"
                     fullWidth slotProps={{
+                        htmlInput: {
+                            min: 1
+                        },
                         input: {
                             startAdornment: (<InputAdornment position="start"> 
                                 <IconButton onClick={()=>setSizePresetOpen(true)}><Height sx={{ transform: 'rotate(90deg)', margin:"-7px" }} /> </IconButton>
@@ -161,6 +165,9 @@ export default function PromptBuilder(props: {
                     value={prompt.height} onChange={(e) => setPrompt({ ...prompt, height: parseInt(e.target.value) })}
                     placeholder="Height"
                     fullWidth slotProps={{
+                        htmlInput: {
+                            min: 1
+                        },
                         input: {
                             startAdornment: (<InputAdornment position="start"> 
                                  <IconButton onClick={()=>setSizePresetOpen(true)}><Height style={{margin:"-7px"}} /> </IconButton>
@@ -176,6 +183,9 @@ export default function PromptBuilder(props: {
                     value={prompt.steps} onChange={(e) => setPrompt({ ...prompt, steps: parseInt(e.target.value) })}
                     placeholder="Steps"
                     fullWidth slotProps={{
+                        htmlInput: {
+                            min: 1
+                        },
                         input: {
                             startAdornment: (<InputAdornment position="start"> <DirectionsRun /> </InputAdornment>),
                             endAdornment: (<InputAdornment position="end">Steps</InputAdornment>)
@@ -190,6 +200,7 @@ export default function PromptBuilder(props: {
                     placeholder="CFG Scale"
                     fullWidth slotProps={{
                         htmlInput: {
+                            min: 0.1,
                             step: 0.1
                         },
                         input: {
@@ -206,8 +217,13 @@ export default function PromptBuilder(props: {
                         value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
                         placeholder="Seed"
                         fullWidth slotProps={{
+                            htmlInput: {
+                                min:-1
+                            },
                             input: {
-                                startAdornment: (<InputAdornment position="start"> <Yard /> </InputAdornment>),
+                                startAdornment: (<InputAdornment position="start">
+                                    <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{margin:"-7px"}} /></IconButton>
+                                </InputAdornment>),
                                 endAdornment: (<InputAdornment position="end">Seed</InputAdornment>)
                             }
                         }}

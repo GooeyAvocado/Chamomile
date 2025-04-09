@@ -87,7 +87,6 @@ export const hydratePrompt = (prompt:Prompt, variables:any, index?: number) => {
           const val =   variables[key].split('|')
           let replaceVal = val[0]
           if(val.length > 0 && index){
-            console.log(index % val.length)
             replaceVal = val[index % val.length]
           }
           hydrated = hydrated.replaceAll("\%" + key + "\%", replaceVal)

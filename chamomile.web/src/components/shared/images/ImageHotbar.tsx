@@ -41,9 +41,7 @@ export default function ImageHotbar(props: {
                 </Tooltip>
                 <Tooltip title="Delete" enterDelay={250}>
                     <IconButton onClick={(e) => {
-                        console.log(e.currentTarget)
                         setDeletePopperAnchor(e.currentTarget)
-
                     }}>
                         <Delete />
                     </IconButton>

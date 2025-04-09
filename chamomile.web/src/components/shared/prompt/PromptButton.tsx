@@ -9,7 +9,8 @@ import Popper from '@mui/material/Popper';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import { usePingPong } from '../../hooks/usePingPong';
-import { Tooltip } from '@mui/material';
+import { Divider, Tooltip } from '@mui/material';
+import PreviewModal from './preview/PreviewModal';
 
 export default function PromptButton(props: {
     onBrew: () => void
@@ -19,7 +20,10 @@ export default function PromptButton(props: {
 }) {
 
     const {onBrew,onLoad,onSave, fullWidth} = props
+    
     const [open, setOpen] = React.useState(false);
+    const [previewOpen, setPreviewOpen] = React.useState(false);
+
     const anchorRef = React.useRef<HTMLDivElement>(null);
     const {pong} = usePingPong()
 
@@ -49,6 +53,13 @@ export default function PromptButton(props: {
                         <Paper>
                             <ClickAwayListener onClickAway={handleClose}>
                                 <MenuList id="split-button-menu" >
+                                    <MenuItem key={"PreviewPromptButton"} style={{fontSize:".8em"}} onClick={()=>{
+                                        handleClose();
+                                        setPreviewOpen(true);
+                                    }} >
+                                        Preview Prompt
+                                    </MenuItem>
+                                    <Divider/>
                                     <MenuItem key={"SavePromptButton"} style={{fontSize:".8em"}} onClick={()=>{
                                         handleClose();
                                         onSave();
@@ -67,6 +78,7 @@ export default function PromptButton(props: {
                     </Grow>
                 )}
             </Popper>
+            <PreviewModal open={previewOpen} setOpen={setPreviewOpen}/>
         </React.Fragment>
     );
 }

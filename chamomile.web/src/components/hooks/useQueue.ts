@@ -30,19 +30,14 @@ export const useQueue = (onImageDone : (val:GeneratedImage)=>void, showSnackbar?
 
         queue.forEach((image) => {
             if (currentGroup.length === 0 || currentGroup[0].positivePrompt === image.positivePrompt) {
-              console.log("waos")
               currentGroup.push(image);
             } else {
-              console.log("owas")
               groups.push([...currentGroup]);
               currentGroup = [image];
             }
           });
           //Push the last remaining grou
           groups.push(currentGroup)
-
-          console.log(groups)
-
         setGroupedQueue(groups)
 
     },[queue])

@@ -6,6 +6,7 @@ using Chamomile.Data;
 using Chamomile.Data.Utils;
 using Hue.Common;
 using Microsoft.AspNetCore.Mvc;
+using static Chamomile.API.Workers.ImageGeneratorWorker;
 
 namespace Chamomile.API.Controllers {
 
@@ -48,6 +49,36 @@ namespace Chamomile.API.Controllers {
             return Ok(new Dictionary<string, object>() {
                 { "jobId", worker.EnqueuePrompt(prompt) }
             });
+        }
+
+        [HttpPost("preview")]
+        public async Task<IActionResult> Preview([FromBody] Prompt prompt) {
+
+            //We don't need to try catch this. if it fails it fails lmao
+            var model = await api.GetCurrentModel();
+            var response = await api.GenerateImage(new() {
+                batch_size = 1,
+                cfg_scale = prompt.CFGScale ?? 7.0,
+                prompt = CommentsPattern().Replace(prompt.PositivePrompt, ""),
+                negative_prompt = CommentsPattern().Replace(prompt.NegativePrompt ?? "", ""),
+                width = prompt.Width ?? 1024,
+                height = prompt.Height ?? 1024,
+                n_iter = 1,
+                sampler_name = prompt.Sampler ?? null,
+                scheduler = prompt.ScheduleType ?? null,
+                seed = prompt.Seed ?? -1,
+                steps = prompt.Steps ?? 10,
+                save_images = false,
+                send_images = true,
+            });
+
+            var img = await dao.ParseImage(Convert.FromBase64String(response.images[0]),prompt.PositivePrompt);
+
+            return Ok(new PreviewReponse() { 
+                Data = response.images[0],
+                Metadata = img
+            });               
+            
         }
 
         [HttpPost("generateMany")]

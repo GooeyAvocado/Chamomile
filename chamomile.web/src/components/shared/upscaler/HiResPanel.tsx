@@ -25,7 +25,6 @@ export default function HiResPanel(props: {
 
         upscaleApi.fetch(val => {
             enqueueSnackbar("Image upscaled!", { variant: 'success' })
-            console.log(val)
             if (val) updateImage?.(val);
         }, () => {
             enqueueSnackbar("Image failed to be upscaled", { variant: 'error' })

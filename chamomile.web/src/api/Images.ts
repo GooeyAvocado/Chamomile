@@ -26,6 +26,13 @@ export const enqueuePrompt = (
     val: Prompt
 ) => Post(setLoading, setItem, onError, ENDPOINT + "generate", val)
 
+export const previewPrompt = (
+    setLoading: (value: boolean) => void,
+    setItem: (val? : {data : string, metadata:GeneratedImage}) => void,
+    onError: (value: any) => void,
+    val: Prompt
+) => Post(setLoading, setItem, onError, ENDPOINT + "preview", val)
+
 export const enqueuePrompts = (
     setLoading: (value: boolean) => void,
     setItem: (val? : {jobIds : number[]}) => void,
