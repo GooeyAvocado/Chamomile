@@ -10,6 +10,7 @@ import { useSnackbar } from "notistack";
 import { updateModel } from "../../../api/Model";
 import useApi from "../../hooks/useApi";
 import ModelTypeSelector from "./ModelType/ModelTypeSelector";
+import AvailabilitySelector from "./availabilitySelector/AvailabilitySelector";
 
 export default function ModelBrowserModal(props: {
     open: boolean,
@@ -23,6 +24,7 @@ export default function ModelBrowserModal(props: {
 
     const [query, setQuery] = useState("")
     const [type, setType] = useState("");
+    const [availability,setAvailability] = useState<0|1|-1>(0);
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
         <DialogTitle>Select a Model</DialogTitle>
@@ -38,9 +40,12 @@ export default function ModelBrowserModal(props: {
                 <div style={{width:"200px"}}>
                     <ModelTypeSelector setModelType={(e)=>setType(e)} modelType={type}/>
                 </div>
+                {showNone && <div style={{width:"200px"}}>
+                    <AvailabilitySelector availability={availability} setAvailability={setAvailability}/>
+                </div>}
             </div>
             <div style={{ flex: '1', overflowY: 'auto' }}>
-                <GridViewMode data={models} onOk={onOk} query={query} showNone={showNone} type={type}/>
+                <GridViewMode data={models} onOk={onOk} query={query} showNone={showNone} type={type} availability={availability}/>
             </div>
 
         </DialogContent>
@@ -49,8 +54,8 @@ export default function ModelBrowserModal(props: {
 
 }
 
-function GridViewMode(props: { data: Model[], query: string, onOk: (val: Model) => void, showNone?: boolean, type:string }) {
-    const { data, query, onOk, showNone, type } = props
+function GridViewMode(props: { data: Model[], query: string, onOk: (val: Model) => void, showNone?: boolean, type:string, availability: 0|1|-1 }) {
+    const { data, query, onOk, showNone, type, availability } = props
 
     const [editorModel, setEditorModel] = useState(undefined as Model | undefined)
     const [editorOpen, setEditorOpen] = useState(false)
@@ -81,10 +86,22 @@ function GridViewMode(props: { data: Model[], query: string, onOk: (val: Model) 
                 {
                     title: '',
                     bannerImage: undefined,
-                    name: 'All',
+                    name: 'Any',
                     type : '',
                     description: '',
-                } as Model, ...(data ?? [])
+                    isAvailable: true
+                } as Model, ...(
+                    (data ?? []).filter(a=>{
+                        switch (availability) {
+                            case 1:
+                                return a.isAvailable
+                            case -1:
+                                return !a.isAvailable
+                            default:
+                                return true;
+                        }
+                    })
+            )
             ] 
             : (data ?? []).filter(a => a.isAvailable)
         )?.filter(a => query.trim().length === 0 ? true : a.name?.toLowerCase().includes(query.toLowerCase())  || a.description?.toLowerCase().includes(query.toLowerCase()))

@@ -10,6 +10,7 @@ import { updateLora } from "../../../api/Loras";
 import useApi from "../../hooks/useApi";
 import { useSnackbar } from "notistack";
 import ModelTypeSelector from "../model/ModelType/ModelTypeSelector";
+import AvailabilitySelector from "../model/availabilitySelector/AvailabilitySelector";
 
 export default function LoraBrowserModal(props: {
     open: boolean,
@@ -23,6 +24,8 @@ export default function LoraBrowserModal(props: {
 
     const [query, setQuery] = useState("")
     const [type, setType] = useState("");
+    const [availability,setAvailability] = useState<0|1|-1>(0);
+
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
         <DialogTitle>Select a LoRA</DialogTitle>
@@ -38,9 +41,12 @@ export default function LoraBrowserModal(props: {
                 <div style={{ width: "200px" }}>
                     <ModelTypeSelector setModelType={(e) => setType(e)} modelType={type} />
                 </div>
+                {showNone && <div style={{width:"200px"}}>
+                    <AvailabilitySelector availability={availability} setAvailability={setAvailability}/>
+                </div>}
             </div>
             <div style={{ flex: '1', overflowY: 'auto' }}>
-                <GridViewMode data={loras} onOk={onOk} query={query} showNone={showNone} type={type} />
+                <GridViewMode data={loras} onOk={onOk} query={query} showNone={showNone} type={type} availability={availability} />
             </div>
 
         </DialogContent>
@@ -49,8 +55,8 @@ export default function LoraBrowserModal(props: {
 
 }
 
-function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) => void, showNone?: boolean, type: string }) {
-    const { data, query, onOk, showNone, type } = props
+function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) => void, showNone?: boolean, type: string, availability: 0|1|-1  }) {
+    const { data, query, onOk, showNone, type, availability } = props
 
     const [editorModel, setEditorModel] = useState(undefined as Lora | undefined)
     const [editorOpen, setEditorOpen] = useState(false)
@@ -81,12 +87,21 @@ function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) =>
                 {
                     alias: '',
                     bannerImage: undefined,
-                    name: 'All',
+                    name: 'Any',
                     type : '',
                     description: '',
                     samplePrompt: '',
                 } as Lora,
-                ...(data ?? [])
+                ...(data ?? []).filter(a=>{
+                        switch (availability) {
+                            case 1:
+                                return a.isAvailable
+                            case -1:
+                                return !a.isAvailable
+                            default:
+                                return true;
+                        }
+                    })
             ]
             : (data ?? []).filter(a => a.isAvailable)
         )?.filter(a => query.trim().length === 0 ? true : a.name.toLowerCase().includes(query.toLowerCase()) || a.description?.toLowerCase().includes(query.toLowerCase()) || a.samplePrompt?.toLowerCase().includes(query.toLowerCase()))

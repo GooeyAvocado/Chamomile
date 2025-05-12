@@ -3,6 +3,7 @@ import { imageUrl } from "../../../api/Images";
 import { Model } from "../../../model/Model";
 import ModelTypePill from "./ModelType/ModelTypePill";
 import ContextMenu from "../ContextMenu";
+import { DoNotDisturbAlt } from "@mui/icons-material";
 
 export default function ModelTile(props: {
     model: Model
@@ -35,8 +36,11 @@ export default function ModelTile(props: {
                     }}>{model.name}</Typography>
                 </div>
                 <div style={{top:'5px', left:'5px', position:'absolute'}}>
-                                    {model.type?.length > 0 && <ModelTypePill type={model.type} bgColor="rgba(0,0,0,.7)"/>}
-                                </div>
+                    {model.type?.length > 0 && <ModelTypePill type={model.type} bgColor="rgba(0,0,0,.7)"/>}
+                </div>
+                <div style={{top:'5px', right:'5px', position:'absolute'}}>
+                    {!model.isAvailable && <DoNotDisturbAlt/>}
+                </div>
             </div>
         </CardActionArea>
        </ContextMenu>

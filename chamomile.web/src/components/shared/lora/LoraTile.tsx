@@ -3,6 +3,7 @@ import { imageUrl } from "../../../api/Images";
 import { Lora } from "../../../model/Lora";
 import ModelTypePill from "../model/ModelType/ModelTypePill";
 import ContextMenu from "../ContextMenu";
+import { DoNotDisturbAlt } from "@mui/icons-material";
 
 export default function LoraTile(props: {
     lora: Lora
@@ -19,7 +20,7 @@ export default function LoraTile(props: {
                     {type: 'divider'},
                     {text: 'View Image', onClick: onViewImage, disabled: lora.bannerImage === undefined },
                ]}>
-        <CardActionArea onClick={onClick}>
+        <CardActionArea onClick={onClick} style={{aspectRatio:1/1, width:'100%'}}>
             <div style={{ alignItems:'center', position:'relative' }}>
                 <img
                     src={lora.bannerImage ? imageUrl(lora.bannerImage) : '/outline.png'}
@@ -36,6 +37,9 @@ export default function LoraTile(props: {
                 </div>
                 <div style={{top:'5px', left:'5px', position:'absolute'}}>
                     {lora.type?.length > 0 && <ModelTypePill type={lora.type} bgColor="rgba(0,0,0,.7)"/>}
+                </div>
+                 <div style={{top:'5px', right:'5px', position:'absolute'}}>
+                    {!lora.isAvailable && <DoNotDisturbAlt/>}
                 </div>
             </div>
         </CardActionArea>
