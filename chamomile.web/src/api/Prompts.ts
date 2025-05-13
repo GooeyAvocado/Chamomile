@@ -36,3 +36,10 @@ export const deletePrompt = (
     onError: (value: any) => void,
     id: number,
 ) => Delete(setLoading, onSuccess, onError, ENDPOINT + id)
+
+
+export const getWildcards = (
+    setLoading: (value: boolean) => void,
+    setItem: (val:any) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "wildcards")
