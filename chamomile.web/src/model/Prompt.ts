@@ -11,4 +11,5 @@ export class Prompt {
     height: number = 1024;
     width: number = 1024;
     sampleImage?: number;
+    variables: any;
 }
