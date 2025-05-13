@@ -92,7 +92,7 @@ export default function VariableEditor(props: {
                                         setPrompt({ ...prompt, positivePrompt: prompt.positivePrompt.replaceAll(a, "") })
                                     }}><Delete /></IconButton>
                                     <div style={{ flex: '1' }}>
-                                        <VariableEditorRow varName={a} value={variables[a]} availableValues={wildcards[a.replaceAll("!__","").replaceAll("__","")]}
+                                        <VariableEditorRow varName={a} value={variables[a]} availableValues={wildcards?.[a.replaceAll("!__","").replaceAll("__","")]}
                                             updateValue={(val) => { 
                                                 setVairables({ ...variables, [a]: val })
                                             }} />
