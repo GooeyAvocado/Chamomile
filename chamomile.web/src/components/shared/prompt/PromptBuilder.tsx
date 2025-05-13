@@ -95,7 +95,7 @@ export default function PromptBuilder(props: {
                         endAdornment: (
                             <InputAdornment position="end">
                                 <div style={{display:'flex', flexDirection:vertical ? 'column' : undefined}}>
-                                    {!noBrew && <Tooltip title="Variables">
+                                    {!noBrew && <Tooltip title="Variables and Overrides">
                                         <IconButton onClick={() => { setVarsOpen(true) }}><Percent /></IconButton>
                                     </Tooltip>}
                                     {!preview && <Tooltip title="Select Models">

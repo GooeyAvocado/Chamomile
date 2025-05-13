@@ -1,65 +1,208 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, TextField } from "@mui/material"
+import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, Tab, Tabs, TextField } from "@mui/material"
 import { usePrompt } from "../../hooks/usePrompt"
-import { Terminal } from "@mui/icons-material"
-import { availableVars, hydratePrompt } from "../Utils"
+import { promptPreview } from "../Utils"
+import { Add, Delete, Terminal } from "@mui/icons-material"
+import { useMemo, useState } from "react"
+import { Prompt } from "../../../model/Prompt"
+import useApi from "../../hooks/useApi"
+import { getWildcards } from "../../../api/Prompts"
 
-export default function VariableEditor(props:{
+export default function VariableEditor(props: {
     open: boolean,
-    setOpen: (val:boolean) => void
-}){
+    setOpen: (val: boolean) => void
+}) {
 
-    const {open,setOpen} = props
-    const {variables, setVairables, prompt} = usePrompt()
+    const { open, setOpen } = props
+    const { variables, setVairables, prompt, setPrompt } = usePrompt()
+
+    const [overridesTab, setOverridesTab] = useState(0)
+    const [newCustName, setNewCustName] = useState("")
+    const [newWildName, setNewWildName] = useState("")
+
+
+    const { data: wildcards } = useApi(getWildcards, true)
+
+    const allWildcards = useMemo(() => {
+        return wildcards ? Object.keys(wildcards).filter(a => !prompt.positivePrompt.includes(a)) : [] as string[]
+    }, [wildcards, prompt.positivePrompt])
+
+
+    const availableVars = (prompt: Prompt) => {
+        const matches = [...prompt.positivePrompt.matchAll(/%([^%]+)%/g)].map(m => m[0]);
+        // Get unique values
+        return [...new Set(matches)];
+    }
+
+    const availableWildcards = (prompt: Prompt) => {
+        const matches = [...prompt.positivePrompt.matchAll(/!*__[A-z_0-9\*]*__/g)].map(m => m[0]);
+        const presetWildcards = Object.keys(variables ?? {}).filter(a=>a.startsWith("__"))
+        // Get unique values
+        return [...new Set([...matches, ...presetWildcards])];
+    }
+
+    const availableCustomNames = () => {
+        return Object.keys(variables ?? {}).filter(a => !a.includes("%") && !a.startsWith("__"))
+    }
 
     const varNames = availableVars(prompt)
+    const wildNames = availableWildcards(prompt)
+    const custNames = availableCustomNames()
 
-    return <Dialog open={open} onClose={()=>setOpen(false)} fullWidth maxWidth='md'>
-        <DialogTitle>Variables</DialogTitle>
-        <DialogContent style={{display:'flex', flexDirection:'column', height:'75vh'}}>
-            <div style={{marginBottom:'10px'}}><b>Prompt Preview</b></div>
-            <div style={{padding:"10px", background:'#222', fontSize:'.9em', fontFamily:'monospace'}}>
-            <TextField
-                value={hydratePrompt(prompt,variables).positivePrompt} disabled multiline maxRows={7}
-                fullWidth slotProps={{
-                    htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
-                    input: {
-                        startAdornment: (
-                            <InputAdornment position="start"> <Terminal /> </InputAdornment>
-                        )
-                    }
-                }}
-            />
+    return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md'>
+        <DialogTitle>Variables and Overrides</DialogTitle>
+        <DialogContent style={{ display: 'flex', flexDirection: 'column', height: '75vh' }}>
+            <div style={{ marginBottom: '10px' }}><b>Prompt Preview</b></div>
+            <div style={{ padding: "10px", background: '#222', fontSize: '.9em', fontFamily: 'monospace' }}>
+                <TextField
+                    value={promptPreview(prompt, variables)} disabled multiline maxRows={7}
+                    fullWidth slotProps={{
+                        htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
+                        input: {
+                            startAdornment: (
+                                <InputAdornment position="start"> <Terminal /> </InputAdornment>
+                            )
+                        }
+                    }}
+                />
             </div>
-            <hr style={{width:"100%"}}/>
-            <div style={{flex:'1', display:'flex', flexDirection:'column', gap:'10px', overflowY:'auto'}}>
-                {varNames.length===0 ? <div style={{height:"100%", display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
-                    <div style={{fontSize:'2.5em'}}>%</div>
-                    <div style={{fontSize:'1.3em'}}><b>There are no variables</b></div>
-                    <hr style={{width:'300px'}}/>
-                    <div style={{width:"250px", textAlign:'center', fontSize:'.8em'}}>Add a variable by putting an identifier between percentages (%MyVar%)</div>
-                </div> : varNames.map(a=><VariableEditorRow varName={a} value={variables[a]} updateValue={(val)=>{
-                    setVairables({...variables,[a]: val})
-                }}/>) }
+            <hr style={{ width: "100%" }} />
+            <Tabs value={overridesTab} onChange={(_, newVal) => setOverridesTab(newVal)} style={{ marginBottom: '10px' }}>
+                <Tab label="Variables" value={0} />
+                <Tab label="Wildcards" value={1} />
+                <Tab label="Other Overrides" value={2} />
+            </Tabs>
+            <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
+                {
+                    overridesTab === 0 ?
+                        varNames.length === 0 ? <div style={{ height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                            <div style={{ fontSize: '2.5em' }}>%</div>
+                            <div style={{ fontSize: '1.3em' }}><b>There are no variables</b></div>
+                            <hr style={{ width: '300px' }} />
+                            <div style={{ width: "250px", textAlign: 'center', fontSize: '.8em' }}>Add a variable by putting an identifier between percentages (%MyVar%)</div>
+                        </div> : varNames.map(a => <VariableEditorRow varName={a} value={variables[a]} updateValue={(val) => {
+                            setVairables({ ...variables, [a]: val })
+                        }} />)
+                        : overridesTab === 1 ?
+                            <>
+                                {wildNames.map(a => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                    <IconButton onClick={() => {
+                                        const updatedVariables = { ...variables };
+                                        delete updatedVariables[a];
+                                        setVairables(updatedVariables);
+                                        setPrompt({ ...prompt, positivePrompt: prompt.positivePrompt.replaceAll(a, "") })
+                                    }}><Delete /></IconButton>
+                                    <div style={{ flex: '1' }}>
+                                        <VariableEditorRow varName={a} value={variables[a]} updateValue={(val) => {
+                                            setVairables({ ...variables, [a]: val })
+                                        }} />
+                                    </div>
+                                </div>)}
 
+                                <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+                                    <IconButton
+                                        disabled={newWildName.length === 0}
+                                        onClick={() => {
+                                            setPrompt({ ...prompt, positivePrompt: `${prompt.positivePrompt} __${newWildName}__` })
+                                            setNewWildName("")
+                                        }}>
+                                        <Add />
+                                    </IconButton>
+                                    {(availableWildcards?.length ?? 0) > 0
+                                        ? <Autocomplete
+                                            id="free-solo-demo"
+                                            freeSolo fullWidth
+                                            options={allWildcards ?? []}
+                                            value={newWildName} onChange={(_, val) => setNewWildName(val ?? "")}
+                                            onInputChange={(_, val) => setNewWildName(val
+                                                .replaceAll("__", "_")
+                                                .replaceAll("%", "") ?? "")}
+                                            renderInput={(params) => <TextField {...params} />}
+                                        />
+                                        : <TextField
+                                            placeholder="New wildcard" value={newWildName}
+                                            fullWidth
+                                            onChange={(e) => {
+                                                setNewWildName(e.target.value
+                                                    .replaceAll("__", "_")
+                                                    .replaceAll("%", "")
+                                                )
+                                            }}
+                                        />}
+
+                                </div>
+
+                            </>
+                            : <>
+                                {custNames.map(a => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                    <IconButton onClick={() => {
+                                        const updatedVariables = { ...variables };
+                                        delete updatedVariables[a];
+                                        setVairables(updatedVariables);
+                                    }}><Delete /></IconButton>
+                                    <div style={{ flex: '1' }}>
+                                        <VariableEditorRow varName={a} value={variables[a]} updateValue={(val) => {
+                                            setVairables({ ...variables, [a]: val })
+                                        }} />
+                                    </div>
+                                </div>)}
+
+                                <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+                                    <IconButton
+                                        disabled={newCustName.length === 0}
+                                        onClick={() => {
+                                            setVairables({ ...variables, [newCustName]: "" });
+                                            setNewCustName("")
+                                        }}>
+                                        <Add />
+                                    </IconButton>
+                                    <TextField
+                                        placeholder="New override" value={newCustName}
+                                        fullWidth
+                                        onChange={(e) => {
+                                            setNewCustName(e.target.value
+                                                .replaceAll("%", "")
+                                            )
+                                        }}
+                                    />
+                                </div>
+
+                            </>
+
+                }
             </div>
         </DialogContent>
         <DialogActions>
-            <Button onClick={()=>setOpen(false)}>OK</Button>
+            <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                <div>
+                    {Object.keys(variables ?? {}).length > 0 && <Button onClick={() => setVairables({})}>Clear overrides</Button>}
+                </div>
+                <Button onClick={() => setOpen(false)}>OK</Button>
+            </div>
         </DialogActions>
     </Dialog>
 
 }
 
-export function VariableEditorRow(props:{
-    varName:string,
-    value:string|undefined,
-    updateValue:(val:string)=>void
-}){
+export function VariableEditorRow(props: {
+    varName: string,
+    value: string | undefined,
+    updateValue: (val: string) => void
+    availableValues?: string[]
+}) {
 
-    const {varName, updateValue,value} = props
+    const { varName, updateValue, value, availableValues } = props
 
-    return <div style={{display:'flex', alignItems:'center'}}>
-        <div style={{width:'200px'}}><b>{varName}</b></div>
-        <TextField value={value ?? ""} onChange={(e)=>updateValue(e.target.value)} fullWidth/>
+    return <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ width: '200px' }}><b>{varName.replaceAll("%", "").replaceAll("!__", "").replaceAll("__", "")}</b></div>
+        {(availableValues?.length ?? 0) > 0
+            ? <Autocomplete
+                id="free-solo-demo"
+                freeSolo fullWidth
+                options={availableValues ?? []}
+                value={value} onChange={(_, val) => updateValue(val ?? "")}
+                onInputChange={(_, val) => updateValue(val ?? "")}
+                renderInput={(params) => <TextField {...params} />}
+            />
+            : <TextField value={value ?? ""} onChange={(e) => updateValue(e.target.value)} fullWidth />}
     </div>
 }

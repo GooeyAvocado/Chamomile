@@ -76,24 +76,59 @@ export const daysUntil = (date: Date): number => {
 }
 
 export const availableVars = (prompt:Prompt) => {
-    const matches = [...prompt.positivePrompt.matchAll(/%([^%]+)%/g)].map(m => m[1]);
+    const matches = [...prompt.positivePrompt.matchAll(/%([^%]+)%/g)].map(m => m[0]);
         // Get unique values
         return [...new Set(matches)];
 }
 
 export const hydratePrompt = (prompt:Prompt, variables:any, index?: number) => {
-     let hydrated = prompt.positivePrompt;
-     Object.keys(variables).forEach(key=>{
+    
+    let hydrated = {}
+    
+    Object.keys(variables).filter(a=>a.includes("%")).forEach(key=>{
           const val =   variables[key].split('|')
           let replaceVal = val[0]
           if(val.length > 0 && index){
             replaceVal = val[index % val.length]
           }
-          hydrated = hydrated.replaceAll("\%" + key + "\%", replaceVal)
+
+          replaceVal = (replaceVal as string).trim();
+          if(replaceVal.length > 0) hydrated = {...hydrated,[key]:replaceVal}
+     });
+
+     Object.keys(variables).filter(a=>!a.includes("%")).forEach(key=>{
+          const replaceVal =   (variables[key] as string).trim()
+          if(replaceVal.length > 0) hydrated = {...hydrated,[key]:replaceVal}
      });
      
-     return {...prompt, positivePrompt:hydrated.trim()} as Prompt;
+     return {...prompt, variables:hydrated} as Prompt;
 }
+
+export const promptPreview = (prompt:Prompt, variables:any) => {
+
+    const RECURSION_LIMIT = 10;
+    let recursionCount = 0;
+    let hydrated = prompt.positivePrompt;
+
+    while (Object.keys(variables).filter(a => hydrated.includes(a) && (variables[a] as string).trim().length!==0)) {
+        //We need to do this so that its caluclated before we enter the loop
+        //Maybe funky things could happen if not
+        var replacementList = Object.keys(variables).filter(a => hydrated.includes(a) && (variables[a] as string).trim().length!==0);
+
+        for (var replacement of replacementList) {
+            hydrated = hydrated.replaceAll(replacement, variables[replacement]);
+        }
+
+        //Limit just in case
+        recursionCount++;
+        if (recursionCount > RECURSION_LIMIT) break;
+    }
+
+
+    return hydrated
+
+}
+
 
 export const objectToQueryString = (obj: any) => obj ? "?" + Object.keys(obj)
     .map((k) => `${k}=${obj[k]}`)
