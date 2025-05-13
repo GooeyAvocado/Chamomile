@@ -12,5 +12,6 @@
         public int? Height { get; set; } = 1024;
         public int? Width { get; set; } = 1024;
         public int? SampleImage { get; set; }
+        public Dictionary<string, string>? Variables { get; set; }
     }
 }

@@ -79,8 +79,8 @@ namespace Chamomile.API.Workers {
                             var img = await api.GenerateImage(new() {
                                 batch_size = 1,
                                 cfg_scale = prompt.CFGScale ?? 7.0,
-                                prompt = CommentsPattern().Replace(prompt.PositivePrompt, ""),
-                                negative_prompt = CommentsPattern().Replace(prompt.NegativePrompt ?? "", ""),
+                                prompt = ProcessPromptText(prompt.PositivePrompt,prompt.Variables),
+                                negative_prompt = ProcessPromptText(prompt.NegativePrompt ?? "",prompt.Variables),
                                 width = prompt.Width ?? 1024,
                                 height = prompt.Height ?? 1024,
                                 n_iter = 1,
@@ -119,6 +119,32 @@ namespace Chamomile.API.Workers {
                     await Task.Delay(1000); // No jobs? Wait before checking again.
                 }
             }
+        }
+
+        private static string ProcessPromptText(string prompt, Dictionary<string, string>? variables) {
+
+            if (variables != null && variables.Count > 0) {
+                const int RECURSION_LIMIT = 10;
+                var recursionCount = 0;
+
+                while (variables.Any(a => prompt.Contains(a.Key) && !string.IsNullOrWhiteSpace(a.Value))) {
+
+                    //We need to do this so that its caluclated before we enter the loop
+                    //Maybe funky things could happen if not
+                    var replacementList = variables.Where(a => prompt.Contains(a.Key) && !string.IsNullOrWhiteSpace(a.Value)).ToList();
+
+                    foreach (var replacement in replacementList) {
+                        prompt = prompt.Replace(replacement.Key, replacement.Value);
+                    }
+
+                    //Limit just in case
+                    recursionCount++;
+                    if (recursionCount > RECURSION_LIMIT) break;
+                }
+            }
+
+            return CommentsPattern().Replace(prompt, "").Trim();
+
         }
 
         
