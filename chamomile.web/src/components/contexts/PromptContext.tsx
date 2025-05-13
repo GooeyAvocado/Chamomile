@@ -16,7 +16,7 @@ export const PromptContext = createContext<PromptContextType | undefined>(undefi
 
 export default function PromptProvider(props: { children: any }) {
 
-      const [orderAmount, setOrderAmount] = useState(1)
+      const [orderAmount, setOrderAmount] = useState(3)
       
       const [prompt, setPrompt] = useState({
         cfgScale : 4.0,
@@ -27,7 +27,7 @@ export default function PromptProvider(props: { children: any }) {
         sampler: "DPM++ 2M",
         scheduleType: "Automatic",
         seed: -1,
-        steps : 30,
+        steps : 30
       } as Prompt)
 
       const [variables, setVariables] = useState({} as any)
