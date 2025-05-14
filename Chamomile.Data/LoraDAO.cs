@@ -30,13 +30,24 @@ namespace Chamomile.Data {
         
         }
 
-        public async Task<List<Usage>> GetUsage() {
-            return await adoTemplate.Query(SelectSql(["*"], LORA_USAGE_VIEW, new([]), [new(LORA_USAGE_COUNT, SortOrder.DESC)]), (_) => { }, (reader) =>
+        public async Task<List<Usage>> GetUsage(FilterOptions filter, int limit) {
+            return await adoTemplate.Query(SelectSql(
+                [LORA_ALIAS, "count(*) as " + LORA_USAGE_COUNT],
+                   "(" + InnerImageSql(filter,limit) + ")") 
+                + $" GROUP BY {LORA_ALIAS} ORDER BY {LORA_USAGE_COUNT} DESC", (cmd) => {
+                    ImagesDAO.SetterFromFilter(cmd, filter);
+                }, (reader) =>
                 new Usage() {
-                    name = reader.GetString(LORA_ALIAS),
+                    name = reader.GetOptionalString(LORA_ALIAS) ?? "None",
                     count = reader.GetInt(LORA_USAGE_COUNT)
                 }
             );
+        }
+
+        private static string InnerImageSql(FilterOptions filter, int limit) {
+            return SelectSql(["IMV." + LORA_ALIAS], $"{IMAGES_TABLE} i left join {IMAGES_LORA_MAP} imv on i.{IMAGES_ID} = imv.{IMAGES_ID}", 
+                new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
+                [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
 
         #endregion

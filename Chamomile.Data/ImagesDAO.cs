@@ -118,7 +118,7 @@ namespace Chamomile.Data {
 
         #region READ
 
-        private static List<WhereCondition> ConditionsFromFilter(FilterOptions filter, int? lastImage) {
+        public static List<WhereCondition> ConditionsFromFilter(FilterOptions filter, int? lastImage) {
             var conditions = new List<WhereCondition>();
 
             if (!string.IsNullOrEmpty(filter.Query)) {
@@ -166,7 +166,7 @@ namespace Chamomile.Data {
             return conditions;
         }
 
-        private static void SetterFromFilter(Setter cmd, FilterOptions filter) {
+        public static void SetterFromFilter(Setter cmd, FilterOptions filter) {
             if (!string.IsNullOrEmpty(filter.Query)) {
 
                 if (TsQueryDetectRegex().IsMatch(filter.Query)) {

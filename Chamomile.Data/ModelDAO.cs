@@ -27,13 +27,23 @@ namespace Chamomile.Data {
         
         }
 
-        public async Task<List<Usage>> GetUsage() {
-            return await adoTemplate.Query(SelectSql(["*"], MODEL_USAGE_VIEW, new([]), [new(MODEL_USAGE_COUNT, SortOrder.DESC)]), (_) =>{ }, (reader) => 
+        public async Task<List<Usage>> GetUsage(FilterOptions filter, int limit) {
+            return await adoTemplate.Query(SelectSql(
+                [MODEL_TITLE, "count(*) as " + MODEL_USAGE_COUNT], 
+                "(" + InnerImageSql(filter,limit) + ")" ) 
+                + $" GROUP BY {MODEL_TITLE} ORDER BY {MODEL_USAGE_COUNT} DESC", (cmd) =>{
+                    ImagesDAO.SetterFromFilter(cmd, filter);
+                }, (reader) => 
                 new Usage() { 
                     name = reader.GetString(MODEL_TITLE),
                     count= reader.GetInt(MODEL_USAGE_COUNT)
                 }
             );
+        }
+
+        private static string InnerImageSql(FilterOptions filter, int limit) {
+            return SelectSql([MODEL_TITLE], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
+                [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
 
         #endregion
