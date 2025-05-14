@@ -16,7 +16,6 @@ import { hydratePrompt } from "../Utils";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import SizePresetSelector from "./SizePresetSelector";
 import SamplerSelector from "./SamplerSelector";
-import SchedulerSelector from "./SchedulerSelector";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
