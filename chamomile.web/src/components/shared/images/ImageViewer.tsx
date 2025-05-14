@@ -10,13 +10,15 @@ import BrewingImageTile from "./BrewingImageTile";
 import useApi from "../../hooks/useApi";
 import { deleteImage, favImage } from "../../../api/Images";
 import AreYouSureModal from "../modals/AreYouSureModal";
-import { Button, CircularProgress } from "@mui/material";
+import { Alert, AlertTitle, Button, CircularProgress, Link, Stack } from "@mui/material";
 import WelcomePane from "../welcome/WelcomePane";
 import { useQueue } from "../../hooks/useQueue";
 import QueuedImageTile from "./QueuedImageTile";
 import PromptEditorModal from "../prompt/PromptEditorModal";
 import useUserAgent from "../../hooks/useUserAgent";
 import QueuedGroupImageTile from "./QueuedGroupImageTile";
+import AdvSearchModal from "../filter/AdvSearchModal";
+
 
 export default function ImageViewer(props:{
     filter:FilterOptions
@@ -36,6 +38,7 @@ export default function ImageViewer(props:{
     const [uploadBrewBlob, setUploadBrewBlob] = useState(undefined as string|undefined)
     const [selectedImage, setSelectedImage] = useState(undefined as undefined | GeneratedImage)
     const [interruptOpen,SetInterruptOpen] = useState(false);
+    const [advSearchOpen, setAdvSearchOpen] = useState(false);
     
     const {enqueueSnackbar} = useSnackbar();
     const {isMobile} = useUserAgent();
@@ -168,12 +171,25 @@ export default function ImageViewer(props:{
                 </>}
             </div>}
         </>}
+        {imageApi.error && 
+            <Stack gap={"10px"}>
+                <Alert variant="standard" severity="error">
+                <AlertTitle>Could not retrieve images</AlertTitle>
+                {imageApi.error.message ? `Server responded: ${imageApi.error.message}` : "Something happened! Check the console"}
+            </Alert>
+            {imageApi.error.message?.includes("tsquery") && <Alert variant="standard" severity="info">
+                <AlertTitle>It looks like this is an Advanced Search related issue</AlertTitle>
+                <Link onClick={()=>{setAdvSearchOpen(true)}} color="textPrimary">Learn about Advanced Search</Link>
+            </Alert>}
+            </Stack>
+        }
         {imageApi.hasMore && (imageApi.images?.length ?? 0) > 0 && <>
             <div style={{textAlign:'center', marginTop:"20px"}}>
                 <Button size="small" onClick={()=>imageApi.showMore()} disabled={imageApi.loading}> {imageApi.loading ? <CircularProgress size={24}/> : "Show More"}</Button>
                 <div style={{fontSize:".7em"}}>Showing {imageApi.images.length.toLocaleString()} of {imageApi.count.toLocaleString()} images</div>
             </div>
         </>} 
+        <AdvSearchModal onClose={()=>setAdvSearchOpen(false)} open={advSearchOpen}/>
     </>
 
 

@@ -131,7 +131,13 @@ export const promptPreview = (prompt:Prompt, variables:any) => {
 
 
 export const objectToQueryString = (obj: any) => obj ? "?" + Object.keys(obj)
-    .map((k) => `${k}=${obj[k]}`)
+    .map((k) => {
+        let value = obj[k];
+        if (typeof value === "string") {
+            value = value.replace(/&/g, "%26").replace(/=/g, "%3D").replace(/\?/g, "%3F");
+        }
+        return `${k}=${value}`;
+    })
     .join("&") : "";
 
 export const currencies = {

@@ -42,7 +42,15 @@ export const useImages = (filter: FilterOptions | undefined) => {
     useEffect(refresh, [filter])
 
 
-    return { images: images, hasMore, showMore: () => showMore(), refresh, loading: imagesApi.loading || countApi.loading, count: countApi.data?.count, reset: reset, 
+    return { 
+        images: images, 
+        hasMore, 
+        showMore: () => showMore(), 
+        refresh, 
+        loading: imagesApi.loading || countApi.loading, 
+        count: countApi.data?.count, 
+        error: imagesApi.error,
+        reset: reset, 
         appendImage: (val: GeneratedImage) => setImages((prevImages) => [val, ...prevImages]),
         updateImage: (val:GeneratedImage)=> setImages((prevImages) =>[...prevImages].map((a)=>a.id===val.id ? val : a)),
         removeImage: (val:GeneratedImage)=>setImages((prevImages) =>[...prevImages].filter(a=>a.id!==val.id))
