@@ -7,10 +7,10 @@ const ENDPOINT = API_PREFIX + "prompts/"
 
 export const createPrompt = (
     setLoading: (value: boolean) => void,
-    onSuccess: () => void,
+    setItem: (val?:Prompt) => void,
     onError: (value: any) => void,
     val: Prompt
-) => Post(setLoading, onSuccess, onError, ENDPOINT, val)
+) => Post(setLoading, setItem, onError, ENDPOINT, val)
 
 export const getPrompts = (
     setLoading: (value: boolean) => void,
@@ -27,10 +27,10 @@ export const getPrompt = (
 
 export const updatePrompt = (
     setLoading: (value: boolean) => void,
-    onSuccess: () => void,
+    setItem: (val?:Prompt) => void,
     onError: (value: any) => void,
     val: Prompt
-) => Put(setLoading, onSuccess, onError, ENDPOINT, val)
+) => Put(setLoading, setItem, onError, ENDPOINT, val)
 
 export const deletePrompt = (
     setLoading: (value: boolean) => void,
