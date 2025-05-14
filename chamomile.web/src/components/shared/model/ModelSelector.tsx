@@ -33,7 +33,8 @@ export default function ModelSelector(props:{
         options={showNone ? [{
             title:'',
             bannerImage : undefined,
-            name: 'All'
+            name: 'All',
+            isAvailable:true
         } as Model, ...(models ?? [])] : models?.filter(a => a.isAvailable) ?? []}
         style={style}
         onChange={(_, value) => { onSelect(value as Model) }}
@@ -46,16 +47,15 @@ export default function ModelSelector(props:{
                     {...optionProps}
                     style={{ display: "flex", gap:'20px' }}
                 >
-                    <img src={option.bannerImage ? imageUrl(option.bannerImage) : "/outlinepadded.png"} style={{width:"96px", height:"96px", objectFit:'cover', objectPosition:'center top', borderRadius:'5px'}}/>
-                    <div>
+                    <img src={option.bannerImage ? imageUrl(option.bannerImage) : "/outlinepadded.png"} style={{width:"32px", height:"32px", objectFit:'cover', objectPosition:'center top', borderRadius:'5px'}}/>
+                    <div style={{color:option.isAvailable ? "white" : "#777"}}>
                         <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                             {option?.type?.length > 0 && <ModelTypePill type={option?.type} />}
                             <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
                                 <b>{option.name}</b>
-                                {!option?.isAvailable && <div style={{ fontSize: '.7em' }}>(Unavailable)</div>}
                             </div>
                         </div>
-                        <div>{option.title}</div>
+                        <div style={{fontSize:".8em"}}>{option.isAvailable ? option.title : "Unavailable"}</div>
                     </div>
 
                 </Box>
@@ -81,6 +81,22 @@ export default function ModelSelector(props:{
                         disableUnderline: true
                     }
                 }} />}
+
+            slotProps={{
+                popper: {
+                    modifiers: [
+                        {
+                            name: 'setWidth',
+                            enabled: true,
+                            phase: 'beforeWrite',
+                            requires: ['computeStyles'],
+                            fn: ({ state }) => {
+                                state.styles.popper.minWidth="500px"
+                            },
+                        },
+                    ],
+                },
+            }}
 
     />
     <ModelBrowserModal onOk={(val)=>{
