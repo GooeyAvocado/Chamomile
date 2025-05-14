@@ -27,6 +27,15 @@ namespace Chamomile.Data {
         
         }
 
+        public async Task<List<Usage>> GetUsage() {
+            return await adoTemplate.Query(SelectSql(["*"], MODEL_USAGE_VIEW, new([]), [new(MODEL_USAGE_COUNT, SortOrder.DESC)]), (_) =>{ }, (reader) => 
+                new Usage() { 
+                    name = reader.GetString(MODEL_TITLE),
+                    count= reader.GetInt(MODEL_USAGE_COUNT)
+                }
+            );
+        }
+
         #endregion
 
         #region UPDATE

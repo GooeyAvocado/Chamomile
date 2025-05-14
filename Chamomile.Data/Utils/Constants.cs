@@ -53,6 +53,13 @@
         public static readonly string PROMPT_HEIGHT      = "prompt_hght_num";
         public static readonly string PROMPT_WIDTH       = "prompt_wdth_num";
 
+        public static readonly string MODEL_USAGE_VIEW = $"{SCHEMA}.model_usage";
+        public static readonly string LORA_USAGE_VIEW = $"{SCHEMA}.lora_usage";
+
+        public static readonly string MODEL_USAGE_COUNT = "model_usage_count";
+        public static readonly string LORA_USAGE_COUNT = "lora_usage_count";
+
+
         public static readonly string CRE_TS = "cre_ts";
 
     }

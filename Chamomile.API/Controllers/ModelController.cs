@@ -23,6 +23,11 @@ namespace Chamomile.API.Controllers {
             return Ok(await dao.GetAll());
         }
 
+        [HttpGet("usage")]
+        public async Task<IActionResult> GetUsage() {
+            return Ok(await dao.GetUsage());
+        }
+
         [HttpGet("upscalers")]
         public async Task<IActionResult> GetAllUpscalers() {
             return Ok(new Dictionary<string, object>() {
