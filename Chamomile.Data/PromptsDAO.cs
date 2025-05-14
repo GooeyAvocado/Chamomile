@@ -2,6 +2,7 @@
 using static Chamomile.Data.Utils.AdoTemplate;
 using static Chamomile.Data.Utils.Constants;
 using static Chamomile.Data.Utils.SqlBuilder;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Chamomile.Data {
     public class PromptsDAO(string connectionString) : BaseDAO(connectionString) {
@@ -24,35 +25,48 @@ namespace Chamomile.Data {
 
         #region CREATE
 
-        public async Task Create(Prompt prompt) {
-            await adoTemplate.Execute(InsertSql([
+        public async Task<Prompt?> Create(Prompt prompt) {
+
+            return await adoTemplate.QuerySingle(
+                InsertSql([
                 PROMPT_PROMPT,PROMPT_NEG_PROMPT,PROMPT_STEPS,
                 PROMPT_SAMPLER, PROMPT_SCHEDULE_TP, PROMPT_CFG_SCL,
                 PROMPT_HEIGHT, PROMPT_WIDTH, PROMPT_NAME,
                 IMAGES_ID
-            ], PROMPT_TABLE), (cmd) => {
-                cmd.SetString(PROMPT_PROMPT,prompt.PositivePrompt);
-                cmd.SetString(PROMPT_NEG_PROMPT,prompt.NegativePrompt);
-                cmd.SetInt(PROMPT_STEPS,prompt.Steps);
-                cmd.SetString(PROMPT_SAMPLER,prompt.Sampler);
-                cmd.SetString(PROMPT_SCHEDULE_TP,prompt.ScheduleType);
-                cmd.SetDouble(PROMPT_CFG_SCL,prompt.CFGScale);
-                cmd.SetInt(PROMPT_HEIGHT,prompt.Height);
-                cmd.SetInt(PROMPT_WIDTH,prompt.Width);
-                cmd.SetString(PROMPT_NAME,prompt.Name);
-                cmd.SetInt(IMAGES_ID,prompt.SampleImage);
-            });
+            ], PROMPT_TABLE) +
+                " RETURNING " + string.Join(", ", [
+                    PROMPT_PROMPT,PROMPT_NEG_PROMPT,PROMPT_STEPS,
+                    PROMPT_SAMPLER, PROMPT_SCHEDULE_TP, PROMPT_CFG_SCL,
+                    PROMPT_HEIGHT, PROMPT_WIDTH, PROMPT_NAME, PROMPT_ID,
+                    IMAGES_ID]), (cmd) => {
+                        cmd.SetString(PROMPT_PROMPT, prompt.PositivePrompt);
+                        cmd.SetString(PROMPT_NEG_PROMPT, prompt.NegativePrompt);
+                        cmd.SetInt(PROMPT_STEPS, prompt.Steps);
+                        cmd.SetString(PROMPT_SAMPLER, prompt.Sampler);
+                        cmd.SetString(PROMPT_SCHEDULE_TP, prompt.ScheduleType);
+                        cmd.SetDouble(PROMPT_CFG_SCL, prompt.CFGScale);
+                        cmd.SetInt(PROMPT_HEIGHT, prompt.Height);
+                        cmd.SetInt(PROMPT_WIDTH, prompt.Width);
+                        cmd.SetString(PROMPT_NAME, prompt.Name);
+                        cmd.SetInt(IMAGES_ID, prompt.SampleImage);
+                    }
+            , PromptRM);
         }
 
         #region UPDATE
 
-        public async Task Update(Prompt prompt) {
-            await adoTemplate.Execute(UpdateSql([
+        public async Task<Prompt?> Update(Prompt prompt) {
+            return await adoTemplate.QuerySingle(UpdateSql([
                 PROMPT_PROMPT,PROMPT_NEG_PROMPT,PROMPT_STEPS,
                 PROMPT_SAMPLER, PROMPT_SCHEDULE_TP, PROMPT_CFG_SCL,
                 PROMPT_HEIGHT, PROMPT_WIDTH, PROMPT_NAME,
                 IMAGES_ID
-            ], PROMPT_TABLE, new([new(PROMPT_ID)])), (cmd) => {
+            ], PROMPT_TABLE, new([new(PROMPT_ID)])) +
+                " RETURNING " + string.Join(", ", [
+                    PROMPT_PROMPT,PROMPT_NEG_PROMPT,PROMPT_STEPS,
+                    PROMPT_SAMPLER, PROMPT_SCHEDULE_TP, PROMPT_CFG_SCL,
+                    PROMPT_HEIGHT, PROMPT_WIDTH, PROMPT_NAME, PROMPT_ID,
+                    IMAGES_ID]), (cmd) => {
                 cmd.SetInt(PROMPT_ID, prompt.Id);
                 cmd.SetString(PROMPT_PROMPT, prompt.PositivePrompt);
                 cmd.SetString(PROMPT_NEG_PROMPT, prompt.NegativePrompt);
@@ -64,7 +78,7 @@ namespace Chamomile.Data {
                 cmd.SetInt(PROMPT_WIDTH, prompt.Width);
                 cmd.SetString(PROMPT_NAME, prompt.Name);
                 cmd.SetInt(IMAGES_ID, prompt.SampleImage);
-            });
+            }, PromptRM);
         }
 
         #endregion

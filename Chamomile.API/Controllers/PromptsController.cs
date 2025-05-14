@@ -21,8 +21,7 @@ namespace Chamomile.API.Controllers {
         #region CREATE
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Prompt prompt) { 
-            await dao.Create(prompt);
-            return Ok();
+            return Ok(await dao.Create(prompt));
         }
         #endregion
 
@@ -59,8 +58,7 @@ namespace Chamomile.API.Controllers {
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] Prompt prompt) {
-            await dao.Update(prompt);
-            return Ok();
+            return Ok(await dao.Update(prompt));
         }
 
         #endregion
