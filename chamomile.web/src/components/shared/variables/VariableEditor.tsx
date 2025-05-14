@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, Tab, Tabs, TextField } from "@mui/material"
+import { Autocomplete, Button, IconButton, InputAdornment, TextField } from "@mui/material"
 import { usePrompt } from "../../hooks/usePrompt"
 import { promptPreview } from "../Utils"
 import { Add, Delete, Terminal } from "@mui/icons-material"
@@ -6,6 +6,11 @@ import { useMemo, useState } from "react"
 import { Prompt } from "../../../model/Prompt"
 import useApi from "../../hooks/useApi"
 import { getWildcards } from "../../../api/Prompts"
+import TabbedModal from "../modals/TabbedModal/TabbedModal"
+import TabbedModalTitle from "../modals/TabbedModal/TabbedModalTitle"
+import TabbedModalConsistentContent from "../modals/TabbedModal/TabbedModalConsistentContent"
+import TabbedModalActions from "../modals/TabbedModal/TabbedModalActions"
+import TabbedModalTabContent from "../modals/TabbedModal/TabbedModalTabContent"
 
 export default function VariableEditor(props: {
     open: boolean,
@@ -15,7 +20,6 @@ export default function VariableEditor(props: {
     const { open, setOpen } = props
     const { variables, setVairables, prompt, setPrompt } = usePrompt()
 
-    const [overridesTab, setOverridesTab] = useState(0)
     const [newCustName, setNewCustName] = useState("")
     const [newWildName, setNewWildName] = useState("")
 
@@ -35,7 +39,7 @@ export default function VariableEditor(props: {
 
     const availableWildcards = (prompt: Prompt) => {
         const matches = [...prompt.positivePrompt.matchAll(/!*__[A-z_0-9\*]*__/g)].map(m => m[0]);
-        const presetWildcards = Object.keys(variables ?? {}).filter(a=>a.startsWith("__"))
+        const presetWildcards = Object.keys(variables ?? {}).filter(a => a.startsWith("__"))
         // Get unique values
         return [...new Set([...matches, ...presetWildcards])];
     }
@@ -48,10 +52,13 @@ export default function VariableEditor(props: {
     const wildNames = availableWildcards(prompt)
     const custNames = availableCustomNames()
 
-    return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md'>
-        <DialogTitle>Variables and Overrides</DialogTitle>
-        <DialogContent style={{ display: 'flex', flexDirection: 'column', height: '75vh' }}>
-            <div style={{ marginBottom: '10px' }}><b>Prompt Preview</b></div>
+    return <TabbedModal 
+            open={open} setOpen={setOpen} fullWidth maxWidth="md" 
+            contentStyle={{ display: 'flex', flexDirection: 'column', height: '75vh' }}
+            tabContentStyle={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}
+        >
+        <TabbedModalTitle>Variables and Overrides</TabbedModalTitle>
+        <TabbedModalConsistentContent position="top">
             <div style={{ padding: "10px", background: '#222', fontSize: '.9em', fontFamily: 'monospace' }}>
                 <TextField
                     value={promptPreview(prompt, variables)} disabled multiline maxRows={7}
@@ -65,15 +72,10 @@ export default function VariableEditor(props: {
                     }}
                 />
             </div>
-            <hr style={{ width: "100%" }} />
-            <Tabs value={overridesTab} onChange={(_, newVal) => setOverridesTab(newVal)} style={{ marginBottom: '10px' }}>
-                <Tab label="Variables" value={0} />
-                <Tab label="Wildcards" value={1} />
-                <Tab label="Other Overrides" value={2} />
-            </Tabs>
-            <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
-                {
-                    overridesTab === 0 ?
+            <hr style={{ width: "100%", marginBottom:'20px' }} />
+        </TabbedModalConsistentContent>
+        <TabbedModalTabContent label="Variables">
+                    {
                         varNames.length === 0 ? <div style={{ height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                             <div style={{ fontSize: '2.5em' }}>%</div>
                             <div style={{ fontSize: '1.3em' }}><b>There are no variables</b></div>
@@ -82,9 +84,10 @@ export default function VariableEditor(props: {
                         </div> : varNames.map(a => <VariableEditorRow varName={a} value={variables[a]} updateValue={(val) => {
                             setVairables({ ...variables, [a]: val })
                         }} />)
-                        : overridesTab === 1 ?
-                            <>
-                                {wildNames.map(a => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    }
+        </TabbedModalTabContent>
+        <TabbedModalTabContent label="Wildcards" >
+{wildNames.map(a => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                     <IconButton onClick={() => {
                                         const updatedVariables = { ...variables };
                                         delete updatedVariables[a];
@@ -92,8 +95,8 @@ export default function VariableEditor(props: {
                                         setPrompt({ ...prompt, positivePrompt: prompt.positivePrompt.replaceAll(a, "") })
                                     }}><Delete /></IconButton>
                                     <div style={{ flex: '1' }}>
-                                        <VariableEditorRow varName={a} value={variables[a]} availableValues={wildcards?.[a.replaceAll("!__","").replaceAll("__","")]}
-                                            updateValue={(val) => { 
+                                        <VariableEditorRow varName={a} value={variables[a]} availableValues={wildcards?.[a.replaceAll("!__", "").replaceAll("__", "")]}
+                                            updateValue={(val) => {
                                                 setVairables({ ...variables, [a]: val })
                                             }} />
                                     </div>
@@ -131,9 +134,8 @@ export default function VariableEditor(props: {
                                         />}
 
                                 </div>
-
-                            </>
-                            : <>
+        </TabbedModalTabContent>
+        <TabbedModalTabContent label="Overrides">
                                 {custNames.map(a => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                     <IconButton onClick={() => {
                                         const updatedVariables = { ...variables };
@@ -166,22 +168,17 @@ export default function VariableEditor(props: {
                                         }}
                                     />
                                 </div>
-
-                            </>
-
-                }
-            </div>
-        </DialogContent>
-        <DialogActions>
+        </TabbedModalTabContent>
+        <TabbedModalActions>
             <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
                 <div>
                     {Object.keys(variables ?? {}).length > 0 && <Button onClick={() => setVairables({})}>Clear overrides</Button>}
                 </div>
                 <Button onClick={() => setOpen(false)}>OK</Button>
             </div>
-        </DialogActions>
-    </Dialog>
+        </TabbedModalActions>
 
+    </TabbedModal>
 }
 
 export function VariableEditorRow(props: {
