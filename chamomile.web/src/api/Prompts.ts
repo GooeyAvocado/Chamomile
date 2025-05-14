@@ -1,3 +1,5 @@
+import Sampler from "../model/Automatic1111/Sampler";
+import Scheduler from "../model/Automatic1111/Scheduler";
 import { Prompt } from "../model/Prompt";
 import { API_PREFIX, Delete, Get, Post, Put } from "./Common";
 
@@ -43,3 +45,15 @@ export const getWildcards = (
     setItem: (val:any) => void,
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT + "wildcards")
+
+export const getSchedulers = (
+    setLoading: (value: boolean) => void,
+    setItem: (val?:Scheduler[]) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "schedulers")
+
+export const getSamplers = (
+    setLoading: (value: boolean) => void,
+    setItem: (val?:Sampler[]) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "samplers")

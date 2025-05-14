@@ -15,10 +15,12 @@ import { enqueuePrompts } from "../../../api/Images";
 import { hydratePrompt } from "../Utils";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import SizePresetSelector from "./SizePresetSelector";
+import SamplerSelector from "./SamplerSelector";
+import SchedulerSelector from "./SchedulerSelector";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
-    fullHeight?:boolean
+    fullHeight?: boolean
     setPrompt?: (val: Prompt) => void
     alwaysExpand?: boolean,
     noBrew?: boolean,
@@ -35,7 +37,7 @@ export default function PromptBuilder(props: {
 
     const createPromptApi = useApi(createPrompt)
     const { enqueueSnackbar } = useSnackbar();
-    const {vertical} = useWindowDimensions();
+    const { vertical } = useWindowDimensions();
 
     const [sizePresetOpen, setSizePresetOpen] = useState(false)
     const [saveOpen, setSaveOpen] = useState(false)
@@ -47,16 +49,16 @@ export default function PromptBuilder(props: {
     const onBrew = () => {
         const allPrompts = []
         for (let index = 0; index < orderAmount; index++) {
-            allPrompts.push(hydratePrompt(prompt,variables, index));
+            allPrompts.push(hydratePrompt(prompt, variables, index));
         }
 
         brewApi.fetch((val) => {
-            if(orderAmount!==val?.jobIds.length){
+            if (orderAmount !== val?.jobIds.length) {
                 enqueueSnackbar(`Only ${val?.jobIds.length} orders placed!`, { variant: 'warning' })
             } else {
                 enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
             }
-            
+
         }, () => {
             enqueueSnackbar("Could not queue images!", { variant: 'error' })
         }, allPrompts)
@@ -81,9 +83,9 @@ export default function PromptBuilder(props: {
             <TextField disabled={preview}
                 value={prompt.positivePrompt} onChange={(e) => setPrompt({ ...prompt, positivePrompt: e.target.value })}
                 placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
-                onKeyUp={(e)=>{
-                    if(noBrew) return;
-                    if(e.ctrlKey && e.key=='Enter') onBrew()
+                onKeyUp={(e) => {
+                    if (noBrew) return;
+                    if (e.ctrlKey && e.key == 'Enter') onBrew()
                 }}
                 fullWidth slotProps={{
                     htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
@@ -94,7 +96,7 @@ export default function PromptBuilder(props: {
                         ),
                         endAdornment: (
                             <InputAdornment position="end">
-                                <div style={{display:'flex', flexDirection:vertical ? 'column' : undefined}}>
+                                <div style={{ display: 'flex', flexDirection: vertical ? 'column' : undefined }}>
                                     {!noBrew && <Tooltip title="Variables and Overrides">
                                         <IconButton onClick={() => { setVarsOpen(true) }}><Percent /></IconButton>
                                     </Tooltip>}
@@ -114,7 +116,7 @@ export default function PromptBuilder(props: {
         </div>
 
         {(alwaysExpand || expanded) && <>
-            <div style={{ marginTop: "10px" }}>
+            <div style={{ marginTop: "10px", display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <TextField disabled={preview}
                     value={prompt.negativePrompt} onChange={(e) => setPrompt({ ...prompt, negativePrompt: e.target.value })}
                     placeholder="Negative Prompt" multiline maxRows={4}
@@ -126,12 +128,11 @@ export default function PromptBuilder(props: {
                             ),
                         }
                     }}
+                    style={noBrew ? { flex: "5" } : { flex: 5, minWidth: '200px' }}
                 />
-            </div>
-            <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
-                {/* Amount */}
-                {!noBrew &&
-                    <TextField type="number"  disabled={preview}
+
+                {/* Seed */}
+                {!noBrew &&  <TextField type="number" disabled={preview}
                         value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
                         placeholder="Steps"
                         fullWidth slotProps={{
@@ -142,9 +143,14 @@ export default function PromptBuilder(props: {
                         }}
                         style={{ flex: "1", minWidth: "200px" }}
                     />
+
                 }
+
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
                 {/* Width */}
-                <TextField type="number"  disabled={preview}
+                <TextField type="number" disabled={preview}
                     value={prompt.width} onChange={(e) => setPrompt({ ...prompt, width: parseInt(e.target.value) })}
                     placeholder="Width"
                     fullWidth slotProps={{
@@ -152,8 +158,8 @@ export default function PromptBuilder(props: {
                             min: 1
                         },
                         input: {
-                            startAdornment: (<InputAdornment position="start"> 
-                                <IconButton onClick={()=>setSizePresetOpen(true)}><Height sx={{ transform: 'rotate(90deg)', margin:"-7px" }} /> </IconButton>
+                            startAdornment: (<InputAdornment position="start">
+                                <IconButton onClick={() => setSizePresetOpen(true)}><Height sx={{ transform: 'rotate(90deg)', margin: "-7px" }} /> </IconButton>
                             </InputAdornment>),
                             endAdornment: (<InputAdornment position="end">px</InputAdornment>)
                         }
@@ -161,7 +167,7 @@ export default function PromptBuilder(props: {
                     style={{ flex: "1", minWidth: "200px" }}
                 />
                 {/* Height */}
-                <TextField type="number"  disabled={preview}
+                <TextField type="number" disabled={preview}
                     value={prompt.height} onChange={(e) => setPrompt({ ...prompt, height: parseInt(e.target.value) })}
                     placeholder="Height"
                     fullWidth slotProps={{
@@ -169,8 +175,8 @@ export default function PromptBuilder(props: {
                             min: 1
                         },
                         input: {
-                            startAdornment: (<InputAdornment position="start"> 
-                                 <IconButton onClick={()=>setSizePresetOpen(true)}><Height style={{margin:"-7px"}} /> </IconButton>
+                            startAdornment: (<InputAdornment position="start">
+                                <IconButton onClick={() => setSizePresetOpen(true)}><Height style={{ margin: "-7px" }} /> </IconButton>
                             </InputAdornment>),
                             endAdornment: (<InputAdornment position="end">px</InputAdornment>)
                         }
@@ -179,7 +185,7 @@ export default function PromptBuilder(props: {
                 />
 
                 {/* Steps */}
-                <TextField type="number"  disabled={preview}
+                <TextField type="number" disabled={preview}
                     value={prompt.steps} onChange={(e) => setPrompt({ ...prompt, steps: parseInt(e.target.value) })}
                     placeholder="Steps"
                     fullWidth slotProps={{
@@ -195,7 +201,7 @@ export default function PromptBuilder(props: {
                 />
 
                 {/* CFG Scale */}
-                <TextField type="number"  disabled={preview}
+                <TextField type="number" disabled={preview}
                     value={prompt.cfgScale} onChange={(e) => setPrompt({ ...prompt, cfgScale: parseFloat(e.target.value) })}
                     placeholder="CFG Scale"
                     fullWidth slotProps={{
@@ -211,38 +217,44 @@ export default function PromptBuilder(props: {
                     style={{ flex: "1", minWidth: "200px" }}
                 />
 
-                {/* Seed */}
-                {!noBrew &&
-                    <TextField type="number"
+                {/* {!noBrew && <div style={{ flex: '1', minWidth: '200px' }}>
+                    <SchedulerSelector scheduler={prompt.scheduleType} setScheduler={(s) => { setPrompt({ ...prompt, scheduleType: s }) }} />
+                </div>} */}
+
+                {!noBrew && <div style={{ flex: "1", minWidth: "200px" }}>
+                    <SamplerSelector sampler={prompt.sampler} setSampler={(s) => { setPrompt({ ...prompt, sampler: s }) }} />
+                </div>}
+
+                {!noBrew && <TextField type="number"
                         value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
                         placeholder="Seed"
                         fullWidth slotProps={{
                             htmlInput: {
-                                min:-1
+                                min: -1
                             },
                             input: {
                                 startAdornment: (<InputAdornment position="start">
-                                    <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{margin:"-7px"}} /></IconButton>
+                                    <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{ margin: "-7px" }} /></IconButton>
                                 </InputAdornment>),
                                 endAdornment: (<InputAdornment position="end">Seed</InputAdornment>)
                             }
                         }}
                         style={{ flex: "1", minWidth: "200px" }}
-                    />
-                }
+                    />}
+
 
             </div>
         </>}
 
-        {!noBrew && vertical && <div style={{width:'100%', marginTop:'10px'}}>
-            <PromptButton onBrew={onBrew} onLoad={() => setLoadOpen(true)} onSave={() => setSaveOpen(true)} fullWidth/>
+        {!noBrew && vertical && <div style={{ width: '100%', marginTop: '10px' }}>
+            <PromptButton onBrew={onBrew} onLoad={() => setLoadOpen(true)} onSave={() => setSaveOpen(true)} fullWidth />
         </div>}
 
-        <VariableEditor open={varsOpen} setOpen={setVarsOpen}/>
+        <VariableEditor open={varsOpen} setOpen={setVarsOpen} />
         <PromptModelSelectorModal open={modelsOpen} setOpen={setModelsOpen} noBrew={noBrew} prompt={promptOverride} setPrompt={setPromptOverride} />
-        <SizePresetSelector 
-            open={sizePresetOpen} setOpen={setSizePresetOpen} 
-            setSize={(width,height)=>{setPrompt({ ...prompt, width:width, height: height })}}
+        <SizePresetSelector
+            open={sizePresetOpen} setOpen={setSizePresetOpen}
+            setSize={(width, height) => { setPrompt({ ...prompt, width: width, height: height }) }}
         />
 
         {!noBrew && <>
