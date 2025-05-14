@@ -45,6 +45,19 @@ namespace Automatic1111.API {
             return JsonSerializer.Deserialize<List<Lora>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No Loras found");
         }
 
+        public async Task<List<Scheduler>> GetSchedulers() {
+            var client = new HttpClient();
+            var response = await client.GetStringAsync(api + "/sdapi/v1/schedulers");
+
+            return JsonSerializer.Deserialize<List<Scheduler>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No Loras found");
+        }
+
+        public async Task<List<Sampler>> GetSamplers() {
+            var client = new HttpClient();
+            var response = await client.GetStringAsync(api + "/sdapi/v1/samplers");
+
+            return JsonSerializer.Deserialize<List<Sampler>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No Loras found");
+        }
 
         public async Task<Progress> GetProgress() {
             var client = new HttpClient();

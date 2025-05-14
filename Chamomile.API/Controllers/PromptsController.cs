@@ -43,6 +43,16 @@ namespace Chamomile.API.Controllers {
             return Ok(await api.GetWildcards());
         }
 
+        [HttpGet("schedulers")]
+        public async Task<IActionResult> GetSchedulers() {
+            return Ok(await api.GetSchedulers());
+        }
+
+        [HttpGet("samplers")]
+        public async Task<IActionResult> GetSamplers() {
+            return Ok(await api.GetSamplers());
+        }
+
         #endregion
 
         #region UPDATE
