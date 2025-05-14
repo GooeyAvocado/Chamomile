@@ -18,6 +18,7 @@ import SizePresetSelector from "./SizePresetSelector";
 import SamplerSelector from "./SamplerSelector";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import PromptCard from "./PromptCard";
+import { usePingPong } from "../../hooks/usePingPong";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -42,6 +43,7 @@ export default function PromptBuilder(props: {
 
     const { enqueueSnackbar } = useSnackbar();
     const { vertical } = useWindowDimensions();
+    const {pong} = usePingPong();
 
     const [sizePresetOpen, setSizePresetOpen] = useState(false)
     const [saveOpen, setSaveOpen] = useState(false)
@@ -101,10 +103,17 @@ export default function PromptBuilder(props: {
             <TextField disabled={preview}
                 value={prompt.positivePrompt} onChange={(e) => setPrompt({ ...prompt, positivePrompt: e.target.value })}
                 placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
-                onKeyUp={(e) => {
+                
+                onKeyDown={(e) => {
                     if (noBrew) return;
-                    if (e.ctrlKey && e.key == 'Enter') onBrew()
+                    e.preventDefault();
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        if(pong?.SD) onBrew()
+                        else enqueueSnackbar("Cannot enqueue prompt, Stable Diffusion is unavailable",{variant:'warning'})
+                    }
+                    if (e.ctrlKey && (e.key === 's' || e.key==='S')) setSaveAys(true)
                 }}
+
                 fullWidth slotProps={{
                     htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
                     input: {
