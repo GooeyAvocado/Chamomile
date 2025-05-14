@@ -35,6 +35,14 @@
         public class JoinCondition(string table1Alias, string table2Alias, string joinColumn) 
             : WhereCondition($"{table1Alias}.{joinColumn}",WhereConditionOperator.EQUALS,$"{table2Alias}.{joinColumn}") { }
 
+        public class FtsCondition(string ftsColumn): WhereCondition("") {
+            public override string ToString() {
+                return $"{ftsColumn} @@ to_tsquery('english', @{ftsColumn})";
+            }
+        }
+
+
+
         public class WhereCondition(string column, WhereConditionOperator operation, string value) {
 
             public WhereCondition(string column) : this(column, WhereConditionOperator.EQUALS, $"@{column}") { }

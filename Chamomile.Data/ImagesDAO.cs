@@ -122,11 +122,19 @@ namespace Chamomile.Data {
             var conditions = new List<WhereCondition>();
 
             if (!string.IsNullOrEmpty(filter.Query)) {
-                conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
-                    new(IMAGES_PROMPT,WhereConditionOperator.ILIKE),
-                    new(IMAGES_BASE_PROMPT,WhereConditionOperator.ILIKE),
-                    new(IMAGES_NEG_PROMPT,WhereConditionOperator.ILIKE)
-                ])));
+
+                if (TsQueryDetectRegex().IsMatch(filter.Query)) {
+                    conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
+                        new FtsCondition(IMAGES_PROMPT_FTS),
+                        new FtsCondition(IMAGES_BASE_PROMPT_FTS),
+                    ])));
+                }
+                else {
+                    conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
+                        new(IMAGES_PROMPT, WhereConditionOperator.ILIKE),
+                        new(IMAGES_BASE_PROMPT, WhereConditionOperator.ILIKE),
+                    ])));
+                }
             }
 
             if (!string.IsNullOrEmpty(filter.Model)) {
@@ -160,9 +168,20 @@ namespace Chamomile.Data {
 
         private static void SetterFromFilter(Setter cmd, FilterOptions filter) {
             if (!string.IsNullOrEmpty(filter.Query)) {
-                cmd.SetString(IMAGES_PROMPT, "%" + filter.Query + "%");
-                cmd.SetString(IMAGES_BASE_PROMPT, "%" + filter.Query + "%");
-                cmd.SetString(IMAGES_NEG_PROMPT, "%" + filter.Query + "%");
+
+                if (TsQueryDetectRegex().IsMatch(filter.Query)) {
+                    var tsQuery = InQuotesRegex()
+                        .Replace(filter.Query, m => "(" + string.Join(" <-> ", m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)) + ")"
+                    );
+
+                    cmd.SetString(IMAGES_PROMPT_FTS, tsQuery);
+                    cmd.SetString(IMAGES_BASE_PROMPT_FTS, tsQuery);
+                }
+                else {
+                    cmd.SetString(IMAGES_PROMPT, $"%{filter.Query}%");
+                    cmd.SetString(IMAGES_BASE_PROMPT, $"%{filter.Query}%");
+                }
+                
             }
 
             if (!string.IsNullOrEmpty(filter.Model)) { cmd.SetString(MODEL_TITLE, filter.Model); }
@@ -307,6 +326,11 @@ namespace Chamomile.Data {
 
         [GeneratedRegex(@"<lora:([^>:]+):([\d.]+)>")]
         public static partial Regex LoraRegex();
+        [GeneratedRegex("\"([^\"]+)\"")]
+        public static partial Regex InQuotesRegex();
+        
+        [GeneratedRegex(@"[&|!:<]")]
+        public static partial Regex TsQueryDetectRegex();
 
         #endregion
 

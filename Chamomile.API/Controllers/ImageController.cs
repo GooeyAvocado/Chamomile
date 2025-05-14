@@ -124,7 +124,14 @@ namespace Chamomile.API.Controllers {
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] FilterOptions options) {
-            return Ok(await dao.GetAll(options, options.LastImage ?? 0));
+            try {
+                return Ok(await dao.GetAll(options, options.LastImage ?? 0));
+            }
+            catch (Npgsql.PostgresException e) {
+                if (e.MessageText.Contains("tsquery"))
+                    return BadRequest(new Exception(e.MessageText));
+                else throw;
+            } 
         }
 
         [HttpGet("count")]

@@ -35,6 +35,8 @@
         public static readonly string IMAGES_BYTES       = "image_bytes_tx";
         public static readonly string IMAGES_HIRES_IN    = "image_hires_in";
         public static readonly string IMAGES_HIRES_BYTES = "image_hires_bytes_tx";
+        public static readonly string IMAGES_PROMPT_FTS  = "image_prompt_fts";
+        public static readonly string IMAGES_BASE_PROMPT_FTS = "image_base_prompt_fts";
 
 
         public static readonly string IMAGES_LORA_MAP = $"{SCHEMA}.images_lora_map";

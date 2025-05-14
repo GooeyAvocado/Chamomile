@@ -68,4 +68,20 @@ CREATE TABLE chamomille.images_lora_map (
 );
 
 
+-- I don't think anyone prompts in other languages but if so change the tsvector
 
+ALTER TABLE chamomile.images
+ADD COLUMN image_base_prompt_fts tsvector GENERATED ALWAYS AS (
+  to_tsvector('english', image_base_prompt_tx)
+) STORED;
+
+ALTER TABLE chamomile.images
+ADD COLUMN image_prompt_fts tsvector GENERATED ALWAYS AS (
+  to_tsvector('english', image_prompt_tx)
+) STORED;
+
+CREATE INDEX idx_image_base_prompt_fts
+  ON chamomile.images USING GIN (image_base_prompt_fts);
+
+CREATE INDEX idx_image_prompt_fts
+  ON chamomile.images USING GIN (image_prompt_fts);
