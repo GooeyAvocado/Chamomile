@@ -14,12 +14,14 @@ import PreviewModal from './preview/PreviewModal';
 
 export default function PromptButton(props: {
     onBrew: () => void
+    onSaveAs : () => void
     onSave: () => void
     onLoad: () => void
+    saveAsEnabled?: boolean
     fullWidth?: boolean
 }) {
 
-    const {onBrew,onLoad,onSave, fullWidth} = props
+    const {onBrew,onLoad,onSave, fullWidth, onSaveAs, saveAsEnabled} = props
     
     const [open, setOpen] = React.useState(false);
     const [previewOpen, setPreviewOpen] = React.useState(false);
@@ -66,6 +68,12 @@ export default function PromptButton(props: {
                                     }} >
                                         Save this recipe
                                     </MenuItem>
+                                    {saveAsEnabled && <MenuItem key={"SaveAsromptButton"} style={{fontSize:".8em"}} onClick={()=>{
+                                        handleClose();
+                                        onSaveAs();
+                                    }} >
+                                        Save this recipe as...
+                                    </MenuItem>}
                                     <MenuItem key={"LoadPromptButton"} style={{fontSize:".8em"}} onClick={()=>{
                                         handleClose();
                                         onLoad();

@@ -11,6 +11,7 @@ import PromptEditorModal from "./PromptEditorModal";
 import PromptReorderButton from "./PromptReorderButton";
 import PromptTile from "./PromptTile";
 import ContextMenu from "../ContextMenu";
+import { usePrompt } from "../../hooks/usePrompt";
 
 export default function PromptSelectorModal(props: {
     open: boolean,
@@ -30,9 +31,16 @@ export default function PromptSelectorModal(props: {
     const [editPrompt, setEditPrompt] = useState(undefined as undefined | Prompt)
     const [viewMode, setViewMode] = useState("grid" as "grid" | "list")
 
+    const {prompt, setPrompt} = usePrompt();
+
     const onDelete = () => {
         delPromptApi.fetch(() => {
             promptsApi.fetch();
+
+            //clear the prompt id if it matches
+            if(prompt.id===delPrompt?.id){
+                setPrompt({...prompt,id:-1})
+            }
             setDelPrompt(undefined)
             enqueueSnackbar("Prompt deleted!", { variant: 'success' })
         }, () => {

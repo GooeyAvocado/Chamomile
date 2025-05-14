@@ -7,7 +7,7 @@ import PromptModelSelectorModal from "./PromptModelSelectorModal";
 import { Prompt } from "../../../model/Prompt";
 import PromptEditorModal from "./PromptEditorModal";
 import useApi from "../../hooks/useApi";
-import { createPrompt } from "../../../api/Prompts";
+import { createPrompt, updatePrompt } from "../../../api/Prompts";
 import { useSnackbar } from "notistack";
 import PromptSelectorModal from "./PromptSelectorModal";
 import VariableEditor from "../variables/VariableEditor";
@@ -35,6 +35,7 @@ export default function PromptBuilder(props: {
     const brewApi = useApi(enqueuePrompts)
 
     const createPromptApi = useApi(createPrompt)
+    const updatePromptApi = useApi(updatePrompt)
     const { enqueueSnackbar } = useSnackbar();
     const { vertical } = useWindowDimensions();
 
@@ -63,9 +64,20 @@ export default function PromptBuilder(props: {
         }, allPrompts)
 
     }
-    const onSave = (val: Prompt) => {
-        createPromptApi.fetch(() => {
+
+    const onSaveAs = (val: Prompt) => {
+        createPromptApi.fetch((val) => {
             enqueueSnackbar("Recipe saved!", { variant: 'success' })
+            if (val) setPrompt(val);
+        }, () => {
+            enqueueSnackbar("Could not save recipe!", { variant: 'error' })
+        }, val)
+    }
+
+    const onSave = (val: Prompt) => {
+        updatePromptApi.fetch((val) => {
+            enqueueSnackbar("Recipe saved!", { variant: 'success' })
+            if (val) setPrompt(val);
         }, () => {
             enqueueSnackbar("Could not save recipe!", { variant: 'error' })
         }, val)
@@ -75,6 +87,8 @@ export default function PromptBuilder(props: {
         setGlobalPrompt(val);
         setLoadOpen(false)
     }
+
+    const existingPrompt = !!prompt.id && prompt.id > 0;
 
     return <>
 
@@ -111,7 +125,14 @@ export default function PromptBuilder(props: {
                     }
                 }}
             />
-            {!noBrew && !vertical && <PromptButton onBrew={onBrew} onLoad={() => setLoadOpen(true)} onSave={() => setSaveOpen(true)} />}
+            {!noBrew && !vertical && 
+                <PromptButton 
+                    onBrew={onBrew} 
+                    onLoad={() => setLoadOpen(true)} 
+                    onSave={existingPrompt ? () => onSave(prompt) : () => setSaveOpen(true)} 
+                    onSaveAs={()=> setSaveOpen(true)}
+                    saveAsEnabled={existingPrompt}
+            />}
         </div>
 
         {(alwaysExpand || expanded) && <>
@@ -246,7 +267,14 @@ export default function PromptBuilder(props: {
         </>}
 
         {!noBrew && vertical && <div style={{ width: '100%', marginTop: '10px' }}>
-            <PromptButton onBrew={onBrew} onLoad={() => setLoadOpen(true)} onSave={() => setSaveOpen(true)} fullWidth />
+            <PromptButton 
+                    onBrew={onBrew} 
+                    onLoad={() => setLoadOpen(true)} 
+                    onSave={existingPrompt ? () => onSave(prompt) : () => setSaveOpen(true)} 
+                    onSaveAs={()=> setSaveOpen(true)}
+                    saveAsEnabled={existingPrompt}
+                    fullWidth
+            />
         </div>}
 
         <VariableEditor open={varsOpen} setOpen={setVarsOpen} />
@@ -257,7 +285,7 @@ export default function PromptBuilder(props: {
         />
 
         {!noBrew && <>
-            <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSave} title="Save Recipe" />
+            <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSaveAs} title="Save Recipe" />
             <PromptSelectorModal open={loadOpen} setOpen={setLoadOpen} onOk={onLoad} />
         </>}
 
