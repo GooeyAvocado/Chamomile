@@ -95,6 +95,20 @@ export default function PromptBuilder(props: {
         setLoadOpen(false)
     }
 
+    const onKeyDown = (e:React.KeyboardEvent<HTMLDivElement>) => {
+        if (noBrew) return;
+        if (e.ctrlKey && e.key === 'Enter') {
+            if(pong?.SD) onBrew()
+            else enqueueSnackbar("Cannot enqueue prompt, Stable Diffusion is unavailable",{variant:'warning'})
+        }
+        if (e.ctrlKey && (e.key === 's' || e.key==='S')) {
+            e.preventDefault();
+            if(existingPrompt && !e.shiftKey) setSaveAys(true)
+            else setSaveOpen(true)
+        }
+
+    }
+
     const existingPrompt = !!prompt.id && prompt.id > 0;
 
     return <>
@@ -104,15 +118,7 @@ export default function PromptBuilder(props: {
                 value={prompt.positivePrompt} onChange={(e) => setPrompt({ ...prompt, positivePrompt: e.target.value })}
                 placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
                 
-                onKeyDown={(e) => {
-                    if (noBrew) return;
-                    e.preventDefault();
-                    if (e.ctrlKey && e.key === 'Enter') {
-                        if(pong?.SD) onBrew()
-                        else enqueueSnackbar("Cannot enqueue prompt, Stable Diffusion is unavailable",{variant:'warning'})
-                    }
-                    if (e.ctrlKey && (e.key === 's' || e.key==='S')) setSaveAys(true)
-                }}
+                onKeyDown={onKeyDown}
 
                 fullWidth slotProps={{
                     htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
@@ -163,6 +169,7 @@ export default function PromptBuilder(props: {
                         }
                     }}
                     style={noBrew ? { flex: "5" } : { flex: 5, minWidth: '200px' }}
+                    onKeyDown={onKeyDown}
                 />
 
                 {/* Seed */}
@@ -176,6 +183,7 @@ export default function PromptBuilder(props: {
                             }
                         }}
                         style={{ flex: "1", minWidth: "200px" }}
+                        onKeyDown={onKeyDown}
                     />
 
                 }
@@ -199,6 +207,7 @@ export default function PromptBuilder(props: {
                         }
                     }}
                     style={{ flex: "1", minWidth: "200px" }}
+                    onKeyDown={onKeyDown}
                 />
                 {/* Height */}
                 <TextField type="number" disabled={preview}
@@ -216,6 +225,7 @@ export default function PromptBuilder(props: {
                         }
                     }}
                     style={{ flex: "1", minWidth: "200px" }}
+                    onKeyDown={onKeyDown}
                 />
 
                 {/* Steps */}
@@ -232,6 +242,7 @@ export default function PromptBuilder(props: {
                         }
                     }}
                     style={{ flex: "1", minWidth: "200px" }}
+                    onKeyDown={onKeyDown}
                 />
 
                 {/* CFG Scale */}
@@ -249,6 +260,7 @@ export default function PromptBuilder(props: {
                         }
                     }}
                     style={{ flex: "1", minWidth: "200px" }}
+                    onKeyDown={onKeyDown}
                 />
 
                 {/* {!noBrew && <div style={{ flex: '1', minWidth: '200px' }}>
@@ -274,6 +286,7 @@ export default function PromptBuilder(props: {
                             }
                         }}
                         style={{ flex: "1", minWidth: "200px" }}
+                        onKeyDown={onKeyDown}
                     />}
 
 
@@ -302,7 +315,7 @@ export default function PromptBuilder(props: {
             <AreYouSureModal open={saveAys} setOpen={setSaveAys} onYes={()=>{onSave(prompt)}} loading={updatePromptApi.loading} title="Overwrite this prompt?">
                 <PromptCard prompt={prompt}/>
             </AreYouSureModal>
-            <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSaveAs} title="Save Recipe" />
+            <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSaveAs} title={`Save Recipe${existingPrompt ? " as...": ""}`} />
             <PromptSelectorModal open={loadOpen} setOpen={setLoadOpen} onOk={onLoad} />
         </>}
 
