@@ -16,6 +16,8 @@ import { hydratePrompt } from "../Utils";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import SizePresetSelector from "./SizePresetSelector";
 import SamplerSelector from "./SamplerSelector";
+import AreYouSureModal from "../modals/AreYouSureModal";
+import PromptCard from "./PromptCard";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -32,10 +34,12 @@ export default function PromptBuilder(props: {
     const [expanded, setExpanded] = useState(false)
     const [modelsOpen, setModelsOpen] = useState(false)
     const [varsOpen, setVarsOpen] = useState(false)
+    const [saveAys, setSaveAys]= useState(false)
     const brewApi = useApi(enqueuePrompts)
 
     const createPromptApi = useApi(createPrompt)
     const updatePromptApi = useApi(updatePrompt)
+
     const { enqueueSnackbar } = useSnackbar();
     const { vertical } = useWindowDimensions();
 
@@ -75,6 +79,7 @@ export default function PromptBuilder(props: {
     }
 
     const onSave = (val: Prompt) => {
+        setSaveAys(false);
         updatePromptApi.fetch((val) => {
             enqueueSnackbar("Recipe saved!", { variant: 'success' })
             if (val) setPrompt(val);
@@ -129,7 +134,7 @@ export default function PromptBuilder(props: {
                 <PromptButton 
                     onBrew={onBrew} 
                     onLoad={() => setLoadOpen(true)} 
-                    onSave={existingPrompt ? () => onSave(prompt) : () => setSaveOpen(true)} 
+                    onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)} 
                     onSaveAs={()=> setSaveOpen(true)}
                     saveAsEnabled={existingPrompt}
             />}
@@ -270,7 +275,7 @@ export default function PromptBuilder(props: {
             <PromptButton 
                     onBrew={onBrew} 
                     onLoad={() => setLoadOpen(true)} 
-                    onSave={existingPrompt ? () => onSave(prompt) : () => setSaveOpen(true)} 
+                    onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)} 
                     onSaveAs={()=> setSaveOpen(true)}
                     saveAsEnabled={existingPrompt}
                     fullWidth
@@ -285,6 +290,9 @@ export default function PromptBuilder(props: {
         />
 
         {!noBrew && <>
+            <AreYouSureModal open={saveAys} setOpen={setSaveAys} onYes={()=>{onSave(prompt)}} loading={updatePromptApi.loading} title="Overwrite this prompt?">
+                <PromptCard prompt={prompt}/>
+            </AreYouSureModal>
             <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSaveAs} title="Save Recipe" />
             <PromptSelectorModal open={loadOpen} setOpen={setLoadOpen} onOk={onLoad} />
         </>}

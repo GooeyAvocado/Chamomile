@@ -4,7 +4,7 @@ import { imageUrl } from "../../../api/Images";
 
 export default function PromptCard(props: {
     prompt: Prompt
-    onClick: () => void
+    onClick?: () => void
 }) {
 
     const { prompt, onClick } = props
