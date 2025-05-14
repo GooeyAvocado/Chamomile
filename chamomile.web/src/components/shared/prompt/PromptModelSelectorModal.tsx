@@ -14,6 +14,7 @@ import { ModelRequest } from "../../../model/ModelRequest";
 import { Prompt } from "../../../model/Prompt";
 import { useLoras } from "../../hooks/useLoras";
 import { useModels } from "../../hooks/useModels";
+import { usePingPong } from "../../hooks/usePingPong";
 
 export default function PromptModelSelectorModal(props:{
     open: boolean,
@@ -33,13 +34,16 @@ export default function PromptModelSelectorModal(props:{
     const currentModelApi = useApi(currentModel, true)
     const changeModelApi = useApi(setModel)
     const {enqueueSnackbar} = useSnackbar();
+    const {pong} = usePingPong();
 
     const prompt = promptOverride ?? globalPrompt;
     const setPrompt = setPromptOverride ?? setGlobalPrompt
 
     useEffect(()=>{
-        refreshModels();
-        refreshLoras();
+        if(open){
+            refreshModels();
+            refreshLoras();
+        }
     },[open])
 
     const usedLoras = () => {
@@ -71,14 +75,21 @@ export default function PromptModelSelectorModal(props:{
         <DialogTitle>Set Models</DialogTitle>
 
         <DialogContent style={{display:'flex', flexDirection:'column', height:'75vh'}}>
-            {!noBrew && <>
-                <Alert severity="warning" style={{marginBottom:'10px', fontSize:'.7em'}}>
-                <AlertTitle style={{fontSize:"1.2em"}}>Changing your primary model will affect all pending images</AlertTitle>
-                Be careful if executing this while there's images brewing!
-            </Alert>
-            <div style={{marginBottom:'10px'}}><ModelCard modelTitle={currentModelApi.data?.model}/></div>
-            <ModelSelector model={currentModelApi.data?.model} setModel={onChangeModel} disabled={changeModelApi.loading} loading={changeModelApi.loading} style={{marginTop:'5px',marginBottom:'10px'}}/>
-            </>}
+            {!noBrew && pong?.SD 
+                ? <>
+                    <Alert severity="warning" style={{marginBottom:'10px', fontSize:'.7em'}}>
+                        <AlertTitle style={{fontSize:"1.2em"}}>Changing your primary model will affect all pending images</AlertTitle>
+                        Be careful if executing this while there's images brewing!
+                    </Alert>
+                    <div style={{marginBottom:'10px'}}><ModelCard modelTitle={currentModelApi.data?.model}/></div>
+                    <ModelSelector model={currentModelApi.data?.model} setModel={onChangeModel} disabled={changeModelApi.loading} loading={changeModelApi.loading} style={{marginTop:'5px',marginBottom:'10px'}}/>
+                </>
+                : <Alert severity="warning">
+                    <AlertTitle>Stable diffusion is unavailable</AlertTitle>
+                    You cannot change the current model because there is no current model. However, you can still set LoRAs for this prompt that you're building
+
+                </Alert>
+            }
             
             <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', width:"100%"}}>
                     <div><b>Loras</b></div>
