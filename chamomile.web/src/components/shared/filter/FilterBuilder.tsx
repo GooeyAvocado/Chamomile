@@ -1,10 +1,12 @@
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useState } from "react";
-import { CalendarMonth, Close, ExpandLess, ExpandMore, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
+import { BarChart, CalendarMonth, Close, ExpandLess, ExpandMore, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
 import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 import AdvSearchModal from "./AdvSearchModal";
+import { useWindowDimensions } from "../../hooks/useWindowDimensions";
+import StatisticsModal from "../statistics/StatisticsModal";
 
 export default function FilterBuilder(props: {
     filter: FilterOptions
@@ -16,6 +18,9 @@ export default function FilterBuilder(props: {
     const [query, setQuery] = useState("")
     const [fromDate, setFromDate] = useState("")
     const [toDate, setToDate] = useState("")
+
+    const [statsOpen, setStatsOpen] = useState(false)
+    const { vertical } = useWindowDimensions();
 
     const [expanded, setExpanded] = useState(false)
     const [advSearchOpen, setAdvSearchOpen] = useState(false)
@@ -32,15 +37,20 @@ export default function FilterBuilder(props: {
         && filter.query?.trim() === ''
 
     return <>
-        <div style={{ width: "100%", display: 'flex', gap: "20px", marginBottom: "10px", marginTop: "10px", flexWrap: "wrap", justifyContent: 'space-between' }}>
-            <TextField value={query} onChange={(e) => { setQuery(e.target.value) }} placeholder="Search" onBlur={() => {
-                if (filter.query?.trim() !== query.trim()) { setFilter({ ...filter, query: query.trim() }) }
-            }}
+        <div style={{ width: "100%", display: 'flex', gap: "20px", marginBottom: "10px", marginTop: "10px", flexWrap: "wrap", justifyContent: 'space-between', alignItems:'center' }}>
+            <TextField value={query} onChange={(e) => { setQuery(e.target.value) }} placeholder="Search"
+
+                multiline={vertical}
+                minRows={vertical ? 4 : 1}
+
+                onBlur={() => {
+                    if (filter.query?.trim() !== query.trim()) { setFilter({ ...filter, query: query.trim() }) }
+                }}
                 slotProps={{
                     input: {
                         startAdornment: <InputAdornment position="start">
                             <Tooltip title="Learn about Advanced Search">
-                                <IconButton onClick={()=>setAdvSearchOpen(true)}><Search /></IconButton>
+                                <IconButton onClick={() => setAdvSearchOpen(true)}><Search /></IconButton>
                             </Tooltip>
                         </InputAdornment>,
                         endAdornment: <InputAdornment position="end">
@@ -59,13 +69,17 @@ export default function FilterBuilder(props: {
                 style={{ flex: "1", minWidth: '250px' }}
             />
 
-            <div style={{ display: "flex", alignItems: 'center', justifyContent: 'end', flexShrink: "1", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: 'center', justifyContent: 'end', flexShrink: "1", gap: "10px", flexDirection: vertical ? 'column' : 'row' }}>
                 <Tooltip title={filter.favorite ? "Show all" : "Show Favorites"}><IconButton onClick={() => setFilter({ ...filter, favorite: !filter?.favorite })}>{filter.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>
+                <Tooltip title={"Statistics"}><IconButton onClick={() => setStatsOpen(true)}><BarChart /></IconButton></Tooltip>
                 <Tooltip title="Refresh"><IconButton onClick={() => setFilter({ ...filter })}><Refresh /></IconButton></Tooltip>
             </div>
 
         </div>
-        <AdvSearchModal open={advSearchOpen} onClose={()=>setAdvSearchOpen(false)}/>
+
+        <AdvSearchModal open={advSearchOpen} onClose={() => setAdvSearchOpen(false)} />
+        <StatisticsModal open={statsOpen} setOpen={setStatsOpen} filter={filter} filterEmpty={filterEmpty}/>
+
         {expanded && <div style={{ display: "flex", flexWrap: 'wrap', width: '100%', marginBottom: "10px", gap: "20px" }}>
 
             <TextField type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value) }} placeholder="From Date" label="From Date" onBlur={() => {
