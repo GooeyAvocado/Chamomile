@@ -1,5 +1,8 @@
+import { objectToQueryString } from "../components/shared/Utils";
+import { FilterOptions } from "../model/FilterOptions";
 import { Model } from "../model/Model";
 import { ModelRequest } from "../model/ModelRequest";
+import Usage from "../model/Usage";
 import { API_PREFIX, Get, Post, Put } from "./Common";
 
 const ENDPOINT = API_PREFIX + "models/"
@@ -41,3 +44,10 @@ export const updateModel = (
     onError: (value: any) => void,
     val: Model
 ) => Put(setLoading, onSuccess, onError, ENDPOINT, val)
+
+export const getModelUsage = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: Usage[]) => void,
+    onError: (value: any) => void,
+    filter: FilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + "usage" + objectToQueryString(filter) );
