@@ -15,9 +15,10 @@ export default function TabbedModal(props:{
     fullWidth?:boolean
     contentStyle?: CSSProperties
     tabContentStyle?: CSSProperties
+    titleTabStack?: boolean
 }){
 
-    const {children,open,setOpen,maxWidth,fullscreen,fullWidth, contentStyle,tabContentStyle} = props
+    const {children,open,setOpen,maxWidth,fullscreen,fullWidth, contentStyle,tabContentStyle, titleTabStack} = props
 
     const [currentTab, setCurrentTab] = useState(0);
     const childrenArray = Children.toArray(children);
@@ -36,9 +37,12 @@ export default function TabbedModal(props:{
 
     return <Dialog open={open} onClose={()=>setOpen(false)} maxWidth={maxWidth} fullWidth={fullWidth} fullScreen={fullscreen}>
         <DialogTitle>
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <div style={titleTabStack
+                ? {display:'flex', flexDirection:'column'} 
+                : {display:'flex', justifyContent:'space-between', alignItems:'center'}
+            }>
                 <div style={{flex:'1'}}>{title}</div>
-                <Tabs value={currentTab} onChange={(_,val)=>setCurrentTab(val)} variant="scrollable" scrollButtons="auto" style={{flexShrink:"1"}}>
+                <Tabs value={currentTab} onChange={(_,val)=>setCurrentTab(val)} variant="scrollable" scrollButtons="auto" style={titleTabStack ? {width:"100%"} : {flexShrink:"1"}}>
                     {tabs.map(a=><Tab {...a}/>)}
                 </Tabs>
             </div>
