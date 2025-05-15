@@ -1,5 +1,5 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Card, Dialog, IconButton, Tab, Tabs, Tooltip } from "@mui/material";
+import { Card, Dialog, IconButton, Stack, Tab, Tabs, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { ArrowBack, ArrowForward, CoffeeOutlined, Delete, Menu, Star, StarBorder, Terminal, TerminalOutlined } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
@@ -173,7 +173,9 @@ export default function ImageModal(props: {
                         {/* LORAs */}
                         {(image?.loras?.length ?? 0) !== 0 && <>
                             <div style={{ marginTop: "20px" }}><b>Loras</b></div>
-                            {image?.loras.map(a => <LoraCard loraAlias={a} currentImage={image} />)}
+                            <Stack gap={"5px"}>
+                                {image?.loras.map(a => <LoraCard loraAlias={a} currentImage={image} />)}
+                            </Stack>
                         </>}
 
                         {/* HiRes Options */}
