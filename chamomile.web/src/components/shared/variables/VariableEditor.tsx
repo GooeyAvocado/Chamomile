@@ -11,6 +11,7 @@ import TabbedModalTitle from "../modals/TabbedModal/TabbedModalTitle"
 import TabbedModalConsistentContent from "../modals/TabbedModal/TabbedModalConsistentContent"
 import TabbedModalActions from "../modals/TabbedModal/TabbedModalActions"
 import TabbedModalTabContent from "../modals/TabbedModal/TabbedModalTabContent"
+import { useWindowDimensions } from "../../hooks/useWindowDimensions"
 
 export default function VariableEditor(props: {
     open: boolean,
@@ -23,6 +24,7 @@ export default function VariableEditor(props: {
     const [newCustName, setNewCustName] = useState("")
     const [newWildName, setNewWildName] = useState("")
 
+    const {width} = useWindowDimensions()
 
     const { data: wildcards } = useApi(getWildcards, true)
 
@@ -53,7 +55,7 @@ export default function VariableEditor(props: {
     const custNames = availableCustomNames()
 
     return <TabbedModal 
-            open={open} setOpen={setOpen} fullWidth maxWidth="md" 
+            open={open} setOpen={setOpen} fullWidth maxWidth="md" titleTabStack={width < 700}
             contentStyle={{ display: 'flex', flexDirection: 'column', height: '75vh' }}
             tabContentStyle={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}
         >
