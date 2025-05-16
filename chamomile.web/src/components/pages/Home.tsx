@@ -15,7 +15,10 @@ export default function Home() {
     favorite: false,
     lora: "",
     model: "",
-    query: ""
+    query: "",
+    fromDate: "",
+    lastImage: 0,
+    toDate: ""
   } as FilterOptions)
 
   const {queue,progress} = useQueue(()=>{})
