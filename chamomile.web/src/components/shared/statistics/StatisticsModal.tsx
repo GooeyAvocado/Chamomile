@@ -129,6 +129,11 @@ function UsageBarGraph(props: {
     const { width } = useWindowDimensions();
     const vertical = width < 750
 
+    if(usage.length===0) return <div style={{flex:'1', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:"10px"}}>
+        <img src="/outline.png" width={64}/>
+        <div>No usage data!</div>
+    </div>
+
     return usage?.map(u => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <div style={{ width: vertical ? "52px" : "300px", flexShrink: '0' }}><CardComponent name={u.name} vertical={vertical} /></div>
         <div style={{ flex: '1', paddingRight: "10px", height: '75px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
