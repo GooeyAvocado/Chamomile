@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Chamomile.API/DB_URL.txt
 docker-compose.yml
+.vscode/settings.json
