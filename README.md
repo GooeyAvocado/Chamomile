@@ -6,31 +6,30 @@ Chamomile is a wrapper for Automatic1111, that leverages its API function to mak
 ![Full prompt](./chamomile.web/public/screenshots/action.png)
 
 ## Key Features
-<div style="display: flex; gap:20px; width:100vw; flex-wrap:wrap;">
+### Better Queue
+Chamomile lets you more easily review pending prompts, and cancel them individually. Now one bad prompt doesn't mean interrupting everything.
 
-<div style="flex:1; display:flex; gap:20px; flex-wrap: wrap;">
-<div style="flex:1; min-width:250px; margin-left: -20px">
-    <b>Better Queue</b>
-    <div>Chamomile lets you more easily review pending prompts, and cancel them individually. Now one bad prompt doesn't mean interrupting everything.</div>
-</div>
-<div style="flex:1; min-width:250px; margin-left: -20px">
-    <b>Powerful Search</b>
-    <div>Chamomile lets you search your generated images by query string, LoRA, model, and date. No more file lookup and organization nightmares.</div>
-</div>
-</div>
+### Powerful Search
+Chamomile lets you search your generated images by query string, LoRA, model, and date. No more file lookup and organization nightmares. Chamomile also supports
+advanced TsQuery search on your images, making it even easier to search by tags and sections of text. You can even migrate your existing collection of images
+to Chamomile and they will be automatically saved and catalogued.
 
-<div style="flex:1; display:flex; gap:20px;flex-wrap:wrap;">
-<div style="flex:1; min-width:250px;">
-    <b>Reusable Recipes</b>
-    <div>Chamomile lets you save prompts as "Recipes" to make it easy to generate more of what you like. Additionally, you can instantly reuse a prompt from any image saved</div>
-</div>
-<div style="flex:1; min-width:250px;">
-    <b>Variables and Comments</b>
-    <div>Chamomile lets you anotate your prompts with comments (#, //, or /**/), as well as specify variables to make it easier to quickly edit your prompts.</div>
-</div>
-</div>
-</div>
+### Reusable Recipes
+<img src="./chamomile.web/public/screenshots/saveRecipe.png" width="500px">
+Chamomile lets you save prompts as "Recipes" to make it easy to generate more of what you like. Additionally, you can instantly reuse a prompt from any image saved.
 
+### Advanced Querying
+<img src="./chamomile.web/public/screenshots/wildcards.png" width="500px">
+Chamomile lets you annotate your prompts with comments (#, //, or /**/), as well as look over and specify wildcards to make it easier to quickly edit your prompts.
+You can then view and search by either the full prompt that was generated, or the base prompt with all wildcards un-replaced, and comments still intact.
+
+### Model Usage Statistics
+<img src="./chamomile.web/public/screenshots/stats.png" width="500px">
+Chamomile lets you dig into your usage patterns, by giving you statistics on all your images, or those that match your search query. You can also limit by latest
+images or by model/LoRA availability.
+
+### And a bit more!
+You can find more on how to use and get started with Chamomile in the included in the help and about documentation 
 
 ## Requirements
 - A Postgres DB
