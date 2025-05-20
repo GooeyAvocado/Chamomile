@@ -20,176 +20,176 @@ import QueuedGroupImageTile from "./QueuedGroupImageTile";
 import AdvSearchModal from "../filter/AdvSearchModal";
 
 
-export default function ImageViewer(props:{
-    filter:FilterOptions
+export default function ImageViewer(props: {
+    filter: FilterOptions
     showBrewing?: boolean,
-    showWelcome?:boolean,
+    showWelcome?: boolean,
     onClick?: (val: GeneratedImage) => void
-    showQueueSnackbars? : boolean
-}){
+    showQueueSnackbars?: boolean
+}) {
 
-    const {filter,showBrewing, onClick, showWelcome, showQueueSnackbars} = props;
+    const { filter, showBrewing, onClick, showWelcome, showQueueSnackbars } = props;
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
     const favApi = useApi(favImage)
 
     const [open, setOpen] = useState(false)
     const [deleteAys, setDeleteAys] = useState(false)
-    const [uploadBrewBlob, setUploadBrewBlob] = useState(undefined as string|undefined)
+    const [uploadBrewBlob, setUploadBrewBlob] = useState(undefined as string | undefined)
     const [selectedImage, setSelectedImage] = useState(undefined as undefined | GeneratedImage)
-    const [interruptOpen,SetInterruptOpen] = useState(false);
+    const [interruptOpen, SetInterruptOpen] = useState(false);
     const [advSearchOpen, setAdvSearchOpen] = useState(false);
-    
-    const {enqueueSnackbar} = useSnackbar();
-    const {isMobile} = useUserAgent();
-    const {currentUpload,lastSuccess, progress: uploadProgress} = useImageUpload();
 
-    const {activeJob,cancel,progress,groupedQueue} = useQueue((val)=>{
-        if(showBrewing){
+    const { enqueueSnackbar } = useSnackbar();
+    const { isMobile } = useUserAgent();
+    const { currentUpload, lastSuccess, progress: uploadProgress } = useImageUpload();
+
+    const { activeJob, cancel, progress, groupedQueue, queue } = useQueue((val) => {
+        if (showBrewing) {
             //Check if we're on index 0
             //if(selectedIndex()===0) setSelectedImage(val)
             imageApi.appendImage(val)
         }
     }, showQueueSnackbars)
 
-    useEffect(()=>{
+    useEffect(() => {
         imageApi.refresh()
-    },[filter])
+    }, [filter])
 
-    useEffect(()=>{
-        if(showBrewing && lastSuccess!==undefined && !!lastSuccess?.id){
+    useEffect(() => {
+        if (showBrewing && lastSuccess !== undefined && !!lastSuccess?.id) {
             imageApi.appendImage(lastSuccess)
         }
-    },[lastSuccess])
+    }, [lastSuccess])
 
-    useEffect(()=>{
-        if(!showBrewing) return;
-        if(uploadBrewBlob) URL.revokeObjectURL(uploadBrewBlob)
-        if(currentUpload) setUploadBrewBlob(URL.createObjectURL(currentUpload))
-    },[currentUpload])
+    useEffect(() => {
+        if (!showBrewing) return;
+        if (uploadBrewBlob) URL.revokeObjectURL(uploadBrewBlob)
+        if (currentUpload) setUploadBrewBlob(URL.createObjectURL(currentUpload))
+    }, [currentUpload])
 
-    const onDelete = (override?:GeneratedImage) => {
+    const onDelete = (override?: GeneratedImage) => {
         setDeleteAys(false)
-        delApi.fetch(()=>{
-            enqueueSnackbar("Image deleted!",{variant:'success'})
-            if(selectedImage) {
-                if(imageApi.count===0){
+        delApi.fetch(() => {
+            enqueueSnackbar("Image deleted!", { variant: 'success' })
+            if (selectedImage) {
+                if (imageApi.count === 0) {
                     setSelectedImage(undefined)
-                } else if( selectedIndex() >= imageApi.count-1 ){
+                } else if (selectedIndex() >= imageApi.count - 1) {
                     onLeft()
                 } else {
                     onRight();
                 }
             }
             imageApi.removeImage(override ?? selectedImage ?? {} as GeneratedImage)
-        },()=>{
-            enqueueSnackbar("Image could not be deleted!",{variant:'error'})
+        }, () => {
+            enqueueSnackbar("Image could not be deleted!", { variant: 'error' })
         }, (override ?? selectedImage)?.id)
     }
 
-    const onFavorite = (override?:GeneratedImage) => {
-        if(!override && !selectedImage) return;
+    const onFavorite = (override?: GeneratedImage) => {
+        if (!override && !selectedImage) return;
         const img = override ?? selectedImage ?? {} as GeneratedImage //This is to cover a condition eslint thinks exists, but really doesn't
         img.favorite = !img?.favorite;
-        favApi.fetch((val)=>{
+        favApi.fetch((val) => {
             imageApi.updateImage(val ?? override ?? selectedImage ?? {} as GeneratedImage)
-        },()=>{
-            enqueueSnackbar("Image could not be favorited!",{variant:'error'})
+        }, () => {
+            enqueueSnackbar("Image could not be favorited!", { variant: 'error' })
         }, img)
     }
 
-    const onUpscale = (val:GeneratedImage) => {
+    const onUpscale = (val: GeneratedImage) => {
         imageApi.updateImage(val ?? selectedImage)
         setSelectedImage(val);
     }
 
     const selectedIndex = () => {
-        return imageApi.images.map(a=>a.id).indexOf(selectedImage?.id ?? 0);
+        return imageApi.images.map(a => a.id).indexOf(selectedImage?.id ?? 0);
     }
 
     const onLeft = () => {
         const index = selectedIndex();
-        if(index=== 0) return;
-        setSelectedImage(imageApi.images[index-1]);
+        if (index === 0) return;
+        setSelectedImage(imageApi.images[index - 1]);
     }
 
     const onRight = () => {
         const index = selectedIndex();
-        if(index=== imageApi.images.length-1) return; //If this is the last image do nothing
-        if(index=== imageApi.images.length-2) { //If is the second to last image
-            if(imageApi.hasMore) imageApi.showMore();
+        if (index === imageApi.images.length - 1) return; //If this is the last image do nothing
+        if (index === imageApi.images.length - 2) { //If is the second to last image
+            if (imageApi.hasMore) imageApi.showMore();
         };
-        setSelectedImage(imageApi.images[index+1]);
+        setSelectedImage(imageApi.images[index + 1]);
     }
 
     const filterIsEmpty = () => {
-        return filter.favorite === false && 
-            filter.fromDate?.trim().length===0 &&
-            filter.toDate?.trim().length===0 &&
+        return filter.favorite === false &&
+            filter.fromDate?.trim().length === 0 &&
+            filter.toDate?.trim().length === 0 &&
             filter.lora?.trim().length === 0 &&
             filter.model?.trim().length === 0 &&
             filter.query?.trim().length === 0
     }
 
-    useEffect(()=>{SetInterruptOpen(false)},[activeJob])
+    useEffect(() => { SetInterruptOpen(false) }, [activeJob])
 
     return <>
         <div style={{
-            display:'grid',
-            gridTemplateColumns:`repeat(auto-fill, minmax(${isMobile ? '128' : '192'}px, 1fr))`,
-            gap:'20px'
+            display: 'grid',
+            gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '128' : '192'}px, 1fr))`,
+            gap: '20px'
         }}>
-            {showBrewing && groupedQueue.map(p=>
-                p.length=== 0 ? <></> : 
-                p.length===1 ? <QueuedImageTile prompt={p[0]} onCancel={()=>cancel(p[0].id)}/>:
-                <QueuedGroupImageTile prompts={p} onCancel={cancel}/>
+            {showBrewing && groupedQueue.map(p =>
+                p.length === 0 ? <></> :
+                    p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} /> :
+                        <QueuedGroupImageTile prompts={p} onCancel={cancel} />
             )}
             {showBrewing && activeJob && <>
-                <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0)=== 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} onClick={()=>{SetInterruptOpen(true)}} progress={(progress?.progress ?? 0) * 100}/>
-                <PromptEditorModal onOk={()=>{}} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress}/>
+                <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100} />
+                <PromptEditorModal onOk={() => { }} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress} />
             </>}
             {showBrewing && currentUpload && <>
-                <BrewingImageTile imageSrc={uploadBrewBlob ?? ""} progress={uploadProgress}/>
+                <BrewingImageTile imageSrc={uploadBrewBlob ?? ""} progress={uploadProgress} />
             </>}
-            {imageApi.images?.map(a=> <ImageTile image={a} onDelete={onDelete}  onFavorite={onFavorite} onClick={onClick ? ()=>{onClick(a)} : ()=>{setSelectedImage(a); setOpen(true)}}/>)}
+            {imageApi.images?.map(a => <ImageTile image={a} onDelete={onDelete} onFavorite={onFavorite} onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setOpen(true) }} />)}
             {!onClick && <>
-                <ImageModal open={open} setOpen={setOpen} image={selectedImage} onDelete={()=>setDeleteAys(true)} onDeleteForce={onDelete} onFavorite={onFavorite} onLeft={onLeft} onRight={onRight} onUpscale={onUpscale}/>
+                <ImageModal open={open} setOpen={setOpen} image={selectedImage} onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onFavorite={onFavorite} onLeft={onLeft} onRight={onRight} onUpscale={onUpscale} />
                 <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
                     Are you sure you want to delete this image?
                 </AreYouSureModal>
             </>}
         </div>
-        {imageApi.count===0 && <>
-            {filterIsEmpty() && !imageApi.loading && showWelcome ? <WelcomePane/>
-            :<div style={{height:'100%', display:"flex" ,flexDirection:'column', justifyContent:'center', alignItems:'center' }}>
-                {imageApi.loading ? <>
-                    <img src="brewing.gif" style={{width:"128px"}}/>
-                    <div style={{marginTop:"-20px"}}>Loading images</div>
-                </> : <>
-                    <img src="outlinepadded.png" style={{width:"128px"}}/>
-                    <div style={{marginTop:"-20px"}}>No images!</div>
-                </>}
-            </div>}
+        {imageApi.count === 0 && !activeJob && (queue?.length ?? 0) === 0 && <>
+            {filterIsEmpty() && !imageApi.loading && showWelcome ? <WelcomePane />
+                : <div style={{ height: '100%', display: "flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    {imageApi.loading ? <>
+                        <img src="brewing.gif" style={{ width: "128px" }} />
+                        <div style={{ marginTop: "-20px" }}>Loading images</div>
+                    </> : <>
+                        <img src="outlinepadded.png" style={{ width: "128px" }} />
+                        <div style={{ marginTop: "-20px" }}>No images!</div>
+                    </>}
+                </div>}
         </>}
-        {imageApi.error && 
+        {imageApi.error &&
             <Stack gap={"10px"}>
                 <Alert variant="standard" severity="error">
-                <AlertTitle>Could not retrieve images</AlertTitle>
-                {imageApi.error.message ? `Server responded: ${imageApi.error.message}` : "Something happened! Check the console"}
-            </Alert>
-            {imageApi.error.message?.includes("tsquery") && <Alert variant="standard" severity="info">
-                <AlertTitle>It looks like this is an Advanced Search related issue</AlertTitle>
-                <Link onClick={()=>{setAdvSearchOpen(true)}} color="textPrimary">Learn about Advanced Search</Link>
-            </Alert>}
+                    <AlertTitle>Could not retrieve images</AlertTitle>
+                    {imageApi.error.message ? `Server responded: ${imageApi.error.message}` : "Something happened! Check the console"}
+                </Alert>
+                {imageApi.error.message?.includes("tsquery") && <Alert variant="standard" severity="info">
+                    <AlertTitle>It looks like this is an Advanced Search related issue</AlertTitle>
+                    <Link onClick={() => { setAdvSearchOpen(true) }} color="textPrimary">Learn about Advanced Search</Link>
+                </Alert>}
             </Stack>
         }
         {imageApi.hasMore && (imageApi.images?.length ?? 0) > 0 && <>
-            <div style={{textAlign:'center', marginTop:"20px"}}>
-                <Button size="small" onClick={()=>imageApi.showMore()} disabled={imageApi.loading}> {imageApi.loading ? <CircularProgress size={24}/> : "Show More"}</Button>
-                <div style={{fontSize:".7em"}}>Showing {imageApi.images.length.toLocaleString()} of {imageApi.count.toLocaleString()} images</div>
+            <div style={{ textAlign: 'center', marginTop: "20px" }}>
+                <Button size="small" onClick={() => imageApi.showMore()} disabled={imageApi.loading}> {imageApi.loading ? <CircularProgress size={24} /> : "Show More"}</Button>
+                <div style={{ fontSize: ".7em" }}>Showing {imageApi.images.length.toLocaleString()} of {imageApi.count.toLocaleString()} images</div>
             </div>
-        </>} 
-        <AdvSearchModal onClose={()=>setAdvSearchOpen(false)} open={advSearchOpen}/>
+        </>}
+        <AdvSearchModal onClose={() => setAdvSearchOpen(false)} open={advSearchOpen} />
     </>
 
 
