@@ -35,7 +35,7 @@ export default function PromptBuilder(props: {
     const [expanded, setExpanded] = useState(false)
     const [modelsOpen, setModelsOpen] = useState(false)
     const [varsOpen, setVarsOpen] = useState(false)
-    const [saveAys, setSaveAys]= useState(false)
+    const [saveAys, setSaveAys] = useState(false)
     const brewApi = useApi(enqueuePrompts)
 
     const createPromptApi = useApi(createPrompt)
@@ -43,7 +43,7 @@ export default function PromptBuilder(props: {
 
     const { enqueueSnackbar } = useSnackbar();
     const { vertical } = useWindowDimensions();
-    const {pong} = usePingPong();
+    const { pong } = usePingPong();
 
     const [sizePresetOpen, setSizePresetOpen] = useState(false)
     const [saveOpen, setSaveOpen] = useState(false)
@@ -95,16 +95,28 @@ export default function PromptBuilder(props: {
         setLoadOpen(false)
     }
 
-    const onKeyDown = (e:React.KeyboardEvent<HTMLDivElement>) => {
+    const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (noBrew) return;
-        if (e.ctrlKey && e.key === 'Enter') {
-            if(pong?.SD) onBrew()
-            else enqueueSnackbar("Cannot enqueue prompt, Stable Diffusion is unavailable",{variant:'warning'})
-        }
-        if (e.ctrlKey && (e.key === 's' || e.key==='S')) {
-            e.preventDefault();
-            if(existingPrompt && !e.shiftKey) setSaveAys(true)
-            else setSaveOpen(true)
+        if (e.ctrlKey) {
+            switch (e.key) {
+                case 'Enter':
+                    if (pong?.SD) onBrew()
+                    else enqueueSnackbar("Cannot enqueue prompt, Stable Diffusion is unavailable", { variant: 'warning' })
+                    break;
+                case 's':
+                case 'S':
+                    e.preventDefault();
+                    if (existingPrompt && !e.shiftKey) setSaveAys(true)
+                    else setSaveOpen(true)
+                    break;
+                case 'o':
+                case 'O':
+                    e.preventDefault();
+                    setLoadOpen(true)
+                    break;
+                default:
+                    break;
+            }
         }
 
     }
@@ -117,7 +129,7 @@ export default function PromptBuilder(props: {
             <TextField disabled={preview}
                 value={prompt.positivePrompt} onChange={(e) => setPrompt({ ...prompt, positivePrompt: e.target.value })}
                 placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
-                
+
                 onKeyDown={onKeyDown}
 
                 fullWidth slotProps={{
@@ -145,14 +157,14 @@ export default function PromptBuilder(props: {
                     }
                 }}
             />
-            {!noBrew && !vertical && 
-                <PromptButton 
-                    onBrew={onBrew} 
-                    onLoad={() => setLoadOpen(true)} 
-                    onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)} 
-                    onSaveAs={()=> setSaveOpen(true)}
+            {!noBrew && !vertical &&
+                <PromptButton
+                    onBrew={onBrew}
+                    onLoad={() => setLoadOpen(true)}
+                    onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)}
+                    onSaveAs={() => setSaveOpen(true)}
                     saveAsEnabled={existingPrompt}
-            />}
+                />}
         </div>
 
         {(alwaysExpand || expanded) && <>
@@ -173,18 +185,18 @@ export default function PromptBuilder(props: {
                 />
 
                 {/* Seed */}
-                {!noBrew &&  <TextField type="number" disabled={preview}
-                        value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
-                        placeholder="Steps"
-                        fullWidth slotProps={{
-                            input: {
-                                startAdornment: (<InputAdornment position="start"> <Coffee /> </InputAdornment>),
-                                endAdornment: (<InputAdornment position="end">Amount</InputAdornment>)
-                            }
-                        }}
-                        style={{ flex: "1", minWidth: "200px" }}
-                        onKeyDown={onKeyDown}
-                    />
+                {!noBrew && <TextField type="number" disabled={preview}
+                    value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
+                    placeholder="Steps"
+                    fullWidth slotProps={{
+                        input: {
+                            startAdornment: (<InputAdornment position="start"> <Coffee /> </InputAdornment>),
+                            endAdornment: (<InputAdornment position="end">Amount</InputAdornment>)
+                        }
+                    }}
+                    style={{ flex: "1", minWidth: "200px" }}
+                    onKeyDown={onKeyDown}
+                />
 
                 }
 
@@ -272,35 +284,35 @@ export default function PromptBuilder(props: {
                 </div>}
 
                 {!noBrew && <TextField type="number"
-                        value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
-                        placeholder="Seed"
-                        fullWidth slotProps={{
-                            htmlInput: {
-                                min: -1
-                            },
-                            input: {
-                                startAdornment: (<InputAdornment position="start">
-                                    <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{ margin: "-7px" }} /></IconButton>
-                                </InputAdornment>),
-                                endAdornment: (<InputAdornment position="end">Seed</InputAdornment>)
-                            }
-                        }}
-                        style={{ flex: "1", minWidth: "200px" }}
-                        onKeyDown={onKeyDown}
-                    />}
+                    value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
+                    placeholder="Seed"
+                    fullWidth slotProps={{
+                        htmlInput: {
+                            min: -1
+                        },
+                        input: {
+                            startAdornment: (<InputAdornment position="start">
+                                <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{ margin: "-7px" }} /></IconButton>
+                            </InputAdornment>),
+                            endAdornment: (<InputAdornment position="end">Seed</InputAdornment>)
+                        }
+                    }}
+                    style={{ flex: "1", minWidth: "200px" }}
+                    onKeyDown={onKeyDown}
+                />}
 
 
             </div>
         </>}
 
         {!noBrew && vertical && <div style={{ width: '100%', marginTop: '10px' }}>
-            <PromptButton 
-                    onBrew={onBrew} 
-                    onLoad={() => setLoadOpen(true)} 
-                    onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)} 
-                    onSaveAs={()=> setSaveOpen(true)}
-                    saveAsEnabled={existingPrompt}
-                    fullWidth
+            <PromptButton
+                onBrew={onBrew}
+                onLoad={() => setLoadOpen(true)}
+                onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)}
+                onSaveAs={() => setSaveOpen(true)}
+                saveAsEnabled={existingPrompt}
+                fullWidth
             />
         </div>}
 
@@ -312,10 +324,10 @@ export default function PromptBuilder(props: {
         />
 
         {!noBrew && <>
-            <AreYouSureModal open={saveAys} setOpen={setSaveAys} onYes={()=>{onSave(prompt)}} loading={updatePromptApi.loading} title="Overwrite this prompt?">
-                <PromptCard prompt={prompt}/>
+            <AreYouSureModal open={saveAys} setOpen={setSaveAys} onYes={() => { onSave(prompt) }} loading={updatePromptApi.loading} title="Overwrite this prompt?">
+                <PromptCard prompt={prompt} />
             </AreYouSureModal>
-            <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSaveAs} title={`Save Recipe${existingPrompt ? " as...": ""}`} />
+            <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSaveAs} title={`Save Recipe${existingPrompt ? " as..." : ""}`} />
             <PromptSelectorModal open={loadOpen} setOpen={setLoadOpen} onOk={onLoad} />
         </>}
 
