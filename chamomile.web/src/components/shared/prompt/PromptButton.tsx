@@ -14,26 +14,26 @@ import PreviewModal from './preview/PreviewModal';
 
 export default function PromptButton(props: {
     onBrew: () => void
-    onSaveAs : () => void
+    onSaveAs: () => void
     onSave: () => void
     onLoad: () => void
     saveAsEnabled?: boolean
     fullWidth?: boolean
 }) {
 
-    const {onBrew,onLoad,onSave, fullWidth, onSaveAs, saveAsEnabled} = props
-    
+    const { onBrew, onLoad, onSave, fullWidth, onSaveAs, saveAsEnabled } = props
+
     const [open, setOpen] = React.useState(false);
     const [previewOpen, setPreviewOpen] = React.useState(false);
 
     const anchorRef = React.useRef<HTMLDivElement>(null);
-    const {pong} = usePingPong()
+    const { pong } = usePingPong()
 
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
     };
 
-    const handleClose = () => {    
+    const handleClose = () => {
         setOpen(false);
     };
 
@@ -42,10 +42,10 @@ export default function PromptButton(props: {
             <ButtonGroup
                 variant="contained"
                 ref={anchorRef}
-                fullWidth = {fullWidth}
+                fullWidth={fullWidth}
             >
-                <Tooltip title={!pong?.SD ? 'Kitchen\'s closed\n(Could not contact SD)' : 'Click to start brewing images'}><Button  onClick={onBrew} disabled={!pong?.SD}>Brew</Button></Tooltip>
-                <Button size="small" style={{width:'40px'}} onClick={handleToggle} >
+                <Tooltip title={!pong?.SD ? 'Kitchen\'s closed\n(Could not contact SD)' : 'Click to start brewing images'}><Button onClick={onBrew} disabled={!pong?.SD}>Brew</Button></Tooltip>
+                <Button size="small" style={{ width: '40px' }} onClick={handleToggle} >
                     <ArrowDropDownIcon />
                 </Button>
             </ButtonGroup>
@@ -55,26 +55,26 @@ export default function PromptButton(props: {
                         <Paper>
                             <ClickAwayListener onClickAway={handleClose}>
                                 <MenuList id="split-button-menu" >
-                                    <MenuItem key={"PreviewPromptButton"} style={{fontSize:".8em"}} onClick={()=>{
+                                    <MenuItem key={"PreviewPromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
                                         handleClose();
                                         setPreviewOpen(true);
                                     }} >
-                                        Preview Prompt
+                                        Preview Recipe
                                     </MenuItem>
-                                    <Divider/>
-                                    <MenuItem key={"SavePromptButton"} style={{fontSize:".8em"}} onClick={()=>{
+                                    <Divider />
+                                    <MenuItem key={"SavePromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
                                         handleClose();
                                         onSave();
                                     }} >
                                         Save this recipe
                                     </MenuItem>
-                                    {saveAsEnabled && <MenuItem key={"SaveAsromptButton"} style={{fontSize:".8em"}} onClick={()=>{
+                                    {saveAsEnabled && <MenuItem key={"SaveAsromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
                                         handleClose();
                                         onSaveAs();
                                     }} >
                                         Save this recipe as...
                                     </MenuItem>}
-                                    <MenuItem key={"LoadPromptButton"} style={{fontSize:".8em"}} onClick={()=>{
+                                    <MenuItem key={"LoadPromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
                                         handleClose();
                                         onLoad();
                                     }} >
@@ -86,7 +86,7 @@ export default function PromptButton(props: {
                     </Grow>
                 )}
             </Popper>
-            <PreviewModal open={previewOpen} setOpen={setPreviewOpen}/>
+            <PreviewModal open={previewOpen} setOpen={setPreviewOpen} />
         </React.Fragment>
     );
 }
