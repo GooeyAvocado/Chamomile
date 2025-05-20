@@ -6,7 +6,7 @@ Chamomile is a wrapper for Automatic1111, that leverages its API function to mak
 ![Full prompt](./chamomile.web/public/screenshots/action.png)
 
 ## Key Features
-<div style="display: flex; gap:20px; width:vw; flex-wrap:wrap;">
+<div style="display: flex; gap:20px; width:100vw; flex-wrap:wrap;">
 
 <div style="flex:1; display:flex; gap:20px; flex-wrap: wrap;">
 <div style="flex:1; min-width:250px; margin-left: -20px">
@@ -47,12 +47,12 @@ Chamomile is a wrapper for Automatic1111, that leverages its API function to mak
 - Run
 
 ## Yet to Support
-[-] Additional Samplers/Schedulers
+- [x] Additional Samplers/Schedulers
     -> Samplers added, scheduler support is available but is hidden to avoid clutter
-[ ] Scripts
-[ ] Img2Img
-[ ] Inpainting
-[X] Statistics
+- [ ] Scripts
+- [ ] Img2Img
+- [ ] Inpainting
+- [X] Statistics
 
 ## Remember to support an artist
 Generating is nice as a reference, but if you want to get a real image, try commissioning an artist. <3
