@@ -3,7 +3,7 @@
 
 Chamomile is a wrapper for Automatic1111, that leverages its API function to make it easy to browse and generate images with StableDiffusion.
 
-![Full prompt](./chamomile.web/public/screenshots/expandedPrompt.png)
+![Full prompt](./chamomile.web/public/screenshots/action.png)
 
 ## Key Features
 <div style="display: flex; gap:20px; width:vw; flex-wrap:wrap;">
@@ -47,11 +47,12 @@ Chamomile is a wrapper for Automatic1111, that leverages its API function to mak
 - Run
 
 ## Yet to Support
-- Additional Samplers/Schedulers
-- Scripts
-- Img2Img
-- Inpainting
-- Statistics
+[-] Additional Samplers/Schedulers
+    -> Samplers added, scheduler support is available but is hidden to avoid clutter
+[ ] Scripts
+[ ] Img2Img
+[ ] Inpainting
+[X] Statistics
 
 ## Remember to support an artist
 Generating is nice as a reference, but if you want to get a real image, try commissioning an artist. <3
