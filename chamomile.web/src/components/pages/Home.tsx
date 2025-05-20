@@ -8,6 +8,8 @@ import ChamomileLogo from "../shared/ChamomileLogo";
 import { useWindowDimensions } from "../hooks/useWindowDimensions";
 import { useQueue } from "../hooks/useQueue";
 import { usePageTitle } from "../hooks/useTitle";
+import DisplayButton from "../shared/display/DisplayButton";
+import HelpButton from "../shared/help/HelpButton";
 
 export default function Home() {
 
@@ -32,11 +34,18 @@ export default function Home() {
   },[queue,progress])
   
 
-  const { vertical, height } = useWindowDimensions();
+  const { vertical, height, width } = useWindowDimensions();
 
   return <div style={{ height: vertical || height < 768 ? undefined : "100vh", width: "80vw", maxWidth: "1400px", overflow: 'hidden', display: "flex", flexDirection: "column", alignItems: 'center', margin: "0 auto", paddingTop: "20px" }}>
-    <ChamomileLogo />
-    <div style={{ width: "100%", marginTop: "20px" }}>
+    <div style={{display:'flex', justifyContent:"space-between", width:"100%", alignItems:"end"}}>
+      <ChamomileLogo hideWords={width < 450}/>
+      <div style={{display:'flex', gap:"10px"}}>
+        <DisplayButton/>
+        <HelpButton/>
+      </div>
+    </div>
+    <hr style={{width:"100%"}}/>
+    <div style={{ width: "100%", marginTop: "10px" }}>
       <PromptBuilder />
     </div>
     <hr style={{ width: "100%" }} />
