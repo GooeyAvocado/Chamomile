@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { deletePrompt, getPrompts, updatePrompt } from "../../../api/Prompts";
 import { Prompt } from "../../../model/Prompt";
 import useApi from "../../hooks/useApi";
-import { Dialog, DialogContent, DialogTitle, InputAdornment, TextField } from "@mui/material";
-import { Delete, Edit, Search } from "@mui/icons-material";
+import { Card, CardActionArea, CardContent, Dialog, DialogContent, DialogTitle, InputAdornment, TextField } from "@mui/material";
+import { ArrowUpward, Delete, Edit, Folder, Search } from "@mui/icons-material";
 import PromptCard from "./PromptCard";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { useSnackbar } from "notistack";
@@ -26,7 +26,6 @@ export default function PromptSelectorModal(props: {
     const { enqueueSnackbar } = useSnackbar();
 
     const [query, setQuery] = useState("")
-    const [tempQuery, setTempQuery] = useState("")
     const [delPrompt, setDelPrompt] = useState(undefined as undefined | Prompt)
     const [editPrompt, setEditPrompt] = useState(undefined as undefined | Prompt)
 
@@ -65,11 +64,11 @@ export default function PromptSelectorModal(props: {
     }, [open])
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
-        <DialogTitle>Select a Recipe</DialogTitle>
+        <DialogTitle>{promptsApi.data?.length} Recipes</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: "75vh" }}>
             <div style={{ display: 'flex', gap: '10px' }}>
                 <TextField
-                    value={tempQuery} onChange={(e) => setTempQuery(e.target.value)} onBlur={() => setQuery(tempQuery)}
+                    value={query} onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search" fullWidth
                     slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search /></InputAdornment> } }}
                 />
@@ -97,26 +96,105 @@ export default function PromptSelectorModal(props: {
 function GridViewMode(props: { data: Prompt[], query: string, setEditPrompt: (val: Prompt) => void, setDelPrompt: (val: Prompt) => void, onOk: (val: Prompt) => void }) {
     const { data, query, setDelPrompt, setEditPrompt, onOk } = props
 
+    const [currLocation, setCurrLocation] = useState("")
 
 
-    return <div style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
-        gap: '20px'
-    }}>
-        {data?.filter(a => query.trim().length === 0 ? true :
-            a.name.toLowerCase().includes(query.toLowerCase()) ||
-            a.positivePrompt.toLowerCase().includes(query.toLowerCase())
-        ).map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <ContextMenu options={[
-                { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} menuButonMode onClick={onClose} /> },
-                { type: 'divider' },
-                { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
-                { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
-            ]}>
-                <PromptTile prompt={a} onClick={() => onOk(a)} />
-            </ContextMenu>
-        </div>)}
-    </div>
+    // Get prompts and folders that start with currLocation
+    const matching = data?.filter(p => currLocation.length === 0 ? true : p.name.startsWith(currLocation + "/"));
+
+    // Prompts at this level: no further slashes after currLocation
+    const currPrompts = matching?.filter(p => {
+        const rest = p.name.slice(currLocation.length + 1);
+        return !rest.includes("/") && rest.length > 0;
+    });
+
+    // Folders at this level: next segment after currLocation before a slash
+
+    const folders = () => {
+        if (!matching || matching.length === 0) return []
+        const folderSet = new Set<string>();
+        matching?.forEach(p => {
+            const rest = p.name?.slice(currLocation.length === 0 ? 0 : currLocation.length + 1);
+            const match = rest?.match(/^([^\/]+)\//);
+            if (match) {
+                folderSet.add(match[1]);
+            }
+        });
+
+        return Array.from(folderSet);
+    }
+
+    if ((query?.trim().length ?? 0) !== 0) {
+        return <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
+            gap: '20px'
+        }}>
+            {data?.filter(a => query.trim().length === 0 ? true :
+                a.name.toLowerCase().includes(query.toLowerCase()) ||
+                a.positivePrompt.toLowerCase().includes(query.toLowerCase())
+            ).map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <ContextMenu options={[
+                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} menuButonMode onClick={onClose} /> },
+                    { type: 'divider' },
+                    { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
+                    { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
+                ]}>
+                    <PromptTile prompt={a} onClick={() => onOk(a)} />
+                </ContextMenu>
+            </div>)}
+
+        </div>
+    }
+
+    const folderList = folders();
+
+    return <>
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
+            gap: '20px', marginBottom: folderList?.length === 0 && currLocation.length === 0 ? "" : "20px"
+        }}>
+            {currLocation.length > 0 && <Card>
+                <CardActionArea onClick={() => setCurrLocation(currLocation.includes("/") ? currLocation.split("/").slice(0, -1).join("/") : "")}>
+                    <CardContent style={{ display: 'flex', gap: "5px", alignItems: "center" }}>
+                        <ArrowUpward fontSize="small" />
+                        <div>{currLocation.includes("/") ? currLocation.split("/").slice(0, -1).join("/") : "Root"}</div>
+                    </CardContent>
+                </CardActionArea>
+            </Card>}
+            {folderList?.map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <Card>
+                    <CardActionArea onClick={() => setCurrLocation(currLocation.length === 0 ? a : currLocation + "/" + a)}>
+                        <CardContent style={{ display: 'flex', gap: "5px", alignItems: "center" }}>
+                            <Folder fontSize="small" />
+                            <div>{a}</div>
+                        </CardContent>
+                    </CardActionArea>
+                </Card>
+            </div>)}
+        </div>
+
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
+            gap: '20px'
+        }}>
+            {currPrompts?.map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <ContextMenu options={[
+                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} menuButonMode onClick={onClose} /> },
+                    { type: 'divider' },
+                    { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
+                    { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
+                ]}>
+                    <PromptTile prompt={a} onClick={() => onOk(a)} />
+                </ContextMenu>
+            </div>)}
+
+        </div>
+
+    </>
+
+
 
 }
