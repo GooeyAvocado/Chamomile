@@ -62,7 +62,6 @@ export default function PromptEditorModal(props: {
                                 : e.target.value
                     })} placeholder="Name" fullWidth style={{ marginBottom: '20px' }}
                 />
-                <div>{internalPrompt.name}</div>
                 <PromptFolderPicker
                     folder={folder} open={folderBrowserOpen} setOpen={setFolderBrowserOpen}
                     setFolder={(folder) => setInternalPrompt({
