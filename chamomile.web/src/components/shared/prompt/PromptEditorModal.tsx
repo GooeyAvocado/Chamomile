@@ -52,10 +52,27 @@ export default function PromptEditorModal(props: {
                         </CardActionArea>
                     </Card>
                 </div>
-                <TextField value={name} onChange={(e) => setInternalPrompt({ ...internalPrompt, name: internalPrompt.name.includes("/") ? [...internalPrompt.name.split("/").slice(0, -1), e.target.value].join("/") : e.target.value })} placeholder="Name" fullWidth style={{ marginBottom: '20px' }} />
+                <TextField
+                    value={name} onChange={(e) => setInternalPrompt({
+                        ...internalPrompt, name:
+                            internalPrompt.name ?
+                                internalPrompt.name.includes("/")
+                                    ? [...internalPrompt.name.split("/").slice(0, -1), e.target.value].join("/")
+                                    : e.target.value
+                                : e.target.value
+                    })} placeholder="Name" fullWidth style={{ marginBottom: '20px' }}
+                />
+                <div>{internalPrompt.name}</div>
                 <PromptFolderPicker
                     folder={folder} open={folderBrowserOpen} setOpen={setFolderBrowserOpen}
-                    setFolder={(folder) => setInternalPrompt({ ...internalPrompt, name: internalPrompt.name.includes("/") ? [folder, internalPrompt.name.split("/").at(-1)].join("/") : [folder, internalPrompt.name].join("/") })}
+                    setFolder={(folder) => setInternalPrompt({
+                        ...internalPrompt, name:
+                            internalPrompt.name ?
+                                internalPrompt.name.includes("/")
+                                    ? [folder, internalPrompt.name.split("/").at(-1)].join("/")
+                                    : [folder, internalPrompt.name].join("/")
+                                : folder + "/"
+                    })}
                 />
             </>}
             <PromptBuilder prompt={internalPrompt} setPrompt={setInternalPrompt} alwaysExpand noBrew preview={preview} />
