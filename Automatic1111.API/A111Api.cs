@@ -8,15 +8,18 @@ namespace Automatic1111.API {
     /// <summary>API for A1111 operations</summary>
     public class A111Api(string api) {
         private const string SD_MODEL_CHECKPOINT = "sd_model_checkpoint";
-        private static readonly JsonSerializerOptions DESERIALIZER_OPTIONS = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        private static readonly JsonSerializerOptions DESERIALIZER_OPTIONS = new() { 
+            PropertyNameCaseInsensitive = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.AllowNamedFloatingPointLiterals
+        };
         
-        private static readonly JsonSerializerOptions IMAGE_DESERIALIZER_OPTIONS = new JsonSerializerOptions {
+        private static readonly JsonSerializerOptions IMAGE_DESERIALIZER_OPTIONS = new() {
             PropertyNameCaseInsensitive = true, // Case-insensitive matching
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, // Prevents null clutter
             ReadCommentHandling = JsonCommentHandling.Skip // Skips unexpected JSON comments
         };
 
-        private static readonly JsonSerializerOptions PROMPT_SERIALZIER_OPTIONS = new JsonSerializerOptions {
+        private static readonly JsonSerializerOptions PROMPT_SERIALZIER_OPTIONS = new() {
             PropertyNamingPolicy = null,  // Matches API field names
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Avoids sending `null`
         };
@@ -146,7 +149,7 @@ namespace Automatic1111.API {
             var client = new HttpClient();
             var response = await client.GetStringAsync(api + "/sdapi/v1/upscalers");
 
-            return JsonSerializer.Deserialize<List<Upscaler>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No Loras found");
+            return JsonSerializer.Deserialize<List<Upscaler>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No Upscalers found");
         }
 
         public async Task<ExtrasResponse> HiResImage(HiResParameters parameters) {

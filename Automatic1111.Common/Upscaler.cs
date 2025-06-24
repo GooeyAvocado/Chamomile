@@ -4,6 +4,6 @@
         public string? model_name { get; set; } = null;
         public string? model_path { get; set; } = null;
         public string? model_url { get; set; } = null;
-        public double scale { get; set; } = 4;
+        public double? scale { get; set; } = 4;
     }
 }
