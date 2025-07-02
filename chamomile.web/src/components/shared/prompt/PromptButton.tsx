@@ -13,7 +13,7 @@ import { Divider, Tooltip } from '@mui/material';
 import PreviewModal from './preview/PreviewModal';
 
 export default function PromptButton(props: {
-    onBrew: () => void
+    onBrew: (amountOverride?: number) => void
     onSaveAs: () => void
     onSave: () => void
     onLoad: () => void
@@ -44,7 +44,9 @@ export default function PromptButton(props: {
                 ref={anchorRef}
                 fullWidth={fullWidth}
             >
-                <Tooltip title={!pong?.SD ? 'Kitchen\'s closed\n(Could not contact SD)' : 'Click to start brewing images'}><Button onClick={onBrew} disabled={!pong?.SD}>Brew</Button></Tooltip>
+                <Tooltip title={!pong?.SD ? 'Kitchen\'s closed\n(Could not contact SD)' : 'Click to start brewing images'}>
+                    <Button onClick={() => onBrew()} disabled={!pong?.SD}>Brew</Button>
+                </Tooltip>
                 <Button size="small" style={{ width: '40px' }} onClick={handleToggle} >
                     <ArrowDropDownIcon />
                 </Button>
@@ -55,7 +57,13 @@ export default function PromptButton(props: {
                         <Paper>
                             <ClickAwayListener onClickAway={handleClose}>
                                 <MenuList id="split-button-menu" >
-                                    <MenuItem key={"PreviewPromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
+                                    <MenuItem key={"BrewSingleButton"} style={{ fontSize: ".8em" }} disabled={!pong?.SD} onClick={() => {
+                                        handleClose();
+                                        onBrew(1)
+                                    }} >
+                                        Single Brew
+                                    </MenuItem>
+                                    <MenuItem key={"PreviewPromptButton"} style={{ fontSize: ".8em" }} disabled={!pong?.SD} onClick={() => {
                                         handleClose();
                                         setPreviewOpen(true);
                                     }} >

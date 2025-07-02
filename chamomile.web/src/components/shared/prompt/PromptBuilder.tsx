@@ -52,17 +52,21 @@ export default function PromptBuilder(props: {
     const prompt = promptOverride ?? globalPrompt
     const setPrompt = setPromptOverride ?? setGlobalPrompt
 
-    const onBrew = () => {
+    const onBrew = (amountOverride?: number) => {
         const allPrompts = []
-        for (let index = 0; index < orderAmount; index++) {
+        for (let index = 0; index < (amountOverride ?? orderAmount); index++) {
             allPrompts.push(hydratePrompt(prompt, variables, index));
         }
 
         brewApi.fetch((val) => {
-            if (orderAmount !== val?.jobIds.length) {
+            if ((amountOverride ?? orderAmount) !== val?.jobIds.length) {
                 enqueueSnackbar(`Only ${val?.jobIds.length} orders placed!`, { variant: 'warning' })
             } else {
-                enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
+                if (amountOverride === 1) {
+                    enqueueSnackbar(`Single order placed!`, { variant: 'success' })
+                } else {
+                    enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
+                }
             }
 
         }, () => {
@@ -184,7 +188,7 @@ export default function PromptBuilder(props: {
                     onKeyDown={onKeyDown}
                 />
 
-                {/* Seed */}
+                {/* Amount */}
                 {!noBrew && <TextField type="number" disabled={preview}
                     value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
                     placeholder="Steps"
