@@ -13,6 +13,7 @@ import { imageToPrompt } from "../Utils";
 import { useEffect, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
+import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -24,12 +25,12 @@ export default function ImageModal(props: {
     onLeft?: () => void,
     onRight?: () => void,
     onUpscale?: (val: GeneratedImage) => void
-    collapseDefault?:boolean
-    imageChildren?: (collapse:boolean) => JSX.Element
+    collapseDefault?: boolean
+    imageChildren?: (collapse: boolean) => JSX.Element
     infoChildren?: JSX.Element
 }) {
 
-    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale,collapseDefault } = props;
+    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale, collapseDefault } = props;
 
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
@@ -42,10 +43,10 @@ export default function ImageModal(props: {
         if ((image?.basePrompt?.trim()?.length ?? 0) === 0) setPromptMode(0)
     }, [image])
 
-    const onUsePrompt = (promptOverride?:Prompt) => {
+    const onUsePrompt = (promptOverride?: Prompt) => {
         setOpen(false)
         enqueueSnackbar("Prompt loaded!", { variant: 'success' })
-        setPrompt(promptOverride ?? imageToPrompt(image, promptMode===1))
+        setPrompt(promptOverride ?? imageToPrompt(image, promptMode === 1))
     }
 
     // window.open(imageUrl(image?.id ?? 0) + ".png");
@@ -95,25 +96,25 @@ export default function ImageModal(props: {
         <div style={vertical ? { display: 'flex', flexDirection: 'column', height: "100vh", overflowY: 'hidden' } : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
 
             {/* Image side */}
-            <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative', backgroundColor:collapse ?'black' : '#333', transition:'background-color 0.5s ease' }}>
+            <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative', backgroundColor: collapse ? 'black' : '#333', transition: 'background-color 0.5s ease' }}>
                 <img src={imageUrl(image?.id ?? 0, image?.hiResAvailable)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain' }} />
-                    
-                    <div style={{position:'absolute', right:'20px', top:'20px', zIndex:1, opacity:collapse ? 1 : 0, transition:'opacity 0.5s ease'}}>
-                        <IconButton onClick={()=>setCollapse(false)}><Menu/></IconButton>
-                    </div>
 
-                    {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
-                        <IconButton onClick={onLeft}><ArrowBack /></IconButton>
-                    </div>}
-                    {onRight && <div style={{ position: 'absolute', right: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
-                        <IconButton onClick={onRight}><ArrowForward /></IconButton>
-                    </div>}
-                
+                <div style={{ position: 'absolute', right: '20px', top: '20px', zIndex: 1, opacity: collapse ? 1 : 0, transition: 'opacity 0.5s ease' }}>
+                    <IconButton onClick={() => setCollapse(false)}><Menu /></IconButton>
+                </div>
+
+                {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
+                    <IconButton onClick={onLeft}><ArrowBack /></IconButton>
+                </div>}
+                {onRight && <div style={{ position: 'absolute', right: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
+                    <IconButton onClick={onRight}><ArrowForward /></IconButton>
+                </div>}
+
                 <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center' }}>
-                    <ImageHotbar 
+                    <ImageHotbar
                         image={image} onUsePrompt={onUsePrompt}
-                        onLeft={onLeft} onRight={onRight} 
-                        onDelete={onDeleteForce} onFavorite={()=>{onFavorite?.()}}
+                        onLeft={onLeft} onRight={onRight}
+                        onDelete={onDeleteForce} onFavorite={() => { onFavorite?.() }}
                     />
                 </div>
 
@@ -125,19 +126,19 @@ export default function ImageModal(props: {
                 <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
 
                     {/* Buttons */}
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom:'10px' }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom: '10px' }}>
                         <div style={{ display: "flex", gap: "10px" }} >
-                            <IconButton onClick={() => { 
-                                if(collapseDefault) setCollapse(!collapse)
+                            <IconButton onClick={() => {
+                                if (collapseDefault) setCollapse(!collapse)
                                 else setOpen(false)
                             }}><ArrowBack /></IconButton>
-                            {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={()=>{onFavorite()}}>{image?.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>}
+                            {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={() => { onFavorite() }}>{image?.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>}
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }} >
                             <PromptReorderButton prompt={imageToPrompt(image, promptMode === 1)} iconOverride={promptMode === 1 ? <CoffeeOutlined /> : undefined} />
                             <Tooltip title={promptMode === 1 ? 'Use this base prompt' : 'Use this prompt'}>
-                                <IconButton onClick={()=>onUsePrompt()}>
+                                <IconButton onClick={() => onUsePrompt()}>
                                     {promptMode === 1 ? <TerminalOutlined /> : <Terminal />}
                                 </IconButton>
                             </Tooltip>
@@ -150,20 +151,30 @@ export default function ImageModal(props: {
 
                         {/* Prompt */}
                         <Card elevation={5}>
-                            <Tabs value={promptMode} onChange={(_, val) => setPromptMode(val)}>
-                                <Tab sx={{ textTransform: 'none' }} label="Prompt" />
-                                {(image?.basePrompt?.trim().length ?? 0) !== 0 && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
-                            </Tabs>
+                            <div style={{ display: 'flex' }}>
+                                <Tabs value={promptMode} onChange={(_, val) => setPromptMode(val)} style={{ flex: "1" }}>
+                                    <Tab sx={{ textTransform: 'none' }} label="Prompt" />
+                                    {(image?.basePrompt?.trim().length ?? 0) !== 0 && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
+                                </Tabs>
+                                <CopyToClipboardButton text={promptMode === 0 ? image?.prompt : image?.basePrompt} style={{ paddingRight: "16px" }} />
+                            </div>
                             <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>{
-                                promptMode === 0 ? image?.prompt : image?.basePrompt
+                                <>
+                                    <div>{promptMode === 0 ? image?.prompt : image?.basePrompt}</div>
+
+                                </>
+
                             }</div>
 
                         </Card>
 
                         {/* Negative Prompt */}
                         {(image?.negativePrompt?.trim().length ?? 0) !== 0 && <>
-                            <div style={{ marginTop: "20px" }}><b>Negative Prompt</b></div>
-                            <div style={{ fontSize: ".7em", fontFamily: 'monospace',  whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{image?.negativePrompt}</div>
+                            <div style={{ marginTop: "20px", display: 'flex', alignItems: "center" }}>
+                                <b style={{ flex: "1" }}>Negative Prompt</b>
+                                <CopyToClipboardButton text={image?.negativePrompt} style={{ paddingRight: "16px" }} />
+                            </div>
+                            <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{image?.negativePrompt}</div>
                         </>}
 
                         {/* Model */}
