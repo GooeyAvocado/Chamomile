@@ -1,5 +1,5 @@
 import { Coffee, DirectionsRun, ExpandLess, ExpandMore, Height, ModelTraining, Percent, Terminal, ThumbDown, Tune, Yard } from "@mui/icons-material";
-import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
+import { Box, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
 import PromptButton from "./PromptButton";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -7,7 +7,7 @@ import PromptModelSelectorModal from "./PromptModelSelectorModal";
 import { Prompt } from "../../../model/Prompt";
 import PromptEditorModal from "./PromptEditorModal";
 import useApi from "../../hooks/useApi";
-import { createPrompt, updatePrompt } from "../../../api/Prompts";
+import { createPrompt, getWildcards, updatePrompt } from "../../../api/Prompts";
 import { useSnackbar } from "notistack";
 import PromptSelectorModal from "./PromptSelectorModal";
 import VariableEditor from "../variables/VariableEditor";
@@ -19,6 +19,8 @@ import SamplerSelector from "./SamplerSelector";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import PromptCard from "./PromptCard";
 import { usePingPong } from "../../hooks/usePingPong";
+import { useLoras } from "../../hooks/useLoras"
+import { BaseSuggestionData, MentionsTextField } from "@jackstenglein/mui-mentions";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -31,12 +33,49 @@ export default function PromptBuilder(props: {
 
     const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight } = props
 
+    const loraStyle = {
+        control: {
+            fontSize: 16,
+            fontFamily: 'Roboto, sans-serif',
+            padding: '6px 8px',
+            width: '100%',
+            minHeight: 100,
+            outline: 'none',
+            border: 'none',
+            backgroundColor: 'transparent',
+        },
+        highlighter: {
+            padding: '6px 8px',
+            overflow: 'hidden',
+        },
+        input: {
+            margin: 0,
+        },
+        suggestions: {
+            list: {
+                backgroundColor: 'white',
+                border: '1px solid #ccc',
+                fontSize: 16,
+            },
+            item: {
+                padding: '5px 15px',
+                borderBottom: '1px solid #eee',
+                '&focused': {
+                    backgroundColor: '#f0f0f0',
+                },
+            },
+        },
+    };
+
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount, variables } = usePrompt()
     const [expanded, setExpanded] = useState(false)
     const [modelsOpen, setModelsOpen] = useState(false)
     const [varsOpen, setVarsOpen] = useState(false)
     const [saveAys, setSaveAys] = useState(false)
     const brewApi = useApi(enqueuePrompts)
+
+    const { loras } = useLoras();
+    const { data: wildcards } = useApi(getWildcards, true)
 
     const createPromptApi = useApi(createPrompt)
     const updatePromptApi = useApi(updatePrompt)
@@ -104,7 +143,8 @@ export default function PromptBuilder(props: {
         if (e.ctrlKey) {
             switch (e.key) {
                 case 'Enter':
-                    if (pong?.SD) onBrew()
+                    e.preventDefault()
+                    if (pong?.SD) onBrew(e.altKey ? 1 : undefined)
                     else enqueueSnackbar("Cannot enqueue prompt, Stable Diffusion is unavailable", { variant: 'warning' })
                     break;
                 case 's':
@@ -130,11 +170,23 @@ export default function PromptBuilder(props: {
     return <>
 
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <TextField disabled={preview}
-                value={prompt.positivePrompt} onChange={(e) => setPrompt({ ...prompt, positivePrompt: e.target.value })}
-                placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
 
+            <MentionsTextField disabled={preview}
+                value={prompt.positivePrompt} onChange={(__, newPlainText) => setPrompt({ ...prompt, positivePrompt: newPlainText })}
+                placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
                 onKeyDown={onKeyDown}
+                dataSources={[
+                    {
+                        data: loras?.map(a => ({ id: a.alias, display: "<lora:" + a.alias + ":1>" } as BaseSuggestionData)) ?? [],
+                        trigger: "<"
+                    },
+                    {
+                        data: Object.keys(wildcards ?? {})?.map(a => ({ id: a, display: "__" + a + "__" } as BaseSuggestionData)) ?? [],
+                        trigger: "__"
+                    },
+                ]}
+
+
 
                 fullWidth slotProps={{
                     htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
@@ -170,6 +222,50 @@ export default function PromptBuilder(props: {
                     saveAsEnabled={existingPrompt}
                 />}
         </div>
+
+        {/* <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+
+            <TextField disabled={preview}
+                value={prompt.positivePrompt} onChange={(e) => setPrompt({ ...prompt, positivePrompt: e.target.value })}
+                placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
+
+                onKeyDown={onKeyDown}
+
+                fullWidth slotProps={{
+                    htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
+                    input: {
+
+                        startAdornment: (
+                            <InputAdornment position="start"> <Terminal /> </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <div style={{ display: 'flex', flexDirection: vertical ? 'column' : undefined }}>
+                                    {!noBrew && <Tooltip title="Variables and Overrides">
+                                        <IconButton onClick={() => { setVarsOpen(true) }}><Percent /></IconButton>
+                                    </Tooltip>}
+                                    {!preview && <Tooltip title="Select Models">
+                                        <IconButton onClick={() => { setModelsOpen(true) }}><ModelTraining /></IconButton>
+                                    </Tooltip>}
+                                    {!alwaysExpand && <Tooltip title="More Options">
+                                        <IconButton onClick={() => { setExpanded(!expanded) }}>{expanded ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                                    </Tooltip>}
+                                </div>
+                            </InputAdornment>
+                        )
+                    }
+                }}
+            />
+
+            {!noBrew && !vertical &&
+                <PromptButton
+                    onBrew={onBrew}
+                    onLoad={() => setLoadOpen(true)}
+                    onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)}
+                    onSaveAs={() => setSaveOpen(true)}
+                    saveAsEnabled={existingPrompt}
+                />}
+        </div> */}
 
         {(alwaysExpand || expanded) && <>
             <div style={{ marginTop: "10px", display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
