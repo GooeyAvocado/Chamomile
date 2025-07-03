@@ -37,7 +37,7 @@ export default function FilterBuilder(props: {
         && filter.query?.trim() === ''
 
     return <>
-        <div style={{ width: "100%", display: 'flex', gap: "20px", marginBottom: "10px", marginTop: "10px", flexWrap: "wrap", justifyContent: 'space-between', alignItems:'center' }}>
+        <div style={{ width: "100%", display: 'flex', gap: "20px", marginBottom: "10px", marginTop: "10px", flexWrap: "wrap", justifyContent: 'space-between', alignItems: 'center' }}>
             <TextField value={query} onChange={(e) => { setQuery(e.target.value) }} placeholder="Search"
 
                 multiline={vertical}
@@ -78,7 +78,7 @@ export default function FilterBuilder(props: {
         </div>
 
         <AdvSearchModal open={advSearchOpen} onClose={() => setAdvSearchOpen(false)} />
-        <StatisticsModal open={statsOpen} setOpen={setStatsOpen} filter={filter} filterEmpty={filterEmpty}/>
+        <StatisticsModal open={statsOpen} setOpen={setStatsOpen} filter={filter} filterEmpty={filterEmpty} />
 
         {expanded && <div style={{ display: "flex", flexWrap: 'wrap', width: '100%', marginBottom: "10px", gap: "20px" }}>
 
