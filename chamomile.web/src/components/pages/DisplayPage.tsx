@@ -27,7 +27,7 @@ export default function DisplayPage() {
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const { progress, queue,activeJob } = useQueue((val) => {
+    const { progress, queue, activeJob } = useQueue((val) => {
         setSelectedImage(val)
         setImages((prev) => {
             return [val, ...prev].slice(0, MAX_BUFFER_SIZE)
@@ -100,12 +100,12 @@ export default function DisplayPage() {
     }
 
     return <>
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', maxWidth:'256px', margin:"0 auto" }}>
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', maxWidth: '256px', margin: "0 auto" }}>
             <img src="ChamomileWordsPrerendered.png" style={{ width: '256px' }} />
-            {activeJob && <div style={{width:'192px'}}><BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0)=== 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} progress={(progress?.progress ?? 0) * 100}/></div>}
-            <div style={{marginTop:'10px'}}><b>Display Mode</b></div>
-            <hr style={{width:"256px"}}/>
-            <div style={{fontSize:'.8em'}}>Start rendering images on another window and they will appear here</div>
+            {activeJob && <div style={{ width: '192px' }}><BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} progress={(progress?.progress ?? 0) * 100} /></div>}
+            <div style={{ marginTop: '10px' }}><b>Display Mode</b></div>
+            <hr style={{ width: "256px" }} />
+            <div style={{ fontSize: '.8em' }}>Start rendering images on another window and they will appear here</div>
         </div>
         <ImageModal
             open={!!selectedImage} setOpen={() => { }}
@@ -113,7 +113,7 @@ export default function DisplayPage() {
             onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete}
             onLeft={onLeft} onRight={onRight}
             onFavorite={onFavorite} onUpscale={onUpscale} collapseDefault
-            imageChildren={(collapse)=>{return <BrewingImageHUD progress={progress} queue={queue} activeJob={activeJob} collapsed={collapse}/>}}
+            imageChildren={(collapse) => { return <BrewingImageHUD progress={progress} queue={queue} activeJob={activeJob} collapsed={collapse} /> }}
         />
         <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
             Are you sure you want to delete this image?
@@ -121,28 +121,28 @@ export default function DisplayPage() {
     </>
 }
 
-function BrewingImageHUD(props:{
+function BrewingImageHUD(props: {
     queue: Prompt[]
     progress: Progress | undefined
     activeJob?: Prompt,
     collapsed?: boolean
-}){
+}) {
 
-    const {progress,queue,activeJob,collapsed} = props
+    const { progress, queue, activeJob, collapsed } = props
 
-    return <div style={{position:'absolute', left:"20px", top:'20px', zIndex:'1', opacity:collapsed && activeJob ? 1 : 0, transition:'opacity 0.2s ease-in-out'}}>
-         <Accordion expanded={activeJob !== undefined} >
-        <AccordionSummary expandIcon={ activeJob ? <ExpandMore /> : <></>}>
-            <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-                {activeJob && <CircularProgress size={16} variant={progress ? "determinate" : "indeterminate"} value={(progress?.progress ?? 0) * 100}/>}
-                <div>{queue.length > 0 ? `Brewing ${queue.length + 1} images` : activeJob ? 'Brewing an image': '' }</div>
-            </div>
-        </AccordionSummary>
-        <AccordionDetails>
-        <div style={{width:'192px', marginTop:"-10px"}}>
-            <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0)=== 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} progress={(progress?.progress ?? 0) * 100}/>
-        </div>
-        </AccordionDetails>
-      </Accordion>
+    return <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '1', opacity: collapsed && activeJob ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}>
+        <Accordion expanded={activeJob !== undefined} >
+            <AccordionSummary expandIcon={activeJob ? <ExpandMore /> : <></>}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {activeJob && <CircularProgress size={16} variant={progress ? "determinate" : "indeterminate"} value={(progress?.progress ?? 0) * 100} />}
+                    <div>{queue.length > 0 ? `Brewing ${queue.length + 1} images` : activeJob ? 'Brewing an image' : ''}</div>
+                </div>
+            </AccordionSummary>
+            <AccordionDetails>
+                <div style={{ width: '192px', marginTop: "-10px" }}>
+                    <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} progress={(progress?.progress ?? 0) * 100} />
+                </div>
+            </AccordionDetails>
+        </Accordion>
     </div>
 }

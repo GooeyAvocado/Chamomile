@@ -73,7 +73,8 @@ export default function ImageViewer(props: {
         delApi.fetch(() => {
             enqueueSnackbar("Image deleted!", { variant: 'success' })
             if (selectedImage) {
-                if (imageApi.count === 0) {
+                //If the count is 1, then we've deleted the last image
+                if (imageApi.count === 1) {
                     setSelectedImage(undefined)
                 } else if (selectedIndex() >= imageApi.count - 1) {
                     onLeft()

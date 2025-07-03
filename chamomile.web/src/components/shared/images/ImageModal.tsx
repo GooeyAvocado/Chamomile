@@ -93,7 +93,7 @@ export default function ImageModal(props: {
                     break;
             }
         }}>
-        <div style={vertical ? { display: 'flex', flexDirection: 'column', height: "100vh", overflowY: 'hidden' } : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
+        <div key={image?.id} style={vertical ? { display: 'flex', flexDirection: 'column', height: "100vh", overflowY: 'hidden' } : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
 
             {/* Image side */}
             <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative', backgroundColor: collapse ? 'black' : '#333', transition: 'background-color 0.5s ease' }}>
