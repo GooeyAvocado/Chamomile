@@ -20,7 +20,7 @@ export default function ImageTile(props: {
     const { image, onClick, onDelete, onFavorite } = props;
     const { setPrompt } = usePrompt();
 
-    const [deleteAys,setDeleteAys] = useState(false)
+    const [deleteAys, setDeleteAys] = useState(false)
 
     return <>
         <ContextMenu options={[
@@ -35,7 +35,7 @@ export default function ImageTile(props: {
             { text: "Delete", icon: <Delete />, onClick: () => { setDeleteAys(true) } },
         ]}>
             <BaseImageTile>
-                <CardActionArea onClick={onClick} style={{ height: "100%", position: "relative" }}>
+                <CardActionArea onClick={onClick} style={{ height: "100%", width: "100%", aspectRatio: "1/1", position: "relative" }}>
                     <img src={'/outline.png'} style={{ width: "50%", height: "50%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0', margin: '25%' }} />
                     <img src={imageUrl(image.id)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
                     {image.favorite && <div style={{ position: 'absolute', top: 5, left: 5 }}><Star /></div>}
@@ -43,11 +43,11 @@ export default function ImageTile(props: {
             </BaseImageTile>
         </ContextMenu>
 
-        {deleteAys && <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={()=>{
+        {deleteAys && <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={() => {
             onDelete(image)
             setDeleteAys(false);
         }}>
-            <div style={{textAlign:'center'}}><img src={imageUrl(image.id)} style={{height:"256px"}}/></div>
+            <div style={{ textAlign: 'center' }}><img src={imageUrl(image.id)} style={{ height: "256px" }} /></div>
         </AreYouSureModal>}
     </>
 
