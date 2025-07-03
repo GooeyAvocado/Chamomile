@@ -141,23 +141,28 @@ export default function ImageViewer(props: {
         }}>
             {showBrewing && groupedQueue.map(p =>
                 p.length === 0 ? <></> :
-                    p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} /> :
-                        <QueuedGroupImageTile prompts={p} onCancel={cancel} />
+                    p.length === 1 ? <QueuedImageTile key={p[0].positivePrompt} prompt={p[0]} onCancel={() => cancel(p[0].id)} /> :
+                        <QueuedGroupImageTile key={p[0].positivePrompt} prompts={p} onCancel={cancel} />
             )}
+
             {showBrewing && activeJob && <>
                 <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100} />
                 <PromptEditorModal onOk={() => { }} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress} />
             </>}
+
             {showBrewing && currentUpload && <>
                 <BrewingImageTile imageSrc={uploadBrewBlob ?? ""} progress={uploadProgress} />
             </>}
-            {imageApi.images?.map(a => <ImageTile image={a} onDelete={onDelete} onFavorite={onFavorite} onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setOpen(true) }} />)}
+
+            {imageApi.images?.map(a => <ImageTile key={`image-${a.id}`} image={a} onDelete={onDelete} onFavorite={onFavorite} onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setOpen(true) }} />)}
+
             {!onClick && <>
                 <ImageModal open={open} setOpen={setOpen} image={selectedImage} onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onFavorite={onFavorite} onLeft={onLeft} onRight={onRight} onUpscale={onUpscale} />
                 <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
                     Are you sure you want to delete this image?
                 </AreYouSureModal>
             </>}
+
         </div>
         {imageApi.count === 0 && !activeJob && (queue?.length ?? 0) === 0 && <>
             {filterIsEmpty() && !imageApi.loading && showWelcome ? <WelcomePane />

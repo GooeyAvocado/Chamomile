@@ -4,19 +4,19 @@ import MenuItem from '@mui/material/MenuItem';
 import { Divider, ListItemIcon } from '@mui/material';
 
 export class ContextMenuOption {
-    text?: React.ReactNode = "";
-    customContent?:(onClose:()=>void) => React.ReactNode
-    disabled?:boolean
-    onClick?: (e:React.MouseEvent<HTMLLIElement, MouseEvent>) => void = ()=>{};
-    type?: "item"|"divider"|"custom" = "item"
-    icon?: React.ReactNode;
+  text?: React.ReactNode = "";
+  customContent?: (onClose: () => void) => React.ReactNode
+  disabled?: boolean
+  onClick?: (e: React.MouseEvent<HTMLLIElement, MouseEvent>) => void = () => { };
+  type?: "item" | "divider" | "custom" = "item"
+  icon?: React.ReactNode;
 }
 
 
-export default function ContextMenu(props:{
-    children:React.ReactNode
-    options: ContextMenuOption[]
-    style?: React.CSSProperties
+export default function ContextMenu(props: {
+  children: React.ReactNode
+  options: ContextMenuOption[]
+  style?: React.CSSProperties
 }) {
   const [contextMenu, setContextMenu] = React.useState<{
     mouseX: number;
@@ -28,13 +28,13 @@ export default function ContextMenu(props:{
     setContextMenu(
       contextMenu === null
         ? {
-            mouseX: event.clientX + 2,
-            mouseY: event.clientY - 6,
-          }
+          mouseX: event.clientX + 2,
+          mouseY: event.clientY - 6,
+        }
         : // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
-          // Other native context menus might behave different.
-          // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
-          null,
+        // Other native context menus might behave different.
+        // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
+        null,
     );
   };
 
@@ -45,7 +45,7 @@ export default function ContextMenu(props:{
   return (
     <div onContextMenu={handleContextMenu} style={{ ...props.style, cursor: 'context-menu' }}>
       {props.children}
-      
+
       <Menu
         open={contextMenu !== null}
         onClose={handleClose}
@@ -56,13 +56,15 @@ export default function ContextMenu(props:{
             : undefined
         }
       >
-        {props.options.filter(a=>!!a).map(a=> a.type==="custom"? a.customContent?.(handleClose) : a.type==="divider" ? <Divider/> :
-            <MenuItem disabled={a.disabled} onClick={(e)=>{
-                handleClose();
-                a.onClick?.(e);
+        {props.options.filter(a => !!a).map((a, i) => a.type === "custom" ? a.customContent?.(handleClose) :
+          a.type === "divider"
+            ? <Divider /> :
+            <MenuItem disabled={a.disabled} onClick={(e) => {
+              handleClose();
+              a.onClick?.(e);
             }}>
-                {a.icon && <ListItemIcon>{a.icon}</ListItemIcon>} 
-                {a.text}
+              {a.icon && <ListItemIcon>{a.icon}</ListItemIcon>}
+              {a.text}
             </MenuItem>
         )}
       </Menu>
