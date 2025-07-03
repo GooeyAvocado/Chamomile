@@ -27,7 +27,7 @@ export default function SamplerSelector(props: {
                 </InputAdornment>
             }
         >
-            {data?.map(a => <MenuItem value={a.name}>{a.name}</MenuItem>)}
+            {data?.map(a => <MenuItem key={a.name} value={a.name}>{a.name}</MenuItem>)}
         </Select>
     </FormControl>
 

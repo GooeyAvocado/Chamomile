@@ -56,7 +56,7 @@ export default function ContextMenu(props: {
             : undefined
         }
       >
-        {props.options.filter(a => !!a).map((a, i) => a.type === "custom" ? a.customContent?.(handleClose) :
+        {props.options.filter(a => !!a).map(a => a.type === "custom" ? a.customContent?.(handleClose) :
           a.type === "divider"
             ? <Divider /> :
             <MenuItem disabled={a.disabled} onClick={(e) => {

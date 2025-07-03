@@ -22,7 +22,7 @@ export default function SchedulerSelector(props: {
                 </InputAdornment>
             }
         >
-            {data?.map(a => <MenuItem value={a.label}>{a.label}</MenuItem>)}
+            {data?.map(a => <MenuItem key={a.label} value={a.label}>{a.label}</MenuItem>)}
         </Select>
     </FormControl>
 

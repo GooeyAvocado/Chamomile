@@ -24,7 +24,7 @@ export default function LoraBrowserModal(props: {
 
     const [query, setQuery] = useState("")
     const [type, setType] = useState("");
-    const [availability,setAvailability] = useState<0|1|-1>(0);
+    const [availability, setAvailability] = useState<0 | 1 | -1>(0);
 
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
@@ -41,8 +41,8 @@ export default function LoraBrowserModal(props: {
                 <div style={{ width: "200px" }}>
                     <ModelTypeSelector setModelType={(e) => setType(e)} modelType={type} />
                 </div>
-                {showNone && <div style={{width:"200px"}}>
-                    <AvailabilitySelector availability={availability} setAvailability={setAvailability}/>
+                {showNone && <div style={{ width: "200px" }}>
+                    <AvailabilitySelector availability={availability} setAvailability={setAvailability} />
                 </div>}
             </div>
             <div style={{ flex: '1', overflowY: 'auto' }}>
@@ -55,7 +55,7 @@ export default function LoraBrowserModal(props: {
 
 }
 
-function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) => void, showNone?: boolean, type: string, availability: 0|1|-1  }) {
+function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) => void, showNone?: boolean, type: string, availability: 0 | 1 | -1 }) {
     const { data, query, onOk, showNone, type, availability } = props
 
     const [editorModel, setEditorModel] = useState(undefined as Lora | undefined)
@@ -88,25 +88,25 @@ function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) =>
                     alias: '',
                     bannerImage: undefined,
                     name: 'Any',
-                    type : '',
+                    type: '',
                     description: '',
                     samplePrompt: '',
                 } as Lora,
-                ...(data ?? []).filter(a=>{
-                        switch (availability) {
-                            case 1:
-                                return a.isAvailable
-                            case -1:
-                                return !a.isAvailable
-                            default:
-                                return true;
-                        }
-                    })
+                ...(data ?? []).filter(a => {
+                    switch (availability) {
+                        case 1:
+                            return a.isAvailable
+                        case -1:
+                            return !a.isAvailable
+                        default:
+                            return true;
+                    }
+                })
             ]
             : (data ?? []).filter(a => a.isAvailable)
         )?.filter(a => query.trim().length === 0 ? true : a.name.toLowerCase().includes(query.toLowerCase()) || a.description?.toLowerCase().includes(query.toLowerCase()) || a.samplePrompt?.toLowerCase().includes(query.toLowerCase()))
             .filter(a => type?.trim().length === 0 ? true : a.type?.toLowerCase().includes(type?.toLowerCase()))
-            .map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            .map(a => <div key={a.alias} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <LoraTile lora={a} onClick={() => onOk(a)}
                     onViewImage={() => {
                         setViewImage(a.bannerImage ?? -1)

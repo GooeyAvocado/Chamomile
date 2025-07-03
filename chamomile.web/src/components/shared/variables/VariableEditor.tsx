@@ -114,13 +114,13 @@ export default function VariableEditor(props: {
                     <div style={{ fontSize: '1.3em' }}><b>There are no variables</b></div>
                     <hr style={{ width: '300px' }} />
                     <div style={{ width: "250px", textAlign: 'center', fontSize: '.8em' }}>Add a variable by putting an identifier between percentages (%MyVar%)</div>
-                </div> : varNames.map(a => <VariableEditorRow varName={a} value={variables[a]} updateValue={(val) => {
+                </div> : varNames.map(a => <VariableEditorRow key={a} varName={a} value={variables[a]} updateValue={(val) => {
                     setVariables({ ...variables, [a]: val })
                 }} />)
             }
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Wildcards" >
-            {wildNames.map(a => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {wildNames.map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <IconButton onClick={() => {
                     const updatedVariables = { ...variables };
                     delete updatedVariables[a];
@@ -169,7 +169,7 @@ export default function VariableEditor(props: {
             </div>
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Overrides">
-            {custNames.map(a => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {custNames.map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <IconButton onClick={() => {
                     const updatedVariables = { ...variables };
                     delete updatedVariables[a];

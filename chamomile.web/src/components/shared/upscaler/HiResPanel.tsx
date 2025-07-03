@@ -12,7 +12,7 @@ export default function HiResPanel(props: {
     updateImage?: (val: GeneratedImage) => void
 }) {
 
-    const {pong} = usePingPong();
+    const { pong } = usePingPong();
 
     const { image, updateImage } = props
     const { selectedUpscaler, setSelectedUpscaler, setUpscaleScale, upscaleScale, upscalers } = useUpscalers()
@@ -39,17 +39,17 @@ export default function HiResPanel(props: {
     return <Card elevation={7}>
         <div style={{ padding: '10px', height: "100px", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: upscaleApi.loading ? 'center' : '' }}>
             {upscaleApi.loading ? <>
-                <CircularProgress/>
+                <CircularProgress />
             </> : <>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
 
-                    <FormControl fullWidth disabled = {!pong?.SD}>
+                    <FormControl fullWidth disabled={!pong?.SD}>
                         <InputLabel>Upscaler</InputLabel>
                         <Select
                             value={selectedUpscaler} onChange={(e) => setSelectedUpscaler(e.target.value)} size="small" label='Upscaler'
                             slotProps={{ root: { style: { fontSize: '.8em' } } }}
                         >
-                            {upscalers?.map((u) => <MenuItem value={u} style={{ fontSize: '.8em' }}>{u}</MenuItem>)}
+                            {upscalers?.map((u) => <MenuItem key={u} value={u} style={{ fontSize: '.8em' }}>{u}</MenuItem>)}
                         </Select>
                     </FormControl>
 

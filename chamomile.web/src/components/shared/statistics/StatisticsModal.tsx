@@ -35,7 +35,7 @@ export default function StatisticsModal(props: {
     const stacked = width < 450
 
     const modelAvailable = (val: string) => models?.find(a => a.title === val)?.isAvailable
-    const loraAvailable = (val: string) => val==="None" || loras?.find(a => a.alias === val)?.isAvailable
+    const loraAvailable = (val: string) => val === "None" || loras?.find(a => a.alias === val)?.isAvailable
 
     const { data: loraData, fetch: fetchLoraUsage, loading: loraLoading } = useApi(getLoraUsage)
     const { data: modelData, fetch: fetchModelUsage, loading: modelLoading } = useApi(getModelUsage)
@@ -43,11 +43,11 @@ export default function StatisticsModal(props: {
     const refreshData = () => {
         fetchLoraUsage(() => {
             setFilterDirty(false)
-        }, undefined, {...filter, lastImage:limit} as FilterOptions)
+        }, undefined, { ...filter, lastImage: limit } as FilterOptions)
 
         fetchModelUsage(() => {
             setFilterDirty(false)
-        }, undefined, {...filter, lastImage:limit} as FilterOptions)
+        }, undefined, { ...filter, lastImage: limit } as FilterOptions)
     }
 
     useEffect(() => {
@@ -72,7 +72,7 @@ export default function StatisticsModal(props: {
         tabContentStyle={{ height: "60vh", display: 'flex', flexDirection: 'column', overflowY: 'auto', backgroundColor: "#222", padding: "10px" }}
     >
         <TabbedModalTitle>Usage Statistics</TabbedModalTitle>
-        <TabbedModalConsistentContent position="top" style={{ display: 'flex', gap: '10px', marginBottom:'10px', marginTop:'5px' }}>
+        <TabbedModalConsistentContent position="top" style={{ display: 'flex', gap: '10px', marginBottom: '10px', marginTop: '5px' }}>
             <AvailabilitySelector availability={availability} setAvailability={setAvailability} />
             <FormControl fullWidth>
                 <InputLabel>Limit</InputLabel>
@@ -93,18 +93,18 @@ export default function StatisticsModal(props: {
             </FormControl>
         </TabbedModalConsistentContent>
         <TabbedModalTabContent label="Models">
-            {open && modelLoading ? <LoadingSpinner text="Loading model usage information" /> : <ModelUsageBarGraph usage={availability=== 0 
-                ? modelData 
-                : availability === 1 
-                    ? modelData.filter(a=>modelAvailable(a.name)) 
-                    : modelData.filter(a=>!modelAvailable(a.name))} />}
+            {open && modelLoading ? <LoadingSpinner text="Loading model usage information" /> : <ModelUsageBarGraph usage={availability === 0
+                ? modelData
+                : availability === 1
+                    ? modelData.filter(a => modelAvailable(a.name))
+                    : modelData.filter(a => !modelAvailable(a.name))} />}
         </TabbedModalTabContent>
         <TabbedModalTabContent label="LoRAs">
-            {open && loraLoading ? <LoadingSpinner text="Loading LoRA usage information" /> : <LoraUsageBarGraph usage={availability=== 0 
-                ? loraData 
-                : availability === 1 
-                    ? loraData.filter(a=>loraAvailable(a.name)) 
-                    : loraData.filter(a=>!loraAvailable(a.name))} />}
+            {open && loraLoading ? <LoadingSpinner text="Loading LoRA usage information" /> : <LoraUsageBarGraph usage={availability === 0
+                ? loraData
+                : availability === 1
+                    ? loraData.filter(a => loraAvailable(a.name))
+                    : loraData.filter(a => !loraAvailable(a.name))} />}
         </TabbedModalTabContent>
         <TabbedModalActions><Button onClick={() => setOpen(false)}>OK</Button></TabbedModalActions>
     </TabbedModal>
@@ -129,12 +129,12 @@ function UsageBarGraph(props: {
     const { width } = useWindowDimensions();
     const vertical = width < 750
 
-    if(usage.length===0) return <div style={{flex:'1', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:"10px"}}>
-        <img src="/outline.png" width={64}/>
+    if (usage.length === 0) return <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: "10px" }}>
+        <img src="/outline.png" width={64} />
         <div>No usage data!</div>
     </div>
 
-    return usage?.map(u => <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+    return usage?.map(u => <div key={u.name} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <div style={{ width: vertical ? "52px" : "300px", flexShrink: '0' }}><CardComponent name={u.name} vertical={vertical} /></div>
         <div style={{ flex: '1', paddingRight: "10px", height: '75px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ width: `${(u.count * 100) / max}%`, height: '50%', backgroundColor: "#556677", display: "flex", alignItems: 'center', paddingLeft: '10px' }}>

@@ -133,7 +133,7 @@ function GridViewMode(props: { data: Prompt[], query: string, setEditPrompt: (va
             {data?.filter(a => query.trim().length === 0 ? true :
                 a.name.toLowerCase().includes(query.toLowerCase()) ||
                 a.positivePrompt.toLowerCase().includes(query.toLowerCase())
-            ).map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            ).map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
                     { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
@@ -163,7 +163,7 @@ function GridViewMode(props: { data: Prompt[], query: string, setEditPrompt: (va
                     </CardContent>
                 </CardActionArea>
             </Card>}
-            {folderList?.map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {folderList?.map(a => <div key={a} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <Card>
                     <CardActionArea onClick={() => setCurrLocation(currLocation.length === 0 ? a : currLocation + "/" + a)}>
                         <CardContent style={{ display: 'flex', gap: "5px", alignItems: "center" }}>
@@ -180,7 +180,7 @@ function GridViewMode(props: { data: Prompt[], query: string, setEditPrompt: (va
             gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
             gap: '20px'
         }}>
-            {currPrompts?.map(a => <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {currPrompts?.map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
                     { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} menuButonMode onClick={onClose} /> },
                     { type: 'divider' },

@@ -28,7 +28,7 @@ export default function HelpDisplay(props: {
                 onChange={(e) => setSelectedTab(e.target.value as number)}
                 fullWidth
             >
-                {helpSectionTitles.map((a, i) => <MenuItem value={i}>{a}</MenuItem>)}
+                {helpSectionTitles.map((a, i) => <MenuItem key={a} value={i}>{a}</MenuItem>)}
             </Select>
             <hr style={{ width: "100%" }} />
 
@@ -66,7 +66,7 @@ export default function HelpDisplay(props: {
                     }
                 }}
             >
-                {helpSectionTitles.map((a, i) => <Tab value={i} label={a} />)}
+                {helpSectionTitles.map((a, i) => <Tab key={a} value={i} label={a} />)}
             </Tabs>
         </div>
         <hr />
