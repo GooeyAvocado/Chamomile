@@ -1,5 +1,5 @@
 import { Coffee, DirectionsRun, ExpandLess, ExpandMore, Height, ModelTraining, Percent, Terminal, ThumbDown, Tune, Yard } from "@mui/icons-material";
-import { Box, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
+import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
 import PromptButton from "./PromptButton";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -32,41 +32,6 @@ export default function PromptBuilder(props: {
 }) {
 
     const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight } = props
-
-    const loraStyle = {
-        control: {
-            fontSize: 16,
-            fontFamily: 'Roboto, sans-serif',
-            padding: '6px 8px',
-            width: '100%',
-            minHeight: 100,
-            outline: 'none',
-            border: 'none',
-            backgroundColor: 'transparent',
-        },
-        highlighter: {
-            padding: '6px 8px',
-            overflow: 'hidden',
-        },
-        input: {
-            margin: 0,
-        },
-        suggestions: {
-            list: {
-                backgroundColor: 'white',
-                border: '1px solid #ccc',
-                fontSize: 16,
-            },
-            item: {
-                padding: '5px 15px',
-                borderBottom: '1px solid #eee',
-                '&focused': {
-                    backgroundColor: '#f0f0f0',
-                },
-            },
-        },
-    };
-
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount, variables } = usePrompt()
     const [expanded, setExpanded] = useState(false)
     const [modelsOpen, setModelsOpen] = useState(false)
