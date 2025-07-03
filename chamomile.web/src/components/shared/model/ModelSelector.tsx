@@ -27,7 +27,7 @@ export default function ModelSelector(props: {
 
 
     return <>
-        <Autocomplete disabled={disabled} key={model}
+        <Autocomplete disabled={disabled} key={model} disableClearable
             freeSolo loading={loading || externalLoading} loadingText={loading ? "Loading..." : "Type to begin"}
             getOptionLabel={(option) => (option as Model)?.name ?? ""}
             options={showNone ? [{

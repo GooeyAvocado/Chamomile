@@ -25,7 +25,7 @@ export default function LoraSelector(props: {
 
 
     return <>
-        <Autocomplete key={lora}
+        <Autocomplete key={lora} disableClearable
             freeSolo loading={loading} loadingText={loading ? "Loading..." : "Type to begin"}
             getOptionLabel={(option) => (option as Lora)?.name ?? ""}
             options={showNone ? [{
