@@ -96,16 +96,16 @@ export default function ModelCard(props: {
     const CardText = () => <Typography style={{ fontSize: '1em' }}>
         <div style={{ flex: '1', color: model.isAvailable ? "white" : "#777" }}>
             <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                {model?.type?.length > 0 && <ModelTypePill type={model?.type} style={{flexShrink:"0"}} />}
+                {model?.type?.length > 0 && <ModelTypePill type={model?.type} style={{ flexShrink: "0" }} />}
                 <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
                     <b>{model.name}</b>
                 </div>
             </div>
-            <div style={{ fontSize: '.8em' }}>{model.isAvailable ? model.title : "Unavailable"}</div>
+            <div style={{ fontSize: ".8em" }}>{`${model.title}${model.isAvailable ? "" : " (Unavailable)"}`}</div>
         </div>
     </Typography>
 
-    const CardContent = (props: { tiny?: boolean, style?: CSSProperties, imageStyle?: CSSProperties }) => <div 
+    const CardContent = (props: { tiny?: boolean, style?: CSSProperties, imageStyle?: CSSProperties }) => <div
         style={{ display: 'flex', padding: "10px", gap: '20px', alignItems: 'center', ...props.style }}>
         <CardImage style={props.imageStyle} />
         {!props.tiny && <CardText />}
@@ -113,21 +113,21 @@ export default function ModelCard(props: {
 
 
     return <>
-        <Card style={{ display: 'flex', alignItems: 'center', overflowX:'hidden' }} elevation={3}>
-            <Tooltip title={tiny ? 
+        <Card style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }} elevation={3}>
+            <Tooltip title={tiny ?
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <CardContent style={{ padding: '0px', gap: "10px" }} imageStyle={{ width: "64px", height: '64px' }} />
                 </div> : ""}>
-                <CardActionArea 
+                <CardActionArea
                     onClick={onClick ?? (tiny || modelUnavailable() ? openMenu : openEditor)}
-                    style={{flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', minWidth:0}}
+                    style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}
                 >
-                    <CardContent tiny={tiny} 
-                        imageStyle={props.imageStyle} 
-                        />
+                    <CardContent tiny={tiny}
+                        imageStyle={props.imageStyle}
+                    />
                 </CardActionArea>
             </Tooltip>
-            {!tiny && !modelUnavailable() && <div style={{flexShrink:'0'}}><IconButton onClick={openMenu}><MoreVert /></IconButton></div>}
+            {!tiny && !modelUnavailable() && <div style={{ flexShrink: '0' }}><IconButton onClick={openMenu}><MoreVert /></IconButton></div>}
         </Card>
 
         {!modelUnavailable() && <ModelEditorModal open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk} model={model} />}
