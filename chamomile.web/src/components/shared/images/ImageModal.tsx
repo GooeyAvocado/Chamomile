@@ -185,7 +185,7 @@ export default function ImageModal(props: {
                         {(image?.loras?.length ?? 0) !== 0 && <>
                             <div style={{ marginTop: "20px" }}><b>Loras</b></div>
                             <Stack gap={"5px"}>
-                                {image?.loras.map(a => <LoraCard key={a} loraAlias={a} currentImage={image} />)}
+                                {image?.loras?.map(a => <LoraCard key={a} loraAlias={a} currentImage={image} />)}
                             </Stack>
                         </>}
 

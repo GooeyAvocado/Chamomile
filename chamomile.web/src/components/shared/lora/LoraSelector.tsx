@@ -34,7 +34,7 @@ export default function LoraSelector(props: {
                 name: 'All',
                 isAvailable: true
             } as Lora, ...(loras ?? [])] : loras?.filter(a => a.isAvailable) ?? []}
-            style={style} value={loras.find(a => a.alias === lora)}
+            style={style} value={loras?.find(a => a.alias === lora)}
             onChange={(_, value) => { onSelect(value as Lora) }}
             renderOption={(props, option) => {
                 const { key, ...optionProps } = props;

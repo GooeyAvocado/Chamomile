@@ -36,7 +36,7 @@ export default function ModelSelector(props: {
                 name: 'All',
                 isAvailable: true
             } as Model, ...(models ?? [])] : models?.filter(a => a.isAvailable) ?? []}
-            style={style} value={models.find(a => a.title === model)}
+            style={style} value={models?.find(a => a.title === model)}
             onChange={(_, value) => { onSelect(value as Model) }}
             renderOption={(props, option) => {
                 const { key, ...optionProps } = props;
