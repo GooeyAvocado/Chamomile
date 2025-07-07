@@ -8,9 +8,17 @@ export default function FullPageDropzone(props: { children: React.ReactNode }) {
   const { setFiles } = useImageUpload();
 
   useEffect(() => {
+
     const handleDragOver = (event: DragEvent) => {
-      event.preventDefault();
-      setDragging(true);
+      // Only set dragging if at least one dragged item is an image
+      const hasImage = Array.from(event.dataTransfer?.items || []).some(
+        (item) => item.kind === "file" && item.type.startsWith("image/")
+      );
+
+      if (hasImage) {
+        event.preventDefault();
+        setDragging(hasImage);
+      }
     };
 
     const handleDragLeave = (event: DragEvent) => {
@@ -20,7 +28,15 @@ export default function FullPageDropzone(props: { children: React.ReactNode }) {
     };
 
     const handleDrop = async (event: DragEvent) => {
+
+      const hasImage = Array.from(event.dataTransfer?.items || []).some(
+        (item) => item.kind === "file" && item.type.startsWith("image/")
+      );
+
+      if (!hasImage) { return }
+
       event.preventDefault();
+
       setDragging(false);
 
       if (event.dataTransfer?.items) {
