@@ -21,7 +21,6 @@ export default function StatisticsModal(props: {
     open: boolean,
     setOpen: (val: boolean) => void
     filter: FilterOptions
-    filterEmpty?: boolean
 }) {
 
     const { open, setOpen, filter } = props

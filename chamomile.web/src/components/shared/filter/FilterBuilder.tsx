@@ -1,12 +1,11 @@
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useState } from "react";
-import { BarChart, CalendarMonth, Close, ExpandLess, ExpandMore, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
+import { CalendarMonth, Close, ExpandLess, ExpandMore, PhotoLibrary, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
 import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 import AdvSearchModal from "./AdvSearchModal";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
-import StatisticsModal from "../statistics/StatisticsModal";
 
 export default function FilterBuilder(props: {
     filter: FilterOptions
@@ -19,7 +18,6 @@ export default function FilterBuilder(props: {
     const [fromDate, setFromDate] = useState("")
     const [toDate, setToDate] = useState("")
 
-    const [statsOpen, setStatsOpen] = useState(false)
     const { vertical } = useWindowDimensions();
 
     const [expanded, setExpanded] = useState(false)
@@ -71,14 +69,13 @@ export default function FilterBuilder(props: {
 
             <div style={{ display: "flex", alignItems: 'center', justifyContent: 'end', flexShrink: "1", gap: "10px", flexDirection: vertical ? 'column' : 'row' }}>
                 <Tooltip title={filter.favorite ? "Show all" : "Show Favorites"}><IconButton onClick={() => setFilter({ ...filter, favorite: !filter?.favorite })}>{filter.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>
-                <Tooltip title={"Statistics"}><IconButton onClick={() => setStatsOpen(true)}><BarChart /></IconButton></Tooltip>
+                <Tooltip title={"Albums"}><IconButton onClick={() => { }}><PhotoLibrary /></IconButton></Tooltip>
                 <Tooltip title="Refresh"><IconButton onClick={() => setFilter({ ...filter })}><Refresh /></IconButton></Tooltip>
             </div>
 
         </div>
 
         <AdvSearchModal open={advSearchOpen} onClose={() => setAdvSearchOpen(false)} />
-        <StatisticsModal open={statsOpen} setOpen={setStatsOpen} filter={filter} filterEmpty={filterEmpty} />
 
         {expanded && <div style={{ display: "flex", flexWrap: 'wrap', width: '100%', marginBottom: "10px", gap: "20px" }}>
 
