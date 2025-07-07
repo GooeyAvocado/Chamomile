@@ -1,5 +1,6 @@
 ﻿using Automatic1111.API;
 using Automatic1111.Common;
+using Chamomile.API.Requests;
 using Chamomile.API.Workers;
 using Chamomile.Common;
 using Chamomile.Data;
@@ -97,6 +98,11 @@ namespace Chamomile.API.Controllers {
             });
         }
 
+        [HttpPost("Albums")]
+        public async Task<IActionResult> CreateAlbum([FromBody] AlbumCreateRequest request) {
+            return Ok(await dao.CreateAlbum(request, request.AddExisting));
+        }
+
         #endregion
 
         #region READ
@@ -189,6 +195,16 @@ namespace Chamomile.API.Controllers {
             return File(file.Data, file.Mime, new string(file.FullFilename.Where(c => c < 128).ToArray()));
         }
 
+        [HttpGet("{ID}/Albums")]
+        public async Task<IActionResult> GetImageAlbums(int ID) { 
+            return Ok(await dao.GetImageAlbums(ID));
+        }
+
+        [HttpGet("Albums")]
+        public async Task<IActionResult> GetAlbums() {
+            return Ok(await dao.GetAlbums());
+        }
+
         #endregion
 
         #region UPDATE
@@ -212,15 +228,41 @@ namespace Chamomile.API.Controllers {
                 : Ok(await dao.SaveHiResImage(options.ImageID, Convert.FromBase64String(hiRes.image)));
         }
 
+        [HttpPut("Albums")]
+        public async Task<IActionResult> UpdateAlbum([FromBody] Album album) {
+            return Ok(await dao.UpdateAlbum(album));
+        }
+
+        [HttpPut("{ID}/Albums")]
+        public async Task<IActionResult> GetImageAlbums([FromBody] ImageAlbumRequest request, int ID) {
+            switch (request.Mode) {
+                case "ADD":
+                    await dao.AddImageToAlbum(ID,request.AlbumId);
+                    break;
+                case "REMOVE":
+                    await dao.RemoveImageFromAlbum(ID,request.AlbumId);
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid mode (Should be ADD or REMOVE): " + request.Mode);
+            }
+            return Ok(GetImageAlbums(ID));
+        }
+
         #endregion
 
         #region DELETE
         [HttpDelete("{ID}")]
         public async Task<IActionResult> Delete(int ID) {
-            await dao.Delete(ID);
+            await dao.DeleteImage(ID);
             return Ok();
         }
         #endregion
+
+        [HttpDelete("Albums/{ID}")]
+        public async Task<IActionResult> DeleteAlbum(int ID) {
+            await dao.DeleteAlbum(ID);
+            return Ok();
+        }
 
 
     }
