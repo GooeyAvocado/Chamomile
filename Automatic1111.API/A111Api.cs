@@ -20,7 +20,7 @@ namespace Automatic1111.API {
         };
 
         private static readonly JsonSerializerOptions PROMPT_SERIALZIER_OPTIONS = new() {
-            PropertyNamingPolicy = null,  // Matches API field names
+            PropertyNamingPolicy = null,  // Matches API field names+
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Avoids sending `null`
         };
         public async Task<bool> Ping() {
@@ -123,7 +123,9 @@ namespace Automatic1111.API {
 
         public async Task ChangeModel(string model) {
             string apiUrl = api + "/sdapi/v1/options";
-            using var client = new HttpClient();
+            using var client = new HttpClient() {
+                Timeout = TimeSpan.FromMinutes(10)
+            };
 
             // Step 1: Get current options
             var response = await client.GetStringAsync(apiUrl);
