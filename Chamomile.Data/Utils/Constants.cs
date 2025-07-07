@@ -56,8 +56,21 @@
         public static readonly string MODEL_USAGE_COUNT = "model_usage_count";
         public static readonly string LORA_USAGE_COUNT = "lora_usage_count";
 
+        public static readonly string ALBUM_TABLE = $"{SCHEMA}.albums";
+        public static readonly string ALBUM_META_VIEW = $"{SCHEMA}.album_meta";
+        public static readonly string ALBUM_ID = "album_id";
+        public static readonly string ALBUM_NAME = "album_nm";
+        public static readonly string ALBUM_COUNT = "album_image_ct";
+        public static readonly string ALBUM_THUMB = "album_thumb_id";
+        public static readonly string ALBUM_SAMPLE_IDS = "album_sample_ids";
+        public static readonly string ALBUM_QUERY = "album_query_tx";
+
+
+        public static readonly string ALBUM_MAP = $"{SCHEMA}.album_map";
 
         public static readonly string CRE_TS = "cre_ts";
+        public static readonly string MIN_TS = "min_ts";
+        public static readonly string MAX_TS = "max_ts";
 
     }
 }

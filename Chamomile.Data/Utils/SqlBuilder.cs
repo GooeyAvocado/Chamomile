@@ -41,7 +41,11 @@
             }
         }
 
-
+        public class InverseFtsCondition(string ftsColumn, string? parameter = null) : WhereCondition("") {
+            public override string ToString() {
+                return $"to_tsvector('english', @{parameter ?? ftsColumn}) @@ {ftsColumn}::tsquery";
+            }
+        }
 
         public class WhereCondition(string column, WhereConditionOperator operation, string value) {
 
@@ -102,7 +106,8 @@ FROM {table}
 WHERE {conditions}
 ORDER BY {string.Join(", ", order.Select(a=>a.ToString()))}
 ";
-        public static string SelectSql(List<string> columns, string table, WhereConditionGroup conditions, List<OrderBy> order, int limit, int offset, bool distinct = false) => $@"
+        public static string SelectSql(List<string> columns, string table, WhereConditionGroup conditions, List<OrderBy> order, int limit, int offset, bool distinct = false) 
+            => limit < 0 || offset < 0 ? SelectSql(columns,table,conditions,order,distinct) : $@"
 SELECT {(distinct ? "DISTINCT" : "")} {string.Join(",", columns)}
 FROM {table}
 WHERE {conditions}

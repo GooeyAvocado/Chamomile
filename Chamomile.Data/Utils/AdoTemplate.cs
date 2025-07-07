@@ -18,6 +18,8 @@ namespace Chamomile.Data.Utils {
             public void SetTimestamp(string key, DateTime? value) => Set(key, NpgsqlDbType.TimestampTz, value);
             public void SetDate(string key, DateTime? value) => Set(key, NpgsqlDbType.Date, value);
 
+            public void SetValue(string key, NpgsqlDbType type, object? value) => Set(key, type, value);
+
         }
 
         public class Getter(IDataReader reader) {
@@ -30,6 +32,8 @@ namespace Chamomile.Data.Utils {
 
             public bool IsNull(string key) => !ContainsKey(key) || reader.IsDBNull(reader.GetOrdinal(key));
 
+
+
             public bool GetBoolean(string key) => GetBoolean(reader.GetOrdinal(key));
             public int GetInt(string key) => GetInt(reader.GetOrdinal(key));
             public long GetLong(string key) => GetLong(reader.GetOrdinal(key));
@@ -38,6 +42,9 @@ namespace Chamomile.Data.Utils {
             public DateTime GetDateTime(string key) => GetDateTime(reader.GetOrdinal(key));
             public Guid GetGuid(string key) => GetGuid(reader.GetOrdinal(key));
             public byte[] GetBytea(string key) => (byte[])reader[key];
+            
+            public object GetValue(string key) => reader[key];
+
 
             public bool GetBoolean(int index) => reader.GetBoolean(index);
             public int GetInt(int index) => reader.GetInt32(index);
@@ -46,6 +53,9 @@ namespace Chamomile.Data.Utils {
             public string GetString(int index) => reader.GetString(index);
             public DateTime GetDateTime(int index) => reader.GetDateTime(index);
             public Guid GetGuid(int index) => reader.GetGuid(index);
+
+            public object GetValue(int index) => reader.GetValue(index);
+
 
             public bool? GetOptionalBoolean(string key) => GetOptionalBoolean(reader.GetOrdinal(key));
             public int? GetOptionalInt(string key) => GetOptionalInt(reader.GetOrdinal(key));
@@ -56,6 +66,9 @@ namespace Chamomile.Data.Utils {
             public Guid? GetOptionalGuid(string key) => GetOptionalGuid(reader.GetOrdinal(key));
             public byte[]? GetOptionalBytea(string key) => reader.IsDBNull(reader.GetOrdinal(key)) ? null : (byte[])reader[key];
 
+            public object? GetOptionalValue(string key) => reader.IsDBNull(reader.GetOrdinal(key)) ? null : reader[key];
+
+
             public bool? GetOptionalBoolean(int index) => reader.IsDBNull(index) ? null : reader.GetBoolean(index);
             public int? GetOptionalInt(int index) => reader.IsDBNull(index) ? null : reader.GetInt32(index);
             public long? GetOptionalLong(int index) => reader.IsDBNull(index) ? null : reader.GetInt64(index);
@@ -63,6 +76,8 @@ namespace Chamomile.Data.Utils {
             public string? GetOptionalString(int index) => reader.IsDBNull(index) ? null : reader.GetString(index);
             public DateTime? GetOptionalDateTime(int index) => reader.IsDBNull(index) ? null : reader.GetDateTime(index);
             public Guid? GetOptionalGuid(int index) => reader.IsDBNull(index) ? null : reader.GetGuid(index);
+
+            public object? GetOptionalValue(int index) => reader.IsDBNull(index) ? null : reader.GetValue(index);
 
         }
 

@@ -40,6 +40,30 @@ namespace Chamomile.Data {
             };
         }
 
+        private Album AlbumMetaRM(Getter reader) {
+            return new() {
+                Id = reader.GetInt(ALBUM_ID),
+                Count = reader.GetInt(ALBUM_COUNT),
+                Name = reader.GetString(ALBUM_NAME),
+                SearchQuery = reader.GetString(ALBUM_QUERY),
+                ThumbId = reader.GetOptionalInt(ALBUM_THUMB),
+                FirstFourImages = reader.IsNull(ALBUM_SAMPLE_IDS) ? [] : new((int[])reader.GetOptionalValue(ALBUM_SAMPLE_IDS)!),
+                Newest = reader.GetOptionalDateTime(MAX_TS),
+                Oldest = reader.GetOptionalDateTime(MIN_TS),
+
+            };
+        }
+
+        private Album AlbumRM(Getter reader) {
+            return new() {
+                Id = reader.GetInt(ALBUM_ID),
+                Name = reader.GetString(ALBUM_NAME),
+                SearchQuery = reader.GetString(ALBUM_QUERY),
+                ThumbId = reader.GetOptionalInt(ALBUM_THUMB),
+            };
+        }
+
+
         #region CREATE
 
         public static string? ExtractStableDiffusionMetadata(Stream stream) {
@@ -111,7 +135,44 @@ namespace Chamomile.Data {
 
             img.Loras = image.Loras;
 
+            try {
+                await AddImageToAlbums(img.Id, await GetMatchingAlbums(img.Prompt, basePrompt));
+            }
+            catch(Exception e) {
+                Console.WriteLine(e.ToString());
+            }
+            
+
             return img;
+        }
+
+        public async Task<Album> CreateAlbum(Album album, bool addExisting) {
+
+            string original = album.SearchQuery;
+            album.SearchQuery = !TsQueryDetectRegex().IsMatch(album.SearchQuery)
+                ? '(' + string.Join("<->", album.SearchQuery.Split(" ", StringSplitOptions.RemoveEmptyEntries)) + ')'
+                : InQuotesRegex()
+                        .Replace(album.SearchQuery, m => "(" + string.Join(" <-> ", m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)) + ")"
+                    );
+
+            //Create the album
+            var id = await adoTemplate.QuerySingle(
+                    InsertSql([ALBUM_NAME, ALBUM_THUMB, ALBUM_QUERY], ALBUM_TABLE) +
+                    " RETURNING " + string.Join(", ", [ALBUM_ID]), (cmd) => {
+                        cmd.SetString(ALBUM_NAME, album.Name);
+                        cmd.SetInt(ALBUM_THUMB, album.ThumbId);
+                        cmd.SetString(ALBUM_QUERY, album.SearchQuery);
+                    }
+                , reader => reader.GetInt(0));
+
+            //If we have a search query, add everything to the search query
+            if (addExisting) {
+                await AddImagesToAlbum((await GetAll(new() { Query = original }, -1, true)).Select(a => a.Id).ToList(), id);
+            }
+
+            //Get the album again 
+            return await GetAlbum(id) ?? throw new InvalidOperationException("Waos this shouldn't happen");
+
         }
 
         #endregion
@@ -150,6 +211,12 @@ namespace Chamomile.Data {
                     IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
                 ));
             }
+            
+            if (filter.Album != null && filter.Album >= 0) {
+                conditions.Add(new(
+                    IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], ALBUM_MAP, new WhereConditionGroup([new(ALBUM_ID)])) + ")"
+                ));
+            }
 
             if (!string.IsNullOrEmpty(filter.FromDate)) {
                 conditions.Add(new(CRE_TS, WhereConditionOperator.GREATER_THAN, "@FROM_DATE"));
@@ -186,6 +253,7 @@ namespace Chamomile.Data {
 
             if (!string.IsNullOrEmpty(filter.Model)) { cmd.SetString(MODEL_TITLE, filter.Model); }
             if (!string.IsNullOrEmpty(filter.Lora)) { cmd.SetString(LORA_ALIAS, filter.Lora); }
+            if (filter.Album != null && filter.Album >= 0) { cmd.SetInt(ALBUM_ID, filter.Album); }
 
             if (!string.IsNullOrEmpty(filter.FromDate)) {
                 cmd.SetDate("FROM_DATE", DateTime.Parse(filter.FromDate));
@@ -198,7 +266,7 @@ namespace Chamomile.Data {
 
         private const int PAGE_SIZE = 54;
 
-        public async Task<List<GeneratedImage>> GetAll(FilterOptions filter, int lastImage) {
+        public async Task<List<GeneratedImage>> GetAll(FilterOptions filter, int lastImage, bool disablePagination = false) {
             return await adoTemplate.Query(
                 SelectSql([
                     IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
@@ -209,7 +277,7 @@ namespace Chamomile.Data {
                     IMAGES_TABLE,
                     new WhereConditionGroup(ConditionsFromFilter(filter,lastImage)),
                     [new OrderBy(CRE_TS, SortOrder.DESC)],
-                    PAGE_SIZE, 0
+                    disablePagination ? -1 : PAGE_SIZE, 0
                 ),
                 (cmd) => SetterFromFilter(cmd, filter), ImageRM
             );
@@ -274,6 +342,53 @@ namespace Chamomile.Data {
             });
         }
 
+
+        public async Task<List<Album>> GetAlbums() {
+            return await adoTemplate.Query(SelectSql(
+                    [ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS],
+                    ALBUM_META_VIEW, new WhereConditionGroup([]), [new OrderBy(ALBUM_NAME)]
+                ), (cmd) => { }, AlbumMetaRM);
+        }
+
+        public async Task<Album?> GetAlbum(int album) {
+            return await adoTemplate.QuerySingle(SelectSql(
+                    [ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS],
+                    ALBUM_META_VIEW, new WhereConditionGroup([new(ALBUM_ID)])
+                ), (cmd) => cmd.SetInt(ALBUM_ID, album), AlbumMetaRM);
+        }
+
+        private async Task<Album?> GetAlbumSimple(int album) {
+            return await adoTemplate.QuerySingle(SelectSql(
+                    [ALBUM_ID, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB],
+                    ALBUM_TABLE, new WhereConditionGroup([new(ALBUM_ID)])
+                ), (cmd) => cmd.SetInt(ALBUM_ID, album), AlbumRM);
+        }
+
+        private async Task<List<int>> GetMatchingAlbums(string prompt, string basePrompt) {
+            return await adoTemplate.Query(SelectSql(
+                    [ALBUM_ID, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB],
+                    ALBUM_TABLE, new WhereConditionGroup([
+                        new WhereCondition($"length({ALBUM_QUERY})", WhereConditionOperator.GREATER_THAN,"0"),
+                        new WhereConditionSubgroup(
+                            new WhereConditionGroup(WhereConditionUnion.OR,[
+                                new InverseFtsCondition(ALBUM_QUERY, IMAGES_PROMPT),
+                                new InverseFtsCondition(ALBUM_QUERY, IMAGES_BASE_PROMPT)
+                            ])
+                        )]), [new OrderBy(ALBUM_NAME)]), (cmd) => {
+                    cmd.SetString(IMAGES_PROMPT, prompt);
+                    cmd.SetString(IMAGES_BASE_PROMPT, prompt);
+                }, reader=>reader.GetInt(ALBUM_ID));
+        }
+
+        public async Task<List<Album>> GetImageAlbums(int image) { 
+            return await adoTemplate.Query(
+                SelectSql(
+                    ["map." + ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS]
+                    , $"{ALBUM_MAP} map, {ALBUM_META_VIEW} inf",new WhereConditionGroup([new(IMAGES_ID), new JoinCondition("map","inf",ALBUM_ID)])
+                    , [new OrderBy(ALBUM_NAME)]
+                ),(cmd)=>cmd.SetInt(IMAGES_ID, image),AlbumMetaRM);
+        }
+
         #endregion
 
         #region UPDATE
@@ -307,11 +422,88 @@ namespace Chamomile.Data {
             }, ImageRM);
         }
 
+        public async Task<Album> UpdateAlbum(Album album) {
+            //Find the album
+            var existingAlbum = await GetAlbumSimple(album.Id ?? 0) ?? throw new InvalidOperationException("Album not found!");
+
+            album.SearchQuery = !TsQueryDetectRegex().IsMatch(album.SearchQuery)
+                ? '(' + string.Join("<->", album.SearchQuery.Split(" ", StringSplitOptions.RemoveEmptyEntries)) + ')'
+                : InQuotesRegex()
+                        .Replace(album.SearchQuery, m => "(" + string.Join(" <-> ", m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)) + ")"
+                    );
+
+            existingAlbum.SearchQuery = album.SearchQuery;
+            existingAlbum.ThumbId = album.ThumbId;
+            existingAlbum.Name = album.Name;
+
+            await adoTemplate.Execute(UpdateSql(
+                [ALBUM_QUERY, ALBUM_THUMB,ALBUM_NAME],
+                ALBUM_TABLE, new WhereConditionGroup([new(ALBUM_ID)])
+                ), (cmd) => { 
+                    cmd.SetInt(ALBUM_ID, album.Id);
+                    cmd.SetString(ALBUM_NAME, album.Name);
+                    cmd.SetInt(ALBUM_THUMB, album.ThumbId);
+                    cmd.SetString(ALBUM_QUERY, album.SearchQuery);
+                });
+
+            return existingAlbum;
+
+        }
+
+        public async Task AddImageToAlbum(int image, int album) {
+            if (await ImageAlreadyInAlbum(image, album)) {
+                throw new InvalidOperationException("Image already in album");
+            }
+
+            await adoTemplate.Execute(InsertSql([ALBUM_ID, IMAGES_ID], ALBUM_MAP), (cmd) => {
+                cmd.SetInt(ALBUM_ID, album);
+                cmd.SetInt(IMAGES_ID, image);
+            });
+
+        }
+
+        public async Task AddImagesToAlbum(List<int> images, int album) {
+            await adoTemplate.ExecuteBatch(InsertSql([ALBUM_ID, IMAGES_ID], ALBUM_MAP), (cmd, image) => {
+                cmd.SetInt(ALBUM_ID, album);
+                cmd.SetInt(IMAGES_ID, image);
+            }, images);
+
+        }
+
+        public async Task AddImageToAlbums(int image, List<int> albums) {
+            await adoTemplate.ExecuteBatch(InsertSql([ALBUM_ID, IMAGES_ID], ALBUM_MAP), (cmd, album) => {
+                cmd.SetInt(ALBUM_ID, album);
+                cmd.SetInt(IMAGES_ID, image);
+            }, albums);
+
+        }
+
+        public async Task RemoveImageFromAlbum(int image, int album) {
+            await adoTemplate.Execute(DeleteSql(ALBUM_MAP, new WhereConditionGroup([new(ALBUM_ID), new(IMAGES_ID)])), (cmd) => {
+                cmd.SetInt(ALBUM_ID, album);
+                cmd.SetInt(IMAGES_ID, image);
+            });
+        }
+
+
+
+        private async Task<bool> ImageAlreadyInAlbum(int image, int album) {
+            return await adoTemplate.QuerySingle(
+                    SelectSql(["count(*)"], ALBUM_MAP,
+                    new WhereConditionGroup([new(ALBUM_ID), new(IMAGES_ID)])),
+                    (cmd) => {
+                        cmd.SetInt(ALBUM_ID, album);
+                        cmd.SetInt(IMAGES_ID, image);
+                    },
+                    (reader) => reader.GetInt(0) > 0
+                );
+        }
+
         #endregion
 
         #region DELETE
 
-        public async Task Delete(int id) {
+        public async Task DeleteImage(int id) {
             await adoTemplate.Execute(UpdateSql([IMAGES_ID], MODELS_TABLE, new([new(IMAGES_ID, WhereConditionOperator.EQUALS, "@ORIGINAL_ID")])), (cmd) => {
                 cmd.SetInt(IMAGES_ID, null);
                 cmd.SetInt("ORIGINAL_ID", id);
@@ -324,11 +516,19 @@ namespace Chamomile.Data {
             await adoTemplate.Execute(DeleteSql(IMAGES_TABLE, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
         }
 
+        public async Task DeleteAlbum(int album) {
+            await adoTemplate.Execute(DeleteSql(ALBUM_TABLE, new([new(ALBUM_ID)])), cmd => cmd.SetInt(ALBUM_ID, album));
+        }
+
+        #endregion
+
+        #region REGEX
+
         [GeneratedRegex(@"<lora:([^>:]+):([\d.]+)>")]
         public static partial Regex LoraRegex();
         [GeneratedRegex("\"([^\"]+)\"")]
         public static partial Regex InQuotesRegex();
-        
+
         [GeneratedRegex(@"[&|!:<]")]
         public static partial Regex TsQueryDetectRegex();
 
