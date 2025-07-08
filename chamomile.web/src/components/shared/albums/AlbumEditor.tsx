@@ -26,7 +26,7 @@ export default function AlbumEditor({
             searchQuery: ""
         })
         setAutoAdd((album?.searchQuery?.length ?? 0) > 0)
-        setAddExisting(false)
+        setAddExisting((!album?.id || album?.id <= 0) && (album?.searchQuery?.length ?? 0) > 0)
         updateApi.resetError();
         createApi.resetError();
     }, [open])

@@ -94,7 +94,7 @@ export default function Home() {
         <hr style={{ width: "100%" }} />
       </>}
 
-      <FilterBuilder filter={filter} setFilter={setFilter} />
+      <FilterBuilder filter={filter} setFilter={setFilter} setAlbum={setAlbum} />
       <hr style={{ width: "100%" }} />
 
       <UploadPanel />

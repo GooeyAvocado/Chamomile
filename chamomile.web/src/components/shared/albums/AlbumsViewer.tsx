@@ -6,8 +6,8 @@ import AlbumTile from "./AlbumTile";
 import NewAlbumTile from "./NewAlbumTile";
 import AlbumEditor from "./AlbumEditor";
 import { useState } from "react";
-import { Button, InputAdornment, TextField } from "@mui/material";
-import { ModelTraining, Search } from "@mui/icons-material";
+import { InputAdornment, TextField } from "@mui/material";
+import { Search } from "@mui/icons-material";
 
 
 export default function AlbumsViewer({ onClick }: {
@@ -35,7 +35,7 @@ export default function AlbumsViewer({ onClick }: {
                         </InputAdornment>
                     }
                 }} style={{ flex: "1" }} />
-            <Button onClick={() => onClick(undefined)} startIcon={<ModelTraining />}>Back</Button>
+            {/* <Button onClick={() => onClick(undefined)} startIcon={<ModelTraining />}>Back</Button> */}
         </div>
         <div style={{ flex: "1", overflow: "auto" }}>
             {albumApi.loading ?

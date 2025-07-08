@@ -1,18 +1,21 @@
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useState } from "react";
-import { CalendarMonth, Close, ExpandLess, ExpandMore, PhotoLibrary, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
+import { CalendarMonth, Close, ExpandLess, ExpandMore, LibraryAdd, PhotoLibrary, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
 import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 import AdvSearchModal from "./AdvSearchModal";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
+import AlbumEditor from "../albums/AlbumEditor";
+import { Album } from "../../../model/Album";
 
 export default function FilterBuilder(props: {
     filter: FilterOptions
     setFilter: (val: FilterOptions) => void
+    setAlbum?: (val: Album) => void
 }) {
 
-    const { filter, setFilter } = props
+    const { filter, setFilter, setAlbum } = props
 
     const [query, setQuery] = useState("")
     const [fromDate, setFromDate] = useState("")
@@ -22,6 +25,7 @@ export default function FilterBuilder(props: {
 
     const [expanded, setExpanded] = useState(false)
     const [advSearchOpen, setAdvSearchOpen] = useState(false)
+    const [createAlbumOpen, setCreateAlbumOpen] = useState(false)
 
     useEffect(() => {
         setQuery(filter.query ?? "");
@@ -52,15 +56,23 @@ export default function FilterBuilder(props: {
                             </Tooltip>
                         </InputAdornment>,
                         endAdornment: <InputAdornment position="end">
-                            {!filterEmpty && <Tooltip title="Clear filter">
-                                <IconButton
-                                    onClick={() => { setFilter({ favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', album: filter.album } as FilterOptions) }}>
-                                    <Close />
-                                </IconButton>
-                            </Tooltip>}
-                            <Tooltip title="More Options">
-                                <IconButton onClick={() => { setExpanded(!expanded) }}>{expanded ? <ExpandLess /> : <ExpandMore />}</IconButton>
-                            </Tooltip>
+                            <div style={{ display: 'flex', flexDirection: vertical ? 'column' : undefined }}>
+                                {setAlbum && !filterEmpty && (filter.album ?? -1) <= 0 && <Tooltip title="Create collection based on this search">
+                                    <IconButton
+                                        onClick={() => { setCreateAlbumOpen(true) }}>
+                                        <LibraryAdd />
+                                    </IconButton>
+                                </Tooltip>}
+                                {!filterEmpty && <Tooltip title="Clear filter">
+                                    <IconButton
+                                        onClick={() => { setFilter({ favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', album: filter.album } as FilterOptions) }}>
+                                        <Close />
+                                    </IconButton>
+                                </Tooltip>}
+                                <Tooltip title="More Options">
+                                    <IconButton onClick={() => { setExpanded(!expanded) }}>{expanded ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                                </Tooltip>
+                            </div>
                         </InputAdornment>
                     }
                 }}
@@ -86,6 +98,10 @@ export default function FilterBuilder(props: {
         </div>
 
         <AdvSearchModal open={advSearchOpen} onClose={() => setAdvSearchOpen(false)} />
+        {setAlbum && <AlbumEditor open={createAlbumOpen} setOpen={(val, result) => {
+            setCreateAlbumOpen(val)
+            if (result) setAlbum(result)
+        }} album={{ name: "", searchQuery: filter.query ?? "" }} />}
 
         {expanded && <div style={{ display: "flex", flexWrap: 'wrap', width: '100%', marginBottom: "10px", gap: "20px" }}>
 
