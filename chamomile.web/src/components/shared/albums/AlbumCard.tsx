@@ -1,17 +1,24 @@
-import { Card, CardActionArea, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material"
+import { Card, IconButton, Menu, MenuItem, Typography } from "@mui/material"
 import { Album } from "../../../model/Album"
-import { CSSProperties, useState } from "react"
-import { imageUrl } from "../../../api/Images"
+import { useState } from "react"
 import { MoreVert } from "@mui/icons-material"
 import AlbumThumbImg from "./AlbumThumbImg"
+import { useAlbums } from "../../hooks/useAlbums"
+import AreYouSureModal from "../modals/AreYouSureModal"
 
-export default function AlbumCard({ album, onClick, refresh }: {
-    album: Album
-    onClick: () => void
-    refresh: () => void
+export default function AlbumCard({ album: albumId, onView, onRemove }: {
+    album: number
+    onView?: (val: Album) => void
+    onRemove?: (val: Album) => void
 }) {
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const { albums } = useAlbums();
+    const [ays, setAys] = useState(false)
+
+
+    const album = albums.find(a => a.id === albumId)
+
 
     const handleClose = () => {
         setAnchorEl(null);
@@ -22,9 +29,7 @@ export default function AlbumCard({ album, onClick, refresh }: {
         setAnchorEl(event.currentTarget);
     };
 
-    const CardImage = (props: { style?: CSSProperties }) => <div style={{ width: "64px" }}>
-        <AlbumThumbImg album={album} />
-    </div>
+    if (!album) return <></>;
 
     const CardText = () => <Typography style={{ fontSize: '1em' }}>
         <div style={{ flex: '1', color: "white" }}>
@@ -41,23 +46,32 @@ export default function AlbumCard({ album, onClick, refresh }: {
     return <>
         <Card style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }} elevation={3}>
 
-            <CardActionArea style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }} >
+            <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, fontSize: "13.33px" }} >
                 <div
                     style={{ display: 'flex', padding: "10px", gap: '20px', alignItems: 'center' }}>
-                    <CardImage />
+                    <div style={{ width: "64px" }}> <AlbumThumbImg album={album} /> </div>
                     <CardText />
                 </div>
-            </CardActionArea>
-            <div style={{ flexShrink: '0' }}><IconButton onClick={openMenu}><MoreVert /></IconButton></div>
+            </div>
+            {(onView || onRemove) && <div style={{ flexShrink: '0' }}><IconButton onClick={openMenu}><MoreVert /></IconButton></div>}
         </Card>
 
+        {onRemove && <AreYouSureModal open={ays} setOpen={setAys} onYes={() => {
+            onRemove?.(album)
+        }} title="Remove?">
+            Are you sure you want to remove this image from the collection?
+        </AreYouSureModal>}
 
-        {<>
+        {(onView || onRemove) && <>
             <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
-                <MenuItem onClick={console.warn}>Edit Model</MenuItem>
-                <Divider />
-                <MenuItem onClick={console.warn} >View sample image</MenuItem>
-                <MenuItem onClick={console.warn} >Set this as sample image</MenuItem>
+                {onView && <MenuItem onClick={() => {
+                    handleClose();
+                    onView?.(album)
+                }}>View collection</MenuItem>}
+                {onRemove && <MenuItem onClick={() => {
+                    handleClose();
+                    setAys(true)
+                }} >Remove from collection</MenuItem>}
             </Menu>
         </>}
     </>

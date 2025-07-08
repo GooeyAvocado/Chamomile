@@ -1,27 +1,32 @@
-import useApi from "../../hooks/useApi";
 import useUserAgent from "../../hooks/useUserAgent";
 import { Album } from "../../../model/Album";
-import { getAlbums } from "../../../api/Albums";
 import AlbumTile from "./AlbumTile";
 import NewAlbumTile from "./NewAlbumTile";
 import AlbumEditor from "./AlbumEditor";
 import { useState } from "react";
 import { InputAdornment, TextField } from "@mui/material";
 import { Search } from "@mui/icons-material";
+import { useAlbums } from "../../hooks/useAlbums";
 
 
-export default function AlbumsViewer({ onClick }: {
+export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
     onClick: (val: Album | undefined) => void
+    disableNew?: boolean
+    hideAlbums?: number[]
 }) {
 
-    const albumApi = useApi(getAlbums, true)
+    const { albums, loading } = useAlbums();
     const [query, setQuery] = useState("")
     const { isMobile } = useUserAgent();
     const [newOpen, setNewOpen] = useState(false)
 
 
     const queryLower = query.toLowerCase();
-    const results = albumApi?.data?.filter(a => query.length === 0 ? true : a.name.toLowerCase().includes(queryLower) || a.searchQuery.toLowerCase().includes(queryLower))
+    const results = albums?.filter(a =>
+        query.length === 0
+            ? true
+            : a.name.toLowerCase().includes(queryLower) || a.searchQuery.toLowerCase().includes(queryLower)
+    ).filter(a => !hideAlbums?.includes(a.id ?? -1))
 
     return <div style={{ paddingTop: "20px", height: "100%", display: 'flex', flexDirection: "column", gap: "20px" }}>
         <div style={{ display: "flex", gap: "20px" }}>
@@ -38,7 +43,7 @@ export default function AlbumsViewer({ onClick }: {
             {/* <Button onClick={() => onClick(undefined)} startIcon={<ModelTraining />}>Back</Button> */}
         </div>
         <div style={{ flex: "1", overflow: "auto" }}>
-            {albumApi.loading ?
+            {loading ?
                 <div style={{ display: 'flex', flexDirection: 'column', height: "100%", justifyContent: 'center', alignItems: 'center' }}>
                     <img src="/brewing.gif" style={{ width: "128px", margin: "16px" }} />
                     <div>Checking the cupboard...</div>
@@ -51,7 +56,7 @@ export default function AlbumsViewer({ onClick }: {
                     gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '192' : '256'}px, 1fr))`,
                     gap: '20px',
                 }}>
-                    {query.trim().length === 0 && <NewAlbumTile onClick={() => setNewOpen(true)} />}
+                    {disableNew || query.trim().length === 0 && <NewAlbumTile onClick={() => setNewOpen(true)} />}
                     {results?.map(a =>
                         <AlbumTile key={`album-${a.id}`} album={a} onClick={() => onClick(a)} />
                     )}

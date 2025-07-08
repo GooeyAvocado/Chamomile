@@ -15,6 +15,7 @@ import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
 import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
 import ImageModalAlbumsDisplay from "../albums/ImageModalAlbumsDisplay";
+import { Album } from "../../../model/Album";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -26,12 +27,15 @@ export default function ImageModal(props: {
     onLeft?: () => void,
     onRight?: () => void,
     onUpscale?: (val: GeneratedImage) => void
+    onAddAlbum?: (val: Album) => void
+    onRemoveAlbum?: (val: Album) => void
+    onViewAlbum?: (val: Album) => void
     collapseDefault?: boolean
     imageChildren?: (collapse: boolean) => JSX.Element
     infoChildren?: JSX.Element
 }) {
 
-    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale, collapseDefault } = props;
+    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale, collapseDefault, onAddAlbum, onRemoveAlbum, onViewAlbum } = props;
 
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
@@ -190,7 +194,7 @@ export default function ImageModal(props: {
                             </Stack>
                         </>}
 
-                        <ImageModalAlbumsDisplay imageId={image?.id ?? 0} onClick={console.warn} />
+                        <ImageModalAlbumsDisplay albums={image?.albums} onAdd={onAddAlbum} onRemove={onRemoveAlbum} onView={onViewAlbum} />
 
 
                         {/* HiRes Options */}

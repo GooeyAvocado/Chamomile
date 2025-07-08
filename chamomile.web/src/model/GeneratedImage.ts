@@ -11,6 +11,7 @@ export class GeneratedImage {
     height: number = 1024;
     width: number = 1024;
     loras: string[] = [];
+    albums: number[] = []
     model: string = "";
     favorite: boolean = false;
     created: Date = new Date();

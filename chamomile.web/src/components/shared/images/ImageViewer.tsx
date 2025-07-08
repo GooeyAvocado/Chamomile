@@ -19,7 +19,9 @@ import useUserAgent from "../../hooks/useUserAgent";
 import QueuedGroupImageTile from "./QueuedGroupImageTile";
 import AdvSearchModal from "../filter/AdvSearchModal";
 import AlbumWelcome from "../albums/AlbumWelcome";
-
+import { Album } from "../../../model/Album";
+import { updateImageAlbums } from "../../../api/Albums";
+import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
 
 export default function ImageViewer(props: {
     filter: FilterOptions
@@ -27,15 +29,17 @@ export default function ImageViewer(props: {
     showWelcome?: boolean,
     onClick?: (val: GeneratedImage) => void
     showQueueSnackbars?: boolean
-    albumMode?: boolean
+    album?: Album
+    setAlbum?: (val: Album) => void
 }) {
 
-    const { filter, showBrewing, onClick, showWelcome, showQueueSnackbars, albumMode } = props;
+    const { filter, showBrewing, onClick, showWelcome, showQueueSnackbars, album, setAlbum } = props;
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
     const favApi = useApi(favImage)
+    const updateImageAlbumsAPI = useApi(updateImageAlbums)
 
-    const [open, setOpen] = useState(false)
+    const [viewerOpen, setViewerOpen] = useState(false)
     const [deleteAys, setDeleteAys] = useState(false)
     const [uploadBrewBlob, setUploadBrewBlob] = useState(undefined as string | undefined)
     const [selectedImage, setSelectedImage] = useState(undefined as undefined | GeneratedImage)
@@ -104,6 +108,70 @@ export default function ImageViewer(props: {
         setSelectedImage(val);
     }
 
+    const onAddAlbum = (val: Album) => {
+        updateImageAlbumsAPI.fetch(() => {
+            const newImg = {
+                ...selectedImage,
+                albums: [...(selectedImage?.albums ?? []), val.id]
+            } as GeneratedImage
+
+
+            imageApi.updateImage(newImg)
+            setSelectedImage(newImg);
+            enqueueSnackbar("Added to collection!", { variant: "success" })
+        }, () => {
+            enqueueSnackbar("Could not add to collection", { variant: "error" })
+        }, selectedImage?.id, {
+            albumId: val.id,
+            mode: "ADD"
+        } as ImageAlbumRequest)
+
+
+    }
+
+    const onRemoveAlbum = (val: Album) => {
+
+        updateImageAlbumsAPI.fetch(() => {
+
+            const newImg = {
+                ...selectedImage,
+                albums: [...(selectedImage?.albums ?? [])].filter(a => a !== val.id)
+            } as GeneratedImage
+
+
+            if (album?.id === val.id) {
+                if (selectedImage) {
+                    //If the count is 1, then we've deleted the last image
+                    if (imageApi.count === 1) {
+                        setSelectedImage(undefined)
+                    } else if (selectedIndex() >= imageApi.count - 1) {
+                        onLeft()
+                    } else {
+                        onRight();
+                    }
+                }
+                imageApi.removeImage(selectedImage ?? {} as GeneratedImage)
+            } else {
+                imageApi.updateImage(newImg)
+                setSelectedImage(newImg);
+            }
+
+            enqueueSnackbar("Removed from collection!", { variant: "success" })
+        }, () => {
+            enqueueSnackbar("Could not remove from collection", { variant: "error" })
+        }, selectedImage?.id, {
+            albumId: val.id,
+            mode: "REMOVE"
+        } as ImageAlbumRequest)
+
+
+    }
+
+    const onViewAlbum = setAlbum ? (val: Album) => {
+        setAlbum(val)
+        setViewerOpen(false)
+    } : undefined
+
     const selectedIndex = () => {
         return imageApi.images.map(a => a.id).indexOf(selectedImage?.id ?? 0);
     }
@@ -147,7 +215,11 @@ export default function ImageViewer(props: {
             )}
 
             {showBrewing && activeJob && <>
-                <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100} />
+                <BrewingImageTile
+                    imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
+                    eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100}
+                />
+
                 <PromptEditorModal onOk={() => { }} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress} />
             </>}
 
@@ -155,10 +227,19 @@ export default function ImageViewer(props: {
                 <BrewingImageTile imageSrc={uploadBrewBlob ?? ""} progress={uploadProgress} />
             </>}
 
-            {imageApi.images?.map(a => <ImageTile key={`image-${a.id}`} image={a} onDelete={onDelete} onFavorite={onFavorite} onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setOpen(true) }} />)}
+            {imageApi.images?.map(a => <ImageTile
+                key={`image-${a.id}`} image={a} onDelete={onDelete}
+                onFavorite={onFavorite}
+                onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setViewerOpen(true) }}
+            />)}
 
             {!onClick && <>
-                <ImageModal open={open} setOpen={setOpen} image={selectedImage} onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onFavorite={onFavorite} onLeft={onLeft} onRight={onRight} onUpscale={onUpscale} />
+                <ImageModal
+                    open={viewerOpen} setOpen={setViewerOpen} image={selectedImage}
+                    onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete}
+                    onFavorite={onFavorite} onLeft={onLeft} onRight={onRight}
+                    onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
+                />
                 <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
                     Are you sure you want to delete this image?
                 </AreYouSureModal>
@@ -166,7 +247,7 @@ export default function ImageViewer(props: {
 
         </div>
         {imageApi.count === 0 && !activeJob && (queue?.length ?? 0) === 0 && <>
-            {filterIsEmpty() && !imageApi.loading && showWelcome ? <>{albumMode ? <AlbumWelcome /> : <WelcomePane />}</>
+            {filterIsEmpty() && !imageApi.loading && showWelcome ? <>{album ? <AlbumWelcome /> : <WelcomePane />}</>
                 : <div style={{ height: '100%', display: "flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     {imageApi.loading ? <>
                         <img src="brewing.gif" style={{ width: "128px" }} />
