@@ -37,7 +37,7 @@ export default function ImageHotbar(props: {
                 </Tooltip>
                 <hr />
                 <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
-                    <IconButton onClick={onFavorite}>{image?.favorite ? <Star /> : <StarOutline />}</IconButton>
+                    <IconButton onClick={onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutline />}</IconButton>
                 </Tooltip>
                 <Tooltip title="Delete" enterDelay={250}>
                     <IconButton onClick={(e) => {
@@ -107,17 +107,17 @@ export default function ImageHotbar(props: {
             anchorOrigin={{ vertical: 'top', horizontal: 'left', }}
             transformOrigin={{ vertical: 'top', horizontal: 'left', }}
         >
-           <MenuItem 
-                onClick={()=>{onUsePrompt(imageToPrompt(image,true)); setPromptAnchor(null)}}
+            <MenuItem
+                onClick={() => { onUsePrompt(imageToPrompt(image, true)); setPromptAnchor(null) }}
                 disabled={(image?.basePrompt?.trim()?.length ?? 0) === 0}
             >
-                <ListItemIcon><TerminalTwoTone/></ListItemIcon>
+                <ListItemIcon><TerminalTwoTone /></ListItemIcon>
                 Use this base prompt
-           </MenuItem>
-           <MenuItem onClick={()=>{onUsePrompt(imageToPrompt(image)); setPromptAnchor(null)}}>
-                <ListItemIcon><Terminal/></ListItemIcon>
+            </MenuItem>
+            <MenuItem onClick={() => { onUsePrompt(imageToPrompt(image)); setPromptAnchor(null) }}>
+                <ListItemIcon><Terminal /></ListItemIcon>
                 Use this prompt
-           </MenuItem>
+            </MenuItem>
         </Menu>
     </>
 

@@ -132,7 +132,7 @@ export default function ImageModal(props: {
                                 if (collapseDefault) setCollapse(!collapse)
                                 else setOpen(false)
                             }}><ArrowBack /></IconButton>
-                            {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={() => { onFavorite() }}>{image?.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>}
+                            {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={() => { onFavorite() }}>{image?.favorite ? <Star htmlColor="gold" /> : <StarBorder />}</IconButton></Tooltip>}
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }} >

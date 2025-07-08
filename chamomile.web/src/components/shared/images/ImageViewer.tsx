@@ -18,6 +18,7 @@ import PromptEditorModal from "../prompt/PromptEditorModal";
 import useUserAgent from "../../hooks/useUserAgent";
 import QueuedGroupImageTile from "./QueuedGroupImageTile";
 import AdvSearchModal from "../filter/AdvSearchModal";
+import AlbumWelcome from "../albums/AlbumWelcome";
 
 
 export default function ImageViewer(props: {
@@ -26,9 +27,10 @@ export default function ImageViewer(props: {
     showWelcome?: boolean,
     onClick?: (val: GeneratedImage) => void
     showQueueSnackbars?: boolean
+    albumMode?: boolean
 }) {
 
-    const { filter, showBrewing, onClick, showWelcome, showQueueSnackbars } = props;
+    const { filter, showBrewing, onClick, showWelcome, showQueueSnackbars, albumMode } = props;
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
     const favApi = useApi(favImage)
@@ -46,8 +48,6 @@ export default function ImageViewer(props: {
 
     const { activeJob, cancel, progress, groupedQueue, queue } = useQueue((val) => {
         if (showBrewing) {
-            //Check if we're on index 0
-            //if(selectedIndex()===0) setSelectedImage(val)
             imageApi.appendImage(val)
         }
     }, showQueueSnackbars)
@@ -166,7 +166,7 @@ export default function ImageViewer(props: {
 
         </div>
         {imageApi.count === 0 && !activeJob && (queue?.length ?? 0) === 0 && <>
-            {filterIsEmpty() && !imageApi.loading && showWelcome ? <WelcomePane />
+            {filterIsEmpty() && !imageApi.loading && showWelcome ? <>{albumMode ? <AlbumWelcome /> : <WelcomePane />}</>
                 : <div style={{ height: '100%', display: "flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     {imageApi.loading ? <>
                         <img src="brewing.gif" style={{ width: "128px" }} />

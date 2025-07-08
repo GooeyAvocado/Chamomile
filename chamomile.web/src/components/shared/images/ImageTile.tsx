@@ -24,7 +24,7 @@ export default function ImageTile(props: {
 
     return <>
         <ContextMenu options={[
-            { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star /> : <StarOutline />, onClick: () => { onFavorite(image) } },
+            { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) } },
             { type: "divider" },
             { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image)} menuButonMode onClick={onClose} /> },
             { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image, true)} iconOverride={<CoffeeOutlined />} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={(image.basePrompt?.trim()?.length ?? 0) === 0} /> },
@@ -38,7 +38,8 @@ export default function ImageTile(props: {
                 <CardActionArea onClick={onClick} style={{ height: "100%", width: "100%", aspectRatio: "1/1", position: "relative" }}>
                     <img src={'/outline.png'} style={{ width: "50%", height: "50%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0', margin: '25%' }} />
                     <img src={imageUrl(image.id)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
-                    {image.favorite && <div style={{ position: 'absolute', top: 5, left: 5 }}><Star /></div>}
+                    {image.favorite && <div style={{ position: 'absolute', top: 7, left: 7, opacity: "0.3" }}><Star htmlColor="black" /></div>}
+                    {image.favorite && <div style={{ position: 'absolute', top: 5, left: 5 }}><Star htmlColor="gold" /></div>}
                 </CardActionArea>
             </BaseImageTile>
         </ContextMenu>

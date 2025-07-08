@@ -11,7 +11,7 @@ export default function AreYouSureModal(props: {
 
     const { onYes, open, setOpen, loading, children, title } = props;
 
-    return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="xs">
+    return <Dialog open={open} onClose={loading ? undefined : () => setOpen(false)} fullWidth maxWidth="xs">
 
         {title && <DialogTitle>{title}</DialogTitle>}
 

@@ -544,7 +544,7 @@ export default function HelpTab(props: {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
                 <div>
-                    <b><LabeledIcon label="Favorites"><Star /></LabeledIcon></b>: Only show favorite images
+                    <b><LabeledIcon label="Favorites"><Star htmlColor="gold" /></LabeledIcon></b>: Only show favorite images
                 </div>
                 <div>
                     <b><LabeledIcon label="To and From dates"><CalendarMonth /></LabeledIcon></b>: Inclusive date ranges for search results

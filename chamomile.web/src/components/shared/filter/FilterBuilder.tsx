@@ -54,7 +54,7 @@ export default function FilterBuilder(props: {
                         endAdornment: <InputAdornment position="end">
                             {!filterEmpty && <Tooltip title="Clear filter">
                                 <IconButton
-                                    onClick={() => { setFilter({ favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '' } as FilterOptions) }}>
+                                    onClick={() => { setFilter({ favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', album: filter.album } as FilterOptions) }}>
                                     <Close />
                                 </IconButton>
                             </Tooltip>}
@@ -68,9 +68,19 @@ export default function FilterBuilder(props: {
             />
 
             <div style={{ display: "flex", alignItems: 'center', justifyContent: 'end', flexShrink: "1", gap: "10px", flexDirection: vertical ? 'column' : 'row' }}>
-                <Tooltip title={filter.favorite ? "Show all" : "Show Favorites"}><IconButton onClick={() => setFilter({ ...filter, favorite: !filter?.favorite })}>{filter.favorite ? <Star /> : <StarBorder />}</IconButton></Tooltip>
-                <Tooltip title={"Albums"}><IconButton onClick={() => { }}><PhotoLibrary /></IconButton></Tooltip>
-                <Tooltip title="Refresh"><IconButton onClick={() => setFilter({ ...filter })}><Refresh /></IconButton></Tooltip>
+
+                <Tooltip title={filter.favorite ? "Show all" : "Show Favorites"}>
+                    <IconButton onClick={() => setFilter({ ...filter, favorite: !filter?.favorite })}>
+                        {filter.favorite ? <Star htmlColor="gold" /> : <StarBorder />}
+                    </IconButton>
+                </Tooltip>
+
+                <Tooltip title="Refresh">
+                    <IconButton onClick={() => setFilter({ ...filter })}>
+                        <Refresh />
+                    </IconButton>
+                </Tooltip>
+
             </div>
 
         </div>
