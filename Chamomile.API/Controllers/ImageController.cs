@@ -3,6 +3,7 @@ using Automatic1111.Common;
 using Chamomile.API.Requests;
 using Chamomile.API.Workers;
 using Chamomile.Common;
+using Chamomile.Common.Exceptions;
 using Chamomile.Data;
 using Chamomile.Data.Utils;
 using Hue.Common;
@@ -100,7 +101,8 @@ namespace Chamomile.API.Controllers {
 
         [HttpPost("Albums")]
         public async Task<IActionResult> CreateAlbum([FromBody] AlbumCreateRequest request) {
-            return Ok(await dao.CreateAlbum(request, request.AddExisting));
+            try { return Ok(await dao.CreateAlbum(request, request.AddExisting)); }
+            catch (ValidationException e) { return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } }); }
         }
 
         #endregion
@@ -230,7 +232,8 @@ namespace Chamomile.API.Controllers {
 
         [HttpPut("Albums")]
         public async Task<IActionResult> UpdateAlbum([FromBody] Album album) {
-            return Ok(await dao.UpdateAlbum(album));
+            try { return Ok(await dao.UpdateAlbum(album));  }
+            catch (ValidationException e) { return BadRequest(new Dictionary<string, string> { { "field",e.Field}, { "message", e.Message } }); }
         }
 
         [HttpPut("{ID}/Albums")]

@@ -1,5 +1,6 @@
 ﻿using Chamomile.API.Utils;
 using Chamomile.Common;
+using Chamomile.Common.Exceptions;
 using Hue.Common;
 using MetadataExtractor;
 using System.Text.RegularExpressions;
@@ -138,10 +139,10 @@ namespace Chamomile.Data {
             try {
                 await AddImageToAlbums(img.Id, await GetMatchingAlbums(img.Prompt, basePrompt));
             }
-            catch(Exception e) {
+            catch (Exception e) {
                 Console.WriteLine(e.ToString());
             }
-            
+
 
             return img;
         }
@@ -150,10 +151,16 @@ namespace Chamomile.Data {
 
             string original = album.SearchQuery;
             album.SearchQuery = !TsQueryDetectRegex().IsMatch(album.SearchQuery)
-                ? '(' + string.Join("<->", album.SearchQuery.Split(" ", StringSplitOptions.RemoveEmptyEntries)) + ')'
+                ? string.IsNullOrWhiteSpace(album.SearchQuery)
+                    ? ""
+                    : '(' + string.Join("<->", album.SearchQuery.Split(" ", StringSplitOptions.RemoveEmptyEntries)) + ')'
                 : InQuotesRegex()
                         .Replace(album.SearchQuery, m => "(" + string.Join(" <-> ", m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)) + ")"
                     );
+
+            if (!(await ValidateTsQuery(album.SearchQuery))) {
+                throw new ValidationException("Invalid TsQuery","search");
+            };
 
             //Create the album
             var id = await adoTemplate.QuerySingle(
@@ -211,7 +218,7 @@ namespace Chamomile.Data {
                     IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
                 ));
             }
-            
+
             if (filter.Album != null && filter.Album >= 0) {
                 conditions.Add(new(
                     IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], ALBUM_MAP, new WhereConditionGroup([new(ALBUM_ID)])) + ")"
@@ -248,7 +255,7 @@ namespace Chamomile.Data {
                     cmd.SetString(IMAGES_PROMPT, $"%{filter.Query}%");
                     cmd.SetString(IMAGES_BASE_PROMPT, $"%{filter.Query}%");
                 }
-                
+
             }
 
             if (!string.IsNullOrEmpty(filter.Model)) { cmd.SetString(MODEL_TITLE, filter.Model); }
@@ -275,7 +282,7 @@ namespace Chamomile.Data {
                     MODEL_TITLE, CRE_TS, IMAGES_HIRES_IN,
                 ],
                     IMAGES_TABLE,
-                    new WhereConditionGroup(ConditionsFromFilter(filter,lastImage)),
+                    new WhereConditionGroup(ConditionsFromFilter(filter, lastImage)),
                     [new OrderBy(CRE_TS, SortOrder.DESC)],
                     disablePagination ? -1 : PAGE_SIZE, 0
                 ),
@@ -284,7 +291,7 @@ namespace Chamomile.Data {
         }
 
         public async Task<int> GetAllCount(FilterOptions filter) {
-            return await adoTemplate.QuerySingle(SelectSql(["count(*)"], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter,null))),
+            return await adoTemplate.QuerySingle(SelectSql(["count(*)"], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, null))),
                     (cmd) => SetterFromFilter(cmd, filter), (reader) => reader.GetInt(0)
                 );
         }
@@ -375,18 +382,32 @@ namespace Chamomile.Data {
                                 new InverseFtsCondition(ALBUM_QUERY, IMAGES_BASE_PROMPT)
                             ])
                         )]), [new OrderBy(ALBUM_NAME)]), (cmd) => {
-                    cmd.SetString(IMAGES_PROMPT, prompt);
-                    cmd.SetString(IMAGES_BASE_PROMPT, prompt);
-                }, reader=>reader.GetInt(ALBUM_ID));
+                            cmd.SetString(IMAGES_PROMPT, prompt);
+                            cmd.SetString(IMAGES_BASE_PROMPT, prompt);
+                        }, reader => reader.GetInt(ALBUM_ID));
         }
 
-        public async Task<List<Album>> GetImageAlbums(int image) { 
+        public async Task<List<Album>> GetImageAlbums(int image) {
             return await adoTemplate.Query(
                 SelectSql(
                     ["map." + ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS]
-                    , $"{ALBUM_MAP} map, {ALBUM_META_VIEW} inf",new WhereConditionGroup([new(IMAGES_ID), new JoinCondition("map","inf",ALBUM_ID)])
+                    , $"{ALBUM_MAP} map, {ALBUM_META_VIEW} inf", new WhereConditionGroup([new(IMAGES_ID), new JoinCondition("map", "inf", ALBUM_ID)])
                     , [new OrderBy(ALBUM_NAME)]
-                ),(cmd)=>cmd.SetInt(IMAGES_ID, image),AlbumMetaRM);
+                ), (cmd) => cmd.SetInt(IMAGES_ID, image), AlbumMetaRM);
+        }
+
+        private async Task<bool> ValidateTsQuery(string query) {
+            if (string.IsNullOrWhiteSpace(query)) return true;
+
+            var sql = "SELECT to_tsquery('english', @query);";
+            try {
+                await adoTemplate.Execute(sql, (cmd) => cmd.SetString("query", query));
+                return true;
+            }
+            catch (Exception e) {
+                Console.WriteLine(e);
+                return false;
+            }
         }
 
         #endregion
@@ -427,19 +448,25 @@ namespace Chamomile.Data {
             var existingAlbum = await GetAlbumSimple(album.Id ?? 0) ?? throw new InvalidOperationException("Album not found!");
 
             album.SearchQuery = !TsQueryDetectRegex().IsMatch(album.SearchQuery)
-                ? '(' + string.Join("<->", album.SearchQuery.Split(" ", StringSplitOptions.RemoveEmptyEntries)) + ')'
+                ? string.IsNullOrWhiteSpace(album.SearchQuery)
+                    ? ""
+                    : '(' + string.Join("<->", album.SearchQuery.Split(" ", StringSplitOptions.RemoveEmptyEntries)) + ')'
                 : InQuotesRegex()
-                        .Replace(album.SearchQuery, m => "(" + string.Join(" <-> ", m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)) + ")"
-                    );
+                    .Replace(album.SearchQuery, m => "(" + string.Join(" <-> ", m.Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)) + ")"
+            );
 
+            if (!(await ValidateTsQuery(album.SearchQuery))) {
+                throw new ValidationException("Invalid TsQuery", "search");
+            };
+            
             existingAlbum.SearchQuery = album.SearchQuery;
             existingAlbum.ThumbId = album.ThumbId;
             existingAlbum.Name = album.Name;
 
             await adoTemplate.Execute(UpdateSql(
-                [ALBUM_QUERY, ALBUM_THUMB,ALBUM_NAME],
+                [ALBUM_QUERY, ALBUM_THUMB, ALBUM_NAME],
                 ALBUM_TABLE, new WhereConditionGroup([new(ALBUM_ID)])
-                ), (cmd) => { 
+                ), (cmd) => {
                     cmd.SetInt(ALBUM_ID, album.Id);
                     cmd.SetString(ALBUM_NAME, album.Name);
                     cmd.SetInt(ALBUM_THUMB, album.ThumbId);
