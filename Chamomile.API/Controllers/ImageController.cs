@@ -240,7 +240,13 @@ namespace Chamomile.API.Controllers {
         public async Task<IActionResult> GetImageAlbums([FromBody] ImageAlbumRequest request, int ID) {
             switch (request.Mode) {
                 case "ADD":
-                    await dao.AddImageToAlbum(ID,request.AlbumId);
+                    try {
+                        await dao.AddImageToAlbum(ID, request.AlbumId);
+                    }
+                    catch (ValidationException e) {
+                        return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } });
+                    }
+                    
                     break;
                 case "REMOVE":
                     await dao.RemoveImageFromAlbum(ID,request.AlbumId);
@@ -248,7 +254,7 @@ namespace Chamomile.API.Controllers {
                 default:
                     throw new InvalidOperationException("Invalid mode (Should be ADD or REMOVE): " + request.Mode);
             }
-            return Ok(GetImageAlbums(ID));
+            return Ok();
         }
 
         #endregion
