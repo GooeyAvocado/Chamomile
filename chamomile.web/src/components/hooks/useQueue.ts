@@ -24,6 +24,7 @@ export const useQueue = (onImageDone: (val: GeneratedImage) => void, showSnackba
     useApi(getCurrentJob, true, (val) => {
         if (typeof val === "string") return; //empty response if no job is active
         setActiveJob(val)
+        getProgressApi.fetch(setCurrentProgress)
     })
     const getProgressApi = useApi(getProgress)
 
