@@ -43,7 +43,7 @@
 
         public class InverseFtsCondition(string ftsColumn, string? parameter = null) : WhereCondition("") {
             public override string ToString() {
-                return $"to_tsvector('english', @{parameter ?? ftsColumn}) @@ {ftsColumn}::tsquery";
+                return $"to_tsvector('english', @{parameter ?? ftsColumn}) @@  to_tsquery('english', {ftsColumn})";
             }
         }
 
