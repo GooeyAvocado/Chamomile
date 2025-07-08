@@ -16,6 +16,7 @@ import AlbumButton from "../shared/albums/AlbumButton";
 import AlbumsViewer from "../shared/albums/AlbumsViewer";
 import AlbumHeader from "../shared/albums/AlbumHeader";
 import GenerationsButton from "../shared/albums/GenerationsButton";
+import { useAlbums } from "../hooks/useAlbums";
 
 export default function Home() {
 
@@ -36,6 +37,7 @@ export default function Home() {
   const [filter, setFilter] = useState(initialFilter)
 
   const { queue, progress } = useQueue(() => { })
+  const { refresh: refreshAlbums } = useAlbums();
   const setTitle = usePageTitle();
 
   useEffect(() => {
@@ -57,7 +59,10 @@ export default function Home() {
           setAlbum(undefined);
           setFilter(initialFilter)
         }} />}
-        {!albumsOpen && <AlbumButton onClick={() => setAlbumsOpen(!albumsOpen)} />}
+        {!albumsOpen && <AlbumButton onClick={() => {
+          setAlbumsOpen(!albumsOpen)
+          refreshAlbums();
+        }} />}
         <StatsButton filter={filter} />
         <hr />
         <DisplayButton />

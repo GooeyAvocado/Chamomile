@@ -116,11 +116,7 @@ namespace Chamomile.API.Controllers {
 
         [HttpGet("current")]
         public IActionResult GetCurrent() {
-            var current = worker.CurrentPrompt;
-            return Ok(current);
-            return current == null 
-                ? NotFound()
-                : Ok(current);
+            return Ok(worker.CurrentPrompt);
         }
 
         [HttpGet("cancel/{id}")]
