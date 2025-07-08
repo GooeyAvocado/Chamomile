@@ -37,6 +37,14 @@ namespace Chamomile.Data {
                         new WhereConditionGroup([new(IMAGES_ID)])),
                         (cmd) => cmd.SetInt(IMAGES_ID, reader.GetInt(IMAGES_ID)),
                         (reader) => reader.GetString(LORA_ALIAS)
+                    ),
+                Albums = await adoTemplate.Query(
+                    SelectSql(
+                        [ALBUM_ID],
+                        ALBUM_MAP,
+                        new WhereConditionGroup([new(IMAGES_ID)])),
+                        (cmd) => cmd.SetInt(IMAGES_ID, reader.GetInt(IMAGES_ID)),
+                        (reader) => reader.GetInt(ALBUM_ID)
                     )
             };
         }
@@ -137,7 +145,9 @@ namespace Chamomile.Data {
             img.Loras = image.Loras;
 
             try {
-                await AddImageToAlbums(img.Id, await GetMatchingAlbums(img.Prompt, basePrompt));
+                var albums = await GetMatchingAlbums(img.Prompt, basePrompt);
+                await AddImageToAlbums(img.Id, albums);
+                img.Albums = albums;
             }
             catch (Exception e) {
                 Console.WriteLine(e.ToString());
@@ -479,7 +489,7 @@ namespace Chamomile.Data {
 
         public async Task AddImageToAlbum(int image, int album) {
             if (await ImageAlreadyInAlbum(image, album)) {
-                throw new InvalidOperationException("Image already in album");
+                return;
             }
 
             await adoTemplate.Execute(InsertSql([ALBUM_ID, IMAGES_ID], ALBUM_MAP), (cmd) => {

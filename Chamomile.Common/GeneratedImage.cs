@@ -14,6 +14,10 @@
         public bool HiResAvailable { get; set; }
 
         public List<string> Loras { get; set; } = [];
+
+        public List<int> Albums { get; set; } = [];
+
+
         public string Model { get; set; } = "";
         public bool Favorite { get; set; } = false;
         public DateTime Created { get; set; } = DateTime.Now;
