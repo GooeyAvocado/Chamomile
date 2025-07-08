@@ -14,40 +14,44 @@ import { UpscalersProvider } from './components/contexts/UpscalersContext.tsx'
 import QueueWatcher from './components/services/QueueWatcher.tsx'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import DisplayPage from './components/pages/DisplayPage.tsx'
+import { AlbumsProvider } from './components/contexts/AlbumsContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
 
+    {/* There are so many providers  */}
     <DimensionsProvider>
       <ThemeWrapper>
         <PingPongProvider>
           <PromptProvider>
             <ModelProvider>
               <LoraProvider>
-                <UpscalersProvider>
-                  <ImageUploadProvider>
-                    <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} >
-                      <HashRouter>
-                        <Routes>
-                          <Route path="*" element={
-                            <QueueWatcher>
-                              <FullPageDropzone>
-                                <Home />
-                              </FullPageDropzone>
-                            </QueueWatcher>
-                          }
-                          />
-                          <Route path="/display" element={< DisplayPage/>} />
-                        </Routes>
-                      </HashRouter>
-                    </SnackbarProvider>
-                  </ImageUploadProvider>
-                </UpscalersProvider>
+                <AlbumsProvider>
+                  <UpscalersProvider>
+                    <ImageUploadProvider>
+                      <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} >
+                        <HashRouter>
+                          <Routes>
+                            <Route path="*" element={
+                              <QueueWatcher>
+                                <FullPageDropzone>
+                                  <Home />
+                                </FullPageDropzone>
+                              </QueueWatcher>
+                            }
+                            />
+                            <Route path="/display" element={< DisplayPage />} />
+                          </Routes>
+                        </HashRouter>
+                      </SnackbarProvider>
+                    </ImageUploadProvider>
+                  </UpscalersProvider>
+                </AlbumsProvider>
               </LoraProvider>
             </ModelProvider>
           </PromptProvider>
         </PingPongProvider>
       </ThemeWrapper>
     </DimensionsProvider>
-  </StrictMode>,
+  </StrictMode >,
 )
