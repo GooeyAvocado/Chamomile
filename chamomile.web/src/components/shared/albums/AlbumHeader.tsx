@@ -85,7 +85,7 @@ export default function AlbumHeader({ album, setAlbum }: {
 
         <AlbumEditor open={editorOpen} setOpen={(val, result) => {
             setEditorOpen(val)
-            if (result) setAlbum(result)
+            if (result) setAlbum({ ...album, name: result.name, searchQuery: result.searchQuery })
         }} album={album} />
 
         <AreYouSureModal onYes={onDelete} open={ays} setOpen={setAys} loading={delApi.loading} title="Are you sure you want to delete this collection?">

@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
 import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
+import ImageModalAlbumsDisplay from "../albums/ImageModalAlbumsDisplay";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -188,6 +189,9 @@ export default function ImageModal(props: {
                                 {image?.loras?.map(a => <LoraCard key={a} loraAlias={a} currentImage={image} />)}
                             </Stack>
                         </>}
+
+                        <ImageModalAlbumsDisplay imageId={image?.id ?? 0} onClick={console.warn} />
+
 
                         {/* HiRes Options */}
                         {!!onUpscale && <>

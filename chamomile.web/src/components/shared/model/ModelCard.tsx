@@ -93,6 +93,7 @@ export default function ModelCard(props: {
 
 
     const CardImage = (props: { style?: CSSProperties }) => <img src={model?.bannerImage ? imageUrl(model.bannerImage) : '/outline.png'} style={{ width: '32px', height: '32px', objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px', background: '#555', ...props.style }} />
+
     const CardText = () => <Typography style={{ fontSize: '1em' }}>
         <div style={{ flex: '1', color: model.isAvailable ? "white" : "#777" }}>
             <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>

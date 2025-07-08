@@ -1,7 +1,7 @@
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useState } from "react";
-import { CalendarMonth, Close, ExpandLess, ExpandMore, LibraryAdd, PhotoLibrary, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
+import { CalendarMonth, Close, ExpandLess, ExpandMore, LibraryAdd, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
 import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 import AdvSearchModal from "./AdvSearchModal";
@@ -100,7 +100,10 @@ export default function FilterBuilder(props: {
         <AdvSearchModal open={advSearchOpen} onClose={() => setAdvSearchOpen(false)} />
         {setAlbum && <AlbumEditor open={createAlbumOpen} setOpen={(val, result) => {
             setCreateAlbumOpen(val)
-            if (result) setAlbum(result)
+            if (result) {
+                setAlbum(result)
+                setFilter({ album: result.id })
+            }
         }} album={{ name: "", searchQuery: filter.query ?? "" }} />}
 
         {expanded && <div style={{ display: "flex", flexWrap: 'wrap', width: '100%', marginBottom: "10px", gap: "20px" }}>
