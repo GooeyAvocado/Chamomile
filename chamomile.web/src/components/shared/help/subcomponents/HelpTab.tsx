@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, IconButton, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, ExpandMore, Height, Menu, ModelTraining, Monitor, MoreVert, Star, Terminal, ThumbDown, Tune, Window, Yard } from "@mui/icons-material";
+import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, ExpandMore, Height, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, PhotoLibrary, Star, Terminal, ThumbDown, Tune, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -498,6 +498,44 @@ export default function HelpTab(props: {
                 Once your recipe is saved, you can browse, edit, and load recipes using
                 the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Load a recipe</Card> or
                 make further alterations and overwrite or save your current recipe as another name.
+            </p>
+
+        </HelpSection>
+
+        <HelpSection title="Collections">
+            <img src="/screenshots/collection.png" width={"100%"} />
+
+            <p>
+                Chamomile allows you to set up collections of images, which can automatically add images that match a custom search query. To
+                view them, Click on the <LabeledIcon label="Collections"><PhotoLibrary /></LabeledIcon> icon on the top of the screen.
+            </p>
+
+            <p>
+                Here you can set up and view existing collections, and search images within
+                your collections. <b>Important note:</b> Deleting images in a collection will
+                delete the image for real!
+            </p>
+
+            <p>
+                While viewing collections, you will not be able to view brewing or recently brewed images.
+                When you're ready to keep brewing or see new results, click
+                the <LabeledIcon label="Brewery"><ModelTraining /></LabeledIcon> icon on the top of the screen
+
+            </p>
+
+            <hr />
+            <img src="/screenshots/collectionsFromSearch.png" width={"100%"} />
+            <p>
+                You can also create collections using the searchbar on the home page. Simply type a search
+                query and then click the <LabeledIcon label="Create collection from this search"><LibraryAdd /></LabeledIcon> icon.
+                Chamomile will also ask you if you want to add all existing images that match the search query text to this
+                new collection.
+            </p>
+
+            <p>
+                Images will automatically be added to the collection if there's a search query tied
+                to the collection. If you want to disable this, simply edit and untick this option. This will
+                clear the search query.
             </p>
 
         </HelpSection>
