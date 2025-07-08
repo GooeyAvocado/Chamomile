@@ -114,6 +114,15 @@ namespace Chamomile.API.Controllers {
             return Ok(worker.GetAllPrompts());
         }
 
+        [HttpGet("current")]
+        public IActionResult GetCurrent() {
+            var current = worker.CurrentPrompt;
+            return Ok(current);
+            return current == null 
+                ? NotFound()
+                : Ok(current);
+        }
+
         [HttpGet("cancel/{id}")]
         public IActionResult CancelJob(long id) {
             return Ok(worker.CancelPrompt(id));

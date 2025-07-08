@@ -18,6 +18,9 @@ namespace Chamomile.API.Workers {
         private readonly Task _workerTask;
         private readonly IHubContext<ImageGenerateHub> _hubContext;
 
+        private volatile Prompt? _currentPrompt;
+        public Prompt? CurrentPrompt => _currentPrompt;
+
         public ImageGeneratorWorker(IHubContext<ImageGenerateHub> hubContext) {
             _hubContext = hubContext;
             dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
@@ -71,6 +74,7 @@ namespace Chamomile.API.Workers {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                         //We don't have to wait to send this
                         _hubContext.Clients.All.SendAsync("JobStarted", jobId, prompt, GetAllPrompts());
+                        _currentPrompt = prompt;
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
 
@@ -99,6 +103,7 @@ namespace Chamomile.API.Workers {
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this
+                            _currentPrompt = null;
                             _hubContext.Clients.All.SendAsync("JobCompleted", jobId, prompt, GetAllPrompts(), savedImg);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
@@ -108,6 +113,7 @@ namespace Chamomile.API.Workers {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this
                             Console.WriteLine(e);
+                            _currentPrompt = null;
                             _hubContext.Clients.All.SendAsync("JobFailed", jobId, prompt, GetAllPrompts(),e.Message);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
