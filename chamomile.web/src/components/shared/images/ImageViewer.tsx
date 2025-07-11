@@ -210,8 +210,8 @@ export default function ImageViewer(props: {
         }}>
             {showBrewing && groupedQueue.map(p =>
                 p.length === 0 ? <></> :
-                    p.length === 1 ? <QueuedImageTile key={p[0].positivePrompt} prompt={p[0]} onCancel={() => cancel(p[0].id)} /> :
-                        <QueuedGroupImageTile key={p[0].positivePrompt} prompts={p} onCancel={cancel} />
+                    p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} /> :
+                        <QueuedGroupImageTile prompts={p} onCancel={cancel} />
             )}
 
             {showBrewing && activeJob && <>

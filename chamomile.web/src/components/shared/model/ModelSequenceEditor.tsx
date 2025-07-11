@@ -64,85 +64,88 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
 
     return <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Model Sequence</DialogTitle>
-        <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "75vh" }}>
 
-            {internalSequence.map((s, index) => (
-                <div key={index} style={{ display: 'flex', gap: '10px', alignItems: 'center', paddingTop: "10px" }}>
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {internalSequence.map((s, index) => (
+                    <div key={index} style={{ display: 'flex', gap: '10px', alignItems: 'center', paddingTop: "10px" }}>
 
-                    <IconButton disabled={loading || s.modelTitle === currentModel} onClick={() => {
-                        const newSequence = [...internalSequence];
-                        newSequence.splice(index, 1);
-                        setInternalSequence(newSequence);
-                        setValidation([])
-                    }}>
-                        <RemoveCircleOutline />
-                    </IconButton>
-
-                    <img
-                        src={models?.find(a => a.title === s.modelTitle)?.bannerImage
-                            ? imageUrl(models?.find(a => a.title === s.modelTitle)?.bannerImage ?? 0)
-                            : "outline.png"}
-
-                        style={{ width: "48px", height: "48px", objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px' }}
-                    />
-
-                    <ModelSelector
-                        error={!!validation?.[index]?.modelTitle}
-                        helperText={validation?.[index]?.modelTitle}
-                        model={s.modelTitle} setModel={(m) => {
+                        <IconButton disabled={loading || s.modelTitle === currentModel} onClick={() => {
                             const newSequence = [...internalSequence];
-                            newSequence[index].modelTitle = m.title;
+                            newSequence.splice(index, 1);
                             setInternalSequence(newSequence);
                             setValidation([])
-                        }} style={{ flex: "1" }} disabled={s.modelTitle === currentModel || loading} />
+                        }}>
+                            <RemoveCircleOutline />
+                        </IconButton>
 
-                    <Tooltip title="This is the chance that the model will be used for the next image. Setting this too low may cause thrashing between models.">
-                        <TextField
-                            type="number"
-                            value={s.chanceStay} disabled={loading}
-                            onChange={(e) => {
-                                const newSequence = [...internalSequence];
-                                newSequence[index].chanceStay = parseFloat(e.target.value);
-                                setInternalSequence(newSequence);
-                            }}
-                            label="Chance to stay (%)"
-                            style={{ width: '150px' }}
-                            slotProps={{
-                                htmlInput: {
-                                    min: 0,
-                                    max: 100,
-                                    step: 1
-                                },
-                                input: { endAdornment: <InputAdornment position="end">%</InputAdornment> }
-                            }}
+                        <img
+                            src={models?.find(a => a.title === s.modelTitle)?.bannerImage
+                                ? imageUrl(models?.find(a => a.title === s.modelTitle)?.bannerImage ?? 0)
+                                : "outline.png"}
+
+                            style={{ width: "48px", height: "48px", objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px' }}
                         />
-                    </Tooltip>
 
-                    <Tooltip title="This is the weight of the model in the sequence, higher means more likely to be used.">
-                        <TextField
-                            error={!!validation?.[index]?.loadWeight}
-                            helperText={validation?.[index]?.loadWeight}
-                            type="number"
-                            value={s.loadWeight} disabled={loading}
-                            onChange={(e) => {
+                        <ModelSelector
+                            error={!!validation?.[index]?.modelTitle}
+                            helperText={validation?.[index]?.modelTitle}
+                            model={s.modelTitle} setModel={(m) => {
                                 const newSequence = [...internalSequence];
-                                newSequence[index].loadWeight = parseFloat(e.target.value);
+                                newSequence[index].modelTitle = m.title;
                                 setInternalSequence(newSequence);
-                            }}
-                            label="Load Weight"
-                            style={{ width: '150px' }}
-                            slotProps={{
-                                htmlInput: {
-                                    min: 1,
-                                    step: 1
-                                },
-                                input: { endAdornment: <InputAdornment position="end">x</InputAdornment> }
-                            }}
-                        />
-                    </Tooltip>
+                                setValidation([])
+                            }} style={{ flex: "1" }} disabled={s.modelTitle === currentModel || loading} />
 
-                </div>
-            ))}
+                        <Tooltip title="This is the chance that the model will be used for the next image. Setting this too low may cause thrashing between models.">
+                            <TextField
+                                type="number"
+                                value={s.chanceStay} disabled={loading}
+                                onChange={(e) => {
+                                    const newSequence = [...internalSequence];
+                                    newSequence[index].chanceStay = parseFloat(e.target.value);
+                                    setInternalSequence(newSequence);
+                                }}
+                                label="Chance to stay (%)"
+                                style={{ width: '150px' }}
+                                slotProps={{
+                                    htmlInput: {
+                                        min: 0,
+                                        max: 100,
+                                        step: 1
+                                    },
+                                    input: { endAdornment: <InputAdornment position="end">%</InputAdornment> }
+                                }}
+                            />
+                        </Tooltip>
+
+                        <Tooltip title="This is the weight of the model in the sequence, higher means more likely to be used.">
+                            <TextField
+                                error={!!validation?.[index]?.loadWeight}
+                                helperText={validation?.[index]?.loadWeight}
+                                type="number"
+                                value={s.loadWeight} disabled={loading}
+                                onChange={(e) => {
+                                    const newSequence = [...internalSequence];
+                                    newSequence[index].loadWeight = parseFloat(e.target.value);
+                                    setInternalSequence(newSequence);
+                                }}
+                                label="Load Weight"
+                                style={{ width: '150px' }}
+                                slotProps={{
+                                    htmlInput: {
+                                        min: 1,
+                                        step: 1
+                                    },
+                                    input: { endAdornment: <InputAdornment position="end">x</InputAdornment> }
+                                }}
+                            />
+                        </Tooltip>
+
+                    </div>
+                ))}
+            </div>
+
             <hr style={{ width: "100%" }} />
             <Button
                 startIcon={<AddCircleOutline />}
