@@ -18,7 +18,7 @@ export default function ModelSelector(props: {
     helperText?: string
 }) {
 
-    const { model, setModel, style, showNone, disabled, loading: externalLoading, error, helperText } = props;
+    const { model, setModel, style, showNone, disabled, loading: externalLoading, error } = props;
     const { loading, models } = useModels();
     const [browserOpen, setBrowserOpen] = useState(false)
 

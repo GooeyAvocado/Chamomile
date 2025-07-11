@@ -4,7 +4,6 @@ import { Model } from "../model/Model";
 import { ModelRequest } from "../model/ModelRequest";
 import Usage from "../model/Usage";
 import { API_PREFIX, Get, Post, Put } from "./Common";
-import { setModelSequence } from "./Images";
 
 const ENDPOINT = API_PREFIX + "models/"
 
