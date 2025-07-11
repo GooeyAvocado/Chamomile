@@ -188,50 +188,6 @@ export default function PromptBuilder(props: {
                 />}
         </div>
 
-        {/* <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-
-            <TextField disabled={preview}
-                value={prompt.positivePrompt} onChange={(e) => setPrompt({ ...prompt, positivePrompt: e.target.value })}
-                placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
-
-                onKeyDown={onKeyDown}
-
-                fullWidth slotProps={{
-                    htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
-                    input: {
-
-                        startAdornment: (
-                            <InputAdornment position="start"> <Terminal /> </InputAdornment>
-                        ),
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <div style={{ display: 'flex', flexDirection: vertical ? 'column' : undefined }}>
-                                    {!noBrew && <Tooltip title="Variables and Overrides">
-                                        <IconButton onClick={() => { setVarsOpen(true) }}><Percent /></IconButton>
-                                    </Tooltip>}
-                                    {!preview && <Tooltip title="Select Models">
-                                        <IconButton onClick={() => { setModelsOpen(true) }}><ModelTraining /></IconButton>
-                                    </Tooltip>}
-                                    {!alwaysExpand && <Tooltip title="More Options">
-                                        <IconButton onClick={() => { setExpanded(!expanded) }}>{expanded ? <ExpandLess /> : <ExpandMore />}</IconButton>
-                                    </Tooltip>}
-                                </div>
-                            </InputAdornment>
-                        )
-                    }
-                }}
-            />
-
-            {!noBrew && !vertical &&
-                <PromptButton
-                    onBrew={onBrew}
-                    onLoad={() => setLoadOpen(true)}
-                    onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)}
-                    onSaveAs={() => setSaveOpen(true)}
-                    saveAsEnabled={existingPrompt}
-                />}
-        </div> */}
-
         {(alwaysExpand || expanded) && <>
             <div style={{ marginTop: "10px", display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <TextField disabled={preview}

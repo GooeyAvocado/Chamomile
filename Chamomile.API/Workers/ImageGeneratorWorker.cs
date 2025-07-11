@@ -6,6 +6,8 @@ using Chamomile.Common;
 using Microsoft.AspNetCore.SignalR;
 using Chamomile.API.Hubs;
 using System.Text.RegularExpressions;
+using System.Collections.Immutable;
+using System.Security.Cryptography;
 
 namespace Chamomile.API.Workers {
     public partial class ImageGeneratorWorker {
@@ -17,6 +19,10 @@ namespace Chamomile.API.Workers {
         private readonly CancellationTokenSource _cts = new();
         private readonly Task _workerTask;
         private readonly IHubContext<ImageGenerateHub> _hubContext;
+        private readonly Random _random = new();
+
+        public ImmutableList<ModelSequence> Sequence { get; set; } = [];
+        
 
         private volatile Prompt? _currentPrompt;
         public Prompt? CurrentPrompt => _currentPrompt;
@@ -107,6 +113,8 @@ namespace Chamomile.API.Workers {
                             _hubContext.Clients.All.SendAsync("JobCompleted", jobId, prompt, GetAllPrompts(), savedImg);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
+                            await ReRollModel(savedImg?.Model ?? "");
+
                         }
                         catch (Exception e) {
 
@@ -125,6 +133,47 @@ namespace Chamomile.API.Workers {
                     await Task.Delay(1000); // No jobs? Wait before checking again.
                 }
             }
+        }
+
+        private async Task ReRollModel(string currentModel) {
+
+            if (Sequence.Count < 2) return; //Don't do this if we don't have a sequence
+
+            //Find the current model 
+            var currentModelChances = Sequence.Find(a => a.ModelTitle == currentModel);
+            if (currentModelChances == null) {
+                //it's likely we've been bumped out of the sequence externally and we haven't realized it yet
+                Sequence = []; //reset this to an empty one
+                return; //l e a v e
+            }
+
+            if (_random.Next(0, 100) < currentModelChances.ChanceStay) {
+                return; //We haven't beat the roll and can return. We'll stay on this model for now.
+            }
+
+            var nextModel = GetNextModel(currentModel);
+            if (nextModel != null) {
+                await api.ChangeModel(nextModel.ModelTitle);
+            }
+        }
+
+        private ModelSequence? GetNextModel(string currentModel) {
+            var candidates = Sequence.Where(a => a.ModelTitle != currentModel && a.LoadWeight > 0);
+            int totalWeight = candidates.Sum(m => m.LoadWeight);
+            int roll = _random.Next(0, totalWeight); // pick a number from 0 to totalWeight-1
+
+            int cumulative = 0;
+
+            //Gracias al señor chat yipiti
+            foreach (var model in candidates) {
+                cumulative += model.LoadWeight;
+                if (roll < cumulative) {
+                    return model;
+                }
+            }
+            
+            //This really shouldn't happen but waos
+            return null;
         }
 
         private static string ProcessPromptText(string prompt, Dictionary<string, string>? variables) {

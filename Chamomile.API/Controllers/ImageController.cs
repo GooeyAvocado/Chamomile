@@ -8,6 +8,7 @@ using Chamomile.Data;
 using Chamomile.Data.Utils;
 using Hue.Common;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Immutable;
 using static Chamomile.API.Workers.ImageGeneratorWorker;
 
 namespace Chamomile.API.Controllers {
@@ -210,6 +211,17 @@ namespace Chamomile.API.Controllers {
         [HttpGet("Albums")]
         public async Task<IActionResult> GetAlbums() {
             return Ok(await dao.GetAlbums());
+        }
+
+        [HttpGet("modelSequence")]
+        public IActionResult GetModelSequence() {
+            return Ok(worker.Sequence);
+        }
+
+        [HttpPost("modelSequence")]
+        public IActionResult ChangeModelSequence([FromBody] List<ModelSequence> sequence) {
+            worker.Sequence = [.. sequence];
+            return Ok(sequence);
         }
 
         #endregion

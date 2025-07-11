@@ -5,7 +5,7 @@ import useApi from "../../hooks/useApi";
 import { currentModel, setModel } from "../../../api/Model";
 import { Model } from "../../../model/Model";
 import { useEffect, useState } from "react";
-import { Add, Close } from "@mui/icons-material";
+import { Add, Close, Schedule } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import LoraSelector from "../lora/LoraSelector";
@@ -15,6 +15,8 @@ import { Prompt } from "../../../model/Prompt";
 import { useLoras } from "../../hooks/useLoras";
 import { useModels } from "../../hooks/useModels";
 import { usePingPong } from "../../hooks/usePingPong";
+import { getModelSequence, setModelSequence } from "../../../api/Images";
+import ModelSequenceEditor from "../model/ModelSequenceEditor";
 
 export default function PromptModelSelectorModal(props: {
     open: boolean,
@@ -31,7 +33,10 @@ export default function PromptModelSelectorModal(props: {
     const { refresh: refreshModels } = useModels()
 
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt } = usePrompt();
-    const currentModelApi = useApi(currentModel, true)
+    const currentModelApi = useApi(currentModel)
+    const currentSequenceApi = useApi(getModelSequence)
+    const changeModelSequenceApi = useApi(setModelSequence)
+    const [sequenceEditorOpen, setSequenceEditorOpen] = useState(false);
     const changeModelApi = useApi(setModel)
     const { enqueueSnackbar } = useSnackbar();
     const { pong } = usePingPong();
@@ -41,8 +46,12 @@ export default function PromptModelSelectorModal(props: {
 
     useEffect(() => {
         if (open) {
-            refreshModels();
             refreshLoras();
+            if (!noBrew) {
+                refreshModels();
+                currentModelApi.fetch();
+                currentSequenceApi.fetch();
+            }
         }
     }, [open])
 
@@ -52,11 +61,22 @@ export default function PromptModelSelectorModal(props: {
         return matches.map(match => match[1])
     }
 
+    const additionalModels = (currentSequenceApi.data ?? []).filter(m => m.modelTitle !== currentModelApi.data?.model);
 
     const onChangeModel = (val: Model) => {
         changeModelApi.fetch(() => {
             enqueueSnackbar("Model changed!", { variant: 'success' })
             currentModelApi.fetch()
+            if ((currentSequenceApi.data?.length ?? 0) > 0 && !currentSequenceApi.data?.find(a => a.modelTitle === val.title)) {
+                //We have a sequence and we've just changed the model to one that is not in the sequence, so we should clear the sequence
+                changeModelSequenceApi.fetch(() => {
+                    enqueueSnackbar("Model sequence cleared!", { variant: 'success' })
+                    currentSequenceApi.fetch();
+                }, () => {
+                    enqueueSnackbar("Model sequence could not be cleared", { variant: 'error' })
+                }, [])
+                setOpen(false);
+            }
         }, () => {
             enqueueSnackbar("Model could not be changed", { variant: 'error' })
         }, { model: val.title } as ModelRequest)
@@ -81,8 +101,42 @@ export default function PromptModelSelectorModal(props: {
                         <AlertTitle style={{ fontSize: "1.2em" }}>Changing your primary model will affect all pending images</AlertTitle>
                         Be careful if executing this while there's images brewing!
                     </Alert>
-                    <div style={{ marginBottom: '10px' }}><ModelCard modelTitle={currentModelApi.data?.model} /></div>
-                    <ModelSelector model={currentModelApi.data?.model} setModel={onChangeModel} disabled={changeModelApi.loading} loading={changeModelApi.loading} style={{ marginTop: '5px', marginBottom: '10px' }} />
+                    <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <ModelCard modelTitle={currentModelApi.data?.model} />
+                        {additionalModels.map(m => <ModelCard key={m.modelTitle} modelTitle={m.modelTitle} />)}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+                        <ModelSelector
+                            model={currentModelApi.data?.model} setModel={onChangeModel}
+                            disabled={changeModelApi.loading} loading={changeModelApi.loading}
+                            style={{ marginTop: '5px', marginBottom: '10px', flex: '1' }}
+                        />
+                        <Tooltip title="Change the model sequence" style={{ marginTop: "-5px" }}><IconButton
+                            disabled={currentModelApi.loading || currentSequenceApi.loading} onClick={() => {
+                                setSequenceEditorOpen(true);
+                            }}><Schedule /></IconButton></Tooltip>
+                    </div>
+
+                    <ModelSequenceEditor
+                        open={sequenceEditorOpen}
+                        setOpen={setSequenceEditorOpen}
+                        currentModel={currentModelApi.data?.model ?? ""}
+                        sequence={currentSequenceApi.data}
+                        onOk={(val) => {
+                            changeModelSequenceApi.fetch(() => {
+                                setSequenceEditorOpen(false);
+                                enqueueSnackbar("Model sequence changed!", { variant: 'success' })
+                                currentSequenceApi.fetch();
+                            }, () => {
+                                enqueueSnackbar("Model sequence could not be changed", { variant: 'error' })
+                            }, val)
+                        }}
+
+                    />
+
+
+
                 </>
                 : <Alert severity="warning">
                     <AlertTitle>Stable diffusion is unavailable</AlertTitle>
@@ -95,6 +149,7 @@ export default function PromptModelSelectorModal(props: {
                 <div><b>Loras</b></div>
                 <Tooltip title={addOpen ? 'Cancel' : 'Add a LoRA'}><IconButton onClick={() => setAddOpen(!addOpen)}><Add sx={{ rotate: addOpen ? '45deg' : '' }} /></IconButton></Tooltip>
             </div>
+
             {addOpen && <>
                 <LoraSelector lora="" setLora={(e) => {
                     addLora(e.alias)

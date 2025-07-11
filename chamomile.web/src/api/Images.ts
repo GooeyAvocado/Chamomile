@@ -3,6 +3,7 @@ import { Progress } from "../model/Automatic1111/Progress";
 import { FilterOptions } from "../model/FilterOptions";
 import { GeneratedImage } from "../model/GeneratedImage";
 import { HiResRequest } from "../model/HiResRequest";
+import ModelSequence from "../model/ModelSequence";
 import { Prompt } from "../model/Prompt";
 import { API_PREFIX, Delete, Get, Post, Put, Upload } from "./Common";
 
@@ -115,3 +116,15 @@ export const deleteImage = (
 ) => Delete(setLoading, onSuccess, onError, ENDPOINT + id)
 
 
+export const getModelSequence = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: ModelSequence[]) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "modelSequence");
+
+export const setModelSequence = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: ModelSequence) => void,
+    onError: (value: any) => void,
+    sequence: ModelSequence[]
+) => Post(setLoading, setItem, onError, ENDPOINT + "modelSequence", sequence);

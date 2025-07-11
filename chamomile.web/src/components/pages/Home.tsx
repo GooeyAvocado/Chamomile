@@ -71,12 +71,6 @@ export default function Home() {
     </div>
     <hr style={{ width: "100%" }} />
 
-
-
-
-
-
-
     {albumsOpen ? <>
       <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
         <AlbumsViewer onClick={(val) => { setAlbum(val); setFilter({ ...filter, album: val?.id ?? -1 }); setAlbumsOpen(false) }} />

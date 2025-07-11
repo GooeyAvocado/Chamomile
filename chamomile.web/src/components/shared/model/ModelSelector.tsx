@@ -14,9 +14,11 @@ export default function ModelSelector(props: {
     showNone?: boolean
     disabled?: boolean
     loading?: boolean
+    error?: boolean
+    helperText?: string
 }) {
 
-    const { model, setModel, style, showNone, disabled, loading: externalLoading } = props;
+    const { model, setModel, style, showNone, disabled, loading: externalLoading, error, helperText } = props;
     const { loading, models } = useModels();
     const [browserOpen, setBrowserOpen] = useState(false)
 
@@ -63,7 +65,7 @@ export default function ModelSelector(props: {
             renderInput={(params: any) =>
                 <TextField {...params}
                     placeholder={model ?? ""} variant="outlined"
-                    label='Model'
+                    label='Model' error={error}
                     slotProps={{
                         input: {
                             ...params.InputProps,
@@ -73,7 +75,7 @@ export default function ModelSelector(props: {
                                 </InputAdornment>
                             ),
                             endAdornment: (<InputAdornment position="end">
-                                <IconButton onClick={() => setBrowserOpen(true)}>
+                                <IconButton onClick={() => setBrowserOpen(true)} disabled={disabled || loading || externalLoading}>
                                     <GridView />
                                 </IconButton>
                             </InputAdornment>),

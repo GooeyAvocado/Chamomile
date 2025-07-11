@@ -4,6 +4,7 @@ import { Model } from "../model/Model";
 import { ModelRequest } from "../model/ModelRequest";
 import Usage from "../model/Usage";
 import { API_PREFIX, Get, Post, Put } from "./Common";
+import { setModelSequence } from "./Images";
 
 const ENDPOINT = API_PREFIX + "models/"
 
@@ -15,7 +16,7 @@ export const getModels = (
 
 export const getUpscalers = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: {upscalers:string[]}) => void,
+    setItem: (value?: { upscalers: string[] }) => void,
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT + "upscalers")
 
@@ -50,4 +51,4 @@ export const getModelUsage = (
     setItem: (value?: Usage[]) => void,
     onError: (value: any) => void,
     filter: FilterOptions
-) => Get(setLoading, setItem, onError, ENDPOINT + "usage" + objectToQueryString(filter) );
+) => Get(setLoading, setItem, onError, ENDPOINT + "usage" + objectToQueryString(filter));
