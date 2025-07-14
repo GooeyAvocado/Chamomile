@@ -8,6 +8,7 @@ using Chamomile.API.Hubs;
 using System.Text.RegularExpressions;
 using System.Collections.Immutable;
 using System.Security.Cryptography;
+using System.Diagnostics;
 
 namespace Chamomile.API.Workers {
     public partial class ImageGeneratorWorker {
@@ -83,9 +84,13 @@ namespace Chamomile.API.Workers {
                         _currentPrompt = prompt;
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
+                        var stopwatch = new Stopwatch();
 
                         try {
                             var model = await api.GetCurrentModel();
+
+                            stopwatch.Restart();
+                            
                             var img = await api.GenerateImage(new() {
                                 batch_size = 1,
                                 cfg_scale = prompt.CFGScale ?? 7.0,
@@ -102,10 +107,12 @@ namespace Chamomile.API.Workers {
                                 send_images = true,
                             }) ?? throw new InvalidOperationException("Image failed to return");
 
-                            Console.WriteLine($"[Completed] Image generated for Job {jobId}");
+                            stopwatch.Stop();
+
+                            Console.WriteLine($"[Completed] Image generated for Job {jobId}: {stopwatch.ElapsedMilliseconds/1000.0}s");
 
                             //We don't replace the comments here because we want to preserve all of it
-                            var savedImg = await dao.CreateImage(Convert.FromBase64String(img.images[0]), prompt.PositivePrompt);
+                            var savedImg = await dao.CreateImage(Convert.FromBase64String(img.images[0]), prompt.PositivePrompt, (int)stopwatch.ElapsedMilliseconds);
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this
@@ -121,6 +128,7 @@ namespace Chamomile.API.Workers {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this
                             Console.WriteLine(e);
+                            stopwatch.Stop();
                             _currentPrompt = null;
                             _hubContext.Clients.All.SendAsync("JobFailed", jobId, prompt, GetAllPrompts(),e.Message);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed

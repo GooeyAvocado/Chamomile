@@ -13,6 +13,8 @@
         public int Width { get; set; }
         public bool HiResAvailable { get; set; }
 
+        public int? GenerationDurationMs { get; set; }
+
         public List<string> Loras { get; set; } = [];
 
         public List<int> Albums { get; set; } = [];

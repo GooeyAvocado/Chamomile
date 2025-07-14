@@ -134,3 +134,5 @@ LEFT JOIN (
     GROUP BY album_id
 ) ff ON a.album_id = ff.album_id
 GROUP BY a.album_id, a.album_nm, a.album_thumb_id, ff.album_sample_ids, a.album_query_tx;
+
+ALTER TABLE chamomile.images ADD image_gen_ms_nb int4 NULL;

@@ -30,6 +30,7 @@ namespace Chamomile.Data {
                 Created = reader.GetDateTime(CRE_TS),
                 Model = reader.GetString(MODEL_TITLE),
                 HiResAvailable = reader.GetBoolean(IMAGES_HIRES_IN),
+                GenerationDurationMs = reader.GetOptionalInt(IMAGE_GEN_MS),
                 Loras = await adoTemplate.Query(
                     SelectSql(
                         [LORA_ALIAS],
@@ -109,18 +110,18 @@ namespace Chamomile.Data {
             return image;
         }
 
-        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, string basePrompt = "") {
+        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, string basePrompt = "", int? generationDuration = null) {
             var image = await ParseImage(imageBytes, basePrompt);
 
             var img = await adoTemplate.QuerySingle(InsertSql([
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
-                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE
+                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE, IMAGE_GEN_MS
             ], IMAGES_TABLE, string.Join(", ", [
                 IMAGES_ID, IMAGES_PROMPT,IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
-                MODEL_TITLE, CRE_TS
+                MODEL_TITLE, CRE_TS, IMAGE_GEN_MS
             ])), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
                 cmd.SetString(IMAGES_BASE_PROMPT, basePrompt);
@@ -134,6 +135,7 @@ namespace Chamomile.Data {
                 cmd.SetInt(IMAGES_WIDTH, image.Width);
                 cmd.SetBytea(IMAGES_BYTES, imageBytes);
                 cmd.SetString(MODEL_TITLE, image.Model);
+                cmd.SetInt(IMAGE_GEN_MS, generationDuration);
             }, ImageRM);
 
 
@@ -289,7 +291,7 @@ namespace Chamomile.Data {
                     IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                     IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                     IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
-                    MODEL_TITLE, CRE_TS, IMAGES_HIRES_IN,
+                    MODEL_TITLE, CRE_TS, IMAGES_HIRES_IN, IMAGE_GEN_MS
                 ],
                     IMAGES_TABLE,
                     new WhereConditionGroup(ConditionsFromFilter(filter, lastImage)),
@@ -312,7 +314,7 @@ namespace Chamomile.Data {
                     IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                     IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                     IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
-                    MODEL_TITLE ,CRE_TS, IMAGES_HIRES_IN,
+                    MODEL_TITLE ,CRE_TS, IMAGES_HIRES_IN,IMAGE_GEN_MS
                 ],
                     IMAGES_TABLE,
                     new WhereConditionGroup([new(IMAGES_ID)])
@@ -445,7 +447,7 @@ namespace Chamomile.Data {
                     IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                     IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                     IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
-                    MODEL_TITLE, CRE_TS
+                    MODEL_TITLE, CRE_TS, IMAGE_GEN_MS
                 ])
             , (cmd) => {
                 cmd.SetBytea(IMAGES_HIRES_BYTES, image);
