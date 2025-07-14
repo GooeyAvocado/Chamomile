@@ -44,6 +44,18 @@ namespace Chamomile.Data {
             );
         }
 
+        private async Task<List<string>> GetUnusedLoras() {
+            return await adoTemplate.Query($@"
+                select l.{LORA_ALIAS}, count(m.{LORA_ALIAS}) 
+                from {LORA_TABLE} l left join {IMAGES_LORA_MAP} m
+                on l.{LORA_ALIAS} = m.{LORA_ALIAS}
+                where l.{LORA_AVAIL_IN} = false
+                group by l.{LORA_ALIAS}
+                having count(m.{LORA_ALIAS}) = 0
+            ", (cmd) => { }, (reader) => reader.GetString(LORA_ALIAS));
+
+        }
+
         private static string InnerImageSql(FilterOptions filter, int limit) {
             return SelectSql(["IMV." + LORA_ALIAS], $"{IMAGES_TABLE} i left join {IMAGES_LORA_MAP} imv on i.{IMAGES_ID} = imv.{IMAGES_ID}", 
                 new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
@@ -89,6 +101,14 @@ namespace Chamomile.Data {
                 await adoTemplate.Execute(UpdateSql([LORA_AVAIL_IN], new() {
                     { LORA_AVAIL_IN, "FALSE"}
                 }, LORA_TABLE, new([new(LORA_ALIAS, unavailableAliases)])));
+            }
+
+            //Check for unavailable models that have zero images and delete them
+            var unusedLoras = await GetUnusedLoras();
+            if (unusedLoras.Count > 0) {
+                Console.WriteLine($"{unusedLoras.Count} lora(s) unused and deleted");
+                unusedLoras.ForEach(m => Console.WriteLine($"    - {m}"));
+                await adoTemplate.Execute(DeleteSql(LORA_TABLE, new([new(LORA_ALIAS, unusedLoras)])));
             }
 
             //Create the new models

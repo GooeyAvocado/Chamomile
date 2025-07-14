@@ -41,6 +41,15 @@ namespace Chamomile.Data {
             );
         }
 
+        private async Task<List<string>> GetUnusedModels() {
+            return await adoTemplate.Query($@"
+                select m.{MODEL_TITLE}
+                from {MODELS_TABLE} m left join {IMAGES_TABLE} i on m.{MODEL_TITLE} = i.{MODEL_TITLE} 
+                where {MODEL_AVAIL_IN}  = false
+                group by  m.{MODEL_TITLE}
+                HAVING COUNT(i.{MODEL_TITLE}) = 0", (cmd) => { }, (reader) => reader.GetString(MODEL_TITLE));
+        }
+
         private static string InnerImageSql(FilterOptions filter, int limit) {
             return SelectSql([MODEL_TITLE], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
@@ -92,6 +101,14 @@ namespace Chamomile.Data {
                 }, MODELS_TABLE, new([new(MODEL_TITLE, unavailableTitles)])));
             }
 
+            //Check for unavailable models that have zero images and delete them
+            var unusedModels = await GetUnusedModels();
+            if (unusedModels.Count > 0) {
+                Console.WriteLine($"{unusedModels.Count} model(s) unused and deleted");
+                unusedModels.ForEach(m => Console.WriteLine($"    - {m}"));
+                await adoTemplate.Execute(DeleteSql(MODELS_TABLE, new([new(MODEL_TITLE, unusedModels)])));
+            }
+
             //Create the new models
             await adoTemplate.ExecuteBatch(InsertSql(
                 [MODEL_NAME, MODEL_TITLE, MODEL_AVAIL_IN,MODEL_DESC],
@@ -102,6 +119,8 @@ namespace Chamomile.Data {
                 cmd.SetBoolean(MODEL_AVAIL_IN, true);
                 cmd.SetString(MODEL_DESC, "");
             },newModels);
+
+            
 
         }
 
