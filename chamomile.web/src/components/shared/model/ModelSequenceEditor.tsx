@@ -5,6 +5,8 @@ import ModelSelector from "./ModelSelector";
 import { useModels } from "../../hooks/useModels";
 import { imageUrl } from "../../../api/Images";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
+import IECControls from "../IECControls/IECControls";
+import { Model } from "../../../model/Model";
 
 export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, currentModel, loading }: {
     open: boolean,
@@ -25,20 +27,22 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
     }[]>()
 
     useEffect(() => {
-        if (open) {
-            //CHECK: Does the current sequence have the current model?
-            if (sequence?.find(a => a.modelTitle === currentModel)) {
-                setInternalSequence(sequence); //If so then we don't need to do anything 
-            } else {
-                //Otherwise this really shouldn't happen, but we'll add the current model to the sequence
-                setInternalSequence([{
-                    modelTitle: currentModel,
-                    chanceStay: 90,
-                    loadWeight: 1
-                } as ModelSequence, ...sequence ?? []]);
-            }
-        }
+        if (open) { initializeInternalSequence(sequence ?? []); }
     }, [open]);
+
+    const initializeInternalSequence = (val: ModelSequence[]) => {
+        //CHECK: Does the current sequence have the current model?
+        if (val?.find(a => a.modelTitle === currentModel)) {
+            setInternalSequence(val); //If so then we don't need to do anything 
+        } else {
+            //Otherwise this really shouldn't happen, but we'll add the current model to the sequence
+            setInternalSequence([{
+                modelTitle: currentModel,
+                chanceStay: 90,
+                loadWeight: 1
+            } as ModelSequence, ...val ?? []]);
+        }
+    }
 
     const validateAndOk = () => {
         const errors = internalSequence.map((s) => {
@@ -147,20 +151,33 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
             </div>
 
             <hr style={{ width: "100%" }} />
-            <Button
-                startIcon={<AddCircleOutline />}
-                style={{ alignSelf: 'end' }}
-                onClick={() => {
-                    setInternalSequence([
-                        ...internalSequence,
-                        {
-                            modelTitle: "",
-                            chanceStay: 95,
-                            loadWeight: 1
-                        } as ModelSequence
-                    ]);
-                }}
-            >Add another model</Button>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <IECControls
+                    setValue={(val) => {
+                        if (Object.keys(val).length === 0) { initializeInternalSequence([]); }
+                        else { initializeInternalSequence(val as ModelSequence[]); }
+                        setValidation([])
+                    }}
+                    value={internalSequence}
+                    type="model sequence"
+                    nonPlural
+                />
+                <Button
+                    startIcon={<AddCircleOutline />}
+                    style={{ alignSelf: 'end' }}
+                    onClick={() => {
+                        setInternalSequence([
+                            ...internalSequence,
+                            {
+                                modelTitle: "",
+                                chanceStay: 95,
+                                loadWeight: 1
+                            } as ModelSequence
+                        ]);
+                    }}
+                >Add another model</Button>
+
+            </div>
 
         </DialogContent>
         <DialogActions>

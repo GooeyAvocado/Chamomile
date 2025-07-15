@@ -13,6 +13,7 @@ import TabbedModalActions from "../modals/TabbedModal/TabbedModalActions"
 import TabbedModalTabContent from "../modals/TabbedModal/TabbedModalTabContent"
 import { useWindowDimensions } from "../../hooks/useWindowDimensions"
 import { useSnackbar } from "notistack"
+import IECControls from "../IECControls/IECControls"
 
 export default function VariableEditor(props: {
     open: boolean,
@@ -204,30 +205,11 @@ export default function VariableEditor(props: {
         </TabbedModalTabContent>
         <TabbedModalActions>
             <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', paddingBottom: '5px', paddingLeft: '5px', paddingRight: '5px' }}>
-                <div style={{ display: 'flex', gap: '5px' }}>
-
-                    <Tooltip title="Import overrides">
-                        <IconButton component="label" color="primary" >
-                            <FileUpload />
-                            <input type="file" accept="application/json" hidden onChange={onImport} />
-                        </IconButton>
-                    </Tooltip>
-
-                    {Object.keys(variables ?? {}).length > 0 && <>
-
-                        <hr />
-
-                        <Tooltip title="Export overrides">
-                            <IconButton onClick={onExport} color="primary">
-                                <FileDownload />
-                            </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Clear all overrides">
-                            <IconButton onClick={() => setVariables({})} color="primary"><Delete /></IconButton>
-                        </Tooltip>
-                    </>}
-                </div>
+                <IECControls
+                    setValue={setVariables}
+                    value={variables}
+                    type="override"
+                />
                 <Button onClick={() => setOpen(false)}>OK</Button>
             </div>
         </TabbedModalActions>
