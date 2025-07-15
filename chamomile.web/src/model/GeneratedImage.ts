@@ -16,4 +16,5 @@ export class GeneratedImage {
     favorite: boolean = false;
     created: Date = new Date();
     hiResAvailable: boolean = false;
+    generationDurationMs?: number = 0;
 }
