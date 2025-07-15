@@ -16,6 +16,7 @@ export const useQueue = (onImageDone: (val: GeneratedImage) => void, showSnackba
     const [currentProgress, setCurrentProgress] = useState(undefined as undefined | Progress)
     const [activeJob, setActiveJob] = useState(undefined as undefined | Prompt)
     const [lastSuccessfulImage, setLastSuccessfulImage] = useState(undefined as undefined | GeneratedImage)
+    const [modelSequenceChangeBusy, setModelSequenceChangeBusy] = useState<string | undefined>()
 
     const interruptApi = useApi(interruptGeneration)
     const cancelApi = useApi(cancelJob)
@@ -89,8 +90,22 @@ export const useQueue = (onImageDone: (val: GeneratedImage) => void, showSnackba
         setActiveJob(undefined)
     });
 
+    useSignalR("ModelRerollStarted", (nextModel: string) => {
+        console.log("Changing model " + nextModel)
+        setModelSequenceChangeBusy(nextModel)
+    });
+
+    useSignalR("ModelRerollComplete", (nextModel: string) => {
+        console.log("Model Reroll complete " + nextModel)
+        if (showSnackbar) enqueueSnackbar("Model changed!", { variant: 'success' })
+        setModelSequenceChangeBusy(undefined)
+    });
+
+
+
 
     return {
+        nextModel: modelSequenceChangeBusy?.replace(".safetensors", ""),
         queue: queue,
         groupedQueue: groupedQueue,
         activeJob: activeJob,

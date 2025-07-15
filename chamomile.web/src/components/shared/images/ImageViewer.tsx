@@ -22,6 +22,7 @@ import AlbumWelcome from "../albums/AlbumWelcome";
 import { Album } from "../../../model/Album";
 import { updateImageAlbums } from "../../../api/Albums";
 import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
+import ModelChangeTile from "./ModelChangeTile";
 
 export default function ImageViewer(props: {
     filter: FilterOptions
@@ -50,7 +51,7 @@ export default function ImageViewer(props: {
     const { isMobile } = useUserAgent();
     const { currentUpload, lastSuccess, progress: uploadProgress } = useImageUpload();
 
-    const { activeJob, cancel, progress, groupedQueue, queue } = useQueue((val) => {
+    const { activeJob, cancel, progress, groupedQueue, queue, nextModel } = useQueue((val) => {
         if (showBrewing) {
             imageApi.appendImage(val)
         }
@@ -213,6 +214,8 @@ export default function ImageViewer(props: {
                     p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} /> :
                         <QueuedGroupImageTile prompts={p} onCancel={cancel} />
             )}
+
+            {showBrewing && nextModel && <ModelChangeTile nextModel={nextModel} />}
 
             {showBrewing && activeJob && <>
                 <BrewingImageTile
