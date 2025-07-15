@@ -1,7 +1,7 @@
-import { Autocomplete, Button, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material"
+import { Autocomplete, Button, IconButton, InputAdornment, TextField } from "@mui/material"
 import { usePrompt } from "../../hooks/usePrompt"
 import { promptPreview } from "../Utils"
-import { Add, Delete, FileDownload, FileUpload, Terminal } from "@mui/icons-material"
+import { Add, Delete, Terminal } from "@mui/icons-material"
 import { useMemo, useState } from "react"
 import { Prompt } from "../../../model/Prompt"
 import useApi from "../../hooks/useApi"
@@ -12,7 +12,6 @@ import TabbedModalConsistentContent from "../modals/TabbedModal/TabbedModalConsi
 import TabbedModalActions from "../modals/TabbedModal/TabbedModalActions"
 import TabbedModalTabContent from "../modals/TabbedModal/TabbedModalTabContent"
 import { useWindowDimensions } from "../../hooks/useWindowDimensions"
-import { useSnackbar } from "notistack"
 import IECControls from "../IECControls/IECControls"
 
 export default function VariableEditor(props: {
@@ -22,8 +21,6 @@ export default function VariableEditor(props: {
 
     const { open, setOpen } = props
     const { variables, setVairables: setVariables, prompt, setPrompt } = usePrompt()
-
-    const { enqueueSnackbar } = useSnackbar();
 
     const [newCustName, setNewCustName] = useState("")
     const [newWildName, setNewWildName] = useState("")
@@ -52,34 +49,6 @@ export default function VariableEditor(props: {
 
     const availableCustomNames = () => {
         return Object.keys(variables ?? {}).filter(a => !a.includes("%") && !a.startsWith("__"))
-    }
-
-    const onExport = () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(variables, null, 4));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "variables.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-    }
-
-    const onImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const text = await file.text();
-        try {
-            const json = JSON.parse(text);
-            if (typeof json === "object" && json !== null) {
-                enqueueSnackbar("Overrides loaded!", { variant: "success" });
-                setVariables(json);
-            } else {
-                enqueueSnackbar("Invalid JSON format.", { variant: "warning" });
-            }
-        } catch {
-            enqueueSnackbar("Failed to parse JSON.", { variant: 'error' });
-        }
-        e.target.value = "";
     }
 
     const varNames = availableVars(prompt)

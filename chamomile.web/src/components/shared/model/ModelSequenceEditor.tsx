@@ -6,7 +6,6 @@ import { useModels } from "../../hooks/useModels";
 import { imageUrl } from "../../../api/Images";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 import IECControls from "../IECControls/IECControls";
-import { Model } from "../../../model/Model";
 
 export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, currentModel, loading }: {
     open: boolean,
