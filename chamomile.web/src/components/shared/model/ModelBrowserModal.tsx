@@ -38,7 +38,11 @@ export default function ModelBrowserModal(props: {
                     />
                 </div>
                 <div style={{ width: "200px" }}>
-                    <ModelTypeSelector setModelType={(e) => setType(e)} modelType={type} />
+                    <ModelTypeSelector
+                        setModelType={(e) => setType(e)}
+                        modelType={type}
+                        allowAny allowUnknown
+                    />
                 </div>
                 {showNone && <div style={{ width: "200px" }}>
                     <AvailabilitySelector availability={availability} setAvailability={setAvailability} />
@@ -105,7 +109,7 @@ function GridViewMode(props: { data: Model[], query: string, onOk: (val: Model) 
             ]
             : (data ?? []).filter(a => a.isAvailable)
         )?.filter(a => query.trim().length === 0 ? true : a.name?.toLowerCase().includes(query.toLowerCase()) || a.description?.toLowerCase().includes(query.toLowerCase()))
-            .filter(a => type?.trim().length === 0 ? true : a.type?.toLowerCase().includes(type?.toLowerCase()))
+            .filter(a => type?.trim().length === 0 ? true : type === "?" ? (a?.type ?? "").trim().length === 0 : a.type?.toLowerCase().includes(type?.toLowerCase()))
             .map(a => <div key={a.title} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ModelTile model={a} onClick={() => onOk(a)}
                     onViewImage={() => {

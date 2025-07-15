@@ -3,8 +3,13 @@ import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 export default function ModelTypeSelector(props: {
     modelType?: string
     setModelType: (val: string) => void
+    allowAny?: boolean
+    allowUnknown?: boolean
 }) {
-    const { modelType, setModelType } = props
+    const {
+        modelType, setModelType,
+        allowAny, allowUnknown
+    } = props
 
     return <FormControl fullWidth>
         <InputLabel>Base Model Type</InputLabel>
@@ -13,7 +18,8 @@ export default function ModelTypeSelector(props: {
             label="Base Model Type"
             onChange={(e) => setModelType(e.target.value)}
         >
-            <MenuItem value={""}>Unknown</MenuItem>
+            {allowAny && <MenuItem value={""}>Any</MenuItem>}
+            {allowUnknown && <MenuItem value={"?"}>Unknown</MenuItem>}
             <MenuItem value={"SD"}>Stable Diffusion</MenuItem>
             <MenuItem value={"SDXL"}>Stable Diffusion XL</MenuItem>
             <MenuItem value={"PONY"}>PonyXL</MenuItem>
