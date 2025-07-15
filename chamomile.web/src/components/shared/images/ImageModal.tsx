@@ -94,6 +94,12 @@ export default function ImageModal(props: {
                         saveImage();
                     }
                     break;
+                case "d":
+                    if (e.ctrlKey) {
+                        e.preventDefault();
+                        onFavorite?.();
+                    }
+                    break;
                 default:
                     break;
             }
@@ -229,10 +235,20 @@ export default function ImageModal(props: {
 
                         </div>
 
-                        {/* Creation Date */}
-                        <div style={{ minWidth: "75px", flex: "1", fontSize: '.8em' }}>
-                            <div style={{ marginTop: "20px" }}><b>Created</b></div>
-                            <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{new Date(image?.created ?? 0).toLocaleString()}</div>
+                        <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
+                            {/* Creation Date */}
+                            <div style={{ minWidth: "75px", flex: "1" }}>
+                                <div style={{ marginTop: "20px" }}><b>Created</b></div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{new Date(image?.created ?? 0).toLocaleString()}</div>
+                            </div>
+
+                            {/* Creation Date */}
+                            {image?.generationDurationMs && <div style={{ minWidth: "75px", flex: "1" }}>
+                                <div style={{ marginTop: "20px" }}><b>Generation Duration</b></div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{(image?.generationDurationMs / 1000.0)}s</div>
+                            </div>}
+
+
                         </div>
                     </div>
 
