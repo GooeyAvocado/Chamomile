@@ -161,7 +161,9 @@ namespace Chamomile.API.Workers {
 
             var nextModel = GetNextModel(currentModel);
             if (nextModel != null) {
+                _ = _hubContext.Clients.All.SendAsync("ModelRerollStarted", nextModel.ModelTitle);
                 await api.ChangeModel(nextModel.ModelTitle);
+                _ = _hubContext.Clients.All.SendAsync("ModelRerollComplete", nextModel.ModelTitle);
             }
         }
 
