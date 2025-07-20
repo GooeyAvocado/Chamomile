@@ -35,10 +35,17 @@ export default function LoraEditorModal(props: {
         </DialogTitle>
         <DialogContent>
             <Card style={{ width: "150px", height: '150px', margin: "0px auto 20px auto" }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
-                <img src={lora?.bannerImage ? imageUrl(lora.bannerImage) : '/outline.png'} style={{ width: '100%', height: '150px', objectFit: 'contain', objectPosition: 'center top' }} />
+                <img
+                    key={internalLora.bannerImage}
+                    src={internalLora?.bannerImage ? imageUrl(internalLora.bannerImage) : '/outline.png'}
+                    style={{
+                        width: '100%', height: '150px',
+                        objectFit: 'contain', objectPosition: 'center top'
+                    }}
+                />
             </CardActionArea></Card>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <ModelTypeSelector modelType={internalLora.type} setModelType={(e)=>setInternalLora({ ...internalLora, type: e })}/>
+                <ModelTypeSelector modelType={internalLora.type} setModelType={(e) => setInternalLora({ ...internalLora, type: e })} />
                 <TextField
                     label="Notes"
                     value={internalLora.description}

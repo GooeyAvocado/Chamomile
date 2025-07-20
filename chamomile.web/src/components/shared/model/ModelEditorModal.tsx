@@ -35,10 +35,17 @@ export default function ModelEditorModal(props: {
         </DialogTitle>
         <DialogContent>
             <Card style={{ width: "150px", height: '150px', margin: "0px auto 20px auto" }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
-                <img src={model?.bannerImage ? imageUrl(model.bannerImage) : '/outline.png'} style={{ width: '100%', height: '150px', objectFit: 'contain', objectPosition: 'center top' }} />
+                <img
+                    key={internalModel.bannerImage}
+                    src={internalModel?.bannerImage ? imageUrl(internalModel.bannerImage) : '/outline.png'}
+                    style={{
+                        width: '100%', height: '150px',
+                        objectFit: 'contain', objectPosition: 'center top'
+                    }}
+                />
             </CardActionArea></Card>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <ModelTypeSelector modelType={internalModel.type} setModelType={(e)=>setInternalModel({ ...internalModel, type: e })}/>
+                <ModelTypeSelector modelType={internalModel.type} setModelType={(e) => setInternalModel({ ...internalModel, type: e })} />
                 <TextField
                     label="Notes"
                     value={internalModel.description}

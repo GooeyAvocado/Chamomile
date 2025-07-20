@@ -40,7 +40,11 @@ export default function PromptEditorModal(props: {
             </>}
             {!preview && <>
                 <Card style={{ width: "150px", height: '150px', margin: "0px auto 20px auto" }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
-                    <img src={internalPrompt.sampleImage ? imageUrl(internalPrompt.sampleImage) : '/outline.png'} style={{ width: '100%', height: '150px', objectFit: 'contain', objectPosition: 'center top' }} />
+                    <img
+                        key={internalPrompt.sampleImage}
+                        src={internalPrompt.sampleImage ? imageUrl(internalPrompt.sampleImage) : '/outline.png'}
+                        style={{ width: '100%', height: '150px', objectFit: 'contain', objectPosition: 'center top' }}
+                    />
                 </CardActionArea></Card>
                 <div style={{ display: 'flex', marginBottom: '10px' }}>
                     <Card>
