@@ -142,7 +142,7 @@ export default function PromptBuilder(props: {
                 onKeyDown={onKeyDown}
                 dataSources={[
                     {
-                        data: loras?.map(a => ({ id: a.alias, display: "<lora:" + a.alias + ":1>" } as BaseSuggestionData)) ?? [],
+                        data: loras?.filter(a => a.isAvailable).map(a => ({ id: a.alias, display: "<lora:" + a.alias + ":1>" } as BaseSuggestionData)) ?? [],
                         trigger: "<"
                     },
                     {
