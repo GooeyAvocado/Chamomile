@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, IconButton, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, ExpandMore, Height, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, PhotoLibrary, Star, Terminal, ThumbDown, Tune, Window, Yard } from "@mui/icons-material";
+import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, ExpandMore, Gradient, Height, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, PhotoLibrary, Star, Terminal, ThumbDown, Tune, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -583,6 +583,9 @@ export default function HelpTab(props: {
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
                 <div>
                     <b><LabeledIcon label="Favorites"><Star htmlColor="gold" /></LabeledIcon></b>: Only show favorite images
+                </div>
+                <div>
+                    <b><LabeledIcon label="Upscaled"><Gradient color="info" /></LabeledIcon></b>: Only show upscaled images
                 </div>
                 <div>
                     <b><LabeledIcon label="To and From dates"><CalendarMonth /></LabeledIcon></b>: Inclusive date ranges for search results
