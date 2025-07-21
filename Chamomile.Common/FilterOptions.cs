@@ -5,6 +5,7 @@
         public string? Lora { get; set; } = "";
         public string? Model { get; set; } = "";
         public bool? Favorite { get; set; } = false;
+        public bool? Upscaled { get; set; } = false;
         public string? FromDate { get; set; } = "";
         public string? ToDate { get; set; } = "";
         public int? LastImage { get; set; } = 0;

@@ -3,7 +3,7 @@ import { CardActionArea } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CoffeeOutlined, Delete, Star, StarOutline, Terminal, TerminalOutlined } from "@mui/icons-material";
+import { CoffeeOutlined, Delete, Gradient, Star, StarOutline, Terminal, TerminalOutlined } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -38,8 +38,14 @@ export default function ImageTile(props: {
                 <CardActionArea onClick={onClick} style={{ height: "100%", width: "100%", aspectRatio: "1/1", position: "relative" }}>
                     <img src={'/outline.png'} style={{ width: "50%", height: "50%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0', margin: '25%' }} />
                     <img src={imageUrl(image.id)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
-                    {image.favorite && <div style={{ position: 'absolute', top: 7, left: 7, opacity: "0.3" }}><Star htmlColor="black" /></div>}
-                    {image.favorite && <div style={{ position: 'absolute', top: 5, left: 5 }}><Star htmlColor="gold" /></div>}
+                    <div style={{ position: 'absolute', top: 7, left: 7, opacity: "0.3", display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        {image.favorite && <Star htmlColor="black" />}
+                        {image.hiResAvailable && <Gradient htmlColor="black" />}
+                    </div>
+                    <div style={{ position: 'absolute', top: 5, left: 5, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        {image.favorite && <Star htmlColor="gold" />}
+                        {image.hiResAvailable && <Gradient color="info" />}
+                    </div>
                 </CardActionArea>
             </BaseImageTile>
         </ContextMenu>

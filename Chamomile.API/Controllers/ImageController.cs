@@ -247,7 +247,7 @@ namespace Chamomile.API.Controllers {
             var hiRes = await api.HiResImage(hiResParameters);
             return hiRes == null
                 ? throw new InvalidOperationException("Waos")
-                : Ok(await dao.SaveHiResImage(options.ImageID, Convert.FromBase64String(hiRes.image)));
+                : Ok(await dao.SaveHiResImage(options.ImageID, Convert.FromBase64String(hiRes.image), options.ResizeFactor));
         }
 
         [HttpPut("Albums")]

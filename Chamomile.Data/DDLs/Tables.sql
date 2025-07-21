@@ -141,3 +141,12 @@ alter table images add image_notes_tx DEFAULT '';
 alter table images add image_notes_fts tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, image_notes_tx)) STORED null;
 
 alter table images add image_download_ct int4 default 0;
+
+ALTER TABLE images
+ADD COLUMN image_effective_size_nb integer
+GENERATED ALWAYS AS (
+  CASE
+    WHEN image_hires_bytes_tx IS NOT NULL THEN length(image_hires_bytes_tx)
+    ELSE length(image_bytes_tx)
+  END
+) STORED;

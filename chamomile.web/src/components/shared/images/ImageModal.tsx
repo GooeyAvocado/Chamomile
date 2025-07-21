@@ -1,5 +1,5 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Alert, Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
+import { Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, Menu, ModelTraining, Notes, PhotoLibrary, Star, StarBorder, Terminal, TerminalOutlined } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
@@ -131,7 +131,7 @@ export default function ImageModal(props: {
 
             {/* Image side */}
             <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative', backgroundColor: collapse ? 'black' : '#333', transition: 'background-color 0.5s ease' }}>
-                <img src={imageUrl(image?.id ?? 0, image?.hiResAvailable)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain' }} />
+                <img src={imageUrl(image?.id ?? 0, image?.hiResAvailable)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain', zIndex: 5 }} />
 
                 <div style={{ position: 'absolute', right: '20px', top: '20px', zIndex: 1, opacity: collapse ? 1 : 0, transition: 'opacity 0.5s ease' }}>
                     <IconButton onClick={() => setCollapse(false)}><Menu /></IconButton>
@@ -150,6 +150,15 @@ export default function ImageModal(props: {
                         onLeft={onLeft} onRight={onRight} onDownload={saveImage}
                         onDelete={onDeleteForce} onFavorite={() => { onFavorite?.() }}
                     />
+                </div>
+
+                <div style={{
+                    position: "absolute", left: '10px', bottom: '10px', zIndex: 1,
+                    display: 'flex', flexDirection: 'column', alignItems: 'start',
+                    fontSize: ".6em", opacity: '.5', color: '#888'
+                }}>
+                    <div>{image?.id}.png ({((image?.size ?? 0) / (1024.0 * 1024.0)).toFixed(2)}mb)</div>
+                    <div>{image?.width}px x {image?.height}px</div>
                 </div>
 
                 {props.imageChildren?.(!!collapse) ?? <></>}
@@ -281,7 +290,7 @@ export default function ImageModal(props: {
 
                             {/* HiRes Options */}
                             <ComplexAccordion elevation={2} title={<><Gradient color={
-                                image?.hiResAvailable ? "success" : "inherit"
+                                image?.hiResAvailable ? "info" : "inherit"
                             } /> <div>Upscale{image?.hiResAvailable && "d"}</div></>} disabled={!onUpscale || !pong?.SD}>
                                 <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
                                 </ComplexAccordionActions>

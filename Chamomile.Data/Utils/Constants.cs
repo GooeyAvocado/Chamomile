@@ -41,7 +41,7 @@
         public static readonly string IMAGES_NOTES_FTS   = "image_notes_fts";
         public static readonly string IMAGE_GEN_MS       = "image_gen_ms_nb";
         public static readonly string IMAGES_DOWNLOAD_CT = "image_download_ct"; 
-
+        public static readonly string IMAGE_SIZE         = "image_effective_size_nb";
 
         public static readonly string IMAGES_LORA_MAP = $"{SCHEMA}.images_lora_map";
 

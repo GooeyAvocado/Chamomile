@@ -11,6 +11,7 @@ export class GeneratedImage {
     seed: number = -1;
     height: number = 1024;
     width: number = 1024;
+    size: number = 0;
     loras: string[] = [];
     albums: number[] = []
     model: string = "";

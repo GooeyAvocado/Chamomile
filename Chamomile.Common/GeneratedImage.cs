@@ -12,6 +12,9 @@
         public long Seed { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }
+
+        public int Size { get; set; }
+
         public bool HiResAvailable { get; set; }
 
         public int? GenerationDurationMs { get; set; }

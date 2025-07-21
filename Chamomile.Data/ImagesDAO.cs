@@ -15,7 +15,7 @@ namespace Chamomile.Data {
 
         private static readonly List<string> ImageColumns = [IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP, IMAGES_CFG_SCL, IMAGES_DOWNLOAD_CT, IMAGES_NOTES,
-                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
+                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN, IMAGE_SIZE,
                 MODEL_TITLE, CRE_TS, IMAGE_GEN_MS];
 
         private async Task<GeneratedImage> ImageRM(Getter reader) {
@@ -38,6 +38,7 @@ namespace Chamomile.Data {
                 HiResAvailable = reader.GetBoolean(IMAGES_HIRES_IN),
                 GenerationDurationMs = reader.GetOptionalInt(IMAGE_GEN_MS),
                 DownloadCount = reader.GetOptionalInt(IMAGES_DOWNLOAD_CT),
+                Size=reader.GetInt(IMAGE_SIZE),
                 
                 Loras = await adoTemplate.Query(
                     SelectSql(
@@ -229,6 +230,10 @@ namespace Chamomile.Data {
 
             if (filter.Favorite == true) {
                 conditions.Add(new(IMAGES_FAV_IN, WhereConditionOperator.EQUALS, "true"));
+            }
+
+            if (filter.Upscaled == true) {
+                conditions.Add(new(IMAGES_HIRES_IN, WhereConditionOperator.EQUALS, "true"));
             }
 
             if (!string.IsNullOrEmpty(filter.Lora)) {
@@ -491,9 +496,12 @@ namespace Chamomile.Data {
             return img;
         }
 
-        public async Task<GeneratedImage?> SaveHiResImage(int id, byte[] image) {
+        public async Task<GeneratedImage?> SaveHiResImage(int id, byte[] image, int scale) {
             return await adoTemplate.QuerySingle(
-                UpdateSql([IMAGES_HIRES_BYTES], IMAGES_TABLE, new([new(IMAGES_ID)])) +
+                UpdateSql([IMAGES_HIRES_BYTES, IMAGES_WIDTH, IMAGES_HEIGHT], new Dictionary<string,string>() {
+                    { IMAGES_WIDTH, $"{IMAGES_WIDTH} * {scale}" },
+                    { IMAGES_HEIGHT, $"{IMAGES_HEIGHT} * {scale}" }
+                }, IMAGES_TABLE, new([new(IMAGES_ID)])) +
                 " RETURNING " + string.Join(", ", ImageColumns)
             , (cmd) => {
                 cmd.SetBytea(IMAGES_HIRES_BYTES, image);
