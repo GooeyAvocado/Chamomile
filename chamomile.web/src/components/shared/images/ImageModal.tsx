@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Card, Dialog, IconButton, Stack, Tab, Tabs, Tooltip } from "@mui/material";
+import { Alert, Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { ArrowBack, ArrowForward, CoffeeOutlined, Delete, Menu, Star, StarBorder, Terminal, TerminalOutlined } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, Menu, ModelTraining, Notes, PhotoLibrary, Star, StarBorder, Terminal, TerminalOutlined } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -16,12 +16,22 @@ import { Prompt } from "../../../model/Prompt";
 import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
 import ImageModalAlbumsDisplay from "../albums/ImageModalAlbumsDisplay";
 import { Album } from "../../../model/Album";
+import AreYouSureModal from "../modals/AreYouSureModal";
+import ComplexAccordion from "../complexAccordion/ComplexAccordion";
+import ComplexAccordionActions from "../complexAccordion/ComplexAccordionActions";
+import ComplexAccordionBody from "../complexAccordion/ComplexAccordionBody";
+import AlbumBrowser from "../albums/AlbumBrowser";
+import AlbumStrip from "../albums/AlbumStrip";
+import LoraStrip from "../lora/LoraStrip";
+import { usePingPong } from "../../hooks/usePingPong";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
     open: boolean,
     setOpen: (val: boolean) => void
     onFavorite?: () => void,
+    onUpdateNotes?: (val: string) => void,
+    onDownload?: () => void,
     onDelete?: () => void,
     onDeleteForce?: () => void,
     onLeft?: () => void,
@@ -35,17 +45,28 @@ export default function ImageModal(props: {
     infoChildren?: JSX.Element
 }) {
 
-    const { image, open, setOpen, onDelete, onFavorite, onLeft, onRight, onDeleteForce, onUpscale, collapseDefault, onAddAlbum, onRemoveAlbum, onViewAlbum } = props;
+    const {
+        image, open, setOpen, onDelete, onFavorite,
+        onLeft, onRight, onDeleteForce, onUpscale,
+        collapseDefault, onAddAlbum, onRemoveAlbum,
+        onViewAlbum, onDownload, onUpdateNotes
+    } = props;
 
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
     const { vertical } = useWindowDimensions()
+    const { pong } = usePingPong();
 
     const [collapse, setCollapse] = useState(collapseDefault)
     const [promptMode, setPromptMode] = useState(0)
+    const [downloadAys, setDownloadAys] = useState(false)
+    const [albumsOpen, setAlbumsOpen] = useState(false)
+    const [notesOpen, setNotesOpen] = useState(false)
+    const [editNote, setEditNote] = useState("")
 
     useEffect(() => {
         if ((image?.basePrompt?.trim()?.length ?? 0) === 0) setPromptMode(0)
+        setNotesOpen(false)
     }, [image])
 
     const onUsePrompt = (promptOverride?: Prompt) => {
@@ -57,13 +78,14 @@ export default function ImageModal(props: {
     // window.open(imageUrl(image?.id ?? 0) + ".png");
 
     const saveImage = async () => {
+        setDownloadAys(false);
         try {
             const a = document.createElement('a');
-            a.href = imageUrl(image?.id ?? 0) + ".png";
+            a.href = imageUrl(image?.id ?? 0) + ".png?CountDownload=true";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-
+            onDownload?.();
         } catch (error) {
             console.error('Error downloading the image:', error);
         }
@@ -91,7 +113,8 @@ export default function ImageModal(props: {
                 case "s":
                     if (e.ctrlKey) {
                         e.preventDefault();
-                        saveImage();
+                        if ((image?.downloadCount ?? 0) > 0) { setDownloadAys(true); }
+                        else { saveImage(); }
                     }
                     break;
                 case "d":
@@ -124,7 +147,7 @@ export default function ImageModal(props: {
                 <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center' }}>
                     <ImageHotbar
                         image={image} onUsePrompt={onUsePrompt}
-                        onLeft={onLeft} onRight={onRight}
+                        onLeft={onLeft} onRight={onRight} onDownload={saveImage}
                         onDelete={onDeleteForce} onFavorite={() => { onFavorite?.() }}
                     />
                 </div>
@@ -169,14 +192,9 @@ export default function ImageModal(props: {
                                 </Tabs>
                                 <CopyToClipboardButton text={promptMode === 0 ? image?.prompt : image?.basePrompt} style={{ paddingRight: "16px" }} />
                             </div>
-                            <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>{
-                                <>
-                                    <div>{promptMode === 0 ? image?.prompt : image?.basePrompt}</div>
-
-                                </>
-
-                            }</div>
-
+                            <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>
+                                {promptMode === 0 ? image?.prompt : image?.basePrompt}
+                            </div>
                         </Card>
 
                         {/* Negative Prompt */}
@@ -190,24 +208,91 @@ export default function ImageModal(props: {
 
                         {/* Model */}
                         <div style={{ marginTop: "20px" }}><b>Model</b></div>
-                        <ModelCard modelTitle={image?.model ?? ""} currentImage={image} />
+                        <ModelCard modelTitle={image?.model ?? ""} currentImage={image} elevation={5} />
 
-                        {/* LORAs */}
-                        {(image?.loras?.length ?? 0) !== 0 && <>
-                            <div style={{ marginTop: "20px" }}><b>Loras</b></div>
-                            <Stack gap={"5px"}>
-                                {image?.loras?.map(a => <LoraCard key={a} loraAlias={a} currentImage={image} />)}
-                            </Stack>
-                        </>}
+                        <Stack style={{ marginTop: "20px" }} gap={"10px"}>
+                            {/* LORAs */}
+                            {(image?.loras?.length ?? 0) !== 0 && <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>}>
+                                <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
+                                    {image && <LoraStrip loras={image?.loras} maxLength={6} />}
+                                </ComplexAccordionActions>
+                                <ComplexAccordionBody>
+                                    <Stack gap={"5px"}>
+                                        {image?.loras?.map(a => <LoraCard key={a} loraAlias={a} currentImage={image} elevation={5} />)}
+                                    </Stack>
+                                </ComplexAccordionBody>
+                            </ComplexAccordion>}
 
-                        <ImageModalAlbumsDisplay albums={image?.albums} onAdd={onAddAlbum} onRemove={onRemoveAlbum} onView={onViewAlbum} />
+                            <ComplexAccordion elevation={2} title={<><PhotoLibrary /> <div>Collections</div></>}>
+                                <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
+                                    {image && <AlbumStrip albums={image?.albums} maxLength={6} />}
+                                </ComplexAccordionActions>
+                                {onAddAlbum && <ComplexAccordionActions position="right" showOnState="expanded">
+                                    <IconButton onClick={() => setAlbumsOpen(true)}><Add /></IconButton>
+                                </ComplexAccordionActions>}
+                                <ComplexAccordionBody>
+                                    <ImageModalAlbumsDisplay albums={image?.albums} onRemove={onRemoveAlbum} onView={onViewAlbum} elevation={5} />
+                                </ComplexAccordionBody>
+                            </ComplexAccordion>
+
+                            <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>}>
+                                <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
+                                    <span style={{
+                                        whiteSpace: "pre-line", overflow: "hidden",
+                                        textOverflow: "ellipsis", maxWidth: "300px",
+                                        fontFamily: 'monospace', fontSize: '.6em',
+                                        WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                                        display: "-webkit-box"
+                                    }}>
+                                        {image?.notes}
+                                    </span>
+                                </ComplexAccordionActions>
+                                {onUpdateNotes && <ComplexAccordionActions position="right" showOnState="expanded">
+                                    <IconButton disabled={notesOpen} onClick={() => {
+                                        setNotesOpen(true)
+                                        setEditNote(image?.notes ?? "")
+                                    }}><Edit /></IconButton>
+                                </ComplexAccordionActions>}
+                                <ComplexAccordionBody>
+                                    <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>
+                                        {!notesOpen
+                                            ? (image?.notes?.length ?? 0) === 0 ? "Image has no notes" : image?.notes
+                                            : <>
+                                                <TextField
+                                                    value={editNote} onChange={(e) => setEditNote(e.target.value)}
+                                                    fullWidth multiline placeholder="Set a note" minRows={5} maxRows={5}
+                                                    slotProps={{ htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } } }}
+                                                />
+                                                <div style={{ display: 'flex', justifyContent: "end", gap: "10px", marginTop: "10px" }}>
+                                                    <Button onClick={() => {
+                                                        setNotesOpen(false)
+                                                        if (editNote.trim() !== (image?.notes ?? "").trim()) {
+                                                            onUpdateNotes?.(editNote)
+                                                        }
+                                                    }}>
+                                                        OK
+                                                    </Button>
+                                                </div>
+                                            </>
+                                        }
+                                    </div>
+                                </ComplexAccordionBody>
+                            </ComplexAccordion>
+
+                            {/* HiRes Options */}
+                            <ComplexAccordion elevation={2} title={<><Gradient color={
+                                image?.hiResAvailable ? "success" : "inherit"
+                            } /> <div>Upscale{image?.hiResAvailable && "d"}</div></>} disabled={!onUpscale || !pong?.SD}>
+                                <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
+                                </ComplexAccordionActions>
+                                <ComplexAccordionBody>
+                                    {!!onUpscale && pong?.SD && <HiResPanel image={image} updateImage={onUpscale} />}
+                                </ComplexAccordionBody>
+                            </ComplexAccordion>
 
 
-                        {/* HiRes Options */}
-                        {!!onUpscale && <>
-                            <div style={{ marginTop: "20px" }}><b>Upscaling</b></div>
-                            <HiResPanel image={image} updateImage={onUpscale} />
-                        </>}
+                        </Stack>
+
 
                         {/* Metadata */}
                         <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
@@ -242,7 +327,7 @@ export default function ImageModal(props: {
                                 <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{new Date(image?.created ?? 0).toLocaleString()}</div>
                             </div>
 
-                            {/* Creation Date */}
+                            {/* Duration */}
                             {image?.generationDurationMs && <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Generation Duration</b></div>
                                 <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{(image?.generationDurationMs / 1000.0)}s</div>
@@ -256,7 +341,18 @@ export default function ImageModal(props: {
 
                 </div>
             </Card>
-        </div>
-    </Dialog>
+        </div >
+
+        {onAddAlbum && <AlbumBrowser
+            open={albumsOpen} setOpen={setAlbumsOpen} albums={image?.albums ?? []}
+            onSelect={(val) => val ? onAddAlbum(val) : console.error("Browser somehow responded with nothing", val)}
+        />
+        }
+
+        <AreYouSureModal open={downloadAys} setOpen={setDownloadAys} title="Download this image again?" onYes={saveImage}>
+            This image has already been downloaded {image?.downloadCount ?? 0} times. Are you sure you want to download it again?
+        </AreYouSureModal>
+
+    </Dialog >
 
 }

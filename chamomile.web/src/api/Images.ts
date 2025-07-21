@@ -100,6 +100,13 @@ export const favImage = (
     image: GeneratedImage
 ) => Put(setLoading, setItem, onError, ENDPOINT, image);
 
+export const noteImage = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: GeneratedImage) => void,
+    onError: (value: any) => void,
+    image: GeneratedImage
+) => Put(setLoading, setItem, onError, ENDPOINT + "notes", image);
+
 export const hiResImage = (
     setLoading: (value: boolean) => void,
     setItem: (value?: GeneratedImage) => void,

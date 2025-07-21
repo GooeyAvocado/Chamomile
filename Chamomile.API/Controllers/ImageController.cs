@@ -160,8 +160,8 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpGet("{ID}/image")]
-        public async Task<IActionResult> GetImage(int ID, [FromQuery] bool NoCache = false) {
-            var file = await dao.GetImage(ID);
+        public async Task<IActionResult> GetImage(int ID, [FromQuery] bool NoCache = false, [FromQuery] bool CountDownload = false) {
+            var file = await dao.GetImage(ID, CountDownload);
 
             if (file == null || file.Data == null || file.Mime == null) return NotFound();
 
@@ -175,8 +175,8 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpGet("{ID}/image/HiRes")]
-        public async Task<IActionResult> GetHiResImage(int ID, [FromQuery] bool NoCache = false) {
-            var file = await dao.GetHiResImage(ID);
+        public async Task<IActionResult> GetHiResImage(int ID, [FromQuery] bool NoCache = false, [FromQuery] bool CountDownload = false) {
+            var file = await dao.GetHiResImage(ID, CountDownload);
 
             if (file == null || file.Data == null || file.Mime == null) return NotFound();
 
@@ -190,17 +190,15 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpGet("{ID}/image.png")]
-        public async Task<IActionResult> GetImageDownload(int ID) {
-            var file = await dao.GetHiResImage(ID);
+        public async Task<IActionResult> GetImageDownload(int ID, [FromQuery] bool CountDownload = false) {
+            var file = await dao.GetImageOptionalHires(ID, CountDownload);
 
 
             if (file == null) return NotFound();
-            if (file.Data == null) file = await dao.GetImage(ID); //Try and grab the non-hi res
             if (file == null || file.Data==null) return NotFound();
 
-
             // Not modified
-            return File(file.Data, file.Mime, new string(file.FullFilename.Where(c => c < 128).ToArray()));
+            return File(file.Data, file.Mime, new string([.. file.FullFilename.Where(c => c < 128)]));
         }
 
         [HttpGet("{ID}/Albums")]
@@ -231,6 +229,11 @@ namespace Chamomile.API.Controllers {
         [HttpPut]
         public async Task<IActionResult> Favorite([FromBody] GeneratedImage image) {
             return Ok(await dao.Favorite(image.Id, image.Favorite));
+        }
+
+        [HttpPut("notes")]
+        public async Task<IActionResult> Notes([FromBody] GeneratedImage image) {
+            return Ok(await dao.UpdateNotes(image.Id, image.Notes ?? ""));
         }
 
         [HttpPost("hiRes")]

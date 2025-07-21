@@ -19,9 +19,10 @@ export default function LoraCard(props: {
     onClick?: () => void
     tiny?: boolean
     imageStyle?: CSSProperties
+    elevation?: number
 }) {
 
-    const { loraAlias, onClick, currentImage, tiny } = props;
+    const { loraAlias, onClick, currentImage, tiny, elevation } = props;
     const { loras, refresh } = useLoras();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -111,7 +112,7 @@ export default function LoraCard(props: {
 
 
     return <>
-        <Card style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }} elevation={3}>
+        <Card style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }} elevation={elevation ?? 3}>
             <Tooltip title={tiny ?
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <CardContent style={{ padding: '0px', gap: "10px" }} imageStyle={{ width: "64px", height: '64px' }} />

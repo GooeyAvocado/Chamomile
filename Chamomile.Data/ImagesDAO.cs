@@ -13,11 +13,17 @@ namespace Chamomile.Data {
 
         private readonly LoraDAO loraDao = new(connectionString);
 
+        private static readonly List<string> ImageColumns = [IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
+                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP, IMAGES_CFG_SCL, IMAGES_DOWNLOAD_CT, IMAGES_NOTES,
+                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
+                MODEL_TITLE, CRE_TS, IMAGE_GEN_MS];
+
         private async Task<GeneratedImage> ImageRM(Getter reader) {
             return new() {
                 Id = reader.GetInt(IMAGES_ID),
                 Prompt = reader.GetString(IMAGES_PROMPT),
                 BasePrompt = reader.GetOptionalString(IMAGES_BASE_PROMPT),
+                Notes = reader.GetOptionalString(IMAGES_NOTES),
                 NegativePrompt = reader.GetString(IMAGES_NEG_PROMPT),
                 Steps = reader.GetInt(IMAGES_STEPS),
                 Sampler = reader.GetString(IMAGES_SAMPLER),
@@ -31,6 +37,8 @@ namespace Chamomile.Data {
                 Model = reader.GetString(MODEL_TITLE),
                 HiResAvailable = reader.GetBoolean(IMAGES_HIRES_IN),
                 GenerationDurationMs = reader.GetOptionalInt(IMAGE_GEN_MS),
+                DownloadCount = reader.GetOptionalInt(IMAGES_DOWNLOAD_CT),
+                
                 Loras = await adoTemplate.Query(
                     SelectSql(
                         [LORA_ALIAS],
@@ -39,6 +47,7 @@ namespace Chamomile.Data {
                         (cmd) => cmd.SetInt(IMAGES_ID, reader.GetInt(IMAGES_ID)),
                         (reader) => reader.GetString(LORA_ALIAS)
                     ),
+
                 Albums = await adoTemplate.Query(
                     SelectSql(
                         [ALBUM_ID],
@@ -117,12 +126,7 @@ namespace Chamomile.Data {
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE, IMAGE_GEN_MS
-            ], IMAGES_TABLE, string.Join(", ", [
-                IMAGES_ID, IMAGES_PROMPT,IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
-                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
-                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
-                MODEL_TITLE, CRE_TS, IMAGE_GEN_MS
-            ])), (cmd) => {
+            ], IMAGES_TABLE, string.Join(", ", ImageColumns)), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
                 cmd.SetString(IMAGES_BASE_PROMPT, basePrompt);
                 cmd.SetString(IMAGES_NEG_PROMPT, image.NegativePrompt);
@@ -207,12 +211,14 @@ namespace Chamomile.Data {
                     conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
                         new FtsCondition(IMAGES_PROMPT_FTS),
                         new FtsCondition(IMAGES_BASE_PROMPT_FTS),
+                        new FtsCondition(IMAGES_NOTES_FTS),
                     ])));
                 }
                 else {
                     conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
                         new(IMAGES_PROMPT, WhereConditionOperator.ILIKE),
                         new(IMAGES_BASE_PROMPT, WhereConditionOperator.ILIKE),
+                        new(IMAGES_NOTES, WhereConditionOperator.ILIKE),
                     ])));
                 }
             }
@@ -262,10 +268,12 @@ namespace Chamomile.Data {
 
                     cmd.SetString(IMAGES_PROMPT_FTS, tsQuery);
                     cmd.SetString(IMAGES_BASE_PROMPT_FTS, tsQuery);
+                    cmd.SetString(IMAGES_NOTES_FTS, tsQuery);
                 }
                 else {
                     cmd.SetString(IMAGES_PROMPT, $"%{filter.Query}%");
                     cmd.SetString(IMAGES_BASE_PROMPT, $"%{filter.Query}%");
+                    cmd.SetString(IMAGES_NOTES, $"%{filter.Query}%");
                 }
 
             }
@@ -287,13 +295,7 @@ namespace Chamomile.Data {
 
         public async Task<List<GeneratedImage>> GetAll(FilterOptions filter, int lastImage, bool disablePagination = false) {
             return await adoTemplate.Query(
-                SelectSql([
-                    IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
-                    IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
-                    IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
-                    MODEL_TITLE, CRE_TS, IMAGES_HIRES_IN, IMAGE_GEN_MS
-                ],
-                    IMAGES_TABLE,
+                SelectSql(ImageColumns,IMAGES_TABLE,
                     new WhereConditionGroup(ConditionsFromFilter(filter, lastImage)),
                     [new OrderBy(CRE_TS, SortOrder.DESC)],
                     disablePagination ? -1 : PAGE_SIZE, 0
@@ -310,20 +312,14 @@ namespace Chamomile.Data {
 
         public async Task<GeneratedImage?> Get(int id) {
             return await adoTemplate.QuerySingle(
-                SelectSql([
-                    IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
-                    IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
-                    IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN,
-                    MODEL_TITLE ,CRE_TS, IMAGES_HIRES_IN,IMAGE_GEN_MS
-                ],
-                    IMAGES_TABLE,
+                SelectSql(ImageColumns, IMAGES_TABLE,
                     new WhereConditionGroup([new(IMAGES_ID)])
                 ),
                 (cmd) => cmd.SetInt(IMAGES_ID, id), ImageRM
             );
         }
 
-        public async Task<ImageDownload?> GetImage(int id) {
+        public async Task<ImageDownload?> GetImage(int id, bool countDownload = false) {
 
             var sql = SelectSql(
                 columns: [IMAGES_BYTES],
@@ -332,6 +328,8 @@ namespace Chamomile.Data {
                     new(IMAGES_ID),
                 ])
             );
+
+            if (countDownload) await IncrementDownloadCount(id);
 
             return await adoTemplate.QuerySingle(sql, (cmd) => {
                 cmd.SetInt(IMAGES_ID, id);
@@ -342,7 +340,7 @@ namespace Chamomile.Data {
             });
         }
 
-        public async Task<ImageDownload?> GetHiResImage(int id) {
+        public async Task<ImageDownload?> GetHiResImage(int id, bool countDownload = false) {
 
             var sql = SelectSql(
                 columns: [IMAGES_HIRES_BYTES],
@@ -351,6 +349,8 @@ namespace Chamomile.Data {
                     new(IMAGES_ID),
                 ])
             );
+
+            if (countDownload) await IncrementDownloadCount(id);
 
             return await adoTemplate.QuerySingle(sql, (cmd) => {
                 cmd.SetInt(IMAGES_ID, id);
@@ -361,6 +361,43 @@ namespace Chamomile.Data {
             });
         }
 
+        public async Task<ImageDownload?> GetImageOptionalHires(int id, bool countDownload = false) {
+
+            var sql = $@"
+                select 
+                    case 
+                        when {IMAGES_HIRES_IN} 
+                        then {IMAGES_HIRES_BYTES}
+                        else {IMAGES_BYTES}
+                    end as {IMAGES_BYTES}
+                from {IMAGES_TABLE}
+                where {IMAGES_ID} = @{IMAGES_ID}
+            ";
+
+            if (countDownload) await IncrementDownloadCount(id);
+
+            return await adoTemplate.QuerySingle(sql, (cmd) => {
+                cmd.SetInt(IMAGES_ID, id);
+            }, (reader) => new ImageDownload() {
+                Filename = id + "",
+                Mime = "image/png",
+                Data = reader.GetOptionalBytea(IMAGES_BYTES),
+            });
+
+        }
+
+        public async Task IncrementDownloadCount(int id) {
+            var sql = $@"
+                update {IMAGES_TABLE}
+                set {IMAGES_DOWNLOAD_CT} = {IMAGES_DOWNLOAD_CT} + 1
+                where {IMAGES_ID} = @{IMAGES_ID}
+            ";
+
+            await adoTemplate.Execute(sql, (cmd) => {
+                cmd.SetInt(IMAGES_ID, id);
+            });
+
+        }
 
         public async Task<List<Album>> GetAlbums() {
             return await adoTemplate.Query(SelectSql(
@@ -440,15 +477,24 @@ namespace Chamomile.Data {
             return img;
         }
 
+        public async Task<GeneratedImage?> UpdateNotes(int id, string notes) {
+            var img = await Get(id);
+            if (img == null) return null;
+
+            await adoTemplate.Execute(UpdateSql([IMAGES_NOTES], IMAGES_TABLE, new([new(IMAGES_ID)])), (cmd) => {
+                cmd.SetString(IMAGES_NOTES, notes);
+                cmd.SetInt(IMAGES_ID, id);
+            });
+
+            img.Notes = notes;
+
+            return img;
+        }
+
         public async Task<GeneratedImage?> SaveHiResImage(int id, byte[] image) {
             return await adoTemplate.QuerySingle(
                 UpdateSql([IMAGES_HIRES_BYTES], IMAGES_TABLE, new([new(IMAGES_ID)])) +
-                " RETURNING " + string.Join(", ", [
-                    IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
-                    IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
-                    IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
-                    MODEL_TITLE, CRE_TS, IMAGE_GEN_MS
-                ])
+                " RETURNING " + string.Join(", ", ImageColumns)
             , (cmd) => {
                 cmd.SetBytea(IMAGES_HIRES_BYTES, image);
                 cmd.SetInt(IMAGES_ID, id);

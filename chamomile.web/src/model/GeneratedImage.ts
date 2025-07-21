@@ -3,6 +3,7 @@ export class GeneratedImage {
     prompt: string = "";
     basePrompt: string = "";
     negativePrompt: string = "";
+    notes: string = "";
     steps: number = 30;
     sampler: string = "";
     scheduleType: string = "";
@@ -17,4 +18,5 @@ export class GeneratedImage {
     created: Date = new Date();
     hiResAvailable: boolean = false;
     generationDurationMs?: number = 0;
+    downloadCount?: number = 0;
 }

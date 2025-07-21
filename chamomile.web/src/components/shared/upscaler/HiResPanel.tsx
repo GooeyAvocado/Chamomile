@@ -59,8 +59,7 @@ export default function HiResPanel(props: {
                         slotProps={{ htmlInput: { step: '.5', style: { fontSize: '.8em' } } }} style={{ width: "100px" }}
                     />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px', alignItems: 'center' }}>
-                    <div style={{ fontSize: '.8em' }}>{image?.hiResAvailable ? "✅ Image has been upsacled!" : "❌ Image has not been upscaled!"}</div>
+                <div style={{ display: 'flex', justifyContent: 'end', marginTop: '5px', alignItems: 'center' }}>
                     <Button size="small" onClick={onUpscale} disabled={!updateImage || !pong?.SD}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
                 </div>
             </>}

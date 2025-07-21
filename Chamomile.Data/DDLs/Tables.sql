@@ -136,3 +136,8 @@ LEFT JOIN (
 GROUP BY a.album_id, a.album_nm, a.album_thumb_id, ff.album_sample_ids, a.album_query_tx;
 
 ALTER TABLE chamomile.images ADD image_gen_ms_nb int4 NULL;
+alter table images add image_notes_tx DEFAULT '';
+
+alter table images add image_notes_fts tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, image_notes_tx)) STORED null;
+
+alter table images add image_download_ct int4 default 0;

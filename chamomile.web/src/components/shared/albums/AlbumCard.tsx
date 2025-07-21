@@ -6,10 +6,11 @@ import AlbumThumbImg from "./AlbumThumbImg"
 import { useAlbums } from "../../hooks/useAlbums"
 import AreYouSureModal from "../modals/AreYouSureModal"
 
-export default function AlbumCard({ album: albumId, onView, onRemove }: {
+export default function AlbumCard({ album: albumId, onView, onRemove, elevation }: {
     album: number
     onView?: (val: Album) => void
     onRemove?: (val: Album) => void
+    elevation?: number
 }) {
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -44,7 +45,7 @@ export default function AlbumCard({ album: albumId, onView, onRemove }: {
 
 
     return <>
-        <Card style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }} elevation={3}>
+        <Card style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }} elevation={elevation ?? 3}>
 
             <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, fontSize: "13.33px" }} >
                 <div

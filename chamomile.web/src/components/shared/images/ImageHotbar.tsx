@@ -1,4 +1,4 @@
-import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Star, StarOutline, Terminal, TerminalTwoTone } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, Star, StarOutline, Terminal, TerminalTwoTone } from "@mui/icons-material";
 import { Button, Card, ClickAwayListener, IconButton, ListItemIcon, Menu, MenuItem, Paper, Popper, Tooltip } from "@mui/material";
 import useUserAgent from "../../hooks/useUserAgent";
 import "./ImageHotbar.css"
@@ -15,15 +15,17 @@ export default function ImageHotbar(props: {
     onLeft?: () => void
     onRight?: () => void
     onDelete?: () => void
+    onDownload?: () => void
     onFavorite?: () => void
 }) {
 
-    const { onUsePrompt, image, onDelete, onFavorite, onLeft, onRight } = props;
+    const { onUsePrompt, image, onDelete, onFavorite, onLeft, onRight, onDownload } = props;
     const { isMobile } = useUserAgent()
     const { pong } = usePingPong();
     const sdAvailable = pong?.SD;
 
     const [deletePopperAnchor, setDeletePopperAnchor] = useState(null as any)
+    const [downloadAgainPopperAnchor, setDownloadAgainPopperAnchor] = useState(null as any)
     const [brewAnchor, setBrewAnchor] = useState(null as any)
     const [promptAnchor, setPromptAnchor] = useState(null as any)
 
@@ -44,6 +46,14 @@ export default function ImageHotbar(props: {
                         setDeletePopperAnchor(e.currentTarget)
                     }}>
                         <Delete />
+                    </IconButton>
+                </Tooltip>
+                <hr />
+                <Tooltip title="Download" enterDelay={250}>
+                    <IconButton onClick={(e) => {
+                        (image?.downloadCount ?? 0) > 0 ? setDownloadAgainPopperAnchor(e.currentTarget) : onDownload?.()
+                    }}>
+                        <Download />
                     </IconButton>
                 </Tooltip>
                 <hr />
@@ -68,6 +78,26 @@ export default function ImageHotbar(props: {
         </Card>
 
         {/* Delete Confirm Popper */}
+        <Popper
+            open={Boolean(downloadAgainPopperAnchor)} anchorEl={downloadAgainPopperAnchor}
+            placement="top" disablePortal
+        >
+            <ClickAwayListener onClickAway={() => setDownloadAgainPopperAnchor(undefined)}>
+                <Paper elevation={3} style={{ padding: "10px", textAlign: "center", marginBottom: '10px' }}>
+                    <div style={{ padding: "10px", fontSize: '.8em' }}>
+                        <div style={{ marginBottom: '10px' }}>Download again?</div>
+                        <Button variant="text" size="small" onClick={() => {
+                            onDownload?.()
+                            setDownloadAgainPopperAnchor(null)
+                        }}>
+                            Download
+                        </Button>
+                    </div>
+                </Paper>
+            </ClickAwayListener>
+        </Popper>
+
+        {/* Download Again Popper  */}
         <Popper
             open={Boolean(deletePopperAnchor)} anchorEl={deletePopperAnchor}
             placement="top" disablePortal

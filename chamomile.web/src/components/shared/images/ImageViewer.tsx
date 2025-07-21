@@ -8,7 +8,7 @@ import { useSnackbar } from "notistack";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import BrewingImageTile from "./BrewingImageTile";
 import useApi from "../../hooks/useApi";
-import { deleteImage, favImage } from "../../../api/Images";
+import { deleteImage, favImage, noteImage } from "../../../api/Images";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { Alert, AlertTitle, Button, CircularProgress, Link, Stack } from "@mui/material";
 import WelcomePane from "../welcome/WelcomePane";
@@ -38,6 +38,7 @@ export default function ImageViewer(props: {
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
     const favApi = useApi(favImage)
+    const notesApi = useApi(noteImage)
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
 
     const [viewerOpen, setViewerOpen] = useState(false)
@@ -102,6 +103,25 @@ export default function ImageViewer(props: {
         }, () => {
             enqueueSnackbar("Image could not be favorited!", { variant: 'error' })
         }, img)
+    }
+
+    const onNotesUpdate = (val: string) => {
+        if (!selectedImage) return;
+        const img = selectedImage
+        img.notes = val;
+        notesApi.fetch((val) => {
+            imageApi.updateImage(val ?? selectedImage)
+        }, () => {
+            enqueueSnackbar("Notes could not be updated!", { variant: 'error' })
+        }, img)
+    }
+
+    const onDownload = () => {
+        if (!selectedImage) return;
+        console.log("Updating image count")
+        const img = { ...selectedImage, downloadCount: (selectedImage.downloadCount ?? 0) + 1 } as GeneratedImage;
+        imageApi.updateImage(img)
+        setSelectedImage(img)
     }
 
     const onUpscale = (val: GeneratedImage) => {
@@ -239,8 +259,8 @@ export default function ImageViewer(props: {
             {!onClick && <>
                 <ImageModal
                     open={viewerOpen} setOpen={setViewerOpen} image={selectedImage}
-                    onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete}
-                    onFavorite={onFavorite} onLeft={onLeft} onRight={onRight}
+                    onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
+                    onFavorite={onFavorite} onDownload={onDownload} onLeft={onLeft} onRight={onRight}
                     onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
                 />
                 <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>

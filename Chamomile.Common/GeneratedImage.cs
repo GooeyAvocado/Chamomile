@@ -3,6 +3,7 @@
         public int Id { get; set; }
         public string Prompt { get; set; } = string.Empty;
         public string? BasePrompt { get; set; } = string.Empty;
+        public string? Notes {  get; set; } = string.Empty;
         public string NegativePrompt {  get; set; } = string.Empty;
         public int Steps { get; set; }
         public string Sampler { get; set; } = string.Empty;
@@ -14,6 +15,7 @@
         public bool HiResAvailable { get; set; }
 
         public int? GenerationDurationMs { get; set; }
+        public int? DownloadCount { get; set; }
 
         public List<string> Loras { get; set; } = [];
 
