@@ -6,7 +6,6 @@ using Chamomile.Common;
 using Chamomile.Common.Exceptions;
 using Chamomile.Data;
 using Chamomile.Data.Utils;
-using Hue.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Immutable;
 using static Chamomile.API.Workers.ImageGeneratorWorker;
@@ -15,17 +14,11 @@ namespace Chamomile.API.Controllers {
 
     [ApiController]
     [Route("api/images")]
-    public class ImageController : ControllerBase {
+    public class ImageController(ImageGeneratorWorker worker) : ControllerBase {
 
-        readonly ImagesDAO dao;
-        readonly A111Api api;
-        readonly ImageGeneratorWorker worker;
-
-        public ImageController(ImageGeneratorWorker worker) {
-            this.worker = worker;
-            dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
-            api = new(new EnvironmentKey("SD_URL", () => throw new InvalidOperationException("")).ToString());
-        }
+        readonly ImagesDAO dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
+        readonly A111Api api = new(new EnvironmentKey("SD_URL", () => throw new InvalidOperationException("")).ToString());
+        readonly ImageGeneratorWorker worker = worker;
 
         #region CREATE
 
@@ -58,7 +51,6 @@ namespace Chamomile.API.Controllers {
         public async Task<IActionResult> Preview([FromBody] Prompt prompt) {
 
             //We don't need to try catch this. if it fails it fails lmao
-            var model = await api.GetCurrentModel();
             var response = await api.GenerateImage(new() {
                 batch_size = 1,
                 cfg_scale = prompt.CFGScale ?? 7.0,
@@ -73,9 +65,9 @@ namespace Chamomile.API.Controllers {
                 steps = prompt.Steps ?? 10,
                 save_images = false,
                 send_images = true,
-            });
+            }) ?? throw new InvalidOperationException("API responded with nothing");
 
-            var img = await dao.ParseImage(Convert.FromBase64String(response.images[0]),prompt.PositivePrompt);
+            var img = await dao.ParseImage(Convert.FromBase64String(response.images[0]));
 
             return Ok(new PreviewReponse() { 
                 Data = response.images[0],
@@ -165,7 +157,7 @@ namespace Chamomile.API.Controllers {
 
             if (file == null || file.Data == null || file.Mime == null) return NotFound();
 
-            Response.Headers.Append("Content-Disposition", "inline; filename=" + new string(file.FullFilename.Where(c => c < 128).ToArray()));
+            Response.Headers.Append("Content-Disposition", "inline; filename=" + new string([.. file.FullFilename.Where(c => c < 128)]));
             Response.Headers.CacheControl = NoCache ? "no-cache" : "public, max-age=90000";
             Response.Headers.Vary = "Cookie";
             Response.Headers.ETag = file.Hash;
@@ -180,7 +172,7 @@ namespace Chamomile.API.Controllers {
 
             if (file == null || file.Data == null || file.Mime == null) return NotFound();
 
-            Response.Headers.Append("Content-Disposition", "inline; filename=" + new string(file.FullFilename.Where(c => c < 128).ToArray()));
+            Response.Headers.Append("Content-Disposition", "inline; filename=" + new string([.. file.FullFilename.Where(c => c < 128)]));
             Response.Headers.CacheControl = NoCache ? "no-cache" : "public, max-age=90000";
             Response.Headers.Vary = "Cookie";
             Response.Headers.ETag = file.Hash;
@@ -198,7 +190,7 @@ namespace Chamomile.API.Controllers {
             if (file == null || file.Data==null) return NotFound();
 
             // Not modified
-            return File(file.Data, file.Mime, new string([.. file.FullFilename.Where(c => c < 128)]));
+            return File(file.Data, file.Mime ?? "image/png", new string([.. file.FullFilename.Where(c => c < 128)]));
         }
 
         [HttpGet("{ID}/Albums")]
@@ -241,7 +233,7 @@ namespace Chamomile.API.Controllers {
             var hiResParameters = new HiResParameters() { 
                 upscaler_1 = options.Upscaler,
                 upscaling_resize = options.ResizeFactor,
-                image = Convert.ToBase64String((await dao.GetImage(options.ImageID))?.Data ?? throw new ArgumentNullException("Image doesn't exist"))
+                image = Convert.ToBase64String((await dao.GetImage(options.ImageID))?.Data ?? throw new ArgumentNullException(nameof(options), "Image doesn't exist"))
             };
 
             var hiRes = await api.HiResImage(hiResParameters);

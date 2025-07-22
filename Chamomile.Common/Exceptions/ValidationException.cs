@@ -1,11 +1,9 @@
 ﻿namespace Chamomile.Common.Exceptions {
-    public class ValidationException : InvalidOperationException {
 
-        public string Field { get; set; } = "";
+    /// <summary>Validation exception from an invalid field</summary>
+    public class ValidationException(string message, string field) : InvalidOperationException(message) {
 
-        public ValidationException(string message, string field) : base(message) { 
-            Field= field;
-        }
-
+        /// <summary>Field causing the exception</summary>
+        public string Field { get; set; } = field;
     }
 }

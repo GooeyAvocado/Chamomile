@@ -35,8 +35,8 @@ namespace Chamomile.Data {
                     ImagesDAO.SetterFromFilter(cmd, filter);
                 }, (reader) => 
                 new Usage() { 
-                    name = reader.GetString(MODEL_TITLE),
-                    count= reader.GetInt(MODEL_USAGE_COUNT)
+                    Name = reader.GetString(MODEL_TITLE),
+                    Count= reader.GetInt(MODEL_USAGE_COUNT)
                 }
             );
         }

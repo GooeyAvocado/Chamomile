@@ -1,7 +1,6 @@
 ﻿using Chamomile.API.Utils;
 using Chamomile.Common;
 using Chamomile.Common.Exceptions;
-using Hue.Common;
 using MetadataExtractor;
 using System.Text.RegularExpressions;
 using static Chamomile.Data.Utils.AdoTemplate;
@@ -92,7 +91,7 @@ namespace Chamomile.Data {
             foreach (var directory in directories) {
                 foreach (var tag in directory.Tags) {
                     if (tag.Description?.StartsWith("parameters:", StringComparison.OrdinalIgnoreCase) ?? false) {
-                        return tag.Description.Substring(11).Trim(); // This contains the raw generation parameters
+                        return tag.Description[11..].Trim(); // This contains the raw generation parameters
                     }
                 }
             }
@@ -100,16 +99,15 @@ namespace Chamomile.Data {
             return null; // No metadata found
         }
 
-        public async Task<GeneratedImage> ParseImage(byte[] imageBytes, string basePrompt = "") {
+        public async Task<GeneratedImage> ParseImage(byte[] imageBytes) {
             var metadata = ExtractStableDiffusionMetadata(new MemoryStream(imageBytes)) ?? throw new InvalidOperationException("Image is missing parameters!");
             var image = ParseUtils.ParametersToImage(metadata);
 
             var loras = await loraDao.GetAll();
 
-            image.Loras = LoraRegex().Matches(image.Prompt)
+            image.Loras = [.. LoraRegex().Matches(image.Prompt)
                     .Select(a => a.Groups[1].Value)
-                    .Where(a => loras.Any(b => b.Alias == a)) //Only with LORAs we have
-                    .ToList();
+                    .Where(a => loras.Any(b => b.Alias == a))];
 
             image.Model = await adoTemplate.QuerySingle(SelectSql([MODEL_TITLE], MODELS_TABLE,
                 new WhereConditionGroup([new(MODEL_NAME, WhereConditionOperator.ILIKE)])),
@@ -121,7 +119,7 @@ namespace Chamomile.Data {
         }
 
         public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, string basePrompt = "", int? generationDuration = null) {
-            var image = await ParseImage(imageBytes, basePrompt);
+            var image = await ParseImage(imageBytes);
 
             var img = await adoTemplate.QuerySingle(InsertSql([
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
@@ -141,9 +139,8 @@ namespace Chamomile.Data {
                 cmd.SetBytea(IMAGES_BYTES, imageBytes);
                 cmd.SetString(MODEL_TITLE, image.Model);
                 cmd.SetInt(IMAGE_GEN_MS, generationDuration);
-            }, ImageRM);
-
-
+            }, ImageRM) ?? throw new InvalidOperationException("This should never happen");
+            
             await adoTemplate.ExecuteBatch(InsertSql([IMAGES_ID, LORA_ALIAS], IMAGES_LORA_MAP), (cmd, lora) => {
                 cmd.SetInt(IMAGES_ID, img.Id);
                 cmd.SetString(LORA_ALIAS, lora);
@@ -152,7 +149,7 @@ namespace Chamomile.Data {
             img.Loras = image.Loras;
 
             try {
-                var albums = await GetMatchingAlbums(img.Prompt, basePrompt);
+                var albums = await GetMatchingAlbums(img.Prompt);
                 await AddImageToAlbums(img.Id, albums);
                 img.Albums = albums;
             }
@@ -191,7 +188,7 @@ namespace Chamomile.Data {
 
             //If we have a search query, add everything to the search query
             if (addExisting) {
-                await AddImagesToAlbum((await GetAll(new() { Query = original }, -1, true)).Select(a => a.Id).ToList(), id);
+                await AddImagesToAlbum([.. (await GetAll(new() { Query = original }, -1, true)).Select(a => a.Id)], id);
             }
 
             //Get the album again 
@@ -336,9 +333,9 @@ namespace Chamomile.Data {
 
             if (countDownload) await IncrementDownloadCount(id);
 
-            return await adoTemplate.QuerySingle(sql, (cmd) => {
-                cmd.SetInt(IMAGES_ID, id);
-            }, (reader) => new ImageDownload() {
+            return await adoTemplate.QuerySingle(sql, 
+                (cmd) => cmd.SetInt(IMAGES_ID, id), 
+                (reader) => new ImageDownload() {
                 Filename = id + "",
                 Mime = "image/png",
                 Data = reader.GetOptionalBytea(IMAGES_BYTES),
@@ -357,9 +354,9 @@ namespace Chamomile.Data {
 
             if (countDownload) await IncrementDownloadCount(id);
 
-            return await adoTemplate.QuerySingle(sql, (cmd) => {
-                cmd.SetInt(IMAGES_ID, id);
-            }, (reader) => new ImageDownload() {
+            return await adoTemplate.QuerySingle(sql, 
+                (cmd) => cmd.SetInt(IMAGES_ID, id), 
+                (reader) => new ImageDownload() {
                 Filename = id + "",
                 Mime = "image/png",
                 Data = reader.GetOptionalBytea(IMAGES_HIRES_BYTES),
@@ -381,9 +378,9 @@ namespace Chamomile.Data {
 
             if (countDownload) await IncrementDownloadCount(id);
 
-            return await adoTemplate.QuerySingle(sql, (cmd) => {
-                cmd.SetInt(IMAGES_ID, id);
-            }, (reader) => new ImageDownload() {
+            return await adoTemplate.QuerySingle(sql, 
+                (cmd) => cmd.SetInt(IMAGES_ID, id), 
+                (reader) => new ImageDownload() {
                 Filename = id + "",
                 Mime = "image/png",
                 Data = reader.GetOptionalBytea(IMAGES_BYTES),
@@ -398,9 +395,7 @@ namespace Chamomile.Data {
                 where {IMAGES_ID} = @{IMAGES_ID}
             ";
 
-            await adoTemplate.Execute(sql, (cmd) => {
-                cmd.SetInt(IMAGES_ID, id);
-            });
+            await adoTemplate.Execute(sql, (cmd) => cmd.SetInt(IMAGES_ID, id));
 
         }
 
@@ -425,7 +420,7 @@ namespace Chamomile.Data {
                 ), (cmd) => cmd.SetInt(ALBUM_ID, album), AlbumRM);
         }
 
-        private async Task<List<int>> GetMatchingAlbums(string prompt, string basePrompt) {
+        private async Task<List<int>> GetMatchingAlbums(string prompt) {
             return await adoTemplate.Query(SelectSql(
                     [ALBUM_ID, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB],
                     ALBUM_TABLE, new WhereConditionGroup([

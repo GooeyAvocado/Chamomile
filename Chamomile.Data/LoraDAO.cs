@@ -38,8 +38,8 @@ namespace Chamomile.Data {
                     ImagesDAO.SetterFromFilter(cmd, filter);
                 }, (reader) =>
                 new Usage() {
-                    name = reader.GetOptionalString(LORA_ALIAS) ?? "None",
-                    count = reader.GetInt(LORA_USAGE_COUNT)
+                    Name = reader.GetOptionalString(LORA_ALIAS) ?? "None",
+                    Count = reader.GetInt(LORA_USAGE_COUNT)
                 }
             );
         }

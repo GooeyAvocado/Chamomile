@@ -17,8 +17,9 @@
             public WhereConditionGroup(List<WhereCondition> conditions) : this(WhereConditionUnion.AND,conditions) { }
 
             public override string ToString() {
-                if (conditions.Count == 0) return "TRUE";
-                return string.Join(union switch {
+                return conditions.Count == 0
+                    ? "TRUE"
+                    : string.Join(union switch {
                     WhereConditionUnion.AND => " AND ",
                     WhereConditionUnion.OR => " OR ",
                     _ => ""

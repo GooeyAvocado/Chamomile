@@ -49,10 +49,10 @@ namespace Chamomile.API.Workers {
         /// Retrieves all pending prompts in order.
         /// </summary>
         public List<Prompt> GetAllPrompts() {
-            return _queue.OrderByDescending(kvp => kvp.Key).Select(a => {
+            return [.. _queue.OrderByDescending(kvp => kvp.Key).Select(a => {
                 a.Value.Id = Convert.ToInt32(a.Key);
                 return a.Value;
-            }).ToList();
+            })];
         }
 
         /// <summary>

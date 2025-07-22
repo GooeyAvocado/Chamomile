@@ -88,7 +88,7 @@ namespace Automatic1111.API {
                 throw new InvalidOperationException($"Failed to generate image. Status: {response.StatusCode}. Response: {jsonResponse}");
             }
 
-            Txt2ImgResponse returnResponse;
+            Txt2ImgResponse? returnResponse;
             try {
                 returnResponse = JsonSerializer.Deserialize<Txt2ImgResponse>(jsonResponse, IMAGE_DESERIALIZER_OPTIONS);
             }
@@ -116,9 +116,9 @@ namespace Automatic1111.API {
             var response = await client.GetStringAsync(apiUrl);
             var options = JsonSerializer.Deserialize<Dictionary<string, object>>(response);
 
-            return options == null || !options.ContainsKey(SD_MODEL_CHECKPOINT) || options[SD_MODEL_CHECKPOINT] == null
+            return options == null || !options.TryGetValue(SD_MODEL_CHECKPOINT, out object? value) || value == null
                 ? throw new InvalidOperationException("Failed to retrieve options.")
-                : options[SD_MODEL_CHECKPOINT].ToString() ?? "";
+                : value.ToString() ?? "";
         }
 
         public async Task ChangeModel(string model) {
