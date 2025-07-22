@@ -493,10 +493,7 @@ namespace Chamomile.Data {
 
         public async Task<GeneratedImage?> SaveHiResImage(int id, byte[] image, int scale) {
             return await adoTemplate.QuerySingle(
-                UpdateSql([IMAGES_HIRES_BYTES, IMAGES_WIDTH, IMAGES_HEIGHT], new Dictionary<string,string>() {
-                    { IMAGES_WIDTH, $"{IMAGES_WIDTH} * {scale}" },
-                    { IMAGES_HEIGHT, $"{IMAGES_HEIGHT} * {scale}" }
-                }, IMAGES_TABLE, new([new(IMAGES_ID)])) +
+                UpdateSql([IMAGES_HIRES_BYTES], IMAGES_TABLE, new([new(IMAGES_ID)])) +
                 " RETURNING " + string.Join(", ", ImageColumns)
             , (cmd) => {
                 cmd.SetBytea(IMAGES_HIRES_BYTES, image);
