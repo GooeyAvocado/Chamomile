@@ -3,10 +3,15 @@ import ChamomileLogo from "../../ChamomileLogo";
 import { Link, Tooltip } from "@mui/material";
 
 export default function AboutTab() {
+
+    const backendBuild = import.meta.env.VITE_FRONTEND_BUILD ?? "v3-local"
+    const frontendBuild = import.meta.env.VITE_BACKEND_BUILD ?? "v3-local"
+    const buildTime = import.meta.env.VITE_BUILD_TIMESTAMP ? new Date(import.meta.env.VITE_BUILD_TIMESTAMP) : new Date();
+
     return <>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', width: "50%", minWidth: '300px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', width: "50%", minWidth: '300px', position: "relative" }}>
             <ChamomileLogo />
-            <div>V2.0</div>
+            <div>V3.0</div>
         </div>
         <hr style={{ width: "50%", minWidth: '300px' }} />
         <img src="/images/googgos.png" style={{ width: "50%", minWidth: "300px" }} />
@@ -24,5 +29,10 @@ export default function AboutTab() {
             </div>
         </div>
         <img src="/cc0.png" style={{ marginTop: '10px', width: "128px" }} />
+        <div style={{ marginTop: "10px", fontFamily: 'monospace', fontSize: '.8em', color: "#5F5F5F", position: "absolute", left: "14px", bottom: "14px" }}>
+            <div>Backend: {backendBuild}</div>
+            <div>Frontend: {frontendBuild}</div>
+            <div>{buildTime.toLocaleString()}</div>
+        </div>
     </>
 }

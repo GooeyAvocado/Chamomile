@@ -1,6 +1,20 @@
+# Vite will pick these up automatically if you're doing `npm run build`
+
 # Build the React app
-FROM node:22 AS frontend-builder
+FROM node:22-slim AS frontend-builder
 WORKDIR /app
+
+# Update system packages to reduce vulnerabilities
+RUN apt-get update && apt-get upgrade -y && apt-get clean
+
+# Get the Frontend and Backend build IDs
+ARG VITE_FRONTEND_BUILD
+ARG VITE_BACKEND_BUILD
+ARG VITE_BUILD_TIMESTAMP
+
+ENV VITE_FRONTEND_BUILD=$VITE_FRONTEND_BUILD
+ENV VITE_BACKEND_BUILD=$VITE_BACKEND_BUILD
+ENV VITE_BUILD_TIMESTAMP=$VITE_BUILD_TIMESTAMP
 
 # Copy package files and install dependencies
 COPY chamomile.web/package.json chamomile.web/package-lock.json ./
