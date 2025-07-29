@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.SignalR;
 using Chamomile.API.Hubs;
 using System.Text.RegularExpressions;
 using System.Collections.Immutable;
-using System.Security.Cryptography;
 using System.Diagnostics;
 
 namespace Chamomile.API.Workers {
@@ -21,6 +20,20 @@ namespace Chamomile.API.Workers {
         private readonly Task _workerTask;
         private readonly IHubContext<ImageGenerateHub> _hubContext;
         private readonly Random _random = new();
+
+        private int _isUserPaused = 0;
+        private bool _isSdPause = false;
+
+        public bool IsPaused => _isSdPause || Interlocked.CompareExchange(ref _isUserPaused, 0, 0) == 1;
+
+        public void Pause() {
+            Interlocked.Exchange(ref _isUserPaused, 1);
+            _ = _hubContext.Clients.All.SendAsync("GenPause"); //Let the user know
+        }
+        public void Resume() {
+            Interlocked.Exchange(ref _isUserPaused, 0);
+            _ = _hubContext.Clients.All.SendAsync("GenResume"); //Let the user know
+        } 
 
         public ImmutableList<ModelSequence> Sequence { get; set; } = [];
         
@@ -67,11 +80,26 @@ namespace Chamomile.API.Workers {
         }
 
         /// <summary>
+        /// Clears the queue of all prompts.
+        /// </summary>
+        public void ClearQueue() {
+            _queue.Clear();
+            _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
+        }
+
+
+        /// <summary>
         /// Background worker that processes prompts in order.
         /// </summary>
         private async Task ProcessQueueAsync() {
+
+            var loopCount = 0;
+
             while (!_cts.Token.IsCancellationRequested) {
-                var firstItem = _queue.OrderBy(kvp => kvp.Key).FirstOrDefault();
+                
+                //If we're paused don't even bother the queue
+                var firstItem = IsPaused ? default : _queue.OrderBy(kvp => kvp.Key).FirstOrDefault();
+
                 if (!firstItem.Equals(default(KeyValuePair<long, Prompt>))) {
                     var (jobId, prompt) = firstItem;
                     if (_queue.TryRemove(jobId, out _)) {
@@ -129,18 +157,53 @@ namespace Chamomile.API.Workers {
                             //We don't have to wait to send this
                             Console.WriteLine(e);
                             stopwatch.Stop();
+
+                            //Reset the loop count because we are going to check SD availability `now`
+                            loopCount = 0;
+
+                            if (!await CheckSd()) {
+                                //Requeue the current prompt 
+                                _queue[-1] = prompt; //-1 so it's handled first next time
+                                _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
+                            }
+
                             _currentPrompt = null;
                             _hubContext.Clients.All.SendAsync("JobFailed", jobId, prompt, GetAllPrompts(),e.Message);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
                         }
                     }
                 }
                 else {
+                    if (loopCount >= 10) {
+                        loopCount = 0; //Reset the loop count after 5 iterations
+
+                        //Check if SD is still available
+                        await CheckSd();
+                    }
                     await Task.Delay(1000); // No jobs? Wait before checking again.
                 }
+
+                loopCount++;
             }
+        }
+
+        private async Task<bool> CheckSd() {
+            var sd = await api.Ping();
+
+            //If we don't have SD and we didn't know about it already
+            if (!sd && !_isSdPause) {
+                _isSdPause = true; //Pause the SD
+                Pause(); //Pause it for the user as well
+                _ = _hubContext.Clients.All.SendAsync("SDAvailabilityChange"); //Let the user know
+            }
+            else if (sd && _isSdPause) { 
+                _isSdPause = false; //Unpause SD BUT do not unpause the user. We don't want to immediately resume generation. The user may want to do something
+                _ = _hubContext.Clients.All.SendAsync("SDAvailabilityChange"); //Let the user know
+            }
+
+            return sd;
         }
 
         private async Task ReRollModel(string currentModel) {

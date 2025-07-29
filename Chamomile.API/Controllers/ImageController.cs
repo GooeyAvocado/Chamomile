@@ -103,14 +103,41 @@ namespace Chamomile.API.Controllers {
         #region READ
 
         [HttpGet("queue")]
+        [Obsolete("This endpoint is deprecated. Use GET /status instead.")]
         public IActionResult GetQueue() {
             return Ok(worker.GetAllPrompts());
         }
 
         [HttpGet("current")]
+        [Obsolete("This endpoint is deprecated. Use GET /status instead.")]
         public IActionResult GetCurrent() {
             return Ok(worker.CurrentPrompt);
         }
+
+        [HttpGet("status")]
+        public IActionResult GetStatus() {
+            return Ok(new ImageWorkerState {
+                CurrentJob = worker.CurrentPrompt,
+                Queue = worker.GetAllPrompts(),
+                Paused = worker.IsPaused
+            });
+        }
+
+        [HttpPost("status")]
+        public IActionResult ChangeStatus([FromBody] ImageWorkerState state) {
+            if (state.Paused) {worker.Pause();}
+            else { worker.Resume(); }
+
+            return GetStatus();
+        }
+
+        [HttpGet("cancel")]
+        public IActionResult CancelAll() {
+            worker.ClearQueue();
+            return Ok();
+        }
+
+
 
         [HttpGet("cancel/{id}")]
         public IActionResult CancelJob(long id) {

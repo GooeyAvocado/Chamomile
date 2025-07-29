@@ -1,18 +1,22 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Prompt } from "../../model/Prompt";
 import useApi from "./useApi";
-import { cancelJob, getCurrentJob, getProgress, getQueue, interruptGeneration } from "../../api/Images";
+import { cancelJob, changeStatus, clearQueue, getProgress, getStatus, interruptGeneration } from "../../api/Images";
 import useSignalR from "./useSignalR";
 import { GeneratedImage } from "../../model/GeneratedImage";
 import { useSnackbar } from "notistack";
 import usePolling from "./usePolling";
 import { Progress } from "../../model/Automatic1111/Progress";
+import { usePingPong } from "./usePingPong";
+import ImageWorkerStatus from "../../model/ImageWorkerStatus";
 
 
 export const useQueue = (onImageDone: (val: GeneratedImage) => void, showSnackbar?: boolean) => {
 
+    const { refreshPing } = usePingPong();
+
     const [queue, setQueue] = useState([] as Prompt[])
-    const [groupedQueue, setGroupedQueue] = useState([] as Prompt[][])
+    const [paused, setPaused] = useState(false)
     const [currentProgress, setCurrentProgress] = useState(undefined as undefined | Progress)
     const [activeJob, setActiveJob] = useState(undefined as undefined | Prompt)
     const [lastSuccessfulImage, setLastSuccessfulImage] = useState(undefined as undefined | GeneratedImage)
@@ -20,19 +24,19 @@ export const useQueue = (onImageDone: (val: GeneratedImage) => void, showSnackba
 
     const interruptApi = useApi(interruptGeneration)
     const cancelApi = useApi(cancelJob)
+    const clearApi = useApi(clearQueue)
+    const changeStatusApi = useApi(changeStatus)
 
-    useApi(getQueue, true, (val: Prompt[] | undefined) => { setQueue(val ?? []) })
-    useApi(getCurrentJob, true, (val) => {
-        if (typeof val === "string") return; //empty response if no job is active
-        setActiveJob(val)
-        getProgressApi.fetch(setCurrentProgress)
+    useApi(getStatus, true, (val?: ImageWorkerStatus) => {
+        setQueue(val?.queue ?? [])
+        setActiveJob(val?.currentJob)
+        setPaused(paused)
     })
-    const getProgressApi = useApi(getProgress)
 
+    const getProgressApi = useApi(getProgress)
     const { enqueueSnackbar } = useSnackbar();
 
-
-    useEffect(() => {
+    const groupedQueue = useMemo(() => {
         const groups = [] as Prompt[][];
         let currentGroup = [] as Prompt[]
 
@@ -46,7 +50,7 @@ export const useQueue = (onImageDone: (val: GeneratedImage) => void, showSnackba
         });
         //Push the last remaining grou
         groups.push(currentGroup)
-        setGroupedQueue(groups)
+        return groups;
 
     }, [queue])
 
@@ -101,8 +105,19 @@ export const useQueue = (onImageDone: (val: GeneratedImage) => void, showSnackba
         setModelSequenceChangeBusy(undefined)
     });
 
+    useSignalR("SDAvailabilityChange", () => {
+        refreshPing();
+    });
 
+    useSignalR("GenPause", () => {
+        setPaused(true)
+        if (showSnackbar) enqueueSnackbar("Brewing paused", { variant: 'info' })
+    });
 
+    useSignalR("GenResume", () => {
+        setPaused(false)
+        if (showSnackbar) enqueueSnackbar("Brewing resumed!", { variant: 'info' })
+    });
 
     return {
         nextModel: modelSequenceChangeBusy?.replace(".safetensors", ""),
@@ -111,7 +126,12 @@ export const useQueue = (onImageDone: (val: GeneratedImage) => void, showSnackba
         activeJob: activeJob,
         progress: activeJob ? currentProgress : undefined,
         lastSuccessfulImage: lastSuccessfulImage,
+        paused: paused,
         interrupt: interruptApi.fetch,
+        clearQueue: clearApi.fetch,
+        togglePause: () => {
+            changeStatusApi.fetch(undefined, undefined, { pause: !paused })
+        },
         cancel: (jobId: number) => {
             cancelApi.fetch(() => {
                 if (showSnackbar) enqueueSnackbar("Order cancelled", { variant: 'info' })

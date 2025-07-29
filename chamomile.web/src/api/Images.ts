@@ -3,6 +3,7 @@ import { Progress } from "../model/Automatic1111/Progress";
 import { FilterOptions } from "../model/FilterOptions";
 import { GeneratedImage } from "../model/GeneratedImage";
 import { HiResRequest } from "../model/HiResRequest";
+import ImageWorkerStatus from "../model/ImageWorkerStatus";
 import ModelSequence from "../model/ModelSequence";
 import { Prompt } from "../model/Prompt";
 import { API_PREFIX, Delete, Get, Post, Put, Upload } from "./Common";
@@ -41,17 +42,17 @@ export const enqueuePrompts = (
     val: Prompt[]
 ) => Post(setLoading, setItem, onError, ENDPOINT + "generateMany", val)
 
-export const getQueue = (
+export const getStatus = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: Prompt[]) => void,
+    setItem: (value?: ImageWorkerStatus) => void,
     onError: (value: any) => void,
-) => Get(setLoading, setItem, onError, ENDPOINT + "queue");
+) => Get(setLoading, setItem, onError, ENDPOINT + "status");
 
-export const getCurrentJob = (
+export const changeStatus = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: Prompt) => void,
+    setItem: (value?: ImageWorkerStatus) => void,
     onError: (value: any) => void,
-) => Get(setLoading, setItem, onError, ENDPOINT + "current");
+) => Get(setLoading, setItem, onError, ENDPOINT + "status");
 
 export const cancelJob = (
     setLoading: (value: boolean) => void,
@@ -59,6 +60,12 @@ export const cancelJob = (
     onError: (value: any) => void,
     id: number
 ) => Get(setLoading, setItem, onError, ENDPOINT + "cancel/" + id);
+
+export const clearQueue = (
+    setLoading: (value: boolean) => void,
+    onSuccess: () => void,
+    onError: (value: any) => void
+) => Get(setLoading, onSuccess, onError, ENDPOINT + "cancel");
 
 export const getProgress = (
     setLoading: (value: boolean) => void,

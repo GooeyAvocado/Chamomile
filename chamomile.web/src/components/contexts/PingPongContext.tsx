@@ -64,12 +64,12 @@ export const PingPongProvider = (props: { children: any }) => {
         return <CenteredCard image="/images/pingpongissue.png">
             <b>A dependency is unavailable! </b>
             <div>
-                <div style={{display:"flex", flexDirection:"column", gap:"5px", marginTop:"10px"}}>
-                    <div style={{display:"flex", gap:"10px", alignItems:'center'}}>
-                        <div>{pingPongApi.data.DB ? <CheckCircle color="success"/> : <Warning color="warning"/>}</div> <div>Database Connection</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginTop: "10px" }}>
+                    <div style={{ display: "flex", gap: "10px", alignItems: 'center' }}>
+                        <div>{pingPongApi.data.DB ? <CheckCircle color="success" /> : <Warning color="warning" />}</div> <div>Database Connection</div>
                     </div>
-                    <div style={{display:"flex", gap:"10px", alignItems:'center'}}>
-                        <div>{pingPongApi.data.SD ? <CheckCircle color="success"/> : <Warning color="warning"/>}</div> <div>Stable Diffusion API</div>
+                    <div style={{ display: "flex", gap: "10px", alignItems: 'center' }}>
+                        <div>{pingPongApi.data.SD ? <CheckCircle color="success" /> : <Warning color="warning" />}</div> <div>Stable Diffusion API</div>
                     </div>
                 </div>
             </div>
