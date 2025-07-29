@@ -21,6 +21,9 @@
         /// <summary>Whether images should be upscaled or not</summary>
         public bool? Upscaled { get; set; } = false;
 
+        /// <summary>Retrieves only previously downloaded images</summary>
+        public bool? Downloaded { get; set; } = false;
+
 
         /// <summary>Start range for the results</summary>
         public string? FromDate { get; set; } = "";

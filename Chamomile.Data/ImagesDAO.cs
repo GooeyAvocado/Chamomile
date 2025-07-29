@@ -233,6 +233,10 @@ namespace Chamomile.Data {
                 conditions.Add(new(IMAGES_HIRES_IN, WhereConditionOperator.EQUALS, "true"));
             }
 
+            if (filter.Downloaded == true) {
+                conditions.Add(new(IMAGES_DOWNLOAD_CT, WhereConditionOperator.GREATER_THAN, "0"));
+            }
+
             if (!string.IsNullOrEmpty(filter.Lora)) {
                 conditions.Add(new(
                     IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
