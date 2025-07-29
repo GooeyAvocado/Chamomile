@@ -59,7 +59,12 @@ export default function PromptBuilder(props: {
     const onBrew = (amountOverride?: number) => {
         const allPrompts = []
         for (let index = 0; index < (amountOverride ?? orderAmount); index++) {
-            allPrompts.push(hydratePrompt(prompt, variables, index));
+            allPrompts.push(hydratePrompt({
+                ...prompt, orderData: {
+                    sample: -1,
+                    source: "PROMPTBOX"
+                }
+            }, variables, index));
         }
 
         brewApi.fetch((val) => {

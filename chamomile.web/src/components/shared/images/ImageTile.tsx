@@ -26,8 +26,8 @@ export default function ImageTile(props: {
         <ContextMenu options={[
             { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) } },
             { type: "divider" },
-            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image)} menuButonMode onClick={onClose} /> },
-            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image, true)} iconOverride={<CoffeeOutlined />} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={(image.basePrompt?.trim()?.length ?? 0) === 0} /> },
+            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image)} source="IMAGE" sample={image.id} menuButonMode onClick={onClose} /> },
+            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image, true)} source="IMAGE_BASE" sample={image.id} iconOverride={<CoffeeOutlined />} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={(image.basePrompt?.trim()?.length ?? 0) === 0} /> },
             { type: "divider" },
             { text: "Use this prompt", icon: <Terminal />, onClick: () => { setPrompt(imageToPrompt(image)) } },
             { text: "Use this base prompt", icon: <TerminalOutlined />, onClick: () => { setPrompt(imageToPrompt(image, true)) }, disabled: (image.basePrompt?.trim()?.length ?? 0) === 0 },

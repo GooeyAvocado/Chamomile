@@ -1,3 +1,5 @@
+import PromptOrderData from "./PromptOrderData";
+
 export class Prompt {
     id: number = 0;
     name: string = "";
@@ -12,4 +14,5 @@ export class Prompt {
     width: number = 1024;
     sampleImage?: number;
     variables: any;
+    orderData?: PromptOrderData
 }

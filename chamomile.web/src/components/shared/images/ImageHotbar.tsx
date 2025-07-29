@@ -126,9 +126,12 @@ export default function ImageHotbar(props: {
             <PromptReorderButton
                 menuButonMode prompt={imageToPrompt(image, true)} textSuffix="from base"
                 iconOverride={<CoffeeOutlined />} disabled={(image?.basePrompt?.trim()?.length ?? 0) === 0}
-                onClick={() => setBrewAnchor(null)}
+                onClick={() => setBrewAnchor(null)} sample={image?.id} source="IMAGE_BASE"
             />
-            <PromptReorderButton menuButonMode prompt={imageToPrompt(image)} onClick={() => setBrewAnchor(null)} />
+            <PromptReorderButton
+                menuButonMode prompt={imageToPrompt(image)} onClick={() => setBrewAnchor(null)}
+                sample={image?.id} source="IMAGE"
+            />
         </Menu>
 
         {/* Prompt Menu */}

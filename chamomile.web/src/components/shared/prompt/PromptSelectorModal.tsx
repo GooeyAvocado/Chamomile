@@ -135,7 +135,7 @@ function GridViewMode(props: { data: Prompt[], query: string, setEditPrompt: (va
                 a.positivePrompt.toLowerCase().includes(query.toLowerCase())
             ).map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
-                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} menuButonMode onClick={onClose} /> },
+                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
@@ -182,7 +182,7 @@ function GridViewMode(props: { data: Prompt[], query: string, setEditPrompt: (va
         }}>
             {currPrompts?.map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
-                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} menuButonMode onClick={onClose} /> },
+                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }

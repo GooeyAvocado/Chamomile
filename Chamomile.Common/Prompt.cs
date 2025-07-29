@@ -41,5 +41,8 @@
 
         /// <summary>Variables to be used to S/R on images</summary>
         public Dictionary<string, string>? Variables { get; set; }
+
+        /// <summary>Order data if this image is in the queue. This is not saved to DB</summary>
+        public PromptOrderData? OrderData { get; set; }
     }
 }
