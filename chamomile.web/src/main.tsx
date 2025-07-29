@@ -15,6 +15,7 @@ import QueueWatcher from './components/services/QueueWatcher.tsx'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import DisplayPage from './components/pages/DisplayPage.tsx'
 import { AlbumsProvider } from './components/contexts/AlbumsContext.tsx'
+import QueueProvider from './components/contexts/QueueContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,20 +30,22 @@ createRoot(document.getElementById('root')!).render(
                 <AlbumsProvider>
                   <UpscalersProvider>
                     <ImageUploadProvider>
-                      <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }} >
-                        <HashRouter>
-                          <Routes>
-                            <Route path="*" element={
-                              <QueueWatcher>
-                                <FullPageDropzone>
-                                  <Home />
-                                </FullPageDropzone>
-                              </QueueWatcher>
-                            }
-                            />
-                            <Route path="/display" element={< DisplayPage />} />
-                          </Routes>
-                        </HashRouter>
+                      <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} autoHideDuration={1500} transitionDuration={250} >
+                        <QueueProvider>
+                          <HashRouter>
+                            <Routes>
+                              <Route path="*" element={
+                                <QueueWatcher>
+                                  <FullPageDropzone>
+                                    <Home />
+                                  </FullPageDropzone>
+                                </QueueWatcher>
+                              }
+                              />
+                              <Route path="/display" element={< DisplayPage />} />
+                            </Routes>
+                          </HashRouter>
+                        </QueueProvider>
                       </SnackbarProvider>
                     </ImageUploadProvider>
                   </UpscalersProvider>

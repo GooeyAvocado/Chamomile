@@ -52,7 +52,8 @@ export const changeStatus = (
     setLoading: (value: boolean) => void,
     setItem: (value?: ImageWorkerStatus) => void,
     onError: (value: any) => void,
-) => Get(setLoading, setItem, onError, ENDPOINT + "status");
+    body: ImageWorkerStatus
+) => Post(setLoading, setItem, onError, ENDPOINT + "status", body);
 
 export const cancelJob = (
     setLoading: (value: boolean) => void,
