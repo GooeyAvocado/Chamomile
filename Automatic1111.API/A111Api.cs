@@ -26,7 +26,7 @@ namespace Automatic1111.API {
         public async Task<bool> Ping() {
             var client = new HttpClient();
             try {
-                var response = await client.GetAsync(api + "/sdapi/v1/sd-models");
+                var response = await client.GetAsync(api + "/sdapi/v1/options");
                 return response.IsSuccessStatusCode;
             }
             catch (Exception) {
