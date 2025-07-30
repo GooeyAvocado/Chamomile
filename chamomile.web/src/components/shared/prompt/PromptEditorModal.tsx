@@ -17,9 +17,10 @@ export default function PromptEditorModal(props: {
     preview?: boolean
     cancelable?: boolean
     progress?: Progress
+    onViewImage?: (id: number) => void
 }) {
 
-    const { open, setOpen, onOk, prompt, title, preview, cancelable, progress } = props;
+    const { open, setOpen, onOk, prompt, title, preview, cancelable, progress, onViewImage } = props;
     const [internalPrompt, setInternalPrompt] = useState({} as Prompt)
     const [imageBrowserOpen, setImageBrowserOpen] = useState(false)
     const [folderBrowserOpen, setFolderBrowserOpen] = useState(false)
@@ -38,6 +39,15 @@ export default function PromptEditorModal(props: {
                     <img src={progress.current_image ? "data:image/png;base64," + progress?.current_image : '/outline.png'} style={{ width: '100%', height: '256px', objectFit: 'contain', objectPosition: 'center top' }} />
                 </Card>
             </>}
+            {!progress && prompt?.orderData && prompt?.orderData?.sample > 0 && preview && <Card style={{ width: "150px", height: '150px', margin: "0px auto 20px auto" }}>
+                <CardActionArea onClick={() => { onViewImage?.(prompt.orderData?.sample ?? 0) }}>
+                    <img
+                        key={prompt?.orderData?.sample}
+                        src={imageUrl(prompt.orderData.sample)}
+                        style={{ width: '100%', height: '150px', objectFit: 'contain', objectPosition: 'center top' }}
+                    />
+                </CardActionArea></Card>
+            }
             {!preview && <>
                 <Card style={{ width: "150px", height: '150px', margin: "0px auto 20px auto" }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
                     <img

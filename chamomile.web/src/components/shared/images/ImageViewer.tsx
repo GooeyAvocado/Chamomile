@@ -23,18 +23,18 @@ import { Album } from "../../../model/Album";
 import { updateImageAlbums } from "../../../api/Albums";
 import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
 import ModelChangeTile from "./ModelChangeTile";
+import ImageModalFromId from "./ImageModalFromId";
 
 export default function ImageViewer(props: {
     filter: FilterOptions
     showBrewing?: boolean,
     showWelcome?: boolean,
     onClick?: (val: GeneratedImage) => void
-    showQueueSnackbars?: boolean
     album?: Album
     setAlbum?: (val: Album) => void
 }) {
 
-    const { filter, showBrewing, onClick, showWelcome, showQueueSnackbars, album, setAlbum } = props;
+    const { filter, showBrewing, onClick, showWelcome, album, setAlbum } = props;
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
     const favApi = useApi(favImage)
@@ -47,6 +47,7 @@ export default function ImageViewer(props: {
     const [selectedImage, setSelectedImage] = useState(undefined as undefined | GeneratedImage)
     const [interruptOpen, SetInterruptOpen] = useState(false);
     const [advSearchOpen, setAdvSearchOpen] = useState(false);
+    const [promptViewImageId, setPromptViewImageID] = useState<undefined | number>()
 
     const { enqueueSnackbar } = useSnackbar();
     const { isMobile } = useUserAgent();
@@ -56,7 +57,7 @@ export default function ImageViewer(props: {
         if (showBrewing) {
             imageApi.appendImage(val)
         }
-    }, showQueueSnackbars)
+    })
 
     useEffect(() => {
         imageApi.refresh()
@@ -231,8 +232,8 @@ export default function ImageViewer(props: {
         }}>
             {showBrewing && groupedQueue.map(p =>
                 p.length === 0 ? <></> :
-                    p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} /> :
-                        <QueuedGroupImageTile prompts={p} onCancel={cancel} />
+                    p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} onView={setPromptViewImageID} /> :
+                        <QueuedGroupImageTile prompts={p} onCancel={cancel} onView={setPromptViewImageID} />
             )}
 
             {showBrewing && nextModel && <ModelChangeTile nextModel={nextModel} />}
@@ -267,6 +268,8 @@ export default function ImageViewer(props: {
                     Are you sure you want to delete this image?
                 </AreYouSureModal>
             </>}
+
+            {promptViewImageId && <ImageModalFromId open={!!promptViewImageId} setOpen={() => setPromptViewImageID(undefined)} image={promptViewImageId} />}
 
         </div>
         {imageApi.count === 0 && !activeJob && (queue?.length ?? 0) === 0 && <>

@@ -113,7 +113,7 @@ export default function Home() {
 
                 <UploadPanel />
                 <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
-                    <ImageViewer key={album?.id} filter={filter} showBrewing={!album} showWelcome showQueueSnackbars album={album} setAlbum={(val) => {
+                    <ImageViewer key={album?.id} filter={filter} showBrewing={!album} showWelcome album={album} setAlbum={(val) => {
                         setAlbum(val)
                         setFilter({ album: val.id })
                     }} />
