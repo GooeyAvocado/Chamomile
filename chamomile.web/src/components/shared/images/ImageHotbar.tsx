@@ -53,7 +53,7 @@ export default function ImageHotbar(props: {
                     <IconButton onClick={(e) => {
                         (image?.downloadCount ?? 0) > 0 ? setDownloadAgainPopperAnchor(e.currentTarget) : onDownload?.()
                     }}>
-                        <Download />
+                        <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : "action"} />
                     </IconButton>
                 </Tooltip>
                 <hr />

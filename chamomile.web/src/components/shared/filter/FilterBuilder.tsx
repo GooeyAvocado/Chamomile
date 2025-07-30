@@ -1,7 +1,7 @@
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useState } from "react";
-import { CalendarMonth, Close, ExpandLess, ExpandMore, Gradient, LibraryAdd, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
+import { CalendarMonth, Close, Download, ExpandLess, ExpandMore, Gradient, LibraryAdd, Refresh, Search, Star, StarBorder } from "@mui/icons-material";
 import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 import AdvSearchModal from "./AdvSearchModal";
@@ -90,6 +90,12 @@ export default function FilterBuilder(props: {
                 <Tooltip title={filter.upscaled ? "Show all" : "Show Upscaled"}>
                     <IconButton onClick={() => setFilter({ ...filter, upscaled: !filter?.upscaled })}>
                         {filter.upscaled ? <Gradient color="info" /> : <Gradient />}
+                    </IconButton>
+                </Tooltip>
+
+                <Tooltip title={filter.upscaled ? "Show all" : "Show Downloaded"}>
+                    <IconButton onClick={() => setFilter({ ...filter, downloaded: !filter?.downloaded })}>
+                        {filter.downloaded ? <Download color="primary" /> : <Download />}
                     </IconButton>
                 </Tooltip>
 
