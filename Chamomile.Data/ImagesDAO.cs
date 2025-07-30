@@ -109,11 +109,32 @@ namespace Chamomile.Data {
                     .Select(a => a.Groups[1].Value)
                     .Where(a => loras.Any(b => b.Alias == a))];
 
-            image.Model = await adoTemplate.QuerySingle(SelectSql([MODEL_TITLE], MODELS_TABLE,
+            var model = await adoTemplate.QuerySingle(SelectSql([MODEL_TITLE], MODELS_TABLE,
                 new WhereConditionGroup([new(MODEL_NAME, WhereConditionOperator.ILIKE)])),
                 (cmd) => cmd.SetString(MODEL_NAME, "%" + image.Model + "%"),
                 (reader) => reader.GetOptionalString(MODEL_TITLE)
             ) ?? "";
+
+            if(model == "") {
+                //We didn't find the model but we can actually probably add it
+                var newModel = new Model() {
+                    Title = image.Model + ".safetensors",
+                    Description = "Model added from image upload",
+                    IsAvailable = false,
+                    Name = image.Model
+                };
+                await adoTemplate.Execute(InsertSql([MODEL_TITLE, MODEL_DESC, MODEL_AVAIL_IN, MODEL_NAME], MODELS_TABLE), (cmd) => {
+                    cmd.SetString(MODEL_TITLE, newModel.Title);
+                    cmd.SetString(MODEL_DESC, newModel.Description);
+                    cmd.SetBoolean(MODEL_AVAIL_IN, newModel.IsAvailable);
+                    cmd.SetString(MODEL_NAME, newModel.Name);
+                });
+
+                model = newModel.Title;
+
+            }
+
+            image.Model = model;
 
             return image;
         }
