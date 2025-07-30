@@ -1,4 +1,4 @@
-import { CheckCircle, Pause, PlayArrow, Stop, Warning } from "@mui/icons-material";
+import { Pause, PlayArrow, Refresh, Stop, Warning } from "@mui/icons-material";
 import { CircularProgress, Divider, IconButton, LinearProgress, ListItemIcon, Menu, MenuItem, Tooltip } from "@mui/material";
 import { usePingPong } from "../../hooks/usePingPong";
 import { useQueue } from "../../hooks/useQueue";
@@ -8,7 +8,7 @@ import { useState } from "react";
 export default function StatusButton() {
 
 
-    const { pong } = usePingPong();
+    const { pong, refreshPing } = usePingPong();
     const { activeJob, paused, queue, togglePause, clearQueue, batchTotalImages, batchImages, progress, sessionImages } = useQueue(() => { });
     const [clearAys, setClearAys] = useState(false)
     const [promptAnchor, setPromptAnchor] = useState(null as any)
@@ -81,6 +81,16 @@ export default function StatusButton() {
             </div>
 
             <Divider />
+
+            {
+                !pong?.SD && <MenuItem
+                    onClick={() => { onClose(); refreshPing() }}
+                    style={{ fontSize: ".8em" }}
+                >
+                    <ListItemIcon><Refresh fontSize="small" /></ListItemIcon>
+                    Check SD Again
+                </MenuItem>
+            }
 
             <MenuItem
                 onClick={() => { onClose(); togglePause(); }} style={{ fontSize: ".8em" }}

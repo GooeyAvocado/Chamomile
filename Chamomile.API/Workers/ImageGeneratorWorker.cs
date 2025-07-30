@@ -24,7 +24,7 @@ namespace Chamomile.API.Workers {
         private int _isUserPaused = 0;
         private bool _isSdPause = false;
 
-        public bool IsPaused => _isSdPause || Interlocked.CompareExchange(ref _isUserPaused, 0, 0) == 1;
+        public bool IsPaused => Interlocked.CompareExchange(ref _isUserPaused, 0, 0) == 1;
 
         public void Pause() {
             Interlocked.Exchange(ref _isUserPaused, 1);
@@ -32,6 +32,7 @@ namespace Chamomile.API.Workers {
         }
         public void Resume() {
             Interlocked.Exchange(ref _isUserPaused, 0);
+            if (_isSdPause) _=CheckSd();
             _ = _hubContext.Clients.All.SendAsync("GenResume"); //Let the user know
         } 
 
@@ -55,6 +56,10 @@ namespace Chamomile.API.Workers {
             long jobId = Interlocked.Increment(ref _jobCounter);
             _queue[jobId] = prompt;
             _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
+            
+            //We should only be getting new prompts if SD is available. CheckSD now.
+            if (_isSdPause) _ = CheckSd();
+
             return jobId;
         }
 
@@ -93,12 +98,12 @@ namespace Chamomile.API.Workers {
         /// </summary>
         private async Task ProcessQueueAsync() {
 
-            var loopCount = 0;
+            //var loopCount = 0;
 
             while (!_cts.Token.IsCancellationRequested) {
                 
                 //If we're paused don't even bother the queue
-                var firstItem = IsPaused ? default : _queue.OrderBy(kvp => kvp.Key).FirstOrDefault();
+                var firstItem = IsPaused || _isSdPause ? default : _queue.OrderBy(kvp => kvp.Key).FirstOrDefault();
 
                 if (!firstItem.Equals(default(KeyValuePair<long, Prompt>))) {
                     var (jobId, prompt) = firstItem;
@@ -149,7 +154,7 @@ namespace Chamomile.API.Workers {
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
                             await ReRollModel(savedImg?.Model ?? "");
-                            loopCount = 0; //We *just* successfully generated an image. We can wait a little longer
+                            //loopCount = 0; //We *just* successfully generated an image. We can wait a little longer
 
                         }
                         catch (Exception e) {
@@ -160,7 +165,7 @@ namespace Chamomile.API.Workers {
                             stopwatch.Stop();
 
                             //Reset the loop count because we are going to check SD availability `now`
-                            loopCount = 0;
+                            //loopCount = 0;
 
                             if (!await CheckSd()) {
                                 //Requeue the current prompt 
@@ -177,16 +182,16 @@ namespace Chamomile.API.Workers {
                     }
                 }
                 else {
-                    if (loopCount >= 10) {
-                        loopCount = 0; //Reset the loop count after 5 iterations
+                    //if (loopCount >= 10) {
+                    //    loopCount = 0; //Reset the loop count after 5 iterations
 
-                        //Check if SD is still available
-                        await CheckSd();
-                    }
+                    //    //Check if SD is still available
+                    //    await CheckSd();
+                    //}
                     await Task.Delay(1000); // No jobs? Wait before checking again.
                 }
 
-                loopCount++;
+                //loopCount++;
             }
         }
 
