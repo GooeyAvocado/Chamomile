@@ -68,7 +68,7 @@ export default function Statusbit() {
                     <IconButton size="small" onClick={() => {
                         togglePause()
                         setExpanded(false)
-                    }}>{
+                    }} disabled={!pong?.SD}>{
                             paused ? <PlayArrow /> : <Pause />
                         }</IconButton>
                 </Tooltip>

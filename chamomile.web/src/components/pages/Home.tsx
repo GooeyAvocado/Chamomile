@@ -18,6 +18,7 @@ import AlbumHeader from "../shared/albums/AlbumHeader";
 import GenerationsButton from "../shared/albums/GenerationsButton";
 import { useAlbums } from "../hooks/useAlbums";
 import Statusbit from "../shared/Statusbit/Statusbit";
+import StatusButton from "../shared/StatusButton/StatusButton";
 
 export default function Home() {
 
@@ -63,6 +64,8 @@ export default function Home() {
             <div style={{ display: 'flex', justifyContent: "space-between", width: "100%", alignItems: "end" }}>
                 <ChamomileLogo hideWords={width < (450 + 120 + 2 + 40)} />
                 <div style={{ display: 'flex', gap: "10px" }}>
+
+                    <StatusButton />
 
                     {(albumsOpen || album) && <GenerationsButton onClick={() => {
                         setAlbumsOpen(false)
@@ -120,8 +123,8 @@ export default function Home() {
 
 
         </div>
-        <div style={{ position: "fixed", bottom: "10px", right: '20px' }}>
+        {/* <div style={{ position: "fixed", bottom: "10px", right: '20px' }}>
             <Statusbit />
-        </div>
+        </div> */}
     </div>
 }

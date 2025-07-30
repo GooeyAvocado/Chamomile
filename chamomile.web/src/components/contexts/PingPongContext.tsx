@@ -1,4 +1,4 @@
-import React, { createContext } from "react";
+import React, { createContext, useState } from "react";
 import useApi from "../hooks/useApi";
 import { pingPong } from "../../api/PingPong";
 import { Card, CircularProgress } from "@mui/material";
@@ -30,7 +30,8 @@ export const PingPongContext = createContext<PingPongContextType | undefined>(un
 
 export const PingPongProvider = (props: { children: any }) => {
 
-    const pingPongApi = useApi(pingPong, true);
+    const [pong, setPong] = useState<{ DB: boolean, SD: boolean } | undefined>()
+    const pingPongApi = useApi(pingPong, true, setPong);
 
     if (pingPongApi.error) {
         console.error(pingPongApi.error)
@@ -42,7 +43,7 @@ export const PingPongProvider = (props: { children: any }) => {
         </CenteredCard>
     }
 
-    if (!pingPongApi.data) {
+    if (!pong) {
         return <CenteredCard image="/images/pingponging.png">
             <div style={{ display: "flex", gap: "20px", alignItems: 'center' }}>
                 <div>
@@ -60,7 +61,7 @@ export const PingPongProvider = (props: { children: any }) => {
 
 
 
-    if (pingPongApi.data && pingPongApi.data?.DB === false) {
+    if (pong && pong?.DB === false) {
         return <CenteredCard image="/images/pingpongissue.png">
             <b>A dependency is unavailable! </b>
             <div>
@@ -76,7 +77,11 @@ export const PingPongProvider = (props: { children: any }) => {
         </CenteredCard>
     }
 
-    return <PingPongContext.Provider value={{ pong: pingPongApi.data, loading: pingPongApi.loading, refreshPing: pingPongApi.fetch, error: pingPongApi.error }}>
+    return <PingPongContext.Provider value={{
+        pong: pong, loading: pingPongApi.loading, refreshPing: () => {
+            pingPongApi.fetch(setPong)
+        }, error: pingPongApi.error
+    }}>
         {props.children}
     </PingPongContext.Provider>
 

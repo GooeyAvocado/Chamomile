@@ -17,7 +17,10 @@ export interface QueueContextType {
     activeJob: Prompt,
     progress?: Progress
     paused: boolean,
-    lastSuccessfulImage: GeneratedImage
+    lastSuccessfulImage: GeneratedImage,
+    sessionImages: number,
+    batchImages: number
+    batchTotalImages: number
     clearQueue: () => void,
     togglePause: () => void,
     cancel: (jobId: number) => void
@@ -26,7 +29,7 @@ export interface QueueContextType {
 export const QueueContext = createContext<QueueContextType | undefined>(undefined);
 
 export default function QueueProvider(props: { children: any }) {
-    const { refreshPing } = usePingPong();
+    const { refreshPing, pong } = usePingPong();
 
     const [queue, setQueue] = useState([] as Prompt[])
     const [paused, setPaused] = useState(false)
@@ -35,12 +38,16 @@ export default function QueueProvider(props: { children: any }) {
     const [lastSuccessfulImage, setLastSuccessfulImage] = useState(undefined as undefined | GeneratedImage)
     const [modelSequenceChangeBusy, setModelSequenceChangeBusy] = useState<string | undefined>()
 
+    const [sessionImages, setSesionImages] = useState(0)
+    const [batchTotalImages, setBatchTotalImages] = useState(0)
+
     const cancelApi = useApi(cancelJob)
     const clearApi = useApi(clearQueue)
     const changeStatusApi = useApi(changeStatus)
 
     useApi(getStatus, true, (val?: ImageWorkerStatus) => {
         setQueue(val?.queue ?? [])
+        setBatchTotalImages(val?.queue.length ?? 0)
         setActiveJob(val?.currentJob)
         setPaused(!!val?.paused)
     })
@@ -60,10 +67,9 @@ export default function QueueProvider(props: { children: any }) {
                 currentGroup = [image];
             }
         });
-        //Push the last remaining grou
+        //Push the last remaining group
         groups.push(currentGroup)
         return groups;
-
     }, [queue])
 
     usePolling(() => {
@@ -73,8 +79,17 @@ export default function QueueProvider(props: { children: any }) {
     }, 2000, !!activeJob)
 
     useSignalR("QueueUpdated", (data: Prompt[]) => {
+        const queueLength = queue.length //I know we don't need to do this but I'm too afraid to not do this. 
         setQueue(data)
+        if (data.length === 0) { setBatchTotalImages(0) }
+        if (data.length > queueLength) {
+            console.warn("More images added")
+            //We've added to our queue instead of removing or canceling
+            setBatchTotalImages(data.length - queueLength)
+        }
     });
+
+    const batchImages = batchTotalImages - queue.length
 
     useSignalR("JobStarted", (jobId: number, prompt: Prompt, queue: Prompt[]) => {
         console.log("Generation started for job " + jobId)
@@ -91,6 +106,7 @@ export default function QueueProvider(props: { children: any }) {
         setActiveJob(undefined)
         setCurrentProgress(undefined)
         setLastSuccessfulImage(image);
+        setSesionImages((prev) => prev + 1);
     });
 
     useSignalR("JobFailed", (jobId: number, prompt: Prompt, queue: Prompt[], message: string) => {
@@ -116,9 +132,7 @@ export default function QueueProvider(props: { children: any }) {
         setModelSequenceChangeBusy(undefined)
     });
 
-    useSignalR("SDAvailabilityChange", () => {
-        refreshPing();
-    });
+    useSignalR("SDAvailabilityChange", refreshPing);
 
     useSignalR("GenPause", () => {
         setPaused(true)
@@ -147,6 +161,9 @@ export default function QueueProvider(props: { children: any }) {
                 enqueueSnackbar("Order could not be cancelled", { variant: 'error' })
             }, jobId)
         },
+        batchImages: batchImages,
+        batchTotalImages: batchTotalImages,
+        sessionImages: sessionImages
 
     } as QueueContextType
 
