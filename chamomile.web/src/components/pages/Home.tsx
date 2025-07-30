@@ -17,7 +17,6 @@ import AlbumsViewer from "../shared/albums/AlbumsViewer";
 import AlbumHeader from "../shared/albums/AlbumHeader";
 import GenerationsButton from "../shared/albums/GenerationsButton";
 import { useAlbums } from "../hooks/useAlbums";
-import Statusbit from "../shared/Statusbit/Statusbit";
 import StatusButton from "../shared/StatusButton/StatusButton";
 
 export default function Home() {

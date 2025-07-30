@@ -29,7 +29,7 @@ export interface QueueContextType {
 export const QueueContext = createContext<QueueContextType | undefined>(undefined);
 
 export default function QueueProvider(props: { children: any }) {
-    const { refreshPing, pong } = usePingPong();
+    const { refreshPing } = usePingPong();
 
     const [queue, setQueue] = useState([] as Prompt[])
     const [paused, setPaused] = useState(false)
