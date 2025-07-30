@@ -197,7 +197,7 @@ export default function ImageModal(props: {
                             <div style={{ display: 'flex' }}>
                                 <Tabs value={promptMode} onChange={(_, val) => setPromptMode(val)} style={{ flex: "1" }}>
                                     <Tab sx={{ textTransform: 'none' }} label="Prompt" />
-                                    {(image?.basePrompt?.trim().length ?? 0) !== 0 && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
+                                    {(image?.basePrompt?.trim().length ?? 0) !== 0 && image?.basePrompt !== image?.prompt && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
                                 </Tabs>
                                 <CopyToClipboardButton text={promptMode === 0 ? image?.prompt : image?.basePrompt} style={{ paddingRight: "16px" }} />
                             </div>

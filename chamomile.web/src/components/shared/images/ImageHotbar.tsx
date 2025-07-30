@@ -125,7 +125,10 @@ export default function ImageHotbar(props: {
         >
             <PromptReorderButton
                 menuButonMode prompt={imageToPrompt(image, true)} textSuffix="from base"
-                iconOverride={<CoffeeOutlined />} disabled={(image?.basePrompt?.trim()?.length ?? 0) === 0}
+                iconOverride={<CoffeeOutlined />} disabled={
+                    (image?.basePrompt?.trim()?.length ?? 0) === 0 ||
+                    image?.basePrompt === image?.prompt
+                }
                 onClick={() => setBrewAnchor(null)} sample={image?.id} source="IMAGE_BASE"
             />
             <PromptReorderButton
@@ -142,7 +145,7 @@ export default function ImageHotbar(props: {
         >
             <MenuItem
                 onClick={() => { onUsePrompt(imageToPrompt(image, true)); setPromptAnchor(null) }}
-                disabled={(image?.basePrompt?.trim()?.length ?? 0) === 0}
+                disabled={(image?.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt}
             >
                 <ListItemIcon><TerminalTwoTone /></ListItemIcon>
                 Use this base prompt
