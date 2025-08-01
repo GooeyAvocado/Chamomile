@@ -6,7 +6,6 @@ import { HiResRequest } from "../model/HiResRequest";
 import ImageWorkerStatus from "../model/ImageWorkerStatus";
 import { KeywordFilterOptions } from "../model/KeywordFilterOptions";
 import KeywordUsage from "../model/KeywordUsage";
-import KeywordUsageDated from "../model/KeywordUsageDated";
 import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
 import ModelSequence from "../model/ModelSequence";
 import { Prompt } from "../model/Prompt";
