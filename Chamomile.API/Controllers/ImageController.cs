@@ -241,6 +241,16 @@ namespace Chamomile.API.Controllers {
             return Ok(sequence);
         }
 
+        [HttpGet("keywords/usage")]
+        public async Task<IActionResult> GetKeywordUsage([FromQuery] FilterOptions options) {
+            return Ok(await dao.GetKeywordUsage(options,options.LastImage ?? -1));
+        }
+
+        [HttpGet("keywords/datedusage")]
+        public async Task<IActionResult> GetKeywordDatedUsage([FromQuery] KeywordFilterOptions options) {
+            return Ok(await dao.GetKeywordDatedUsage(options, options.LastImage ?? -1, options.Keyword ?? ""));
+        }
+
         #endregion
 
         #region UPDATE

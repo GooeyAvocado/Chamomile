@@ -484,6 +484,67 @@ namespace Chamomile.Data {
             }
         }
 
+        public async Task<List<KeywordUsage>> GetKeywordUsage(FilterOptions filter, int limit) {
+            var sql = $@"
+                SELECT
+                  k.keyword as {KEYWORD},
+                  COUNT(*) AS {KEYWORD_USAGE},
+                  MIN(k.{IMAGES_ID}) AS {KEYWORD_SAMPLE},
+                  min(k.{CRE_TS}) as {MIN_TS}, max(k.{CRE_TS}) as {MAX_TS}
+                FROM (
+                  {SelectSql([IMAGES_ID,IMAGES_PROMPT, CRE_TS],IMAGES_TABLE,
+                    new WhereConditionGroup(ConditionsFromFilter(filter, null)), [new(CRE_TS,SortOrder.DESC)])}
+                  {(limit > 0 ? $" LIMIT {limit}" : "")}
+                ) AS filtered_images
+                JOIN LATERAL extract_keywords(filtered_images.{IMAGES_ID}, filtered_images.{IMAGES_PROMPT},filtered_images.{CRE_TS}) AS k ON TRUE
+                GROUP BY k.keyword
+                ORDER BY {KEYWORD_USAGE} DESC;
+            ";
+
+            return await adoTemplate.Query(sql, (cmd) => {
+                SetterFromFilter(cmd, filter);
+            }, reader => new KeywordUsage() {
+                Keyword = reader.GetString(KEYWORD),
+                Count = reader.GetInt(KEYWORD_USAGE),
+                Sample = reader.GetInt(KEYWORD_SAMPLE),
+                MinTs = reader.GetDateTime(MIN_TS),
+                MaxTs = reader.GetDateTime(MAX_TS)
+            });
+        }
+
+        public async Task<List<KeywordUsageDated>> GetKeywordDatedUsage(FilterOptions filter, int limit, string keyword) {
+            var sql = $@"
+                select 
+                    DATE(cre_ts) as {KEYWORD_USAGE_DATE}, 
+                    count(*) as {KEYWORD_USAGE}, 
+                    min(image_id) as {KEYWORD_SAMPLE}
+                from (
+                    SELECT
+                      k.keyword,
+                      k.{CRE_TS},
+                      k.{IMAGES_ID}
+                    FROM (
+                        {SelectSql([IMAGES_ID, IMAGES_PROMPT, CRE_TS], IMAGES_TABLE,
+                        new WhereConditionGroup(ConditionsFromFilter(filter, null)), [new(CRE_TS, SortOrder.DESC)])}
+                        {(limit > 0 ? $" LIMIT {limit}" : "")}
+                    ) AS filtered_images
+                    JOIN LATERAL extract_keywords(filtered_images.{IMAGES_ID}, filtered_images.{IMAGES_PROMPT},filtered_images.{CRE_TS}) AS k ON TRUE
+                    WHERE LOWER(k.keyword) = @{KEYWORD}
+                ) group by {KEYWORD_USAGE_DATE} order by {KEYWORD_USAGE_DATE} asc
+            ";
+
+            return await adoTemplate.Query(sql, (cmd) => {
+                SetterFromFilter(cmd, filter);
+                cmd.SetString(KEYWORD, keyword.ToLowerInvariant());
+            }, reader => new KeywordUsageDated() {
+                Keyword = keyword,
+                Count = reader.GetInt(KEYWORD_USAGE),
+                Sample = reader.GetInt(KEYWORD_SAMPLE),
+                date = reader.GetDateTime(KEYWORD_USAGE_DATE),
+            });
+        }
+
+
         #endregion
 
         #region UPDATE

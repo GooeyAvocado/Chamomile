@@ -34,5 +34,6 @@
 
         /// <summary>Last image returned from last request for pagination</summary>
         public int? LastImage { get; set; } = 0;
+
     }
 }

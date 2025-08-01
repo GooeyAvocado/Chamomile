@@ -150,3 +150,35 @@ GENERATED ALWAYS AS (
     ELSE length(image_bytes_tx)
   END
 ) STORED;
+
+
+REATE OR REPLACE FUNCTION extract_keywords(
+  image_id INT,
+  image_prompt_tx TEXT
+)
+RETURNS TABLE (
+  keyword TEXT,
+  image_id INT
+) AS $$
+  SELECT
+    TRIM(k) AS keyword,
+    image_id
+  FROM unnest(
+   	regexp_split_to_array(
+  TRIM(
+    REGEXP_REPLACE(
+      REGEXP_REPLACE(
+        REGEXP_REPLACE(image_prompt_tx, '[()]', '', 'g'),       -- Remove parentheses
+        '<lora:[^>]+>',                                     -- Remove LoRA tags
+        '',
+        'gi'
+      ),
+      E'[\\n\\r\\t]+', ' ', 'g'                            -- Normalize linebreaks/tabs to spaces
+    )
+  ),
+  E'[,\n\r]| {2,}'                                        -- Split on commas, linebreaks, or 2+ spaces
+)
+   -- split by comma or linebreaks
+  ) AS k
+  WHERE TRIM(k) <> '';
+$$ LANGUAGE sql STABLE;

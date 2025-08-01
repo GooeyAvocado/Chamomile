@@ -76,5 +76,10 @@
         public static readonly string MIN_TS = "min_ts";
         public static readonly string MAX_TS = "max_ts";
 
+        public static readonly string KEYWORD = "keyword_tx";
+        public static readonly string KEYWORD_USAGE = "usage_ct";
+        public static readonly string KEYWORD_USAGE_DATE = "usage_dt";
+        public static readonly string KEYWORD_SAMPLE = "sample_id";
+
     }
 }
