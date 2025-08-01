@@ -97,6 +97,7 @@ namespace Chamomile.Data.Utils {
             using var conn = new NpgsqlConnection(ConnectionString);
             await conn.OpenAsync();
 
+            Console.WriteLine(sql);
             using var cmd = new NpgsqlCommand(sql, conn);
 
             void setParam(string key, NpgsqlDbType type, object? val){

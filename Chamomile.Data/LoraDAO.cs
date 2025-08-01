@@ -30,16 +30,49 @@ namespace Chamomile.Data {
         
         }
 
-        public async Task<List<Usage>> GetUsage(FilterOptions filter, int limit) {
+        public async Task<List<KeywordUsage>> GetUsage(FilterOptions filter, int limit) {
             return await adoTemplate.Query(SelectSql(
-                [LORA_ALIAS, "count(*) as " + LORA_USAGE_COUNT],
+                [
+                    LORA_ALIAS, 
+                    $"count(*) as {LORA_USAGE_COUNT}",
+                    $"min({CRE_TS}) as {MIN_TS}" ,
+                    $"max({CRE_TS}) as {MAX_TS}"
+                ],
                    "(" + InnerImageSql(filter,limit) + ")") 
                 + $" GROUP BY {LORA_ALIAS} ORDER BY {LORA_USAGE_COUNT} DESC", (cmd) => {
                     ImagesDAO.SetterFromFilter(cmd, filter);
                 }, (reader) =>
-                new Usage() {
-                    Name = reader.GetOptionalString(LORA_ALIAS) ?? "None",
-                    Count = reader.GetInt(LORA_USAGE_COUNT)
+                new KeywordUsage() {
+                    Keyword = reader.GetOptionalString(LORA_ALIAS) ?? "None",
+                    Count = reader.GetInt(LORA_USAGE_COUNT),
+                    MinTs = reader.GetDateTime(MIN_TS),
+                    MaxTs = reader.GetDateTime(MAX_TS),
+                }
+            );
+        }
+
+        public async Task<List<KeywordUsageDated>> GetUsageDated(FilterOptions filter, int limit, string lora) {
+            return await adoTemplate.Query(SelectSql(
+                [
+                    //LORA_ALIAS,
+                    $"date({CRE_TS}) as {KEYWORD_USAGE_DATE}",
+                    $"count(*) as {LORA_USAGE_COUNT}",
+                    $"min({IMAGES_ID}) as {IMAGES_ID}" ,
+                ],
+                   "(" + InnerImageSql(filter, limit) + ")")
+                + $@" 
+                    WHERE {LORA_ALIAS} = @{LORA_ALIAS}
+                    GROUP BY {KEYWORD_USAGE_DATE} 
+                    ORDER BY {KEYWORD_USAGE_DATE} ASC
+                ", (cmd) => {
+                    ImagesDAO.SetterFromFilter(cmd, filter);
+                    cmd.SetString(LORA_ALIAS, lora);
+                }, (reader) =>
+                new KeywordUsageDated() {
+                    Keyword = lora,
+                    Count = reader.GetInt(LORA_USAGE_COUNT),
+                    Date = reader.GetDateTime(KEYWORD_USAGE_DATE),
+                    Sample = reader.GetInt(IMAGES_ID),
                 }
             );
         }
@@ -57,7 +90,7 @@ namespace Chamomile.Data {
         }
 
         private static string InnerImageSql(FilterOptions filter, int limit) {
-            return SelectSql(["IMV." + LORA_ALIAS], $"{IMAGES_TABLE} i left join {IMAGES_LORA_MAP} imv on i.{IMAGES_ID} = imv.{IMAGES_ID}", 
+            return SelectSql([$"IMV.{LORA_ALIAS}", $"img.{CRE_TS}", $"img.{IMAGES_ID}"], $"{IMAGES_TABLE} img left join {IMAGES_LORA_MAP} imv on img.{IMAGES_ID} = imv.{IMAGES_ID}", 
                 new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }

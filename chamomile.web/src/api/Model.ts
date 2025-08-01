@@ -1,8 +1,10 @@
 import { objectToQueryString } from "../components/shared/Utils";
 import { FilterOptions } from "../model/FilterOptions";
+import { KeywordFilterOptions } from "../model/KeywordFilterOptions";
+import KeywordUsage from "../model/KeywordUsage";
+import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
 import { Model } from "../model/Model";
 import { ModelRequest } from "../model/ModelRequest";
-import Usage from "../model/Usage";
 import { API_PREFIX, Get, Post, Put } from "./Common";
 
 const ENDPOINT = API_PREFIX + "models/"
@@ -47,7 +49,14 @@ export const updateModel = (
 
 export const getModelUsage = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: Usage[]) => void,
+    setItem: (value?: KeywordUsage[]) => void,
     onError: (value: any) => void,
     filter: FilterOptions
 ) => Get(setLoading, setItem, onError, ENDPOINT + "usage" + objectToQueryString(filter));
+
+export const getModelUsageDated = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: KeywordUsageDatedResult) => void,
+    onError: (value: any) => void,
+    filter: KeywordFilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + "datedusage" + objectToQueryString(filter));

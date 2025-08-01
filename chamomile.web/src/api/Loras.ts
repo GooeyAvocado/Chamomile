@@ -1,7 +1,9 @@
 import { objectToQueryString } from "../components/shared/Utils";
 import { FilterOptions } from "../model/FilterOptions";
+import { KeywordFilterOptions } from "../model/KeywordFilterOptions";
+import KeywordUsage from "../model/KeywordUsage";
+import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
 import { Lora } from "../model/Lora";
-import Usage from "../model/Usage";
 import { API_PREFIX, Get, Put } from "./Common";
 
 const ENDPOINT = API_PREFIX + "loras/"
@@ -27,7 +29,14 @@ export const updateLora = (
 
 export const getLoraUsage = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: Usage[]) => void,
+    setItem: (value?: KeywordUsage[]) => void,
     onError: (value: any) => void,
     filter: FilterOptions
-) => Get(setLoading, setItem, onError, ENDPOINT + "usage" + objectToQueryString(filter) );
+) => Get(setLoading, setItem, onError, ENDPOINT + "usage" + objectToQueryString(filter));
+
+export const getLoraUsageDated = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: KeywordUsageDatedResult) => void,
+    onError: (value: any) => void,
+    filter: KeywordFilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + "datedusage" + objectToQueryString(filter));

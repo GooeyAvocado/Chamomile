@@ -6,9 +6,8 @@ import TabbedModalActions from "../modals/TabbedModal/TabbedModalActions"
 import TabbedModalTabContent from "../modals/TabbedModal/TabbedModalTabContent"
 import { FilterOptions } from "../../../model/FilterOptions"
 import useApi from "../../hooks/useApi"
-import { getLoraUsage } from "../../../api/Loras"
-import { getModelUsage } from "../../../api/Model"
-import Usage from "../../../model/Usage"
+import { getLoraUsage, getLoraUsageDated } from "../../../api/Loras"
+import { getModelUsage, getModelUsageDated } from "../../../api/Model"
 import ModelCard from "../model/ModelCard"
 import TabbedModalConsistentContent from "../modals/TabbedModal/TabbedModalConsistentContent"
 import { useWindowDimensions } from "../../hooks/useWindowDimensions"
@@ -16,8 +15,10 @@ import LoraCard from "../lora/LoraCard"
 import AvailabilitySelector from "../model/availabilitySelector/AvailabilitySelector"
 import { useModels } from "../../hooks/useModels"
 import { useLoras } from "../../hooks/useLoras"
-import { getKeywordUsage } from "../../../api/Images"
-import { KeywordUsageTable } from "./subcomponents/KeywordsStatsPanel"
+import { getKeywordUsage, getKeywordUsageDated } from "../../../api/Images"
+import KeywordUsage from "../../../model/KeywordUsage"
+import { StatsPanel } from "./subcomponents/StatsPanel"
+import ModelTypePill from "../model/ModelType/ModelTypePill"
 
 export default function StatisticsModal(props: {
     open: boolean,
@@ -98,59 +99,66 @@ export default function StatisticsModal(props: {
             </FormControl>
         </TabbedModalConsistentContent>
         <TabbedModalTabContent label="Models">
-            {open && modelLoading ? <LoadingSpinner text="Loading model usage information" /> : <ModelUsageBarGraph usage={availability === 0
-                ? modelData
-                : availability === 1
-                    ? modelData.filter(a => modelAvailable(a.name))
-                    : modelData.filter(a => !modelAvailable(a.name))} />}
+            {open ? (modelLoading || !modelData) ? <LoadingSpinner text="Loading model usage information" /> : <StatsPanel
+                datedUsageApi={getModelUsageDated} minAutoCompleteLength={0}
+                usage={availability === 0 ? modelData : availability === 1
+                    ? modelData?.filter(a => modelAvailable(a.keyword))
+                    : modelData?.filter(a => !modelAvailable(a.keyword))}
+                filter={filter} keywordColumnOverride="Model"
+                getSampleImageId={(u) => models.find(a => a.title === u.keyword)?.bannerImage}
+                renderKeywordRow={(u) => {
+                    const m = models.find(a => a.title === u.keyword) ?? {
+                        name: u.keyword, title: u.keyword, isAvailable: false, type: ""
+                    }
+                    return <div style={{ color: m.isAvailable ? "white" : "#DDD", fontSize: ".8em" }}>
+                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                            {m?.type?.length > 0 && <ModelTypePill type={m?.type} style={{ flexShrink: "0" }} />}
+                            <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
+                                <b>{m.name}</b>
+                            </div>
+                        </div>
+                        <div style={{ fontSize: ".8em" }}>{`${m.title}${m.isAvailable ? "" : " (Unavailable)"}`}</div>
+                    </div>
+                }}
+            /> : ""}
         </TabbedModalTabContent>
         <TabbedModalTabContent label="LoRAs">
-            {open && loraLoading ? <LoadingSpinner text="Loading LoRA usage information" /> : <LoraUsageBarGraph usage={availability === 0
-                ? loraData
-                : availability === 1
-                    ? loraData.filter(a => loraAvailable(a.name))
-                    : loraData.filter(a => !loraAvailable(a.name))} />}
+            {open ? (loraLoading || !loraData) ? <LoadingSpinner text="Loading LoRA usage information" /> : <StatsPanel
+                datedUsageApi={getLoraUsageDated} minAutoCompleteLength={0}
+                usage={availability === 0 ? loraData : availability === 1
+                    ? loraData?.filter(a => loraAvailable(a.keyword))
+                    : loraData?.filter(a => !loraAvailable(a.keyword))}
+                filter={filter} keywordColumnOverride="LoRA"
+                getSampleImageId={(u) => loras.find(a => a.alias === u.keyword)?.bannerImage}
+                renderKeywordRow={(u) => {
+                    const m = loras.find(a => a.alias === u.keyword) ?? {
+                        name: u.keyword, alias: u.keyword, isAvailable: false, type: ""
+                    }
+                    return <div style={{ color: m.isAvailable ? "white" : "#DDD", fontSize: ".8em" }}>
+                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                            {m?.type?.length > 0 && <ModelTypePill type={m?.type} style={{ flexShrink: "0" }} />}
+                            <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
+                                <b>{m.name}</b>
+                            </div>
+                        </div>
+                        <div style={{ fontSize: ".8em" }}>{`${m.alias}${m.isAvailable ? "" : " (Unavailable)"}`}</div>
+                    </div>
+                }}
+            /> : ""}
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Keywords">
-            {open && keywordLoading ? <LoadingSpinner text="Keyword usage information" /> : <>
-                <KeywordUsageTable usage={keywordData} filter={filter} />
-            </>}
+            {open ? (keywordLoading || !keywordData) ? <LoadingSpinner text="Keyword usage information" /> : <>
+                <StatsPanel
+                    datedUsageApi={getKeywordUsageDated}
+                    usage={keywordData}
+                    filter={filter}
+                    renderCount={(total) => <Tooltip title="'Keywords' are determined by non-LoRA words split by commas, line breaks, or more than two spaces. This detection isn't perfect!">
+                        <div style={{ opacity: ".7", fontSize: ".9em" }}> About {total} unique keywords</div>
+                    </Tooltip>}
+                />
+            </> : ""}
         </TabbedModalTabContent>
         <TabbedModalActions><Button onClick={() => setOpen(false)}>OK</Button></TabbedModalActions>
     </TabbedModal>
-
-}
-
-function ModelUsageBarGraph(props: { usage: Usage[] }) {
-    return <UsageBarGraph usage={props.usage} cardComponent={(props) => <ModelCard modelTitle={props.name} tiny={props.vertical} />} />
-}
-
-function LoraUsageBarGraph(props: { usage: Usage[] }) {
-    return <UsageBarGraph usage={props.usage} cardComponent={(props) => <LoraCard loraAlias={props.name} tiny={props.vertical} />} />
-}
-
-function UsageBarGraph(props: {
-    usage: Usage[]
-    cardComponent: (props: { name: string, vertical: boolean }) => ReactNode
-}) {
-
-    const { usage, cardComponent: CardComponent } = props;
-    const max = usage?.[0]?.count ?? 0
-    const { width } = useWindowDimensions();
-    const vertical = width < 750
-
-    if (usage.length === 0) return <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: "10px" }}>
-        <img src="/outline.png" width={64} />
-        <div>No usage data!</div>
-    </div>
-
-    return usage?.map(u => <div key={u.name} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <div style={{ width: vertical ? "52px" : "300px", flexShrink: '0' }}><CardComponent name={u.name} vertical={vertical} /></div>
-        <div style={{ flex: '1', paddingRight: "10px", height: '75px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ width: `${(u.count * 100) / max}%`, height: '50%', backgroundColor: "#556677", display: "flex", alignItems: 'center', paddingLeft: '10px' }}>
-                {u.count}
-            </div>
-        </div>
-    </div>)
 
 }

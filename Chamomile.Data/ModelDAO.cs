@@ -27,16 +27,49 @@ namespace Chamomile.Data {
         
         }
 
-        public async Task<List<Usage>> GetUsage(FilterOptions filter, int limit) {
+        public async Task<List<KeywordUsage>> GetUsage(FilterOptions filter, int limit) {
             return await adoTemplate.Query(SelectSql(
-                [MODEL_TITLE, "count(*) as " + MODEL_USAGE_COUNT], 
+                [
+                    MODEL_TITLE, 
+                    $"count(*) as {MODEL_USAGE_COUNT}", 
+                    $"min({CRE_TS}) as {MIN_TS}" ,
+                    $"max({CRE_TS}) as {MAX_TS}"
+                ], 
                 "(" + InnerImageSql(filter,limit) + ")" ) 
-                + $" GROUP BY {MODEL_TITLE} ORDER BY {MODEL_USAGE_COUNT} DESC", (cmd) =>{
+                + $" GROUP BY {MODEL_TITLE} ORDER BY {MODEL_USAGE_COUNT} DESC, {MODEL_TITLE}", (cmd) =>{
                     ImagesDAO.SetterFromFilter(cmd, filter);
                 }, (reader) => 
-                new Usage() { 
-                    Name = reader.GetString(MODEL_TITLE),
-                    Count= reader.GetInt(MODEL_USAGE_COUNT)
+                new KeywordUsage() { 
+                    Keyword = reader.GetString(MODEL_TITLE),
+                    Count= reader.GetInt(MODEL_USAGE_COUNT),
+                    MinTs = reader.GetDateTime(MIN_TS),
+                    MaxTs= reader.GetDateTime(MAX_TS),
+                }
+            );
+        }
+
+        public async Task<List<KeywordUsageDated>> GetUsageDated(FilterOptions filter, int limit, string model) {
+            return await adoTemplate.Query(SelectSql(
+                [
+                    //MODEL_TITLE,
+                    $"date({CRE_TS}) as {KEYWORD_USAGE_DATE}",
+                    $"count(*) as {MODEL_USAGE_COUNT}",
+                    $"min({IMAGES_ID}) as {IMAGES_ID}" ,
+                ],
+                "(" + InnerImageSql(filter, limit) + ")")
+                + $@" 
+                    WHERE {MODEL_TITLE} = @{MODEL_TITLE}
+                    GROUP BY {KEYWORD_USAGE_DATE} 
+                    ORDER BY {KEYWORD_USAGE_DATE} ASC
+                ", (cmd) => {
+                    ImagesDAO.SetterFromFilter(cmd, filter);
+                    cmd.SetString(MODEL_TITLE, model);
+                }, (reader) =>
+                new KeywordUsageDated() {
+                    Keyword = model,
+                    Count = reader.GetInt(MODEL_USAGE_COUNT),
+                    Date = reader.GetDateTime(KEYWORD_USAGE_DATE),
+                    Sample = reader.GetInt(IMAGES_ID)
                 }
             );
         }
@@ -51,7 +84,7 @@ namespace Chamomile.Data {
         }
 
         private static string InnerImageSql(FilterOptions filter, int limit) {
-            return SelectSql([MODEL_TITLE], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
+            return SelectSql([MODEL_TITLE, CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
 

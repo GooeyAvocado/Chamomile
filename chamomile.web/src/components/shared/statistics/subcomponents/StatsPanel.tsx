@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import KeywordUsage from "../../../../model/KeywordUsage";
-import { Card, CardActionArea, Chip, CircularProgress, IconButton, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
+import { Card, CardActionArea, Chip, CircularProgress, IconButton, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from "@mui/material";
 import ImageTileFromID from "../../images/ImageTileFromID";
 import { ChevronLeft, ChevronRight, FirstPage, LastPage, TableView, Timeline } from "@mui/icons-material";
 import ImageModalFromId from "../../images/ImageModalFromId";
@@ -8,12 +8,28 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import ChamomileLogo from "../../ChamomileLogo";
 import useApi from "../../../hooks/useApi";
-import { getKeywordUsageDated } from "../../../../api/Images";
 import { FilterOptions } from "../../../../model/FilterOptions";
 import { KeywordFilterOptions } from "../../../../model/KeywordFilterOptions";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
+import KeywordUsageDatedResult from "../../../../model/KeywordUsageDatedResult";
 
-export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], filter: FilterOptions }) {
+export function StatsPanel({ usage, filter, datedUsageApi, keywordColumnOverride, renderImageTile, renderKeywordRow, rowHeightOverride, renderCount, getSampleImageId, minAutoCompleteLength: propMinACL }: {
+    usage: KeywordUsage[],
+    filter: FilterOptions
+    renderImageTile?: (usage: KeywordUsage, setImageView: (val: number) => void) => React.ReactNode
+    renderKeywordRow?: (usage: KeywordUsage) => React.ReactNode
+    renderCount?: (total: number) => React.ReactNode
+    getSampleImageId?: (usage: KeywordUsage) => number | undefined
+    keywordColumnOverride?: string,
+    rowHeightOverride?: number
+    minAutoCompleteLength?: number
+    datedUsageApi: (
+        setLoading: (value: boolean) => void,
+        setItem: (value?: KeywordUsageDatedResult) => void,
+        onError: (value: any) => void,
+        filter: KeywordFilterOptions
+    ) => void
+}) {
 
     const [page, setPage] = useState(0);
     const [imageView, setImageView] = useState<number | undefined>()
@@ -32,7 +48,7 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
     const [graphHeight, setGraphHeight] = useState(0)
     const [graphWidth, setGraphWidth] = useState(0)
 
-    const { fetch, data, loading } = useApi(getKeywordUsageDated)
+    const { fetch, data, loading } = useApi(datedUsageApi)
 
     useEffect(() => {
         console.log(selectedKeywords.length)
@@ -48,9 +64,11 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
         }
     }, [contentRef.current, windowHeight, windowWidth]);
 
+    const minAutoCompleteLength = propMinACL ?? 3
+
     const keywordOptions = useMemo(
         () =>
-            keywordQuery.length >= 3
+            keywordQuery.length >= minAutoCompleteLength
                 ? usage?.map(u => u.keyword).filter(
                     k => k.toLowerCase().includes(keywordQuery.toLowerCase())
                 ) : [],
@@ -59,7 +77,8 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
 
     const colors = ["#e57373", "#64b5f6", "#81c784", "#ffd54f", "#ba68c8", "#4db6ac", "#f06292", "#9575cd"];
     const darkolors = ["#683535ff", "#325a7aff", "#3f6141ff", "#756325ff", "#5a3361ff", "#265a55ff", "#6d2b41ff", "#483863ff"];
-
+    const max = usage?.[0].count
+    const rowHeight = rowHeightOverride ?? 36
 
     return <>
         <div style={{ flex: "1", display: 'flex', flexDirection: 'column' }}>
@@ -67,7 +86,7 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
                 <TableHead>
                     <TableRow>
                         <TableCell sx={{ width: 48 }}></TableCell>
-                        <TableCell sx={{ width: '100%' }}>Keyword</TableCell>
+                        <TableCell sx={{ width: '100%' }}>{keywordColumnOverride ?? "Keyword"}</TableCell>
                         <TableCell sx={{ whiteSpace: 'nowrap' }}>Usage</TableCell>
                         <TableCell sx={{ whiteSpace: 'nowrap' }}>First use</TableCell>
                         <TableCell sx={{ whiteSpace: 'nowrap' }}>Last use</TableCell>
@@ -76,10 +95,17 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
                 <TableBody>
                     {displayData.map(a => (
                         <TableRow key={a.keyword}>
-                            <TableCell><ImageTileFromID image={a.sample} style={{ width: "32px" }} onClick={() => { setImageView(a.sample); console.log(a) }}
-                            /></TableCell>
-                            <TableCell><div>
-                                {a.keyword}
+                            <TableCell>
+                                {renderImageTile ? renderImageTile(a, setImageView) : <ImageTileFromID image={getSampleImageId ? getSampleImageId(a) : a.sample} style={{ width: "32px" }} onClick={() => {
+                                    const id = getSampleImageId ? getSampleImageId(a) : a.sample
+                                    if (id) setImageView(id)
+                                }} />}
+                            </TableCell>
+                            <TableCell><div style={{ position: "relative", width: "100%", height: `${rowHeight}px` }}>
+                                <div style={{ background: "#556677", width: `${a.count * 100 / max}%`, height: `${rowHeight}px` }} />
+                                <div style={{ position: "absolute", left: "8px", top: "0", height: `${rowHeight}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    {renderKeywordRow ? renderKeywordRow(a) : a.keyword}
+                                </div>
                             </div></TableCell>
                             <TableCell>{a.count.toLocaleString()}</TableCell>
                             <TableCell>{new Date(a.minTs).toLocaleDateString()}</TableCell>
@@ -89,7 +115,7 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
                 </TableBody>
             </TableContainer> : selectedKeywords.length === 0 ? <div style={{ display: 'flex', flex: "1", flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: "10px" }}>
                 <ChamomileLogo hideWords />
-                <div>Select a keyword!</div>
+                <div>Select a {keywordColumnOverride?.toLowerCase() ?? "keyword"}!</div>
             </div> : loading && !data ? <div style={{ display: 'flex', flex: "1", flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: "10px" }}>
                 <CircularProgress />
                 <div>Fetching usage data</div>
@@ -225,7 +251,13 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
                                                                 >
                                                                     <ImageTileFromID image={pt.sample} style={{ width: "48px" }} />
                                                                     <div>
-                                                                        <div>{pt.keyword[0].toUpperCase()}{pt.keyword.slice(1)}</div>
+                                                                        <div>{renderKeywordRow ? renderKeywordRow({
+                                                                            count: pt.count,
+                                                                            keyword: pt.keyword,
+                                                                            maxTs: pt.date,
+                                                                            minTs: pt.date,
+                                                                            sample: pt.sample
+                                                                        }) : <>{pt.keyword[0].toUpperCase()}{pt.keyword.slice(1)}</>}</div>
                                                                         <div>{date.toLocaleDateString()}: {pt.count.toLocaleString()} usages</div>
                                                                     </div>
                                                                 </CardActionArea>
@@ -255,12 +287,13 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
                 <IconButton onClick={() => { setMode(mode === "table" ? "graph" : "table") }}>
                     {mode === "table" ? <Timeline /> : <TableView />}
                 </IconButton>
-                {mode === "table" && <Tooltip title="'Keywords' are determined by non-LoRA words split by commas, line breaks, or more than two spaces. This detection isn't perfect!">
-                    <div style={{ opacity: ".7", fontSize: ".9em" }}> About {usage.length} unique keywords</div>
-                </Tooltip>}
+                {mode === "table" && (
+                    renderCount ? renderCount(usage.length) :
+                        <div style={{ opacity: ".7", fontSize: ".9em" }}> {usage.length} {keywordColumnOverride ?? "Keyword"}s</div>
+                )}
                 {mode === "graph" && <Autocomplete
                     multiple fullWidth style={{ flex: "1" }}
-                    options={keywordOptions} noOptionsText={keywordQuery.length >= 3 ? 'No options' : "Type at least 3 characters"}
+                    options={keywordOptions} noOptionsText={keywordQuery.length >= minAutoCompleteLength ? 'No options' : `Type at least ${minAutoCompleteLength} characters`}
                     value={selectedKeywords}
                     onChange={(_, value) => setSelectedKeywords(value)}
                     inputValue={keywordQuery}
@@ -269,7 +302,7 @@ export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], fi
                     renderInput={params => (
                         <TextField
                             {...params}
-                            label="Filter keywords"
+                            label={`Filter ${keywordColumnOverride?.toLowerCase() ?? "keyword"}s`}
                             placeholder={selectedKeywords.length > 0 ? "" : "Search"}
                             size="small"
                         />

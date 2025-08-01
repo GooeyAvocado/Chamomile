@@ -27,6 +27,11 @@ namespace Chamomile.API.Controllers {
         public async Task<IActionResult> GetUsage([FromQuery] FilterOptions options) {
             return Ok(await dao.GetUsage(options,options.LastImage ?? -1));
         }
+        
+        [HttpGet("datedusage")]
+        public async Task<IActionResult> GetDatedUsage([FromQuery] KeywordFilterOptions options) {
+            return Ok(await Utils.Utils.GetUsage(dao.GetUsageDated, options));
+        }
 
         [HttpGet("refresh")]
         public async Task<IActionResult> Refresh() {
