@@ -18,7 +18,7 @@ export default function PromptTile(props: {
                         style={{ width: "50%" }}
                     />
                 </div>
-                {prompt.sampleImage && <img
+                {prompt.sampleImage && <img loading="lazy"
                     src={imageUrl(prompt.sampleImage)}
                     style={{
                         position: "absolute", top: "0px", left: "0px",

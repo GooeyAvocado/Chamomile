@@ -498,7 +498,7 @@ namespace Chamomile.Data {
                 ) AS filtered_images
                 JOIN LATERAL extract_keywords(filtered_images.{IMAGES_ID}, filtered_images.{IMAGES_PROMPT},filtered_images.{CRE_TS}) AS k ON TRUE
                 GROUP BY k.keyword
-                ORDER BY {KEYWORD_USAGE} DESC;
+                ORDER BY {KEYWORD_USAGE} DESC, k.keyword;
             ";
 
             return await adoTemplate.Query(sql, (cmd) => {
@@ -540,7 +540,7 @@ namespace Chamomile.Data {
                 Keyword = keyword,
                 Count = reader.GetInt(KEYWORD_USAGE),
                 Sample = reader.GetInt(KEYWORD_SAMPLE),
-                date = reader.GetDateTime(KEYWORD_USAGE_DATE),
+                Date = reader.GetDateTime(KEYWORD_USAGE_DATE),
             });
         }
 

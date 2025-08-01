@@ -28,7 +28,7 @@ export default function LoraTile(props: {
                             style={{ width: "50%" }}
                         />
                     </div>
-                    {lora.bannerImage && <img
+                    {lora.bannerImage && <img loading="lazy"
                         src={imageUrl(lora.bannerImage)}
                         style={{
                             position: "absolute", top: "0px", left: "0px",

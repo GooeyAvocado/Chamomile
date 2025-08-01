@@ -1,0 +1,302 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import KeywordUsage from "../../../../model/KeywordUsage";
+import { Card, CardActionArea, Chip, CircularProgress, IconButton, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from "@mui/material";
+import ImageTileFromID from "../../images/ImageTileFromID";
+import { ChevronLeft, ChevronRight, FirstPage, LastPage, TableView, Timeline } from "@mui/icons-material";
+import ImageModalFromId from "../../images/ImageModalFromId";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
+import ChamomileLogo from "../../ChamomileLogo";
+import useApi from "../../../hooks/useApi";
+import { getKeywordUsageDated } from "../../../../api/Images";
+import { FilterOptions } from "../../../../model/FilterOptions";
+import { KeywordFilterOptions } from "../../../../model/KeywordFilterOptions";
+import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
+
+export function KeywordUsageTable({ usage, filter }: { usage: KeywordUsage[], filter: FilterOptions }) {
+
+    const [page, setPage] = useState(0);
+    const [imageView, setImageView] = useState<number | undefined>()
+    const [mode, setMode] = useState<"table" | "graph">("table")
+    const pageSize = 6;
+    const pages = Math.ceil(usage.length / pageSize)
+    const contentRef = useRef<HTMLDivElement>(null);
+    const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+
+    const displayData = usage.slice(pageSize * page, pageSize * (page + 1))
+    const nextPage = () => setPage(Math.min(page + 1, pages - 1))
+    const prevPage = () => setPage(Math.max(0, page - 1))
+
+    const [keywordQuery, setKeywordQuery] = useState("");
+    const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+    const [graphHeight, setGraphHeight] = useState(0)
+    const [graphWidth, setGraphWidth] = useState(0)
+
+    const { fetch, data, loading } = useApi(getKeywordUsageDated)
+
+    useEffect(() => {
+        console.log(selectedKeywords.length)
+        if (selectedKeywords.length > 0) {
+            fetch(undefined, undefined, { ...filter, keyword: selectedKeywords.join(",") } as KeywordFilterOptions)
+        }
+    }, [selectedKeywords])
+
+    useEffect(() => {
+        if (contentRef.current) {
+            setGraphHeight(contentRef.current.scrollHeight);
+            setGraphWidth(contentRef.current.scrollWidth);
+        }
+    }, [contentRef.current, windowHeight, windowWidth]);
+
+    const keywordOptions = useMemo(
+        () =>
+            keywordQuery.length >= 3
+                ? usage?.map(u => u.keyword).filter(
+                    k => k.toLowerCase().includes(keywordQuery.toLowerCase())
+                ) : [],
+        [keywordQuery, usage, selectedKeywords]
+    );
+
+    const colors = ["#e57373", "#64b5f6", "#81c784", "#ffd54f", "#ba68c8", "#4db6ac", "#f06292", "#9575cd"];
+    const darkolors = ["#683535ff", "#325a7aff", "#3f6141ff", "#756325ff", "#5a3361ff", "#265a55ff", "#6d2b41ff", "#483863ff"];
+
+
+    return <>
+        <div style={{ flex: "1", display: 'flex', flexDirection: 'column' }}>
+            {mode === "table" ? <TableContainer component={Paper} sx={{ width: '100%', flex: "1" }}>
+                <TableHead>
+                    <TableRow>
+                        <TableCell sx={{ width: 48 }}></TableCell>
+                        <TableCell sx={{ width: '100%' }}>Keyword</TableCell>
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>Usage</TableCell>
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>First use</TableCell>
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>Last use</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {displayData.map(a => (
+                        <TableRow key={a.keyword}>
+                            <TableCell><ImageTileFromID image={a.sample} style={{ width: "32px" }} onClick={() => { setImageView(a.sample); console.log(a) }}
+                            /></TableCell>
+                            <TableCell><div>
+                                {a.keyword}
+                            </div></TableCell>
+                            <TableCell>{a.count.toLocaleString()}</TableCell>
+                            <TableCell>{new Date(a.minTs).toLocaleDateString()}</TableCell>
+                            <TableCell>{new Date(a.maxTs).toLocaleDateString()}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </TableContainer> : selectedKeywords.length === 0 ? <div style={{ display: 'flex', flex: "1", flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: "10px" }}>
+                <ChamomileLogo hideWords />
+                <div>Select a keyword!</div>
+            </div> : loading && !data ? <div style={{ display: 'flex', flex: "1", flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: "10px" }}>
+                <CircularProgress />
+                <div>Fetching usage data</div>
+            </div> : <div style={{ display: "flex", flex: "1", flexDirection: 'column' }}>
+                <div ref={contentRef} style={{ flex: '1', background: "#333333", position: "relative" }}>
+
+
+                    {/* This is where the graph goes */}
+                    {/* All this because I really *REALLY* don't want to have to deal with a graphing library */}
+                    {/* Thank you to ChatGPT I thought I aws going to need to figure this out but as it turns out ChatGPT can do it all for me */}
+                    {/* The AI is used on this app for more than just the image generation */}
+                    {data && (
+                        <svg
+                            width={graphWidth}
+                            height={graphHeight}
+                            style={{
+                                position: "absolute", top: 0, left: 0,
+                                width: "100%", height: "100%",
+                                paddingLeft: "0px", // Increased padding for labels
+                                boxSizing: "border-box"
+                            }}
+                        >
+                            {/* Padding values */}
+                            {(() => {
+                                const paddingLeft = 60; // Increased from 32 to 60 for 6 digits
+                                const paddingRight = 32;
+                                const paddingTop = 32;
+                                const paddingBottom = 32;
+                                const innerWidth = graphWidth - paddingLeft - paddingRight;
+                                const innerHeight = graphHeight - paddingTop - paddingBottom;
+
+                                // Vertical ticks (usage)
+                                const vTicks = 8;
+                                const maxUsage = data.maxUsage ?? 100;
+                                const usageStep = maxUsage / vTicks;
+
+                                // Horizontal ticks (time)
+                                const hTicks = 15;
+                                const minTs = new Date((data.minTs ?? "").split("T")[0]);
+                                const maxTs = new Date((data.maxTs ?? "").split("T")[0]);
+                                const timeStep = (maxTs.getTime() - minTs.getTime()) / (hTicks - 1);
+
+                                return (
+                                    <>
+                                        {/* Vertical grid lines & labels */}
+                                        {Array.from({ length: hTicks - 1 }).map((_, i) => {
+                                            const x = paddingLeft + (innerWidth / (hTicks - 1)) * i;
+                                            const ts = new Date(minTs.getTime() + timeStep * i);
+                                            const label = ts.toLocaleDateString();
+                                            return (
+                                                <g key={`v-${i}`}>
+                                                    <line
+                                                        x1={x}
+                                                        y1={paddingTop}
+                                                        x2={x}
+                                                        y2={graphHeight - paddingBottom}
+                                                        stroke="#ccc"
+                                                        strokeWidth={1}
+                                                    />
+                                                    {/* Date label */}
+                                                    {i % 2 && <text
+                                                        x={x}
+                                                        y={graphHeight - paddingBottom + 18}
+                                                        textAnchor="middle"
+                                                        fontSize="12"
+                                                        fill="#888"
+                                                    >
+                                                        {label}
+                                                    </text>}
+                                                </g>
+                                            );
+                                        })}
+
+                                        {/* Horizontal grid lines & labels */}
+                                        {Array.from({ length: vTicks }).map((_, i) => {
+                                            const y = graphHeight - paddingBottom - (innerHeight / vTicks) * i;
+                                            const usageLabel = Math.round(usageStep * i);
+                                            return (
+                                                <g key={`h-${i}`}>
+                                                    <line
+                                                        x1={paddingLeft}
+                                                        y1={y}
+                                                        x2={graphWidth - paddingRight}
+                                                        y2={y}
+                                                        stroke="#ccc"
+                                                        strokeWidth={1}
+                                                    />
+                                                    {/* Usage label */}
+                                                    <text
+                                                        x={paddingLeft - 12} // Increased offset for 6 digits
+                                                        y={y + 4}
+                                                        textAnchor="end"
+                                                        fontSize="12"
+                                                        fill="#888"
+                                                    >
+                                                        {usageLabel.toLocaleString()}
+                                                    </text>
+                                                </g>
+                                            );
+                                        })}
+
+                                        {/* Draw lines for each keyword series */}
+                                        {Object.entries(data.usage ?? {}).map(([keyword, points], idx) => {
+                                            // Assign a color for each series (simple palette)
+                                            const color = colors[idx % colors.length];
+
+                                            // Prepare points for polyline
+                                            const polyPoints = points.map(pt => {
+                                                const date = new Date(pt.date.split("T")[0]);
+                                                const x = paddingLeft + ((date.getTime() - minTs.getTime()) / (maxTs.getTime() - minTs.getTime())) * innerWidth;
+                                                const y = graphHeight - paddingBottom - (pt.count / maxUsage) * innerHeight;
+                                                return `${x},${y}`;
+                                            }).join(" ");
+
+                                            return (
+                                                <g key={keyword}>
+                                                    <polyline
+                                                        points={polyPoints}
+                                                        fill="none"
+                                                        stroke={color}
+                                                        strokeWidth={2}
+                                                    />
+                                                    {/* Draw circles for each point */}
+                                                    {points.map(pt => {
+                                                        const date = new Date(pt.date.split("T")[0]);
+                                                        const x = paddingLeft + ((date.getTime() - minTs.getTime()) / (maxTs.getTime() - minTs.getTime())) * innerWidth;
+                                                        const y = graphHeight - paddingBottom - (pt.count / maxUsage) * innerHeight;
+                                                        return (
+                                                            <Tooltip title={<Card >
+                                                                <CardActionArea onClick={() => { setImageView(pt.sample) }}
+                                                                    sx={{ textTransform: 'none' }}
+                                                                    style={{ display: "flex", alignItems: 'center', gap: "10px", padding: "8px" }}
+                                                                >
+                                                                    <ImageTileFromID image={pt.sample} style={{ width: "48px" }} />
+                                                                    <div>
+                                                                        <div>{pt.keyword[0].toUpperCase()}{pt.keyword.slice(1)}</div>
+                                                                        <div>{date.toLocaleDateString()}: {pt.count.toLocaleString()} usages</div>
+                                                                    </div>
+                                                                </CardActionArea>
+                                                            </Card>}>
+                                                                <circle key={pt.date} cx={x} cy={y} r={3} fill={color} >
+                                                                </circle>
+                                                            </Tooltip>
+                                                        );
+                                                    })}
+                                                </g>
+                                            );
+                                        })}
+
+                                    </>
+                                );
+                            })()}
+                        </svg>
+                    )}
+
+
+
+                </div>
+            </div>}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: "10px" }}>
+            <div style={{ display: "flex", gap: "10px", marginLeft: "10px", alignItems: 'center', flex: "1" }}>
+                <IconButton onClick={() => { setMode(mode === "table" ? "graph" : "table") }}>
+                    {mode === "table" ? <Timeline /> : <TableView />}
+                </IconButton>
+                {mode === "table" && <Tooltip title="'Keywords' are determined by non-LoRA words split by commas, line breaks, or more than two spaces. This detection isn't perfect!">
+                    <div style={{ opacity: ".7", fontSize: ".9em" }}> About {usage.length} unique keywords</div>
+                </Tooltip>}
+                {mode === "graph" && <Autocomplete
+                    multiple fullWidth style={{ flex: "1" }}
+                    options={keywordOptions} noOptionsText={keywordQuery.length >= 3 ? 'No options' : "Type at least 3 characters"}
+                    value={selectedKeywords}
+                    onChange={(_, value) => setSelectedKeywords(value)}
+                    inputValue={keywordQuery}
+                    onInputChange={(_, value) => setKeywordQuery(value)}
+                    filterOptions={x => x} // disables built-in filtering
+                    renderInput={params => (
+                        <TextField
+                            {...params}
+                            label="Filter keywords"
+                            placeholder={selectedKeywords.length > 0 ? "" : "Search"}
+                            size="small"
+                        />
+                    )}
+                    renderTags={(value, getTagProps) =>
+                        value.map((option, index) => (
+                            <Chip
+                                variant="filled"
+                                style={{ backgroundColor: darkolors[index % colors.length], color: 'white' }}
+                                label={`${option}`}
+                                {...getTagProps({ index })}
+                            />
+                        ))
+                    }
+                    disabled={usage.length === 0}
+                />}
+            </div>
+            {mode === "table" && <div style={{ display: 'flex', gap: "5px", alignItems: 'center' }}>
+                <IconButton onClick={() => setPage(0)} disabled={page === 0}><FirstPage /></IconButton>
+                <IconButton onClick={() => prevPage()} disabled={page === 0}><ChevronLeft /></IconButton>
+                <div>{page + 1}</div>
+                <IconButton onClick={() => nextPage()} disabled={page === pages - 1}> <ChevronRight /></IconButton>
+                <IconButton onClick={() => setPage(pages - 1)} disabled={page === pages - 1}><LastPage /></IconButton>
+            </div>}
+        </div>
+
+        <ImageModalFromId image={imageView} open={!!imageView && imageView > 0} setOpen={() => setImageView(-1)} />
+    </>
+
+}

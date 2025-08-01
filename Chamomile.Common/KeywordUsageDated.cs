@@ -5,6 +5,6 @@
         public string Keyword { get; set; }
         public int Count { get; set; }
         public int Sample { get; set; }
-        public DateTime date { get; set; }
+        public DateTime Date { get; set; }
     }
 }

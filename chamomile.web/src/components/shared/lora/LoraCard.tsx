@@ -91,7 +91,7 @@ export default function LoraCard(props: {
         setEditorOpen(true)
     }
 
-    const CardImage = (props: { style?: CSSProperties }) => <img src={lora?.bannerImage ? imageUrl(lora.bannerImage) : '/outline.png'} style={{ width: '32px', height: '32px', objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px', background: '#555', ...props.style }} />
+    const CardImage = (props: { style?: CSSProperties }) => <img loading="lazy" src={lora?.bannerImage ? imageUrl(lora.bannerImage) : '/outline.png'} style={{ width: '32px', height: '32px', objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px', background: '#555', ...props.style }} />
     const CardText = () => <Typography style={{ fontSize: '1em' }}>
         <div style={{ flex: '1', color: lora.isAvailable ? "white" : "#777" }}>
             <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>

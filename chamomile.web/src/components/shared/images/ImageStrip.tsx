@@ -19,7 +19,7 @@ export default function ImageStrip({ images, maxLength }: {
     return <div style={{ display: 'flex', gap: "5px" }}>
         {displayImages.map(a => <Card>
             <div style={{ maxWidth: "32px", aspectRatio: 1 / 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: "relative" }}>
-                <img src={imageUrl(a)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
+                <img loading="lazy" src={imageUrl(a)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
                 <img
                     src={imageUrl(a)}
                     style={{ width: "50%" }}

@@ -4,6 +4,10 @@ import { FilterOptions } from "../model/FilterOptions";
 import { GeneratedImage } from "../model/GeneratedImage";
 import { HiResRequest } from "../model/HiResRequest";
 import ImageWorkerStatus from "../model/ImageWorkerStatus";
+import { KeywordFilterOptions } from "../model/KeywordFilterOptions";
+import KeywordUsage from "../model/KeywordUsage";
+import KeywordUsageDated from "../model/KeywordUsageDated";
+import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
 import ModelSequence from "../model/ModelSequence";
 import { Prompt } from "../model/Prompt";
 import { API_PREFIX, Delete, Get, Post, Put, Upload } from "./Common";
@@ -143,3 +147,17 @@ export const setModelSequence = (
     onError: (value: any) => void,
     sequence: ModelSequence[]
 ) => Post(setLoading, setItem, onError, ENDPOINT + "modelSequence", sequence);
+
+export const getKeywordUsage = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: KeywordUsage[]) => void,
+    onError: (value: any) => void,
+    filter: FilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + "keywords/usage" + objectToQueryString(filter));
+
+export const getKeywordUsageDated = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: KeywordUsageDatedResult) => void,
+    onError: (value: any) => void,
+    filter: KeywordFilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + "keywords/datedusage" + objectToQueryString(filter));

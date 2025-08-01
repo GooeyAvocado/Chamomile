@@ -35,7 +35,7 @@ export default function QueuedGroupImageTile(props: {
                 <BaseImageTile>
                     <CardActionArea onClick={() => { setPreviewOpen(true) }} style={{ height: "100%", position: "relative" }}>
                         {orderData && orderData?.sample > 0 ?
-                            <img src={imageUrl(orderData.sample)}
+                            <img loading="lazy" src={imageUrl(orderData.sample)}
                                 style={{
                                     width: "100%", height: "100%", objectFit: 'cover',
                                     objectPosition: 'center top', position: 'absolute',

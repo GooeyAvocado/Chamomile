@@ -29,7 +29,7 @@ export default function ModelTile(props: {
                         />
                     </div>
 
-                    {model.bannerImage && <img
+                    {model.bannerImage && <img loading="lazy"
                         src={imageUrl(model.bannerImage)}
                         style={{
                             position: "absolute", top: "0px", left: "0px",

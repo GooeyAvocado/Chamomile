@@ -248,7 +248,34 @@ namespace Chamomile.API.Controllers {
 
         [HttpGet("keywords/datedusage")]
         public async Task<IActionResult> GetKeywordDatedUsage([FromQuery] KeywordFilterOptions options) {
-            return Ok(await dao.GetKeywordDatedUsage(options, options.LastImage ?? -1, options.Keyword ?? ""));
+
+            var keywords = options.Keyword?.Split(",");
+            KeywordUsageDatedResult result = new() {
+                Usage = []
+            };
+
+            if (keywords?.Length > 0) {
+                foreach (var keyword in keywords) {
+                    var usage = await dao.GetKeywordDatedUsage(options, options.LastImage ?? -1, keyword);
+                    if (usage.Count == 0) continue;
+
+                    var min = usage[0].Date;
+                    var max = usage[^1].Date;
+                    var maxUsage = usage.Max(a => a.Count);
+
+                    result.MinTs = result.MinTs == null 
+                        ? min : result.MinTs > min ? min : result.MinTs;
+
+                    result.MaxTs = result.MaxTs == null
+                        ? max : result.MaxTs < max  ? max : result.MaxTs;
+
+                    result.MaxUsage = Math.Max(result.MaxUsage ?? 0, maxUsage);
+
+                    result.Usage.Add(keyword, usage);
+                }
+            }
+
+            return Ok(result);
         }
 
         #endregion

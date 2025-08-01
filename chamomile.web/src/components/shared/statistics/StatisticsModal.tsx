@@ -1,4 +1,4 @@
-import { Button, CircularProgress, FormControl, InputLabel, MenuItem, Select } from "@mui/material"
+import { Button, CircularProgress, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from "@mui/material"
 import { ReactNode, useEffect, useState } from "react"
 import TabbedModal from "../modals/TabbedModal/TabbedModal"
 import TabbedModalTitle from "../modals/TabbedModal/TabbedModalTitle"
@@ -16,6 +16,8 @@ import LoraCard from "../lora/LoraCard"
 import AvailabilitySelector from "../model/availabilitySelector/AvailabilitySelector"
 import { useModels } from "../../hooks/useModels"
 import { useLoras } from "../../hooks/useLoras"
+import { getKeywordUsage } from "../../../api/Images"
+import { KeywordUsageTable } from "./subcomponents/KeywordsStatsPanel"
 
 export default function StatisticsModal(props: {
     open: boolean,
@@ -38,15 +40,18 @@ export default function StatisticsModal(props: {
 
     const { data: loraData, fetch: fetchLoraUsage, loading: loraLoading } = useApi(getLoraUsage)
     const { data: modelData, fetch: fetchModelUsage, loading: modelLoading } = useApi(getModelUsage)
+    const { data: keywordData, fetch: fetchKeywordUsage, loading: keywordLoading } = useApi(getKeywordUsage)
 
     const refreshData = () => {
-        fetchLoraUsage(() => {
-            setFilterDirty(false)
-        }, undefined, { ...filter, lastImage: limit } as FilterOptions)
 
-        fetchModelUsage(() => {
-            setFilterDirty(false)
-        }, undefined, { ...filter, lastImage: limit } as FilterOptions)
+
+        setFilterDirty(false)
+
+        fetchLoraUsage(undefined, undefined, { ...filter, lastImage: limit } as FilterOptions)
+
+        fetchModelUsage(undefined, undefined, { ...filter, lastImage: limit } as FilterOptions)
+
+        fetchKeywordUsage(undefined, undefined, { ...filter, lastImage: limit } as FilterOptions)
     }
 
     useEffect(() => {
@@ -58,6 +63,7 @@ export default function StatisticsModal(props: {
     useEffect(() => {
         if (open) refreshData();
     }, [limit])
+
     useEffect(() => { setFilterDirty(true) }, [filter])
 
     const LoadingSpinner = (props: { text: string }) => <div style={{ flex: "1", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', width: "100%", gap: "30px" }}>
@@ -104,6 +110,11 @@ export default function StatisticsModal(props: {
                 : availability === 1
                     ? loraData.filter(a => loraAvailable(a.name))
                     : loraData.filter(a => !loraAvailable(a.name))} />}
+        </TabbedModalTabContent>
+        <TabbedModalTabContent label="Keywords">
+            {open && keywordLoading ? <LoadingSpinner text="Keyword usage information" /> : <>
+                <KeywordUsageTable usage={keywordData} filter={filter} />
+            </>}
         </TabbedModalTabContent>
         <TabbedModalActions><Button onClick={() => setOpen(false)}>OK</Button></TabbedModalActions>
     </TabbedModal>
