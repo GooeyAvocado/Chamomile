@@ -9,7 +9,7 @@ import { imageUrl } from "../../../api/Images";
 
 export default function QueuedGroupImageTile(props: {
     prompts: Prompt[]
-    onCancel: (id: number) => void
+    onCancel: (id: number | number[]) => void
     onView?: (id: number) => void
 }) {
 
@@ -17,7 +17,7 @@ export default function QueuedGroupImageTile(props: {
     const [previewOpen, setPreviewOpen] = useState(false);
 
     const cancelAll = () => {
-        prompts.forEach(a => onCancel(a.id))
+        onCancel(prompts.map(a => a.id))
     }
 
     const orderData = prompts.find(a => !!a.orderData)?.orderData;

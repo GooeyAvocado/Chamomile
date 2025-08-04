@@ -65,6 +65,14 @@ export const cancelJob = (
     id: number
 ) => Get(setLoading, setItem, onError, ENDPOINT + "cancel/" + id);
 
+export const cancelJobs = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: Prompt[]) => void,
+    onError: (value: any) => void,
+    ids: number[]
+) => Post(setLoading, setItem, onError, ENDPOINT + "cancel", ids);
+
+
 export const clearQueue = (
     setLoading: (value: boolean) => void,
     onSuccess: () => void,

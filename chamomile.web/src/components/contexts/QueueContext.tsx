@@ -1,7 +1,7 @@
 import { createContext, useMemo, useState } from "react";
 import { Prompt } from "../../model/Prompt";
 import useApi from "../hooks/useApi";
-import { cancelJob, changeStatus, clearQueue, getProgress, getStatus } from "../../api/Images";
+import { cancelJobs, changeStatus, clearQueue, getProgress, getStatus } from "../../api/Images";
 import ImageWorkerStatus from "../../model/ImageWorkerStatus";
 import { useSnackbar } from "notistack";
 import usePolling from "../hooks/usePolling";
@@ -23,7 +23,7 @@ export interface QueueContextType {
     batchTotalImages: number
     clearQueue: () => void,
     togglePause: () => void,
-    cancel: (jobId: number) => void
+    cancel: (jobId: number | number[]) => void
 }
 
 export const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -41,7 +41,7 @@ export default function QueueProvider(props: { children: any }) {
     const [sessionImages, setSesionImages] = useState(0)
     const [batchTotalImages, setBatchTotalImages] = useState(0)
 
-    const cancelApi = useApi(cancelJob)
+    const cancelApi = useApi(cancelJobs)
     const clearApi = useApi(clearQueue)
     const changeStatusApi = useApi(changeStatus)
 
@@ -154,12 +154,16 @@ export default function QueueProvider(props: { children: any }) {
         togglePause: () => {
             changeStatusApi.fetch(undefined, undefined, { paused: !paused })
         },
-        cancel: (jobId: number) => {
+        cancel: (jobId: number | number[]) => {
+
+            const jobs = Array.isArray(jobId) ? jobId : [jobId]
+            if (jobs.length === 0) return;
+
             cancelApi.fetch(() => {
-                enqueueSnackbar("Order cancelled", { variant: 'info' })
+                enqueueSnackbar(`Order${jobs.length > 1 ? "s" : ""} cancelled`, { variant: 'info' })
             }, () => {
-                enqueueSnackbar("Order could not be cancelled", { variant: 'error' })
-            }, jobId)
+                enqueueSnackbar(`Order${jobs.length > 1 ? "s" : ""} could not be cancelled`, { variant: 'error' })
+            }, jobs)
         },
         batchImages: batchImages,
         batchTotalImages: batchTotalImages,
