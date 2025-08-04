@@ -24,6 +24,7 @@ import { updateImageAlbums } from "../../../api/Albums";
 import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
 import ModelChangeTile from "./ModelChangeTile";
 import ImageModalFromId from "./ImageModalFromId";
+import { Prompt } from "../../../model/Prompt";
 
 export default function ImageViewer(props: {
     filter: FilterOptions
@@ -54,7 +55,7 @@ export default function ImageViewer(props: {
     const { currentUpload, lastSuccess, progress: uploadProgress } = useImageUpload();
 
     const { activeJob, cancel, progress, groupedQueue, queue, nextModel } = useQueue((val) => {
-        if (showBrewing) {
+        if (showBrewing && imageAlbumFilter(val)) {
             imageApi.appendImage(val)
         }
     })
@@ -224,6 +225,23 @@ export default function ImageViewer(props: {
 
     useEffect(() => { SetInterruptOpen(false) }, [activeJob])
 
+    const imageAlbumFilter = (val: GeneratedImage) => {
+        if (!album?.id) return true;
+        return val.albums.includes(album.id)
+    }
+
+    const promptAlbumFilter = (val: Prompt) => {
+        if (!album?.id) return true;
+        return val.orderData?.albums?.includes(album.id)
+    }
+
+    const promptsAlbumFilter = (val: Prompt[]) => {
+        if (!album?.id) return true;
+
+        //This ternary is impossible but Eslint says otherwise. Go figure
+        return val.some(a => a.orderData?.albums?.includes(album.id ?? 0))
+    }
+
     return <>
         <div style={{
             display: 'grid',
@@ -231,14 +249,14 @@ export default function ImageViewer(props: {
             gap: '20px'
         }}>
             {showBrewing && groupedQueue.map(p =>
-                p.length === 0 ? <></> :
+                p.length === 0 || !promptsAlbumFilter(p) ? <></> :
                     p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} onView={setPromptViewImageID} /> :
                         <QueuedGroupImageTile prompts={p} onCancel={cancel} onView={setPromptViewImageID} />
             )}
 
             {showBrewing && nextModel && <ModelChangeTile nextModel={nextModel} />}
 
-            {showBrewing && activeJob && <>
+            {showBrewing && activeJob && promptAlbumFilter(activeJob) && <>
                 <BrewingImageTile
                     imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
                     eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100}

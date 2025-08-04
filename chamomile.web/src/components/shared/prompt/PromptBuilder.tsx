@@ -38,6 +38,7 @@ export default function PromptBuilder(props: {
     const [varsOpen, setVarsOpen] = useState(false)
     const [saveAys, setSaveAys] = useState(false)
     const brewApi = useApi(enqueuePrompts)
+    const { album } = usePrompt();
 
     const { loras } = useLoras();
     const { data: wildcards } = useApi(getWildcards, true)
@@ -62,7 +63,8 @@ export default function PromptBuilder(props: {
             allPrompts.push(hydratePrompt({
                 ...prompt, orderData: {
                     sample: -1,
-                    source: "PROMPTBOX"
+                    source: "PROMPTBOX",
+                    albums: album?.id ? [album?.id] : []
                 }
             }, variables, index));
         }

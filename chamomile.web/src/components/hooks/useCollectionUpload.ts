@@ -2,27 +2,29 @@ import { useEffect, useState } from 'react'
 
 //I should've designed this ages ago
 
-export class Upload<T,U> {
+export class Upload<T, U> {
     public constructor(
         /** Indicates whether or not the API is loading */
         public loading: boolean,
 
-        public lastSuccess : T,
+        public lastSuccess: T,
 
         /** Progress (0-100)*/
         public overallProgress: number,
 
-        public uploadIndex:number,
+        public uploadIndex: number,
 
         /** Progress (0-100)*/
         public progress: number,
 
-        public currentUpload : U,
+        public currentUpload: U,
 
         /** Tell Fido to Fetch */
         public upload: (
 
-            collection : U[],
+            collection: U[],
+
+            query?: any,
 
             /** Callback function that'll occur on success */
             onSuccess?: (
@@ -35,12 +37,12 @@ export class Upload<T,U> {
                 /** Error return from the API */
                 val?: any
             ) => void,
-            
+
         ) => void
     ) { }
 }
 
-export default function useCollectionUpload<T,U>(
+export default function useCollectionUpload<T, U>(
 
     /**API function to use */
     uploadFunc: (
@@ -56,24 +58,25 @@ export default function useCollectionUpload<T,U>(
 
     const [loading, setLoading] = useState(false)
     const [collection, setCollection] = useState([] as U[])
+    const [queryObj, setQueryObj] = useState<any>(undefined)
     const [uploadIndex, setUploadIndex] = useState(-1)
-    const [lastSuccess, setLastSuccess] = useState(undefined as T|undefined)
+    const [lastSuccess, setLastSuccess] = useState(undefined as T | undefined)
     const [progress, setProgress] = useState(0)
 
-    const defaultOnSuccess = (val:T)=>{console.log(val)};
+    const defaultOnSuccess = (val: T) => { console.log(val) };
     const [onSuccess, setOnSuccess] = useState(defaultOnSuccess as any)
 
-    const defaultOnError = (val:any)=>{console.log(val)}
+    const defaultOnError = (val: any) => { console.log(val) }
     const [onError, setOnError] = useState(defaultOnError as any)
 
-    useEffect(()=>{
-        if(collection.length===0) return;
+    useEffect(() => {
+        if (collection.length === 0) return;
         setUploadIndex(0)
     }, [collection])
 
-    useEffect(()=>{
-        if(uploadIndex<0) return;
-        if(uploadIndex>=collection.length) {
+    useEffect(() => {
+        if (uploadIndex < 0) return;
+        if (uploadIndex >= collection.length) {
             setUploadIndex(-1)
             return;
         };
@@ -82,31 +85,33 @@ export default function useCollectionUpload<T,U>(
             (val?: T) => {
                 onSuccess?.(val)
                 setLastSuccess(val)
-                setUploadIndex(uploadIndex+1)
+                setUploadIndex(uploadIndex + 1)
             }
             ,
             (val: any) => {
                 if (val !== undefined) {
                     console.error(val)
                     onError?.(val)
-                    setUploadIndex(uploadIndex+1)
+                    setUploadIndex(uploadIndex + 1)
                 }
             },
-            collection[uploadIndex]
+            collection[uploadIndex], queryObj
         )
-    },[uploadIndex])
+    }, [uploadIndex])
 
     const f = (
         collection: U[],
-        onSuccess: (val:T)=>void,
-        onError: (val:any)=>void
+        query: any,
+        onSuccess: (val: T) => void,
+        onError: (val: any) => void
     ) => {
         setOnSuccess(onSuccess)
         setOnError(onError)
+        setQueryObj(query)
         setCollection(collection)
     }
 
 
-    return { loading, progress, upload: f, overallProgress: uploadIndex*100/collection.length, currentUpload: uploadIndex===-1 ? undefined : collection[uploadIndex],uploadIndex:uploadIndex, lastSuccess: lastSuccess  } as Upload<T,U>;
+    return { loading, progress, upload: f, overallProgress: uploadIndex * 100 / collection.length, currentUpload: uploadIndex === -1 ? undefined : collection[uploadIndex], uploadIndex: uploadIndex, lastSuccess: lastSuccess } as Upload<T, U>;
 
 }

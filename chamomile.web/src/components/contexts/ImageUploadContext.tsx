@@ -3,18 +3,19 @@ import { createContext, useEffect, useState } from "react";
 import { uploadExistingImage } from "../../api/Images";
 import useCollectionUpload from "../hooks/useCollectionUpload";
 import { GeneratedImage } from "../../model/GeneratedImage";
+import { usePrompt } from "../hooks/usePrompt";
 
 export class ImageUploadContextType {
     public constructor(
         public files: File[] | undefined,
-        public setFiles: (val:File[])=>void,
+        public setFiles: (val: File[]) => void,
         public overallProgress: number,
-        public progress : number,
-        public currentUpload : File,
-        public uploadPrompt:boolean,
-        public setUploadPrompt: (val:boolean)=>void,
-        public upload : (onSuccess : (val?:GeneratedImage|unknown)=>void, onError : (val:any)=>void) => void,
-        public uploadIndex:number,
+        public progress: number,
+        public currentUpload: File,
+        public uploadPrompt: boolean,
+        public setUploadPrompt: (val: boolean) => void,
+        public upload: (onSuccess: (val?: GeneratedImage | unknown) => void, onError: (val: any) => void) => void,
+        public uploadIndex: number,
         public lastSuccess: GeneratedImage
     ) { }
 }
@@ -24,35 +25,36 @@ export const ImageUploadContext = createContext<ImageUploadContextType | undefin
 export const ImageUploadProvider = (props: { children: any }) => {
 
     const fileUploadApi = useCollectionUpload(uploadExistingImage);
-    const [collection, setCollection] = useState(undefined as undefined|File[])
+    const [collection, setCollection] = useState(undefined as undefined | File[])
     const [uploadPrompt, setUploadPrompt] = useState(false)
+    const { album } = usePrompt();
 
-    useEffect(()=>{
-        if(collection && (collection?.length ?? 0) > 0){
+    useEffect(() => {
+        if (collection && (collection?.length ?? 0) > 0) {
             setUploadPrompt(true)
-            fileUploadApi.upload(collection)
+            fileUploadApi.upload(collection, album ? { albumId: album?.id } : {})
         } else {
             setUploadPrompt(false)
         }
-        
-    },[collection])
+
+    }, [collection])
 
     const upload = () => {
-        if(collection===undefined) return;
-        fileUploadApi.upload(collection)
+        if (collection === undefined) return;
+        fileUploadApi.upload(collection, album ? { albumId: album?.id } : {})
     }
 
-    
 
-    return <ImageUploadContext.Provider value={{ 
-        files: collection, setFiles:setCollection, 
-        currentUpload:fileUploadApi.currentUpload, 
-        overallProgress: fileUploadApi.overallProgress, 
-        progress:fileUploadApi.progress,
-        uploadPrompt:uploadPrompt,
-        setUploadPrompt:setUploadPrompt,
-        upload:upload,
-        uploadIndex:fileUploadApi.uploadIndex,
+
+    return <ImageUploadContext.Provider value={{
+        files: collection, setFiles: setCollection,
+        currentUpload: fileUploadApi.currentUpload,
+        overallProgress: fileUploadApi.overallProgress,
+        progress: fileUploadApi.progress,
+        uploadPrompt: uploadPrompt,
+        setUploadPrompt: setUploadPrompt,
+        upload: upload,
+        uploadIndex: fileUploadApi.uploadIndex,
         lastSuccess: fileUploadApi.lastSuccess
     } as ImageUploadContextType}>
         {props.children}

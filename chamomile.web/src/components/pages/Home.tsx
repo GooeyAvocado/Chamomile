@@ -11,17 +11,16 @@ import { usePageTitle } from "../hooks/useTitle";
 import DisplayButton from "../shared/display/DisplayButton";
 import HelpButton from "../shared/help/HelpButton";
 import StatsButton from "../shared/StatsButton/StatsButton";
-import { Album } from "../../model/Album";
 import AlbumButton from "../shared/albums/AlbumButton";
 import AlbumsViewer from "../shared/albums/AlbumsViewer";
 import AlbumHeader from "../shared/albums/AlbumHeader";
 import GenerationsButton from "../shared/albums/GenerationsButton";
 import { useAlbums } from "../hooks/useAlbums";
 import StatusButton from "../shared/StatusButton/StatusButton";
+import { usePrompt } from "../hooks/usePrompt";
 
 export default function Home() {
 
-    const [album, setAlbum] = useState(undefined as Album | undefined);
     const [albumsOpen, setAlbumsOpen] = useState(false)
 
     const initialFilter = {
@@ -38,6 +37,7 @@ export default function Home() {
     const [filter, setFilter] = useState(initialFilter)
 
     const { queue, progress } = useQueue(() => { })
+    const { album, setAlbum } = usePrompt();
     const { refresh: refreshAlbums } = useAlbums();
     const setTitle = usePageTitle();
 
@@ -92,27 +92,30 @@ export default function Home() {
             </> : <>
 
                 {album ? <>
-                    <div style={{ width: "100%" }}>
-                        <AlbumHeader album={album} setAlbum={(val) => {
-                            setAlbum(val)
-                            if (!val) setFilter({ ...filter, album: -1 })
-                            else if (val.id !== filter.album) setFilter({ ...filter, album: val.id })
-                        }} />
+                    <div style={{ width: "100%", }}>
+                        <AlbumHeader onBack={() => { setAlbumsOpen(true) }}
+                            album={album} setAlbum={(val) => {
+                                setAlbum(val)
+                                if (!val) setFilter({ ...filter, album: -1 })
+                                else if (val.id !== filter.album) setFilter({ ...filter, album: val.id })
+                            }} />
                     </div>
                     <hr style={{ width: "100%" }} />
                 </> : <>
-                    <div style={{ width: "100%", marginTop: "10px" }}>
-                        <PromptBuilder />
-                    </div>
-                    <hr style={{ width: "100%" }} />
+
                 </>}
+
+                <div style={{ width: "100%", marginTop: "10px" }}>
+                    <PromptBuilder />
+                </div>
+                <hr style={{ width: "100%" }} />
 
                 <FilterBuilder filter={filter} setFilter={setFilter} setAlbum={setAlbum} />
                 <hr style={{ width: "100%" }} />
 
                 <UploadPanel />
                 <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
-                    <ImageViewer key={album?.id} filter={filter} showBrewing={!album} showWelcome album={album} setAlbum={(val) => {
+                    <ImageViewer key={album?.id} showBrewing filter={filter} showWelcome album={album} setAlbum={(val) => {
                         setAlbum(val)
                         setFilter({ album: val.id })
                     }} />

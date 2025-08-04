@@ -22,7 +22,8 @@ export const uploadExistingImage = (
     onSuccess: (val?: GeneratedImage) => void,
     onError: (value: any) => void,
     file: File,
-) => Upload(setLoading, setProgress, onSuccess, onError, "POST", ENDPOINT, file)
+    queryObj: any
+) => Upload(setLoading, setProgress, onSuccess, onError, "POST", ENDPOINT + objectToQueryString(queryObj), file)
 
 export const enqueuePrompt = (
     setLoading: (value: boolean) => void,

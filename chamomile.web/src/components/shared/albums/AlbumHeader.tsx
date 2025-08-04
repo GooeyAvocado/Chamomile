@@ -1,6 +1,6 @@
-import { Card, IconButton, Tooltip } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import { Album } from "../../../model/Album";
-import { CheckCircle, Delete, Edit, Info } from "@mui/icons-material";
+import { ArrowBack, CheckCircle, Delete, Edit, Info } from "@mui/icons-material";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { useState } from "react";
 import useApi from "../../hooks/useApi";
@@ -8,14 +8,17 @@ import { deleteAlbum } from "../../../api/Albums";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { useSnackbar } from "notistack";
 import AlbumEditor from "./AlbumEditor";
-import AlbumThumbImg from "./AlbumThumbImg";
 
-export default function AlbumHeader({ album, setAlbum }: {
+export default function AlbumHeader({ album, setAlbum, style, forceVertical, onBack }: {
     album: Album
     setAlbum: (val: Album | undefined) => void
+    style?: React.CSSProperties
+    forceVertical?: boolean
+    onBack?: () => void
 }) {
 
-    const { vertical } = useWindowDimensions();
+    const { vertical: windowDimVertical } = useWindowDimensions();
+    const vertical = windowDimVertical || forceVertical
     const [ays, setAys] = useState(false)
     const [editorOpen, setEditorOpen] = useState(false)
     const delApi = useApi(deleteAlbum)
@@ -29,58 +32,62 @@ export default function AlbumHeader({ album, setAlbum }: {
         enqueueSnackbar("Collection could not be deleted!", { variant: 'error' })
     }, album.id)
 
-    return <div style={{ display: "flex", padding: vertical ? "0px" : "16px", gap: "16px", flex: "1 0", flexDirection: vertical ? "column" : undefined }}>
+    return <div style={{
+        display: "flex", paddingTop: "16px", gap: "16px", flex: "1 0",
+        flexDirection: vertical ? "row" : undefined, ...style
+    }}>
 
-        <Card elevation={10} style={{ height: "128px", maxWidth: "350px", alignSelf: 'center' }}>
+        {/* <Card elevation={10} style={{ height: `${64 + 16}px`, maxWidth: "350px", alignSelf: 'center' }}>
             <AlbumThumbImg album={album} />
-        </Card>
+        </Card> */}
 
         <div style={{ display: 'flex', flexDirection: 'column', flex: "1", height: "100%" }}>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: "8px" }}>
 
-                <div style={{ fontFamily: 'Merriweather', fontSize: "1.5em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: "1" }}>
+                {/* Header */}
+                <div style={{
+                    fontFamily: 'Merriweather', fontSize: "1.5em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                    display: 'flex', gap: "10px", alignItems: "center"
+                }}>
+                    {onBack && <IconButton size="small" onClick={onBack}><ArrowBack /></IconButton>}
                     {album.name}
                 </div>
 
-                {!vertical && (album.count ?? 0) > 2 &&
-                    <div style={{ fontSize: ".8em", textAlign: "right", flex: "1, 0" }}>
-                        {/* This just looks cleaner. I pity the soul that makes an album with exactly one image */}
-                        <div style={{ fontSize: ".8em" }}>{album.count} Images</div>
-                        <div>{new Date(album.oldest ?? "").toLocaleDateString()} - {new Date(album.newest ?? "").toLocaleDateString()}</div>
-                    </div>
-                }
+                {/* Middle Section */}
+                <div style={{ display: 'flex', gap: "8px", flex: "1", alignSelf: "flex-start" }}>
 
-            </div>
-
-            <hr style={{ width: "100%" }} />
-
-            <div style={{ flex: "1", display: "flex", justifyContent: 'space-between' }}>
-
-                <div>
-                    <div style={{ display: 'flex', gap: "8px" }}>
-
-                        {album.searchQuery?.trim().length === 0
-                            ? <Info color="info" fontSize="small" />
-                            : <Tooltip title={`Images are being added to this album using this query`}>
-                                <CheckCircle color="success" fontSize="small" />
-                            </Tooltip>
-                        }
-
-                        <div style={{ fontFamily: 'monospace', fontSize: ".7em", marginTop: "2px" }}>
-                            {album.searchQuery || "Images are not being automatically added"}
-                        </div>
-                    </div>
+                    {album.searchQuery?.trim().length === 0
+                        ? <Tooltip title="Images are not being automatically added to this album">
+                            <Info color="info" fontSize="inherit" />
+                        </Tooltip>
+                        : <Tooltip title={album.searchQuery}>
+                            <CheckCircle color="success" fontSize="inherit" />
+                        </Tooltip>
+                    }
 
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: "flex-end" }}>
-                    <div style={{ display: 'flex', gap: "8px", flexDirection: vertical ? "column" : undefined }}>
+                {/* End Section */}
+                <div style={{ display: 'flex', gap: "20px" }}>
+
+                    {!vertical && (album.count ?? 0) > 2 &&
+                        <div style={{ fontSize: ".8em", textAlign: "right", flex: "1, 0" }}>
+                            {/* This just looks cleaner. I pity the soul that makes an album with exactly one image */}
+                            <div style={{ fontSize: ".8em" }}>{album.count} Images</div>
+                            <div>{new Date(album.oldest ?? "").toLocaleDateString()} - {new Date(album.newest ?? "").toLocaleDateString()}</div>
+                        </div>
+                    }
+
+                    <div style={{ display: 'flex', gap: "8px" }}>
                         <IconButton onClick={() => setEditorOpen(true)}><Edit fontSize="small" /></IconButton>
                         <IconButton onClick={() => setAys(true)}><Delete fontSize="small" /></IconButton>
                     </div>
                 </div>
+
             </div>
+
+
         </div>
 
         <AlbumEditor open={editorOpen} setOpen={(val, result) => {

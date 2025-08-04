@@ -23,6 +23,7 @@ export default function PromptReorderButton(props: {
     const { orderAmount, variables } = usePrompt()
     const brewApi = useApi(enqueuePrompts)
     const { enqueueSnackbar } = useSnackbar();
+    const { album } = usePrompt();
 
     const { pong } = usePingPong()
 
@@ -32,7 +33,8 @@ export default function PromptReorderButton(props: {
             allPrompts.push(hydratePrompt({
                 ...prompt, orderData: {
                     sample: sample ?? -1,
-                    source: source ?? "UNKNOWN"
+                    source: source ?? "UNKNOWN",
+                    albums: album?.id ? [album?.id] : []
                 }
             }, variables, index));
         }

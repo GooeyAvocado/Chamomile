@@ -44,6 +44,7 @@ namespace Chamomile.API.Controllers {
                     catch (ValidationException e) {
                         return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } });
                     }
+                    img.Albums = [.. img.Albums.Union([albumId.Value])];
                 }
 
                 return Ok(img);
