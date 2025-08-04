@@ -152,25 +152,27 @@ GENERATED ALWAYS AS (
 ) STORED;
 
 
-REATE OR REPLACE FUNCTION extract_keywords(
+CREATE OR REPLACE FUNCTION extract_keywords(
   image_id INT,
-  image_prompt_tx TEXT
+  image_prompt_tx TEXT,
+  cre_ts timestamp
 )
 RETURNS TABLE (
   keyword TEXT,
-  image_id INT
+  image_id INT,
+  cre_ts timestamp
 ) AS $$
   SELECT
     TRIM(k) AS keyword,
-    image_id
+    image_id, cre_ts
   FROM unnest(
    	regexp_split_to_array(
   TRIM(
     REGEXP_REPLACE(
       REGEXP_REPLACE(
-        REGEXP_REPLACE(image_prompt_tx, '[()]', '', 'g'),       -- Remove parentheses
+        REGEXP_REPLACE(image_prompt_tx, '[()]', ' ', 'g'),       -- Remove parentheses
         '<lora:[^>]+>',                                     -- Remove LoRA tags
-        '',
+        ' ',
         'gi'
       ),
       E'[\\n\\r\\t]+', ' ', 'g'                            -- Normalize linebreaks/tabs to spaces
