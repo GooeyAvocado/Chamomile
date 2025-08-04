@@ -23,7 +23,7 @@ namespace Chamomile.API.Controllers {
         #region CREATE
 
         [HttpPost]
-        public async Task<IActionResult> Create(IFormFile file) {
+        public async Task<IActionResult> Create(IFormFile file, [FromQuery] int? albumId) {
             if (file == null || file.Length == 0) { return BadRequest("No data!"); }
             if (file.Length > 5 * 1024 * 1024) { return BadRequest("File Too Large!"); }
             if (!ImageDownload.AcceptableMimeTypeExtensions.ContainsKey(file.ContentType)) {
@@ -33,11 +33,24 @@ namespace Chamomile.API.Controllers {
             using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
             var fileBytes = memoryStream.ToArray();
-            
-            var img = await dao.CreateImage(fileBytes);
 
-            return Ok(img);
+            try {
+                var img = await dao.CreateImage(fileBytes);
 
+                if (albumId.HasValue) {
+                    try {
+                        await dao.AddImageToAlbum(img.Id, albumId.Value);
+                    }
+                    catch (ValidationException e) {
+                        return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } });
+                    }
+                }
+
+                return Ok(img);
+            }
+            catch (InvalidOperationException e) {
+                return BadRequest(new Dictionary<string, string> { {"error" , e.Message } });
+            }
         }
 
         [HttpPost("generate")]
@@ -142,6 +155,11 @@ namespace Chamomile.API.Controllers {
         [HttpGet("cancel/{id}")]
         public IActionResult CancelJob(long id) {
             return Ok(worker.CancelPrompt(id));
+        }
+
+        [HttpPost("cancel")]
+        public IActionResult CancelJobs([FromBody]List<long> id) {
+            return Ok(worker.CancelPrompts(id));
         }
 
         [HttpGet("progress")]

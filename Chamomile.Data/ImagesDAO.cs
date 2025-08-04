@@ -139,7 +139,7 @@ namespace Chamomile.Data {
             return image;
         }
 
-        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, string basePrompt = "", int? generationDuration = null) {
+        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, Prompt? prompt = null, int? generationDuration = null) {
             var image = await ParseImage(imageBytes);
 
             var img = await adoTemplate.QuerySingle(InsertSql([
@@ -148,7 +148,7 @@ namespace Chamomile.Data {
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE, IMAGE_GEN_MS
             ], IMAGES_TABLE, string.Join(", ", ImageColumns)), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
-                cmd.SetString(IMAGES_BASE_PROMPT, basePrompt);
+                cmd.SetString(IMAGES_BASE_PROMPT, prompt?.PositivePrompt ?? "");
                 cmd.SetString(IMAGES_NEG_PROMPT, image.NegativePrompt);
                 cmd.SetInt(IMAGES_STEPS, image.Steps);
                 cmd.SetString(IMAGES_SAMPLER, image.Sampler);
@@ -169,15 +169,25 @@ namespace Chamomile.Data {
 
             img.Loras = image.Loras;
 
+            var addToAlbum = prompt?.OrderData?.Albums ?? [];
+
+            if (addToAlbum.Count > 0) {
+                try {
+                    await AddImageToAlbums(img.Id, addToAlbum);
+                }
+                catch (Exception e) {
+                    Console.WriteLine(e.ToString());
+                }
+            }
+
             try {
-                var albums = await GetMatchingAlbums(img.Prompt);
+                var albums = (await GetMatchingAlbums(img.Prompt)).Except(addToAlbum).ToList();
                 await AddImageToAlbums(img.Id, albums);
-                img.Albums = albums;
+                img.Albums = [.. albums.Union(addToAlbum)];
             }
             catch (Exception e) {
                 Console.WriteLine(e.ToString());
             }
-
 
             return img;
         }

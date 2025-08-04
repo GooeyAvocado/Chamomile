@@ -85,6 +85,15 @@ namespace Chamomile.API.Workers {
         }
 
         /// <summary>
+        /// Cancels a specific prompt if it hasn't started processing.
+        /// </summary>
+        public bool CancelPrompts(List<long> jobIds) {
+            foreach (var id in jobIds) {_queue.TryRemove(id, out _);}
+            _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
+            return true;
+        }
+
+        /// <summary>
         /// Clears the queue of all prompts.
         /// </summary>
         public void ClearQueue() {
@@ -145,7 +154,11 @@ namespace Chamomile.API.Workers {
                             Console.WriteLine($"[Completed] Image generated for Job {jobId}: {stopwatch.ElapsedMilliseconds/1000.0}s");
 
                             //We don't replace the comments here because we want to preserve all of it
-                            var savedImg = await dao.CreateImage(Convert.FromBase64String(img.images[0]), prompt.PositivePrompt, (int)stopwatch.ElapsedMilliseconds);
+                            var savedImg = await dao.CreateImage(
+                                Convert.FromBase64String(img.images[0]), 
+                                prompt, 
+                                (int)stopwatch.ElapsedMilliseconds
+                            );
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this
