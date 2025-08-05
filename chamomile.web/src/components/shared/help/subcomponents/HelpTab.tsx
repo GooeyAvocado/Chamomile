@@ -1,8 +1,8 @@
 import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
-import { Alert, AlertTitle, Button, Card, CardContent, IconButton, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, ExpandMore, Gradient, Height, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, PhotoLibrary, Star, Terminal, ThumbDown, Tune, Window, Yard } from "@mui/icons-material";
+import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
+import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Gradient, Height, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, Pause, PhotoLibrary, PlayArrow, Settings, Star, Terminal, ThumbDown, Timeline, Tune, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -136,7 +136,46 @@ export default function HelpTab(props: {
                 By default, Chamomile places 3 images in the queue when you hit {BrewButton}, but you can modify
                 this easily. Simply click on the <LabeledIcon label="More Options"> <ExpandMore /></LabeledIcon> button
                 on the prompt box and set your <LabeledIcon label="Amount"><Coffee /></LabeledIcon> of images up or down.
+                You can also change this default in the <LabeledIcon label="Settings"><Settings /></LabeledIcon> drawer
+                accessible through the icon on the top right of the screen.
             </div>
+        </HelpSection>
+
+        <HelpSection title="System Status" >
+            <img src="/screenshots/statusbutton.png" />
+            <p>
+                You may have noticed a play button on the top right of the screen change to two circular progress bars.
+                This button allows you to change and view the current system status. Chamomile can be in a few statuses
+                including:
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
+                <div>
+                    <b><LabeledIcon label="Ready"><PlayArrow color="success" /></LabeledIcon></b>: Ready to generate images
+                </div>
+                <div style={{ display: "flex" }}>
+                    <b style={{ marginRight: "5px" }}><LabeledIcon label="Busy:">
+                        <div style={{ position: "relative", width: "24px", height: "24px" }}>
+                            <CircularProgress size={24} value={75} variant="determinate" style={{ position: "absolute", top: "0", left: "0" }} color="warning" />
+                            <CircularProgress size={20} value={50} variant="determinate" style={{ position: "absolute", top: "2px", left: "2px" }} />
+                            <div style={{ fontSize: ".65em", fontWeight: "normal", position: "absolute", width: "24px", textAlign: "center", top: "6px" }}>{5}</div>
+                        </div>
+                    </LabeledIcon></b>The system is currently busy. The inner circle is
+                    current image progress, and the outer circle is the overall progress.
+                    The number in the center is the number of images still on queue (up to 99).
+                </div>
+                <div>
+                    <b><LabeledIcon label="Paused"><Pause color="warning" /></LabeledIcon></b>: Generation is paused, and no job is currently active
+                </div>
+                <div>
+                    <b><LabeledIcon label="SD Unavailable"><Warning color="warning" /></LabeledIcon></b>: Unable to generate images.
+                </div>
+            </div>
+            <p>
+                If SD is unavailable, an additional option on this menu will appear to refresh SD status. Generation will be paused if an image fails
+                to generate because SD becomes unavailable. The image that failed to generate will be re-added to the queue
+                in the first position so it's generated as soon as SD becomes available and generation is resumed.
+            </p>
+
         </HelpSection>
 
         <HelpSection title="Using Different Models and LoRAs" >
@@ -168,6 +207,32 @@ export default function HelpTab(props: {
                 more of your LoRAs may be too high. Try adjusting or removing unnecessary LoRAs and see if that helps.
             </p>
             <p>You can download additional models from several sources, but we recommend <Link href="https://civitai.com/">CivitAI</Link></p>
+        </HelpSection>
+
+        <HelpSection title="Model Sequencing" >
+            <img src="/screenshots/modelsequence.png" style={{ width: "70%" }} />
+            <p>
+                If you have a large batch of images ahead, and want to introduce further variety in your
+                outputs, you can consider setting up a model sequence. Based on the settings left here,
+                Chamomile will dynamically switch models after generation of an image.
+            </p>
+            <p>
+                Each model has two properties:
+            </p>
+            <ul>
+                <li>
+                    <b>Chance to stay</b>:
+                    Percentage chance that Chamomile will stay on this model rather than switch to
+                    another model in the sequence. Setting this value too low may cause Chamomile to
+                    thrash between models<br /><br />
+                </li>
+                <li>
+                    <b>Load weight</b>:
+                    How likely this model is to be chosen when switching models. A higher load weight
+                    means this model will be picked more often compared to others in the sequence.
+                    Chamomile will not pick the same model it just switched from.
+                </li>
+            </ul>
         </HelpSection>
 
         <HelpSection title="Model and LoRA Management" >
@@ -318,11 +383,10 @@ export default function HelpTab(props: {
                     <b><LabeledIcon label="Steps"><DirectionsRun /></LabeledIcon></b>: Amount of iterations the diffusion model should run for.
                     <img src="/images/charts/steps.png" width={"100%"} />
                     <p>
-                        Think of this as how long your image will "brew" for. Fewer steps are like a quick coffee
-                        brew—faster, but with less detail and subtlety. More steps allow for richer, more refined
-                        images, but take longer to generate. However, just like over-brewing coffee, increasing
-                        steps beyond a certain point won't improve quality and may even waste time, as image
-                        improvements eventually plateau.
+                        Think of this as how long your image will "brew" for. Fewer steps are like a quick tea brew:
+                        faster, but with less depth and subtlety. More steps allow for richer, more refined images,
+                        but take longer to generate. However, just like over-brewing tea, increasing steps beyond a
+                        certain point won't improve quality and may even waste time, as image improvements eventually plateau.
                     </p>
                     <p>10 steps or less are usually too un-detailed, while more than 30 usually nets no benefit in quality</p>
                 </div>
@@ -331,25 +395,26 @@ export default function HelpTab(props: {
                     <b><LabeledIcon label="CFG Scale"><Tune /></LabeledIcon></b>: Controls how strictly the model follows your prompt.
                     <img src="/images/charts/cfg.png" width={"100%"} />
                     <p>
-                        Think of this like adjusting
-                        the coffee-to-water ratio when brewing coffee: a higher CFG Scale is like using more coffee grounds for a stronger, more defined flavor
-                        (closer to your prompt), while a lower CFG Scale is like using less coffee for a milder, more subtle result (more creative freedom for the model).
+                        Think of this like adjusting the tea-to-water ratio when brewing tea. A higher CFG Scale is like using more tea leaves for a stronger,
+                        more defined flavor (closer to your prompt), while a lower CFG Scale is like using fewer leaves for a milder, more subtle result
+                        (more creative freedom for the model).
                     </p>
                     <p>
-                        You can add too much water and then there's no taste (no image), and you can add too much coffee and then it's
-                        too acrid (too much image). Staying around 2.0 to 7.0 is usually good enough for most models.
+                        You can add too much water and then there's no taste (no image), and you can add too many tea leaves and then it's
+                        too bitter (too much image). Staying around 2.0 to 7.0 is usually good enough for most models.
                     </p>
                 </div>
                 <div>
                     <b><LabeledIcon label="Sampler"><Window /></LabeledIcon></b>: Determines the algorithm used to generate your image.
                     <img src="/images/charts/sampler.png" width={"100%"} />
                     <p>
-                        Think of the sampler like choosing a brewing method for coffee—French press, espresso, pour-over, etc. Each method
-                        extracts flavors differently, resulting in unique tastes and textures. Similarly, different samplers can produce subtle
-                        or dramatic changes in your image's style, detail, and consistency.
+                        Think of the sampler like choosing a tea brewing method (steeping, cold brew, etc). Each method
+                        draws out flavors differently, resulting in unique aromas and textures. Similarly, different
+                        samplers can produce subtle or dramatic changes in your image's style, detail, and consistency.
                     </p>
-                    <p><i>While all samplers are presented, most models will tell you which sampler to pick. This is usually either DPM++ 2M for
-                        realistic results, or Euler A for softer, more cartoonish results.
+                    <p><i>
+                        While all samplers are presented, most models will tell you which sampler to pick. This is usually
+                        either DPM++ 2M for realistic results, or Euler A for softer, more stylized results.
                     </i></p>
                 </div>
                 {/* This is left here in case we ever want to bring this back */}
@@ -357,7 +422,7 @@ export default function HelpTab(props: {
                     <b><LabeledIcon label="Scheduler"><Schedule /></LabeledIcon></b>: Controls the schedule or timing of how noise is added and 
                     removed during the image generation process.
                     <p>
-                        Think of the scheduler like setting a timer or schedule for a slow-cooker recipe—different timing strategies can affect 
+                        Think of the scheduler like setting a timer or schedule for brewing tea. Different timing strategies can affect 
                         how flavors develop and blend. Similarly, different schedulers influence how the image evolves step by step, impacting 
                         the final look and feel.
                     </p>
@@ -367,7 +432,7 @@ export default function HelpTab(props: {
                 <div>
                     <b><LabeledIcon label="Seed"><Yard /></LabeledIcon></b>: Seed to generate the initial noise of the image
                     <p>
-                        Not all coffee beans are equal, and neither is the noise that's used to kick off generation. Set this to a specific value
+                        Not all tea leaves are the same, and neither is the noise that's used to start generation. Set this to a specific value
                         if you want to adjust a prompt with finer tweaks and subtler differences between generations.
                     </p>
                     <p>
@@ -380,11 +445,28 @@ export default function HelpTab(props: {
                         If you wish to experiment further without saving each image,
                         you can use the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Preview Recipe</Card> option in
                         the {BrewButton} button's menu
-
                     </i></p>
                 </div>
+                <div>Most of these have defaults that are configurable in the <LabeledIcon label="Settings"><Settings /></LabeledIcon> drawer</div>
             </div>
         </HelpSection>
+
+        <HelpSection title="Settings" >
+            <img src="/screenshots/settings.png" width={"50%"} />
+            <p>
+                There's a few configurable items for the Chamomile UI that you can set:
+            </p>
+            <ul>
+                <li><b>Sound:</b> Chamomile makes a few sounds. Do you want to hear them?</li>
+                <li><b>Defaults:</b> Set the defaults for some of the advanced prompting values.</li>
+                <li>
+                    <b>Globals:</b> When you re-brew a recipe or existing image, all
+                    prompt parameters from the source are used. You can configure Chamomile to use
+                    the value you've set in the prompt box rather than the value from the source.
+                </li>
+            </ul>
+        </HelpSection>
+
 
         <HelpSection title="Previewing Recipes">
             <img src="/screenshots/preview.png" width={"70%"} />
@@ -517,10 +599,9 @@ export default function HelpTab(props: {
             </p>
 
             <p>
-                While viewing collections, you will not be able to view brewing or recently brewed images.
-                When you're ready to keep brewing or see new results, click
-                the <LabeledIcon label="Brewery"><ModelTraining /></LabeledIcon> icon on the top of the screen
-
+                While viewing a collection, any images ordered (through re-brewing, the prompt box, or from saved recipes)
+                will automatically be added to the collection. Only images to be added to the collection will be shown as
+                brewing!
             </p>
 
             <hr />
@@ -556,7 +637,7 @@ export default function HelpTab(props: {
             </div>
         </HelpSection>
 
-        <HelpSection title="Viewing Your Statistics" >
+        <HelpSection title="Usage Statistics" >
             <img src="/screenshots/stats.png" style={{ width: "70%" }} />
             <p>
                 You can view usage statistics for both LoRA and Model usage by clicking
@@ -564,8 +645,28 @@ export default function HelpTab(props: {
                 the top of the screen. These statistics are based on your search query. If it is
                 blank, it'll show global overall statistics. You can further refine this to
                 show only models that are available or unavailable, and a limit to how many
-                images to analyze
+                images to analyze.
             </p>
+            <p>
+                You can view three different usage statistics:
+            </p>
+            <ul>
+                <li><b>Models:</b> SD Models used in generation</li>
+                <li><b>LoRAs:</b> LoRAs used in generation, including a statistic for no LoRAs used</li>
+                <li><b>Keywords:</b> Usage statistics on keywords* in your prompts</li>
+            </ul>
+            <div style={{ fontSize: ".8em", fontStyle: 'italic', opacity: ".8" }}>
+                *Keywords are determined by splitting your prompts by commas, line breaks, or more than one
+                space after having removed all LoRAs and parentheses. It's not perfect!
+            </div>
+            <p>
+                You can also view usage statistics over time for these three data categories. Simply
+                click the <LabeledIcon label="Chart"><Timeline /></LabeledIcon> button on the bottom,
+                and choose what elements to plot.
+            </p>
+
+            {/* <hr /> */}
+            {/* <img src="/screenshots/statsgraph.png" style={{ width: "70%" }} /> */}
         </HelpSection>
 
         <HelpSection title="Advanced Full Text Search">
@@ -586,6 +687,9 @@ export default function HelpTab(props: {
                 </div>
                 <div>
                     <b><LabeledIcon label="Upscaled"><Gradient color="info" /></LabeledIcon></b>: Only show upscaled images
+                </div>
+                <div>
+                    <b><LabeledIcon label="Downloaded"><Download color="primary" /></LabeledIcon></b>: Only show downloaded images
                 </div>
                 <div>
                     <b><LabeledIcon label="To and From dates"><CalendarMonth /></LabeledIcon></b>: Inclusive date ranges for search results
@@ -655,6 +759,10 @@ export default function HelpTab(props: {
                     <TableRow>
                         <TableCell>{keyCombo(["CTRL", "S"])}</TableCell>
                         <TableCell>Save Image</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>{keyCombo(["CTRL", "D"])}</TableCell>
+                        <TableCell>Toggle Image Favorite</TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>{keyCombo(["DEL"])}</TableCell>

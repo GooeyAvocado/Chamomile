@@ -17,9 +17,9 @@ export default function WhatsNew({ open, setOpen }: {
 
 ### What's new?
 - **Collections:** It's now a lot easier to organize your images. You can set up collections to automatically add images based on a search, or generate images directly to an album.
-- **Settings:** You can now configure sound, defaults, and which values from the promptbox are fixed between orders.
+- **Settings:** You can now configure sound, defaults, and which values from the prompt box are fixed between orders.
 - **Keyword Statistics:** One new statistics category added so you can see what makes up your prompts.
-- **LoRA and Wildcard autocomplete:** On your promptbox, you can now auto complete for LoRAs (<) or wildcards (__).
+- **LoRA and Wildcard autocomplete:** On your prompt box, you can now auto complete for LoRAs (<) or wildcards (__).
 - **Model Sequencing:** Chamomile can now sequence models and switch between them when conducting large numbers of brews.
 - **Pause Brewing:** Need to take a break? Don't want to lose your queue? Simply pause generation on the top right of the screen. You can close SD and bring it back up later
 - **Image notes:** You can now write some small text notes on images

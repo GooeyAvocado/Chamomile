@@ -76,8 +76,6 @@ export default function StatusButton() {
                 <div style={{ marginTop: "10px" }}>Image ({imagePercentage.toFixed(2)}%)</div>
                 <LinearProgress value={imagePercentage} variant="determinate" />
                 <div style={{ marginTop: "10px" }}>{sessionImages} image(s) so far</div>
-
-
             </div>
 
             <Divider />
