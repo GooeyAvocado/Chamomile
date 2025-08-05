@@ -1,14 +1,16 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useQueue } from "../hooks/useQueue";
+import { useSettings } from "../hooks/useSettings";
 
 export default function QueueWatcher(props: { children: ReactNode }) {
 
     const imageGenerated = () => {
-        new Audio("/sounds/imageDone.mp3").play()
+        if (settings.enableSound) new Audio("/sounds/imageDone.mp3").play()
     }
 
     const [warned, setWarned] = useState(true)
     const { queue } = useQueue(imageGenerated);
+    const { settings } = useSettings();
 
 
     const onQueueChange = () => {
@@ -17,7 +19,7 @@ export default function QueueWatcher(props: { children: ReactNode }) {
         }
         if (queue.length === 0 && !warned) {
             setWarned(true)
-            new Audio("/sounds/queueDone.ogg").play()
+            if (settings.enableSound) new Audio("/sounds/queueDone.ogg").play()
             new Notification("Queue nearly complete!", {
                 body: "All your images will finish generating soon!",
                 silent: true,

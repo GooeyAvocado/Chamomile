@@ -1,8 +1,11 @@
 import { GitHub } from "@mui/icons-material";
 import ChamomileLogo from "../../ChamomileLogo";
-import { Link, Tooltip } from "@mui/material";
+import { Button, Link, Tooltip } from "@mui/material";
+import { useSettings } from "../../../hooks/useSettings";
 
 export default function AboutTab() {
+
+    const { showWhatsNew } = useSettings();
 
     const backendBuild = import.meta.env.VITE_FRONTEND_BUILD ?? "v3-local"
     const frontendBuild = import.meta.env.VITE_BACKEND_BUILD ?? "v3-local"
@@ -23,6 +26,7 @@ export default function AboutTab() {
                 </u></Tooltip> on CivitAI</Link>
         </div>
         <div style={{ marginTop: "10px", display: "flex", flexDirection: 'column', gap: "10px" }}>
+            <div style={{ textAlign: 'center' }}><Button onClick={showWhatsNew}>What's new?</Button></div>
             <div style={{ display: 'flex', gap: "10px" }}>
                 <GitHub />
                 <Link href="https://github.com/GooeyAvocado/Chamomile">Chamomile's Source Code</Link>

@@ -16,45 +16,50 @@ import { HashRouter, Route, Routes } from 'react-router-dom'
 import DisplayPage from './components/pages/DisplayPage.tsx'
 import { AlbumsProvider } from './components/contexts/AlbumsContext.tsx'
 import QueueProvider from './components/contexts/QueueContext.tsx'
+import { SettingsProvider } from './components/contexts/SettingsContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
 
     {/* There are so many providers  */}
+
     <DimensionsProvider>
       <ThemeWrapper>
-        <PingPongProvider>
-          <PromptProvider>
-            <ModelProvider>
-              <LoraProvider>
-                <AlbumsProvider>
-                  <UpscalersProvider>
-                    <ImageUploadProvider>
-                      <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} autoHideDuration={1500} transitionDuration={250} >
-                        <QueueProvider>
-                          <HashRouter>
-                            <Routes>
-                              <Route path="*" element={
-                                <QueueWatcher>
-                                  <FullPageDropzone>
-                                    <Home />
-                                  </FullPageDropzone>
-                                </QueueWatcher>
-                              }
-                              />
-                              <Route path="/display" element={< DisplayPage />} />
-                            </Routes>
-                          </HashRouter>
-                        </QueueProvider>
-                      </SnackbarProvider>
-                    </ImageUploadProvider>
-                  </UpscalersProvider>
-                </AlbumsProvider>
-              </LoraProvider>
-            </ModelProvider>
-          </PromptProvider>
-        </PingPongProvider>
+        <SettingsProvider>
+          <PingPongProvider>
+            <PromptProvider>
+              <ModelProvider>
+                <LoraProvider>
+                  <AlbumsProvider>
+                    <UpscalersProvider>
+                      <ImageUploadProvider>
+                        <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} autoHideDuration={1500} transitionDuration={250} >
+                          <QueueProvider>
+                            <HashRouter>
+                              <Routes>
+                                <Route path="*" element={
+                                  <QueueWatcher>
+                                    <FullPageDropzone>
+                                      <Home />
+                                    </FullPageDropzone>
+                                  </QueueWatcher>
+                                }
+                                />
+                                <Route path="/display" element={< DisplayPage />} />
+                              </Routes>
+                            </HashRouter>
+                          </QueueProvider>
+                        </SnackbarProvider>
+                      </ImageUploadProvider>
+                    </UpscalersProvider>
+                  </AlbumsProvider>
+                </LoraProvider>
+              </ModelProvider>
+            </PromptProvider>
+          </PingPongProvider>
+        </SettingsProvider>
       </ThemeWrapper>
     </DimensionsProvider>
+
   </StrictMode >,
 )
