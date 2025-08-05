@@ -1,4 +1,4 @@
-import { ModelTraining } from "@mui/icons-material";
+import { Coffee } from "@mui/icons-material";
 import { IconButton, Tooltip } from "@mui/material";
 
 export default function GenerationsButton({ onClick }: {
@@ -7,7 +7,7 @@ export default function GenerationsButton({ onClick }: {
 
     return <Tooltip title={"Brewery"}>
         <IconButton onClick={onClick}>
-            <ModelTraining />
+            <Coffee />
         </IconButton>
     </Tooltip>
 
