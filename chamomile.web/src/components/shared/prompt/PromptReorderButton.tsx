@@ -7,6 +7,7 @@ import { hydratePrompt } from "../Utils";
 import { enqueuePrompts } from "../../../api/Images";
 import useApi from "../../hooks/useApi";
 import { useSnackbar } from "notistack";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function PromptReorderButton(props: {
     prompt: Prompt,
@@ -20,18 +21,26 @@ export default function PromptReorderButton(props: {
 }) {
 
     const { prompt, menuButonMode, onClick, iconOverride, textSuffix, disabled, sample, source } = props
-    const { orderAmount, variables } = usePrompt()
+    const { settings } = useSettings();
+
+    const { prompt: promptboxPrompt, orderAmount, variables } = usePrompt()
     const brewApi = useApi(enqueuePrompts)
     const { enqueueSnackbar } = useSnackbar();
     const { album } = usePrompt();
-
     const { pong } = usePingPong()
 
     const onBrew = () => {
         const allPrompts = []
         for (let index = 0; index < orderAmount; index++) {
             allPrompts.push(hydratePrompt({
-                ...prompt, orderData: {
+                ...prompt, ...{
+                    cfgScale: settings.globals.cfg ? promptboxPrompt.cfgScale : prompt.cfgScale,
+                    sampler: settings.globals.sampler ? promptboxPrompt.sampler : prompt.sampler,
+                    steps: settings.globals.steps ? promptboxPrompt.steps : prompt.steps,
+                    width: settings.globals.width ? promptboxPrompt.width : prompt.width,
+                    height: settings.globals.height ? promptboxPrompt.height : prompt.height
+
+                }, orderData: {
                     sample: sample ?? -1,
                     source: source ?? "UNKNOWN",
                     albums: album?.id ? [album?.id] : []

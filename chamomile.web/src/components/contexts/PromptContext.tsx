@@ -1,6 +1,7 @@
 import { createContext, useState } from "react";
 import { Prompt } from "../../model/Prompt";
 import { Album } from "../../model/Album";
+import { useSettings } from "../hooks/useSettings";
 
 export interface PromptContextType {
     prompt: Prompt,
@@ -17,19 +18,21 @@ export const PromptContext = createContext<PromptContextType | undefined>(undefi
 
 export default function PromptProvider(props: { children: any }) {
 
-    const [orderAmount, setOrderAmount] = useState(3)
+    const { settings } = useSettings()
+
+    const [orderAmount, setOrderAmount] = useState(settings.defaults.amount)
     const [album, setAlbum] = useState(undefined as Album | undefined);
 
     const [prompt, setPrompt] = useState({
-        cfgScale: 4.0,
-        width: 1024,
-        height: 1024,
+        cfgScale: settings.defaults.cfg,
+        width: settings.defaults.width,
+        height: settings.defaults.height,
         positivePrompt: "",
-        negativePrompt: "",
-        sampler: "DPM++ 2M",
-        scheduleType: "Automatic",
+        negativePrompt: settings.defaults.negativePrompt,
+        sampler: settings.defaults.sampler,
+        scheduleType: settings.defaults.scheduler,
         seed: -1,
-        steps: 30
+        steps: settings.defaults.steps
     } as Prompt)
 
     const [variables, setVariables] = useState({} as any)

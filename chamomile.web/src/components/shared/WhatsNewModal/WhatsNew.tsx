@@ -9,6 +9,9 @@ export default function WhatsNew({ open, setOpen }: {
     setOpen: (val: boolean) => void
 }) {
 
+    const frontendBuild = import.meta.env.VITE_BACKEND_BUILD ?? "v3-local"
+    const buildTime = import.meta.env.VITE_BUILD_TIMESTAMP ? new Date(import.meta.env.VITE_BUILD_TIMESTAMP) : new Date();
+
     const majorVersion = 3.0
     const whatsnew = `We added a lot with this one, including this dialog!
 
@@ -45,6 +48,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug that would make Chamomile not display an active job if the page loaded while there was an active job
 - Fixed bug that would make "unknown" model types show all models instead
 - Fixed bug that would make it impossible to upload images where the base model is unavailable
+- Fixed bug that would make cancelling a group of orders fail to completely appear cancelled on the frontend
 - Improved system stability
 
 ### Known bugs
@@ -54,9 +58,8 @@ export default function WhatsNew({ open, setOpen }: {
     const { settings } = useSettings();
 
     useEffect(() => {
-        if (false && open && settings.enableSound) {
-            const audio = new Audio("/sounds/wnew.mp3")
-            audio.play()
+        if (open && settings.enableSound) {
+            new Audio("/sounds/wnew.mp3").play()
         }
     }, [open])
 
@@ -66,7 +69,12 @@ export default function WhatsNew({ open, setOpen }: {
             <Markdown>{whatsnew}</Markdown>
         </DialogContent>
         <DialogActions>
-            <Button onClick={() => setOpen(false)}>OK</Button>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ marginTop: "10px", fontFamily: 'monospace', fontSize: '.8em', color: "#5F5F5F", position: "absolute", left: "14px", bottom: "14px" }}>
+                    <div>{frontendBuild} Built on {buildTime.toLocaleDateString()}</div>
+                </div>
+                <Button onClick={() => setOpen(false)}>OK</Button>
+            </div>
         </DialogActions>
     </Dialog>
 

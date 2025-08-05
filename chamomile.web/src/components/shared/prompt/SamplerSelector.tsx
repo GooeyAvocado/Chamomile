@@ -6,12 +6,13 @@ import { Window } from "@mui/icons-material";
 export default function SamplerSelector(props: {
     sampler: string,
     setSampler: (val: string) => void
+    style?: React.CSSProperties
 }) {
 
-    const { sampler, setSampler } = props
+    const { sampler, setSampler, style } = props
     const { data } = useApi(getSamplers, true)
 
-    return <FormControl fullWidth>
+    return <FormControl fullWidth style={style}>
         <Select
             disabled={!data}
             value={sampler ?? ""}

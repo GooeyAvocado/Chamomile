@@ -6,12 +6,13 @@ import { Schedule } from "@mui/icons-material";
 export default function SchedulerSelector(props: {
     scheduler: string,
     setScheduler: (val: string) => void
+    style?: React.CSSProperties
 }) {
 
-    const { scheduler, setScheduler } = props
+    const { scheduler, setScheduler, style } = props
     const { data } = useApi(getSchedulers, true)
 
-    return <FormControl fullWidth>
+    return <FormControl fullWidth style={style}>
         <Select
             disabled={!data}
             value={scheduler ?? ""}
@@ -19,6 +20,11 @@ export default function SchedulerSelector(props: {
             startAdornment={
                 <InputAdornment position="start">
                     <Schedule />
+                </InputAdornment>
+            }
+            endAdornment={
+                <InputAdornment position="end">
+                    <div style={{ marginRight: "15px" }}>Scheduler</div>
                 </InputAdornment>
             }
         >

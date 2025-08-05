@@ -55,7 +55,7 @@ export default function AlbumHeader({ album, setAlbum, style, forceVertical, onB
                 </div>
 
                 {/* Middle Section */}
-                <div style={{ display: 'flex', gap: "8px", flex: "1", alignSelf: "flex-start" }}>
+                <div style={{ display: 'flex', gap: "8px", flex: "1", alignSelf: "center" }}>
 
                     {album.searchQuery?.trim().length === 0
                         ? <Tooltip title="Images are not being automatically added to this album">

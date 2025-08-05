@@ -303,13 +303,17 @@ export default function PromptBuilder(props: {
                     onKeyDown={onKeyDown}
                 />
 
-                {/* {!noBrew && <div style={{ flex: '1', minWidth: '200px' }}>
-                    <SchedulerSelector scheduler={prompt.scheduleType} setScheduler={(s) => { setPrompt({ ...prompt, scheduleType: s }) }} />
-                </div>} */}
+                {/* {!noBrew && <SchedulerSelector 
+                    scheduler={prompt.scheduleType} 
+                    setScheduler={(s) => { setPrompt({ ...prompt, scheduleType: s }) }} 
+                    style={{ flex: '1', minWidth: '200px' }}
+                />} */}
 
-                {!noBrew && <div style={{ flex: "1", minWidth: "200px" }}>
-                    <SamplerSelector sampler={prompt.sampler} setSampler={(s) => { setPrompt({ ...prompt, sampler: s }) }} />
-                </div>}
+                {!noBrew && <SamplerSelector
+                    sampler={prompt.sampler}
+                    setSampler={(s) => { setPrompt({ ...prompt, sampler: s }) }}
+                    style={{ flex: "1", minWidth: "200px" }}
+                />}
 
                 {!noBrew && <TextField type="number"
                     value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}

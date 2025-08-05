@@ -18,6 +18,7 @@ import GenerationsButton from "../shared/albums/GenerationsButton";
 import { useAlbums } from "../hooks/useAlbums";
 import StatusButton from "../shared/StatusButton/StatusButton";
 import { usePrompt } from "../hooks/usePrompt";
+import SettingsButton from "../shared/settings/SettingsButton";
 
 export default function Home() {
 
@@ -79,6 +80,7 @@ export default function Home() {
                     <hr />
                     <DisplayButton />
                     <HelpButton />
+                    <SettingsButton />
                 </div>
             </div>
 
