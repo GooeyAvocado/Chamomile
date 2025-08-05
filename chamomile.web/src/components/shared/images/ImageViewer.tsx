@@ -216,6 +216,8 @@ export default function ImageViewer(props: {
 
     const filterIsEmpty = () => {
         return filter.favorite === false &&
+            filter.upscaled === false &&
+            filter.downloaded === false &&
             filter.fromDate?.trim().length === 0 &&
             filter.toDate?.trim().length === 0 &&
             filter.lora?.trim().length === 0 &&
