@@ -641,8 +641,8 @@ export default function HelpTab(props: {
             <img src="/screenshots/stats.png" style={{ width: "70%" }} />
             <p>
                 You can view usage statistics for both LoRA and Model usage by clicking
-                the <LabeledIcon label="Statistics"><BarChart /></LabeledIcon> button along
-                the top of the screen. These statistics are based on your search query. If it is
+                the <LabeledIcon label="Statistics"><BarChart /></LabeledIcon> at the end
+                of the search box. These statistics are based on your search query. If it is
                 blank, it'll show global overall statistics. You can further refine this to
                 show only models that are available or unavailable, and a limit to how many
                 images to analyze.

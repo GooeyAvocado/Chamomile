@@ -76,7 +76,6 @@ export default function Home() {
                         setAlbumsOpen(!albumsOpen)
                         refreshAlbums();
                     }} />}
-                    <StatsButton filter={filter} />
                     <hr />
                     <DisplayButton />
                     <HelpButton />
