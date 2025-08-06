@@ -47,7 +47,7 @@ export default function FilterBuilder(props: {
 
     useEffect(() => {
         if (expandRef.current) {
-            setExpandedHeight(expanded ? `${expandRef.current.scrollHeight + 15}px` : "0px");
+            setExpandedHeight(expanded ? `${expandRef.current.scrollHeight}px` : "0px");
         }
     }, [expanded, width]);
 
@@ -119,8 +119,8 @@ export default function FilterBuilder(props: {
 
         <div ref={expandRef}
             style={{
-                height: expandedHeight,
-                overflowY: "hidden", transition: "height 0.2s ease"
+                maxHeight: expandedHeight, paddingBottom: expanded ? "15px" : "0px",
+                overflowY: "hidden", transition: "max-height 0.2s ease, padding 0.2 ease"
             }}
         >
             <div

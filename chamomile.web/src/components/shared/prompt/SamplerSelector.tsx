@@ -1,7 +1,7 @@
-import { Autocomplete, Box, FormControl, InputAdornment, ListItemIcon, MenuItem, Select, TextField } from "@mui/material";
+import { Autocomplete, InputAdornment, ListItemIcon, MenuItem, TextField } from "@mui/material";
 import { getSamplers } from "../../../api/Prompts";
 import useApi from "../../hooks/useApi";
-import { Bolt, Explore, Image, Palette, Title, Window } from "@mui/icons-material";
+import { Bolt, Explore, Image, Palette, Window } from "@mui/icons-material";
 import Sampler from "../../../model/Automatic1111/Sampler";
 import React, { useMemo } from "react";
 

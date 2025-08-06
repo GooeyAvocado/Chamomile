@@ -273,8 +273,8 @@ export default function PromptBuilder(props: {
         {/* Expanded contents */}
         <div ref={expandRef} style={{
             paddingRight: !noBrew && !vertical ? "130px" : undefined,
-            overflowY: "hidden", height: alwaysExpand ? undefined : expandedHeight,
-            transition: "height 0.2s ease"
+            overflowY: "hidden", maxHeight: alwaysExpand ? undefined : expandedHeight,
+            transition: "max-height 0.2s ease"
         }}>
             {/* Row 1: negative prompt */}
             <div style={{ marginTop: "10px", display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
