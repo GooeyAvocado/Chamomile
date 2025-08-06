@@ -1,7 +1,7 @@
 import { Drawer, IconButton, InputAdornment, Switch, TextField } from "@mui/material"
 import { useSettings } from "../../hooks/useSettings"
 import { Coffee, DirectionsRun, Height, ThumbDown, Tune, VolumeUp } from "@mui/icons-material";
-import SchedulerSelector from "../prompt/SchedulerSelector";
+// import SchedulerSelector from "../prompt/SchedulerSelector";
 import SamplerSelector from "../prompt/SamplerSelector";
 import { useState } from "react";
 import SizePresetSelector from "../prompt/SizePresetSelector";
@@ -22,7 +22,7 @@ export default function SettingsSlidein({ open, setOpen }: {
 
     return <Drawer open={open} onClose={() => { setOpen(false) }} title="Settings" anchor="right">
         <div style={{ padding: "20px", width: "400px" }}>
-            <div style={{ marginBottom: "20px", fontSize: "1.7em", fontFamily: "Merriweather" }}>
+            <div style={{ marginBottom: "10px", fontSize: "1.7em", fontFamily: "Merriweather" }}>
                 Settings
             </div>
 
@@ -146,10 +146,10 @@ export default function SettingsSlidein({ open, setOpen }: {
                         }}
                     />
 
-                    <SchedulerSelector
+                    {/* <SchedulerSelector
                         scheduler={settings.defaults.scheduler}
                         setScheduler={(s) => { setSettings({ ...settings, defaults: { ...settings.defaults, scheduler: s } }) }}
-                    />
+                    /> */}
 
                     <SamplerSelector
                         sampler={settings.defaults.sampler}
