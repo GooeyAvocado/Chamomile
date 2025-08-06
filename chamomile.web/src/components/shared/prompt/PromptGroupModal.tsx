@@ -95,7 +95,7 @@ export default function PromptGroupModal(props: {
                             <td>{a.id}</td>
                             <td>{a.width}px</td>
                             <td>{a.height}px</td>
-                            <td>{a.steps}0</td>
+                            <td>{a.steps}</td>
                             <td>{a.cfgScale}</td>
                         </tr>)}
                     </tbody>
