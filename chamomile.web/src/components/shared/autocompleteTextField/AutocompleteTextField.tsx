@@ -1,4 +1,4 @@
-import { ListItem, MenuItem, MenuList, Paper, Popper, TextField } from "@mui/material"
+import { ClickAwayListener, ListItem, MenuItem, MenuList, Paper, Popper, TextField } from "@mui/material"
 import { useRef, useState } from "react"
 
 export interface AutoCompletes<T = any> {
@@ -181,8 +181,8 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
         setAnchorEl(null)
     }
 
-    return (
-        <>
+    return <ClickAwayListener onClickAway={closeSuggestions}>
+        <div style={{ width: "100%" }}>
             <TextField
                 fullWidth
                 inputRef={inputRef}
@@ -213,6 +213,7 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
                         "PageUp",
                         "PageDown",
                     ].includes(e.key)) { handleGetCursorPosition(); }
+                    if (e.key === "Escape") { closeSuggestions() }
 
                     props.onKeyUp?.(e)
                 }}
@@ -304,7 +305,8 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
 
                 </Popper>
             )}
-        </>
-    );
+        </div>
+    </ClickAwayListener>
+
 }
 
