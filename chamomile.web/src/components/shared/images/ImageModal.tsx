@@ -323,7 +323,7 @@ export default function ImageModal(props: {
                             </div>
 
                             <div style={{ minWidth: "75px", flex: "1" }}>
-                                <div style={{ marginTop: "20px" }}><b>Schedule</b></div>
+                                <div style={{ marginTop: "20px" }}><b>Scheduler</b></div>
                                 <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.scheduleType}</div>
                             </div>
 
