@@ -120,7 +120,7 @@ export default function FilterBuilder(props: {
         <div ref={expandRef}
             style={{
                 maxHeight: expandedHeight, paddingBottom: expanded ? "15px" : "0px",
-                overflowY: "hidden", transition: "max-height 0.2s ease, padding 0.2 ease"
+                overflowY: "hidden", transition: "max-height 0.2s ease"
             }}
         >
             <div
