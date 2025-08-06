@@ -76,7 +76,7 @@ export function StatsPanel({ usage, filter, datedUsageApi, keywordColumnOverride
     );
 
     const colors = ["#e57373", "#64b5f6", "#81c784", "#ffd54f", "#ba68c8", "#4db6ac", "#f06292", "#9575cd"];
-    const darkolors = ["#683535ff", "#325a7aff", "#3f6141ff", "#756325ff", "#5a3361ff", "#265a55ff", "#6d2b41ff", "#483863ff"];
+    const darkColors = ["#683535ff", "#325a7aff", "#3f6141ff", "#756325ff", "#5a3361ff", "#265a55ff", "#6d2b41ff", "#483863ff"];
     const max = usage?.[0]?.count
     const rowHeight = rowHeightOverride ?? 36
 
@@ -311,7 +311,7 @@ export function StatsPanel({ usage, filter, datedUsageApi, keywordColumnOverride
                         value.map((option, index) => (
                             <Chip
                                 variant="filled"
-                                style={{ backgroundColor: darkolors[index % colors.length], color: 'white' }}
+                                style={{ backgroundColor: darkColors[index % colors.length], color: 'white' }}
                                 label={`${option}`}
                                 {...getTagProps({ index })}
                             />

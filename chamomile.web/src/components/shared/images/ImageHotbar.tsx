@@ -1,4 +1,4 @@
-import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, Receipt, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
 import { Button, Card, ClickAwayListener, IconButton, ListItemIcon, Menu, MenuItem, Paper, Popper, Tooltip } from "@mui/material";
 import useUserAgent from "../../hooks/useUserAgent";
 import "./ImageHotbar.css"
