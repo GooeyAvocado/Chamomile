@@ -66,7 +66,7 @@ export default function SamplerSelector(props: {
     }, [data])
 
     return <Autocomplete key={sampler} disableClearable
-        freeSolo
+        freeSolo fullWidth
         getOptionLabel={(option) => (option as GroupedSampler)?.name ?? ""}
         options={groupedSamplers ?? [{
             name: sampler
@@ -126,26 +126,6 @@ export default function SamplerSelector(props: {
 
 
     />
-
-    return <FormControl fullWidth style={style}>
-        <Select
-            disabled={!data}
-            value={sampler ?? ""}
-            onChange={(e) => setSampler(e.target.value)}
-            startAdornment={
-                <InputAdornment position="start">
-                    <Window />
-                </InputAdornment>
-            }
-            endAdornment={
-                <InputAdornment position="end">
-                    <div style={{ marginRight: "15px" }}>Sampler</div>
-                </InputAdornment>
-            }
-        >
-            {data?.map(a => <MenuItem key={a.name} value={a.name}>{a.name}</MenuItem>)}
-        </Select>
-    </FormControl>
 
 
 }

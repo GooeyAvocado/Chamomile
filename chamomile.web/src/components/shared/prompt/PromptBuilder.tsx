@@ -1,4 +1,4 @@
-import { Coffee, DataObject, DirectionsRun, ExpandMore, Height, ModelTraining, ReceiptLong, ThumbDown, Tune, Yard } from "@mui/icons-material";
+import { Close, Coffee, DataObject, DirectionsRun, ExpandMore, Height, ModelTraining, OpenWith, ReceiptLong, ThumbDown, Tune, Yard } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import PromptButton from "./PromptButton";
@@ -11,7 +11,7 @@ import { createPrompt, getWildcards, updatePrompt } from "../../../api/Prompts";
 import { useSnackbar } from "notistack";
 import PromptSelectorModal from "./PromptSelectorModal";
 import VariableEditor from "../variables/VariableEditor";
-import { enqueuePrompts } from "../../../api/Images";
+import { enqueuePrompts, imageUrl } from "../../../api/Images";
 import { hydratePrompt } from "../Utils";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import SizePresetSelector from "./SizePresetSelector";
@@ -20,7 +20,8 @@ import AreYouSureModal from "../modals/AreYouSureModal";
 import PromptCard from "./PromptCard";
 import { usePingPong } from "../../hooks/usePingPong";
 import { useLoras } from "../../hooks/useLoras"
-import { BaseSuggestionData, MentionsTextField } from "@jackstenglein/mui-mentions";
+import AutocompleteTextfield, { AutoCompletes } from "../autocompleteTextField/AutocompleteTextField";
+import { Lora } from "../../../model/Lora";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -148,23 +149,78 @@ export default function PromptBuilder(props: {
         }
     }, [expanded, width]);
 
+    const dPromptVarsRegex = /\$\{([a-zA-Z_][a-zA-Z0-9_]*)=([^}]+)\}/g;
+    const matches = [...prompt.positivePrompt.matchAll(dPromptVarsRegex)];
+    const dPromptVars = matches.map(m => ({
+        key: m[1],
+        value: m[2]
+    }));
+
     return <>
 
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
 
-            <MentionsTextField disabled={preview}
-                value={prompt.positivePrompt} onChange={(__, newPlainText) => setPrompt({ ...prompt, positivePrompt: newPlainText })}
-                placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline maxRows={vertical ? 5 : 7} minRows={vertical ? 5 : fullHeight ? 7 : undefined}
+            <AutocompleteTextfield disabled={preview}
+                value={prompt.positivePrompt} onChange={(e) => {
+                    setPrompt({ ...prompt, positivePrompt: e.target.value })
+                }}
+                placeholder={vertical ? `What'll you like?` : "What do you want to see?"} multiline
+                maxRows={vertical ? 5 : 7}
+                minRows={vertical ? 5 : fullHeight ? 7 : undefined}
                 onKeyDown={onKeyDown}
-                dataSources={[
+                data={[
                     {
-                        data: loras?.filter(a => a.isAvailable).map(a => ({ id: a.alias, display: "<lora:" + a.alias + ":1>" } as BaseSuggestionData)) ?? [],
-                        trigger: "<"
-                    },
+                        name: "LoRAs",
+                        data: loras?.filter(a => a.isAvailable) ?? [],
+                        prefix: "<",
+                        suffix: ">",
+                        matcher: (val, query) => {
+                            const q = query.toLowerCase().replace("lora:", "")
+                            return val.alias.toLowerCase().includes(q) ||
+                                val.name.toLowerCase().includes(q)
+                        },
+                        value: (val) => `<lora:${val.alias}:1>`,
+                        renderer: (val) => <div style={{ display: 'flex', alignItems: 'center', gap: "10px" }}>
+                            <img src={val.bannerImage ? imageUrl(val.bannerImage) : "/color.png"} width={32} height={32} />
+                            <div>
+                                <div style={{ fontSize: ".8em" }}>{val.name}</div>
+                                <div style={{ fontSize: ".7em" }}>{val.alias}</div>
+                            </div>
+
+                        </div>
+
+                    } as AutoCompletes<Lora>,
                     {
-                        data: Object.keys(wildcards ?? {})?.map(a => ({ id: a, display: "__" + a + "__" } as BaseSuggestionData)) ?? [],
-                        trigger: "__"
-                    },
+                        name: "Wildcards",
+                        data: Object.keys(wildcards ?? {}) ?? [],
+                        prefix: "__",
+                        suffix: "__",
+                        matcher: (val, query) => {
+                            const q = query.toLowerCase()
+                            return val.toLowerCase().includes(q)
+                        },
+                        value: (val) => `__${val}__`,
+                        renderer: (val) => <div>
+                            <div>{val}</div>
+                            <div style={{ fontSize: ".8em", opacity: ".8" }}>{wildcards[val].join(", ")}</div>
+                        </div>,
+                    } as AutoCompletes<string>,
+
+                    {
+                        name: "DynamicPrompts Vars",
+                        data: dPromptVars ?? [],
+                        prefix: "${",
+                        suffix: "}",
+                        matcher: (val, query) => val.key.toLowerCase().includes(query.toLowerCase()),
+                        value: (val) => `$\{${val.key}}`,
+                        renderer: (val) => <div>
+                            <div>{val.key}</div>
+                            <div style={{ fontSize: ".8em", opacity: ".8" }}>{val.value}</div>
+                        </div>,
+                    } as AutoCompletes<{
+                        key: string,
+                        value: string
+                    }>,
                 ]}
 
 
@@ -234,127 +290,144 @@ export default function PromptBuilder(props: {
                     onKeyDown={onKeyDown}
                 />
 
-                {/* Amount */}
-                {!noBrew && <TextField type="number" disabled={preview}
-                    value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
-                    placeholder="Steps"
-                    fullWidth slotProps={{
-                        input: {
-                            startAdornment: (<InputAdornment position="start"> <Coffee /> </InputAdornment>),
-                            endAdornment: (<InputAdornment position="end">Amount</InputAdornment>)
-                        }
-                    }}
-                    style={{ flex: "1", minWidth: "200px" }}
-                    onKeyDown={onKeyDown}
-                />
-
-                }
-
             </div>
 
             <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
-                {/* Width */}
-                <TextField type="number" disabled={preview}
-                    value={prompt.width} onChange={(e) => setPrompt({ ...prompt, width: parseInt(e.target.value) })}
-                    placeholder="Width"
-                    fullWidth slotProps={{
-                        htmlInput: {
-                            min: 1
-                        },
-                        input: {
-                            startAdornment: (<InputAdornment position="start">
-                                <IconButton onClick={() => setSizePresetOpen(true)}><Height sx={{ transform: 'rotate(90deg)', margin: "-7px" }} /> </IconButton>
-                            </InputAdornment>),
-                            endAdornment: (<InputAdornment position="end">px</InputAdornment>)
-                        }
-                    }}
-                    style={{ flex: "1", minWidth: "200px" }}
-                    onKeyDown={onKeyDown}
-                />
-                {/* Height */}
-                <TextField type="number" disabled={preview}
-                    value={prompt.height} onChange={(e) => setPrompt({ ...prompt, height: parseInt(e.target.value) })}
-                    placeholder="Height"
-                    fullWidth slotProps={{
-                        htmlInput: {
-                            min: 1
-                        },
-                        input: {
-                            startAdornment: (<InputAdornment position="start">
-                                <IconButton onClick={() => setSizePresetOpen(true)}><Height style={{ margin: "-7px" }} /> </IconButton>
-                            </InputAdornment>),
-                            endAdornment: (<InputAdornment position="end">px</InputAdornment>)
-                        }
-                    }}
-                    style={{ flex: "1", minWidth: "200px" }}
-                    onKeyDown={onKeyDown}
-                />
 
-                {/* Steps */}
-                <TextField type="number" disabled={preview}
-                    value={prompt.steps} onChange={(e) => setPrompt({ ...prompt, steps: parseInt(e.target.value) })}
-                    placeholder="Steps"
-                    fullWidth slotProps={{
-                        htmlInput: {
-                            min: 1
-                        },
-                        input: {
-                            startAdornment: (<InputAdornment position="start"> <DirectionsRun /> </InputAdornment>),
-                            endAdornment: (<InputAdornment position="end">Steps</InputAdornment>)
-                        }
-                    }}
-                    style={{ flex: "1", minWidth: "200px" }}
-                    onKeyDown={onKeyDown}
-                />
+                <div style={{
+                    flex: "1", alignItems: 'center', borderRadius: "4px",
+                    border: "1px solid rgba(255,255,255, 0.23)", minWidth: "260px"
+                }}>
 
-                {/* CFG Scale */}
-                <TextField type="number" disabled={preview}
-                    value={prompt.cfgScale} onChange={(e) => setPrompt({ ...prompt, cfgScale: parseFloat(e.target.value) })}
-                    placeholder="CFG Scale"
-                    fullWidth slotProps={{
-                        htmlInput: {
-                            min: 0.1,
-                            step: 0.1
-                        },
-                        input: {
-                            startAdornment: (<InputAdornment position="start"> <Tune /> </InputAdornment>),
-                            endAdornment: (<InputAdornment position="end">CFG Scale</InputAdornment>)
-                        }
-                    }}
-                    style={{ flex: "1", minWidth: "200px" }}
-                    onKeyDown={onKeyDown}
-                />
+                    {/* This is necessary. If this isn't in a sub-div, the padding adds to the width and makes flex:1 not be half and half */}
+                    {/* border-box does not solve this issue either. I have no idea why, but hey, this works. So we're good */}
+                    <div style={{
+                        display: 'flex', gap: "10px", width: "100%", height: width < 350 ? undefined : "56px",
+                        flexDirection: width < 350 ? "column" : undefined, alignItems: 'center', padding: "0 16px"
+                    }}>
+                        <IconButton onClick={() => setSizePresetOpen(true)}><OpenWith sx={{ margin: width < 350 ? "7px" : "-7px" }} /> </IconButton>
 
-                {/* {!noBrew && <SchedulerSelector 
-                    scheduler={prompt.scheduleType} 
-                    setScheduler={(s) => { setPrompt({ ...prompt, scheduleType: s }) }} 
-                    style={{ flex: '1', minWidth: '200px' }}
-                />} */}
+                        {/* Width */}
+                        <TextField type="number" disabled={preview}
+                            value={prompt.width} onChange={(e) => setPrompt({ ...prompt, width: parseInt(e.target.value) })}
+                            placeholder="Width"
+                            fullWidth slotProps={{
+                                htmlInput: {
+                                    min: 1
+                                },
 
-                {!noBrew && <SamplerSelector
+                            }} variant="standard"
+                            style={{ flex: "1", minWidth: "45px" }}
+                            onKeyDown={onKeyDown} size="small"
+                        />
+                        <Close fontSize="inherit" />
+                        {/* Height */}
+                        <TextField type="number" disabled={preview}
+                            value={prompt.height} onChange={(e) => setPrompt({ ...prompt, height: parseInt(e.target.value) })}
+                            placeholder="Height"
+                            fullWidth slotProps={{
+                                htmlInput: { min: 1 },
+                            }} variant="standard"
+                            style={{ flex: "1", minWidth: "45px" }} size="small"
+                            onKeyDown={onKeyDown}
+                        />
+                        <div>px</div>
+
+
+                    </div>
+                </div>
+
+                <SamplerSelector
                     sampler={prompt.sampler}
                     setSampler={(s) => { setPrompt({ ...prompt, sampler: s }) }}
-                    style={{ flex: "1", minWidth: "200px" }}
-                />}
+                    style={{ flex: "1", minWidth: "260px" }}
+                />
 
-                {!noBrew && <TextField type="number"
-                    value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
-                    placeholder="Seed"
-                    fullWidth slotProps={{
-                        htmlInput: {
-                            min: -1
-                        },
-                        input: {
-                            startAdornment: (<InputAdornment position="start">
-                                <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{ margin: "-7px" }} /></IconButton>
-                            </InputAdornment>),
-                            endAdornment: (<InputAdornment position="end">Seed</InputAdornment>)
-                        }
-                    }}
-                    style={{ flex: "1", minWidth: "200px" }}
-                    onKeyDown={onKeyDown}
-                />}
 
+
+                <div style={{
+                    display: 'flex', gap: "10px", flex: "1", alignItems: 'center',
+                    flexDirection: width < 350 ? "column" : undefined, height: width < 350 ? undefined : "56px"
+                }}>
+                    {/* Steps */}
+                    <TextField type="number" disabled={preview}
+                        value={prompt.steps} onChange={(e) => setPrompt({ ...prompt, steps: parseInt(e.target.value) })}
+                        placeholder="Steps"
+                        fullWidth slotProps={{
+                            htmlInput: {
+                                min: 1
+                            },
+                            input: {
+                                startAdornment: (<InputAdornment position="start"> <DirectionsRun /> </InputAdornment>),
+                                endAdornment: (<InputAdornment position="end">Steps</InputAdornment>)
+                            }
+                        }}
+                        style={{ flex: "1", minWidth: "140px" }}
+                        onKeyDown={onKeyDown}
+                    />
+
+                    {/* CFG Scale */}
+                    <TextField type="number" disabled={preview}
+                        value={prompt.cfgScale} onChange={(e) => setPrompt({ ...prompt, cfgScale: parseFloat(e.target.value) })}
+                        placeholder="CFG Scale"
+                        fullWidth slotProps={{
+                            htmlInput: {
+                                min: 0.1,
+                                step: 0.1
+                            },
+                            input: {
+                                startAdornment: (<InputAdornment position="start"> <Tune /> </InputAdornment>),
+                                endAdornment: (<InputAdornment position="end">CFG</InputAdornment>)
+                            }
+                        }}
+                        style={{ flex: "1", minWidth: "140px" }}
+                        onKeyDown={onKeyDown}
+                    />
+                </div>
+
+                {/* {!noBrew && <SchedulerSelector
+                    scheduler={prompt.scheduleType}
+                    setScheduler={(s) => { setPrompt({ ...prompt, scheduleType: s }) }}
+                    style={{ flex: '1', minWidth: '260px' }}
+                />} */}
+
+                {!noBrew && <div style={{
+                    display: 'flex', gap: "10px", flex: "1", alignItems: 'center',
+                    flexDirection: width < 465 ? "column" : undefined, height: width < 465 ? undefined : "56px"
+                }}>
+                    <TextField type="number"
+                        value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
+                        placeholder="Seed"
+                        fullWidth slotProps={{
+                            htmlInput: {
+                                min: -1
+                            },
+                            input: {
+                                startAdornment: (<InputAdornment position="start">
+                                    <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{ margin: "-7px" }} /></IconButton>
+                                </InputAdornment>),
+                                endAdornment: (<InputAdornment position="end">Seed</InputAdornment>)
+                            }
+                        }}
+                        style={{ flex: "1", minWidth: "200px" }}
+                        onKeyDown={onKeyDown}
+                    />
+
+                    {/* Amount */}
+                    <TextField type="number" disabled={preview}
+                        value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
+                        placeholder="Steps"
+                        fullWidth slotProps={{
+                            input: {
+                                startAdornment: (<InputAdornment position="start"> <Coffee /> </InputAdornment>),
+                                endAdornment: (<InputAdornment position="end">Amount</InputAdornment>)
+                            }
+                        }}
+                        style={{ flex: "1", minWidth: "200px" }}
+                        onKeyDown={onKeyDown}
+                    />
+
+                </div>}
 
             </div>
         </div>
