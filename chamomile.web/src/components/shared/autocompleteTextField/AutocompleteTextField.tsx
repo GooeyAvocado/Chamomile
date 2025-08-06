@@ -47,8 +47,9 @@ interface CursorContext {
 
 };
 
-export default function AutocompleteTextfield({ data, ...props }: {
-    data: AutoCompletes[]
+export default function AutocompleteTextfield({ data, autocompleteZIndex, ...props }: {
+    data: AutoCompletes[],
+    autocompleteZIndex?: number
 } & React.ComponentProps<typeof TextField>) {
 
     const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -237,7 +238,7 @@ export default function AutocompleteTextfield({ data, ...props }: {
                             },
                         },
                     ]}
-                    style={{ zIndex: "2000" }}
+                    style={{ zIndex: autocompleteZIndex ?? "2000" }}
                 >
                     <Paper>
                         <MenuList id="split-button-menu"

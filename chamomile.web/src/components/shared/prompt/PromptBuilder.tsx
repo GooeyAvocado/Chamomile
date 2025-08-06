@@ -161,7 +161,7 @@ export default function PromptBuilder(props: {
         {/* Collapsed Contents */}
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
 
-            <AutocompleteTextfield disabled={preview}
+            <AutocompleteTextfield disabled={preview} autocompleteZIndex={!noBrew ? 10 : undefined}
                 value={prompt.positivePrompt} onChange={(e) => {
                     setPrompt({ ...prompt, positivePrompt: e.target.value })
                 }}
