@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Prompt } from "../../../model/Prompt"
 import { Button, Card, CardActionArea, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
-import { Cancel, DirectionsRun, EditNote, Height, Numbers, Tune } from "@mui/icons-material";
+import { Cancel, DirectionsRun, EditNote, Numbers, OpenWith, Tune } from "@mui/icons-material";
 import PromptEditorModal from "./PromptEditorModal";
 import { imageUrl } from "../../../api/Images";
 
@@ -65,11 +65,8 @@ export default function PromptGroupModal(props: {
                         <td width={"40px"}>
                             <Tooltip title="Job ID"><Numbers /></Tooltip>
                         </td>
-                        <td width={"70px"}>
-                            <Tooltip title="Width"><Height sx={{ transform: 'rotate(90deg)' }} /></Tooltip>
-                        </td>
-                        <td width={"70px"}>
-                            <Tooltip title="Height"><Height /></Tooltip>
+                        <td width={"140px"}>
+                            <Tooltip title="Dimensions"><OpenWith /></Tooltip>
                         </td>
                         <td width={"50px"}>
                             <Tooltip title="Steps"><DirectionsRun /></Tooltip>
@@ -93,8 +90,7 @@ export default function PromptGroupModal(props: {
                                 </Tooltip>
                             </td>
                             <td>{a.id}</td>
-                            <td>{a.width}px</td>
-                            <td>{a.height}px</td>
+                            <td>{a.width} x {a.height}px</td>
                             <td>{a.steps}</td>
                             <td>{a.cfgScale}</td>
                         </tr>)}
