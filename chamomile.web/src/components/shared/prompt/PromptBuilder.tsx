@@ -1,4 +1,4 @@
-import { Close, Coffee, DataObject, DirectionsRun, ExpandMore, Height, ModelTraining, OpenWith, ReceiptLong, ThumbDown, Tune, Yard } from "@mui/icons-material";
+import { Close, Coffee, DataObject, DirectionsRun, ExpandMore, ModelTraining, OpenWith, ReceiptLong, ThumbDown, Tune, Yard } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import PromptButton from "./PromptButton";
@@ -158,6 +158,7 @@ export default function PromptBuilder(props: {
 
     return <>
 
+        {/* Collapsed Contents */}
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
 
             <AutocompleteTextfield disabled={preview}
@@ -269,11 +270,13 @@ export default function PromptBuilder(props: {
                 </div>}
         </div>
 
+        {/* Expanded contents */}
         <div ref={expandRef} style={{
             paddingRight: !noBrew && !vertical ? "130px" : undefined,
             overflowY: "hidden", height: alwaysExpand ? undefined : expandedHeight,
             transition: "height 0.2s ease"
         }}>
+            {/* Row 1: negative prompt */}
             <div style={{ marginTop: "10px", display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <TextField disabled={preview}
                     value={prompt.negativePrompt} onChange={(e) => setPrompt({ ...prompt, negativePrompt: e.target.value })}
@@ -292,8 +295,10 @@ export default function PromptBuilder(props: {
 
             </div>
 
+            {/* Row 2: Literally everything else */}
             <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
 
+                {/* Group 1: Model and Samplers */}
                 <div style={{
                     flex: "1", alignItems: 'center', borderRadius: "4px",
                     border: "1px solid rgba(255,255,255, 0.23)", minWidth: "260px"
@@ -344,94 +349,91 @@ export default function PromptBuilder(props: {
                 />
 
 
+                {/* Group 2: Everything else */}
+                <div style={{ display: 'flex', flex: "2", gap: "10px", flexWrap: width < 1000 ? "wrap" : undefined }}>
+                    <div style={{
+                        display: 'flex', gap: "10px", flex: "1", alignItems: 'center',
+                        flexDirection: width < 350 ? "column" : undefined, height: width < 350 ? undefined : "56px"
+                    }}>
+                        {/* Steps */}
+                        <TextField type="number" disabled={preview}
+                            value={prompt.steps} onChange={(e) => setPrompt({ ...prompt, steps: parseInt(e.target.value) })}
+                            placeholder="Steps"
+                            fullWidth slotProps={{
+                                htmlInput: {
+                                    min: 1
+                                },
+                                input: {
+                                    startAdornment: (<InputAdornment position="start"> <DirectionsRun /> </InputAdornment>),
+                                    endAdornment: (<InputAdornment position="end">Steps</InputAdornment>)
+                                }
+                            }}
+                            style={{ flex: "1", minWidth: "140px" }}
+                            onKeyDown={onKeyDown}
+                        />
 
-                <div style={{
-                    display: 'flex', gap: "10px", flex: "1", alignItems: 'center',
-                    flexDirection: width < 350 ? "column" : undefined, height: width < 350 ? undefined : "56px"
-                }}>
-                    {/* Steps */}
-                    <TextField type="number" disabled={preview}
-                        value={prompt.steps} onChange={(e) => setPrompt({ ...prompt, steps: parseInt(e.target.value) })}
-                        placeholder="Steps"
-                        fullWidth slotProps={{
-                            htmlInput: {
-                                min: 1
-                            },
-                            input: {
-                                startAdornment: (<InputAdornment position="start"> <DirectionsRun /> </InputAdornment>),
-                                endAdornment: (<InputAdornment position="end">Steps</InputAdornment>)
-                            }
-                        }}
-                        style={{ flex: "1", minWidth: "140px" }}
-                        onKeyDown={onKeyDown}
-                    />
+                        {/* CFG Scale */}
+                        <TextField type="number" disabled={preview}
+                            value={prompt.cfgScale} onChange={(e) => setPrompt({ ...prompt, cfgScale: parseFloat(e.target.value) })}
+                            placeholder="CFG Scale"
+                            fullWidth slotProps={{
+                                htmlInput: {
+                                    min: 0.1,
+                                    step: 0.1
+                                },
+                                input: {
+                                    startAdornment: (<InputAdornment position="start"> <Tune /> </InputAdornment>),
+                                    endAdornment: (<InputAdornment position="end">CFG</InputAdornment>)
+                                }
+                            }}
+                            style={{ flex: "1", minWidth: "140px" }}
+                            onKeyDown={onKeyDown}
+                        />
+                    </div>
 
-                    {/* CFG Scale */}
-                    <TextField type="number" disabled={preview}
-                        value={prompt.cfgScale} onChange={(e) => setPrompt({ ...prompt, cfgScale: parseFloat(e.target.value) })}
-                        placeholder="CFG Scale"
-                        fullWidth slotProps={{
-                            htmlInput: {
-                                min: 0.1,
-                                step: 0.1
-                            },
-                            input: {
-                                startAdornment: (<InputAdornment position="start"> <Tune /> </InputAdornment>),
-                                endAdornment: (<InputAdornment position="end">CFG</InputAdornment>)
-                            }
-                        }}
-                        style={{ flex: "1", minWidth: "140px" }}
-                        onKeyDown={onKeyDown}
-                    />
+                    {!noBrew && <div style={{
+                        display: 'flex', gap: "10px", flex: "1", alignItems: 'center',
+                        flexDirection: width < 465 ? "column" : undefined, height: width < 465 ? undefined : "56px"
+                    }}>
+                        <TextField type="number"
+                            value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
+                            placeholder="Seed"
+                            fullWidth slotProps={{
+                                htmlInput: {
+                                    min: -1
+                                },
+                                input: {
+                                    startAdornment: (<InputAdornment position="start">
+                                        <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{ margin: "-7px" }} /></IconButton>
+                                    </InputAdornment>),
+                                    endAdornment: (<InputAdornment position="end">Seed</InputAdornment>)
+                                }
+                            }}
+                            style={{ flex: "1", minWidth: "200px" }}
+                            onKeyDown={onKeyDown}
+                        />
+
+                        {/* Amount */}
+                        <TextField type="number" disabled={preview}
+                            value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
+                            placeholder="Steps"
+                            fullWidth slotProps={{
+                                input: {
+                                    startAdornment: (<InputAdornment position="start"> <Coffee /> </InputAdornment>),
+                                    endAdornment: (<InputAdornment position="end">Amount</InputAdornment>)
+                                }
+                            }}
+                            style={{ flex: "1", minWidth: "200px" }}
+                            onKeyDown={onKeyDown}
+                        />
+
+                    </div>}
                 </div>
-
-                {/* {!noBrew && <SchedulerSelector
-                    scheduler={prompt.scheduleType}
-                    setScheduler={(s) => { setPrompt({ ...prompt, scheduleType: s }) }}
-                    style={{ flex: '1', minWidth: '260px' }}
-                />} */}
-
-                {!noBrew && <div style={{
-                    display: 'flex', gap: "10px", flex: "1", alignItems: 'center',
-                    flexDirection: width < 465 ? "column" : undefined, height: width < 465 ? undefined : "56px"
-                }}>
-                    <TextField type="number"
-                        value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
-                        placeholder="Seed"
-                        fullWidth slotProps={{
-                            htmlInput: {
-                                min: -1
-                            },
-                            input: {
-                                startAdornment: (<InputAdornment position="start">
-                                    <IconButton onClick={() => setPrompt({ ...prompt, seed: Math.floor(Math.random() * 1000000000) })}><Yard style={{ margin: "-7px" }} /></IconButton>
-                                </InputAdornment>),
-                                endAdornment: (<InputAdornment position="end">Seed</InputAdornment>)
-                            }
-                        }}
-                        style={{ flex: "1", minWidth: "200px" }}
-                        onKeyDown={onKeyDown}
-                    />
-
-                    {/* Amount */}
-                    <TextField type="number" disabled={preview}
-                        value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
-                        placeholder="Steps"
-                        fullWidth slotProps={{
-                            input: {
-                                startAdornment: (<InputAdornment position="start"> <Coffee /> </InputAdornment>),
-                                endAdornment: (<InputAdornment position="end">Amount</InputAdornment>)
-                            }
-                        }}
-                        style={{ flex: "1", minWidth: "200px" }}
-                        onKeyDown={onKeyDown}
-                    />
-
-                </div>}
 
             </div>
         </div>
 
+        {/* Vertical promptbutton */}
         {!noBrew && vertical && <div style={{ width: '100%', marginTop: '10px' }}>
             <PromptButton
                 onBrew={onBrew}
@@ -443,6 +445,7 @@ export default function PromptBuilder(props: {
             />
         </div>}
 
+        {/* Modals */}
         <VariableEditor open={varsOpen} setOpen={setVarsOpen} />
         <PromptModelSelectorModal open={modelsOpen} setOpen={setModelsOpen} noBrew={noBrew} prompt={promptOverride} setPrompt={setPromptOverride} />
         <SizePresetSelector
@@ -450,6 +453,7 @@ export default function PromptBuilder(props: {
             setSize={(width, height) => { setPrompt({ ...prompt, width: width, height: height }) }}
         />
 
+        {/* Modals that only show up if this has the ability to brew */}
         {!noBrew && <>
             <AreYouSureModal open={saveAys} setOpen={setSaveAys} onYes={() => { onSave(prompt) }} loading={updatePromptApi.loading} title="Overwrite this prompt?">
                 <PromptCard prompt={prompt} />
