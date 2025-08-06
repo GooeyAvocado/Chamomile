@@ -15,7 +15,11 @@ import { useAlbums } from "../hooks/useAlbums";
 
 export default function Home() {
 
-    const [albumsOpen, setAlbumsOpen] = useState(false)
+    const { vertical, height } = useWindowDimensions();
+    const { queue, progress } = useQueue(() => { })
+    const { album, setAlbum } = usePrompt();
+    const { refresh: refreshAlbums } = useAlbums();
+    const setTitle = usePageTitle();
 
     const initialFilter = {
         favorite: false,
@@ -29,11 +33,7 @@ export default function Home() {
     } as FilterOptions
 
     const [filter, setFilter] = useState(initialFilter)
-
-    const { queue, progress } = useQueue(() => { })
-    const { album, setAlbum } = usePrompt();
-    const { refresh: refreshAlbums } = useAlbums();
-    const setTitle = usePageTitle();
+    const [albumsOpen, setAlbumsOpen] = useState(false)
 
     useEffect(() => {
         let subtitle = "";
@@ -42,14 +42,11 @@ export default function Home() {
         setTitle(subtitle)
     }, [queue, progress])
 
-
-    const { vertical, height } = useWindowDimensions();
-
     return <div style={{
         height: vertical || height < 768 ? undefined : "100vh",
-        width: "80vw", maxWidth: "1400px", overflow: 'hidden',
-        display: "flex", flexDirection: "column", alignItems: 'center',
-        margin: "0 auto", paddingTop: "20px"
+        overflow: 'hidden', display: "flex",
+        flexDirection: "column", alignItems: 'center',
+        margin: "0 auto"
     }}>
 
         {/* Header */}
@@ -69,41 +66,49 @@ export default function Home() {
             }}
         />
 
-        {albumsOpen ? <>
-            <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
-                <AlbumsViewer onClick={(val) => { setAlbum(val); setFilter({ ...filter, album: val?.id ?? -1 }); setAlbumsOpen(false) }} />
-            </div>
-        </> : <>
+        <div style={{ display: "flex", flexDirection: 'column', width: "100%", flex: 1, padding: "0px 5%", overflowY: "hidden" }}>
 
-            {album ? <>
-                <div style={{ width: "100%", }}>
-                    <AlbumHeader onBack={() => { setAlbumsOpen(true) }}
-                        album={album} setAlbum={(val) => {
-                            setAlbum(val)
-                            if (!val) setFilter({ ...filter, album: -1 })
-                            else if (val.id !== filter.album) setFilter({ ...filter, album: val.id })
-                        }} />
+            {albumsOpen ? <>
+                <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
+                    <AlbumsViewer onClick={(val) => { setAlbum(val); setFilter({ ...filter, album: val?.id ?? -1 }); setAlbumsOpen(false) }} />
                 </div>
-                <hr style={{ width: "100%" }} />
             </> : <>
 
+                {album && <>
+                    <div style={{ width: "100%", }}>
+                        <AlbumHeader onBack={() => { setAlbumsOpen(true) }}
+                            album={album} setAlbum={(val) => {
+                                setAlbum(val)
+                                if (!val) setFilter({ ...filter, album: -1 })
+                                else if (val.id !== filter.album) setFilter({ ...filter, album: val.id })
+                            }} />
+                    </div>
+                    <hr style={{ width: "100%" }} />
+                </>}
+
+                <div style={{ marginBottom: '5px', width: "100%", marginTop: "15px", display: "flex", flexDirection: "column", gap: "15px" }}>
+                    <div style={{ width: "100%" }}>
+                        <PromptBuilder />
+                    </div>
+
+                    <FilterBuilder
+                        filter={filter} setFilter={setFilter} setAlbum={setAlbum}
+                    />
+                </div>
+
+                {/* Upload progress panel */}
+                <UploadPanel />
+
+                {/* Image viewer */}
+                <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
+                    <ImageViewer key={album?.id} showBrewing filter={filter} showWelcome album={album} setAlbum={(val) => {
+                        setAlbum(val)
+                        setFilter({ album: val.id })
+                    }} />
+                </div>
+
             </>}
+        </div>
 
-            <div style={{ width: "100%", marginTop: "10px" }}>
-                <PromptBuilder />
-            </div>
-            <hr style={{ width: "100%" }} />
-
-            <FilterBuilder filter={filter} setFilter={setFilter} setAlbum={setAlbum} />
-            <hr style={{ width: "100%" }} />
-
-            <UploadPanel />
-            <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
-                <ImageViewer key={album?.id} showBrewing filter={filter} showWelcome album={album} setAlbum={(val) => {
-                    setAlbum(val)
-                    setFilter({ album: val.id })
-                }} />
-            </div>
-        </>}
     </div>
 }
