@@ -1,7 +1,7 @@
-import { Autocomplete, Button, IconButton, InputAdornment, TextField } from "@mui/material"
+import { Alert, AlertTitle, Autocomplete, Button, IconButton, InputAdornment, TextField } from "@mui/material"
 import { usePrompt } from "../../hooks/usePrompt"
 import { promptPreview } from "../Utils"
-import { Add, Delete, Terminal } from "@mui/icons-material"
+import { Add, Delete, ReceiptLong } from "@mui/icons-material"
 import { useMemo, useState } from "react"
 import { Prompt } from "../../../model/Prompt"
 import useApi from "../../hooks/useApi"
@@ -60,7 +60,7 @@ export default function VariableEditor(props: {
         contentStyle={{ display: 'flex', flexDirection: 'column', height: '75vh' }}
         tabContentStyle={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}
     >
-        <TabbedModalTitle>Variables and Overrides</TabbedModalTitle>
+        <TabbedModalTitle>Wildcards and Overrides</TabbedModalTitle>
         <TabbedModalConsistentContent position="top">
             <div style={{ padding: "10px", background: '#222', fontSize: '.9em', fontFamily: 'monospace' }}>
                 <TextField
@@ -69,7 +69,7 @@ export default function VariableEditor(props: {
                         htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
                         input: {
                             startAdornment: (
-                                <InputAdornment position="start"> <Terminal /> </InputAdornment>
+                                <InputAdornment position="start"> <ReceiptLong /> </InputAdornment>
                             )
                         }
                     }}
@@ -77,18 +77,6 @@ export default function VariableEditor(props: {
             </div>
             <hr style={{ width: "100%", marginBottom: '20px' }} />
         </TabbedModalConsistentContent>
-        <TabbedModalTabContent label="Variables">
-            {
-                varNames.length === 0 ? <div style={{ height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                    <div style={{ fontSize: '2.5em' }}>%</div>
-                    <div style={{ fontSize: '1.3em' }}><b>There are no variables</b></div>
-                    <hr style={{ width: '300px' }} />
-                    <div style={{ width: "250px", textAlign: 'center', fontSize: '.8em' }}>Add a variable by putting an identifier between percentages (%MyVar%)</div>
-                </div> : varNames.map(a => <VariableEditorRow key={a} varName={a} value={variables[a]} updateValue={(val) => {
-                    setVariables({ ...variables, [a]: val })
-                }} />)
-            }
-        </TabbedModalTabContent>
         <TabbedModalTabContent label="Wildcards" >
             {wildNames.map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <IconButton onClick={() => {
@@ -172,6 +160,24 @@ export default function VariableEditor(props: {
                 />
             </div>
         </TabbedModalTabContent>
+
+        {prompt.positivePrompt.includes("%") && <TabbedModalTabContent label="Variables">
+            <Alert severity="warning" variant="outlined" style={{ marginBottom: "10px" }}>
+                <AlertTitle>Variables are deprecated</AlertTitle>
+                This feature may be removed soon!
+            </Alert>
+            {
+                varNames.length === 0 ? <div style={{ height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <div style={{ fontSize: '2.5em' }}>%</div>
+                    <div style={{ fontSize: '1.3em' }}><b>There are no variables</b></div>
+                    <hr style={{ width: '300px' }} />
+                    <div style={{ width: "250px", textAlign: 'center', fontSize: '.8em' }}>Add a variable by putting an identifier between percentages (%MyVar%)</div>
+                </div> : varNames.map(a => <VariableEditorRow key={a} varName={a} value={variables[a]} updateValue={(val) => {
+                    setVariables({ ...variables, [a]: val })
+                }} />)
+            }
+        </TabbedModalTabContent>}
+
         <TabbedModalActions>
             <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', paddingBottom: '5px', paddingLeft: '5px', paddingRight: '5px' }}>
                 <IECControls
