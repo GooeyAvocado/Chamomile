@@ -64,7 +64,7 @@ export default function ImageHotbar(props: {
                 </Tooltip>
                 <Tooltip title="Use this Prompt" enterDelay={250}>
                     <IconButton onClick={(e) => setPromptAnchor(e.currentTarget)}>
-                        <Receipt />
+                        <ReceiptLong />
                     </IconButton>
                 </Tooltip>
                 <hr />
