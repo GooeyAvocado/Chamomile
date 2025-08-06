@@ -40,7 +40,6 @@ export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
                         </InputAdornment>
                     }
                 }} style={{ flex: "1" }} />
-            {/* <Button onClick={() => onClick(undefined)} startIcon={<ModelTraining />}>Back</Button> */}
         </div>
         <div style={{ flex: "1", overflow: "auto" }}>
             {loading ?
