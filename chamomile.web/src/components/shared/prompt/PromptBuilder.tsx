@@ -1,6 +1,6 @@
-import { Coffee, DirectionsRun, ExpandLess, ExpandMore, Height, ModelTraining, Percent, Terminal, ThumbDown, Tune, Yard } from "@mui/icons-material";
+import { Coffee, DataObject, DirectionsRun, ExpandMore, Height, ModelTraining, ReceiptLong, ThumbDown, Tune, Yard } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PromptButton from "./PromptButton";
 import { usePrompt } from "../../hooks/usePrompt";
 import PromptModelSelectorModal from "./PromptModelSelectorModal";
@@ -34,11 +34,14 @@ export default function PromptBuilder(props: {
     const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight } = props
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount, variables } = usePrompt()
     const [expanded, setExpanded] = useState(false)
+    const [expandedHeight, setExpandedHeight] = useState("0px")
     const [modelsOpen, setModelsOpen] = useState(false)
     const [varsOpen, setVarsOpen] = useState(false)
     const [saveAys, setSaveAys] = useState(false)
     const brewApi = useApi(enqueuePrompts)
     const { album } = usePrompt();
+
+    const expandRef = useRef<HTMLDivElement>(null);
 
     const { loras } = useLoras();
     const { data: wildcards } = useApi(getWildcards, true)
@@ -47,7 +50,7 @@ export default function PromptBuilder(props: {
     const updatePromptApi = useApi(updatePrompt)
 
     const { enqueueSnackbar } = useSnackbar();
-    const { vertical } = useWindowDimensions();
+    const { vertical, width } = useWindowDimensions();
     const { pong } = usePingPong();
 
     const [sizePresetOpen, setSizePresetOpen] = useState(false)
@@ -139,9 +142,15 @@ export default function PromptBuilder(props: {
 
     const existingPrompt = !!prompt.id && prompt.id > 0;
 
+    useEffect(() => {
+        if (expandRef.current) {
+            setExpandedHeight(expanded ? `${expandRef.current.scrollHeight}px` : "0px");
+        }
+    }, [expanded, width]);
+
     return <>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
 
             <MentionsTextField disabled={preview}
                 value={prompt.positivePrompt} onChange={(__, newPlainText) => setPrompt({ ...prompt, positivePrompt: newPlainText })}
@@ -165,19 +174,24 @@ export default function PromptBuilder(props: {
                     input: {
 
                         startAdornment: (
-                            <InputAdornment position="start"> <Terminal /> </InputAdornment>
+                            <InputAdornment position="start"> <ReceiptLong /> </InputAdornment>
                         ),
                         endAdornment: (
                             <InputAdornment position="end">
                                 <div style={{ display: 'flex', flexDirection: vertical ? 'column' : undefined }}>
-                                    {!noBrew && <Tooltip title="Variables and Overrides">
-                                        <IconButton onClick={() => { setVarsOpen(true) }}><Percent /></IconButton>
+                                    {!noBrew && <Tooltip title="Wildcards and Overrides">
+                                        <IconButton onClick={() => { setVarsOpen(true) }}><DataObject /></IconButton>
                                     </Tooltip>}
-                                    {!preview && <Tooltip title="Select Models">
+                                    {!preview && <Tooltip title="Models">
                                         <IconButton onClick={() => { setModelsOpen(true) }}><ModelTraining /></IconButton>
                                     </Tooltip>}
                                     {!alwaysExpand && <Tooltip title="More Options">
-                                        <IconButton onClick={() => { setExpanded(!expanded) }}>{expanded ? <ExpandLess /> : <ExpandMore />}</IconButton>
+                                        <IconButton onClick={() => { setExpanded?.(!expanded) }}><ExpandMore
+                                            style={{
+                                                transition: "transform 0.2s ease",
+                                                transform: expanded ? "rotate(180deg)" : "rotate(0deg)"
+                                            }}
+                                        /></IconButton>
                                     </Tooltip>}
                                 </div>
                             </InputAdornment>
@@ -185,17 +199,25 @@ export default function PromptBuilder(props: {
                     }
                 }}
             />
+
             {!noBrew && !vertical &&
-                <PromptButton
-                    onBrew={onBrew}
-                    onLoad={() => setLoadOpen(true)}
-                    onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)}
-                    onSaveAs={() => setSaveOpen(true)}
-                    saveAsEnabled={existingPrompt}
-                />}
+                <div style={{ width: "120px" }}>
+                    <PromptButton
+                        fullWidth
+                        onBrew={onBrew}
+                        onLoad={() => setLoadOpen(true)}
+                        onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)}
+                        onSaveAs={() => setSaveOpen(true)}
+                        saveAsEnabled={existingPrompt}
+                    />
+                </div>}
         </div>
 
-        {(alwaysExpand || expanded) && <>
+        <div ref={expandRef} style={{
+            paddingRight: !noBrew && !vertical ? "130px" : undefined,
+            overflowY: "hidden", height: alwaysExpand ? undefined : expandedHeight,
+            transition: "height 0.2s ease"
+        }}>
             <div style={{ marginTop: "10px", display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <TextField disabled={preview}
                     value={prompt.negativePrompt} onChange={(e) => setPrompt({ ...prompt, negativePrompt: e.target.value })}
@@ -335,7 +357,7 @@ export default function PromptBuilder(props: {
 
 
             </div>
-        </>}
+        </div>
 
         {!noBrew && vertical && <div style={{ width: '100%', marginTop: '10px' }}>
             <PromptButton

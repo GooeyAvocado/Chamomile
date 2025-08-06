@@ -247,7 +247,7 @@ export default function ImageViewer(props: {
     return <>
         <div style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '128' : '192'}px, 1fr))`,
+            gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '128' : 128 + 32 + 16}px, 1fr))`,
             gap: '20px'
         }}>
             {showBrewing && groupedQueue.map(p =>

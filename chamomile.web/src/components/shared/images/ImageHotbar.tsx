@@ -1,4 +1,4 @@
-import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, Star, StarOutline, Terminal, TerminalTwoTone } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, Receipt, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
 import { Button, Card, ClickAwayListener, IconButton, ListItemIcon, Menu, MenuItem, Paper, Popper, Tooltip } from "@mui/material";
 import useUserAgent from "../../hooks/useUserAgent";
 import "./ImageHotbar.css"
@@ -64,7 +64,7 @@ export default function ImageHotbar(props: {
                 </Tooltip>
                 <Tooltip title="Use this Prompt" enterDelay={250}>
                     <IconButton onClick={(e) => setPromptAnchor(e.currentTarget)}>
-                        <Terminal />
+                        <Receipt />
                     </IconButton>
                 </Tooltip>
                 <hr />
@@ -147,11 +147,11 @@ export default function ImageHotbar(props: {
                 onClick={() => { onUsePrompt(imageToPrompt(image, true)); setPromptAnchor(null) }}
                 disabled={(image?.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt}
             >
-                <ListItemIcon><TerminalTwoTone /></ListItemIcon>
+                <ListItemIcon><ReceiptLongTwoTone /></ListItemIcon>
                 Use this base prompt
             </MenuItem>
             <MenuItem onClick={() => { onUsePrompt(imageToPrompt(image)); setPromptAnchor(null) }}>
-                <ListItemIcon><Terminal /></ListItemIcon>
+                <ListItemIcon><ReceiptLong /></ListItemIcon>
                 Use this prompt
             </MenuItem>
         </Menu>

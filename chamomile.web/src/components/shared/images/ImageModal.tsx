@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, Menu, ModelTraining, Notes, PhotoLibrary, Star, StarBorder, Terminal, TerminalOutlined } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -182,7 +182,7 @@ export default function ImageModal(props: {
                             <PromptReorderButton prompt={imageToPrompt(image, promptMode === 1)} source={promptMode === 1 ? "IMAGE_BASE" : "IMAGE"} sample={image?.id} iconOverride={promptMode === 1 ? <CoffeeOutlined /> : undefined} />
                             <Tooltip title={promptMode === 1 ? 'Use this base prompt' : 'Use this prompt'}>
                                 <IconButton onClick={() => onUsePrompt()}>
-                                    {promptMode === 1 ? <TerminalOutlined /> : <Terminal />}
+                                    {promptMode === 1 ? <ReceiptLongTwoTone /> : <ReceiptLong />}
                                 </IconButton>
                             </Tooltip>
                             {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}

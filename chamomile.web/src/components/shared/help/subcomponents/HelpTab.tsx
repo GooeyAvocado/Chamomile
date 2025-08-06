@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Gradient, Height, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, Pause, PhotoLibrary, PlayArrow, Settings, Star, Terminal, ThumbDown, Timeline, Tune, Warning, Window, Yard } from "@mui/icons-material";
+import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Gradient, Height, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -119,7 +119,7 @@ export default function HelpTab(props: {
                 <div style={{ ...codeStyle, padding: "20px", flex: '1', display: "flex", gap: "10px", alignItems: 'start' }}>
                     <Tooltip title="Use this prompt">
                         <IconButton onClick={() => writePrompt(samplePrompt)}>
-                            <Terminal />
+                            <ReceiptLong />
                         </IconButton>
                     </Tooltip>
                     <div>
@@ -129,7 +129,7 @@ export default function HelpTab(props: {
                 <img src="/images/wave.png" style={{ width: "25%" }} />
             </div>
             <div>
-                <i>Hint: Press the terminal icon to load this prompt to your prompt box and close this window</i>
+                <i>Hint: Press the order icon to load this prompt to your prompt box and close this window</i>
             </div>
 
             <div style={{ marginTop: "20px" }}>
@@ -183,11 +183,11 @@ export default function HelpTab(props: {
             <p>
                 One of the basic ways to generate different images beyond prompting differently is to use different models and low-rank
                 adaptations (LoRAs) on top of said models. Chamomile makes it easy to select your model and add or remove LoRAs to your
-                prompt. Click on the <LabeledIcon label="Select Models button"><ModelTraining /></LabeledIcon> on the prompt box.
+                prompt. Click on the <LabeledIcon label="Models button"><ModelTraining /></LabeledIcon> on the prompt box.
             </p>
             <Alert severity="warning" style={{ fontSize: ".8em" }}>
                 <AlertTitle style={{ fontSize: "1.2em" }}>New models and LoRAs may not automatically be visible</AlertTitle>
-                While Chamomile refreshes models and availability every time you open the select models dialog, your web
+                While Chamomile refreshes models and availability every time you open the models dialog, your web
                 ui may not. If your newly downloaded models aren't showing up in Chamomile, open your Web UI and refresh
                 the list of models there, then open the dialog on Chamomile again. Or, simply restart your Web UI.
             </Alert>
@@ -289,7 +289,7 @@ export default function HelpTab(props: {
             </p>
         </HelpSection>
 
-        <HelpSection title="What are Variables and Overrides" >
+        <HelpSection title="What are Overrides" >
             <img src="/screenshots/overrides.png" style={{ width: "100%" }} />
             <p>
                 Along with wildcards, Chamomile supports two other ways to alter a prompt at generation time
@@ -544,7 +544,7 @@ export default function HelpTab(props: {
             </p>
             <p>
                 Each will let you choose to
-                either <LabeledIcon label="Use this prompt"><Terminal /></LabeledIcon> , which will load its
+                either <LabeledIcon label="Use this prompt"><ReceiptLong /></LabeledIcon> , which will load its
                 details onto the main prompt box, or
                 immediately <LabeledIcon label="Brew"><Coffee /></LabeledIcon> the amount currently set on
                 the prompt box.

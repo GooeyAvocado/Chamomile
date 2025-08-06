@@ -3,7 +3,7 @@ import { CardActionArea } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CoffeeOutlined, Delete, Gradient, Star, StarOutline, Terminal, TerminalOutlined } from "@mui/icons-material";
+import { CoffeeOutlined, Delete, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -29,8 +29,8 @@ export default function ImageTile(props: {
             { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image)} source="IMAGE" sample={image.id} menuButonMode onClick={onClose} /> },
             { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image, true)} source="IMAGE_BASE" sample={image.id} iconOverride={<CoffeeOutlined />} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={(image.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt} /> },
             { type: "divider" },
-            { text: "Use this prompt", icon: <Terminal />, onClick: () => { setPrompt(imageToPrompt(image)) } },
-            { text: "Use this base prompt", icon: <TerminalOutlined />, onClick: () => { setPrompt(imageToPrompt(image, true)) }, disabled: (image.basePrompt?.trim()?.length ?? 0) === 0 || image.basePrompt === image.prompt },
+            { text: "Use this prompt", icon: <ReceiptLong />, onClick: () => { setPrompt(imageToPrompt(image)) } },
+            { text: "Use this base prompt", icon: <ReceiptLongTwoTone />, onClick: () => { setPrompt(imageToPrompt(image, true)) }, disabled: (image.basePrompt?.trim()?.length ?? 0) === 0 || image.basePrompt === image.prompt },
             { type: "divider" },
             { text: "Delete", icon: <Delete />, onClick: () => { setDeleteAys(true) } },
         ]}>
