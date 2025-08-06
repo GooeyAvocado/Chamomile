@@ -194,7 +194,17 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
                     props.onChange?.(e)
                 }}
                 onClick={(e) => {
-                    handleGetCursorPosition();
+                    const target = e.target as HTMLElement;
+                    if (
+                        target.tagName === "TEXTAREA" || // textarea (multiline input)
+                        target.classList.contains('MuiInputBase-input') // fallback for single-line inputs
+                    ) {
+                        handleGetCursorPosition();
+
+                    } else {
+                        closeSuggestions();
+                    }
+
                     props.onClick?.(e)
                 }}
                 onKeyDown={(e) => {
