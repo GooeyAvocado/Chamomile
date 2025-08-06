@@ -1,4 +1,5 @@
-import { ClickAwayListener, ListItem, MenuItem, MenuList, Paper, Popper, TextField } from "@mui/material"
+import { Close } from "@mui/icons-material"
+import { ClickAwayListener, IconButton, ListItem, MenuItem, MenuList, Paper, Popper, TextField } from "@mui/material"
 import { useRef, useState } from "react"
 
 export interface AutoCompletes<T = any> {
@@ -253,9 +254,12 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
                             }}
                         >
                             <div style={{ paddingLeft: "20px", paddingRight: "20px", paddingTop: "5px" }}>
-                                <div style={{ display: 'flex', justifyContent: "space-between" }}>
+                                <div style={{ display: 'flex', justifyContent: "space-between", alignItems: "flex-end" }}>
                                     <b>{cursorContext?.setName}</b>
-                                    <div>{cursorContext?.resultsTotal} result(s)</div>
+                                    <div style={{ display: 'flex', gap: "5px", alignItems: 'center' }}>
+                                        {cursorContext?.resultsTotal} result(s)
+                                        <IconButton onClick={() => closeSuggestions()} size="small"><Close fontSize="inherit" /></IconButton>
+                                    </div>
 
                                 </div>
                                 <hr />
