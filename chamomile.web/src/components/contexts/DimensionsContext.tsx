@@ -14,7 +14,7 @@ export const DimensionsContext = createContext<Dimensions | undefined>(undefined
 function getWindowDimensions(): Dimensions {
     const { innerWidth: width, innerHeight: height } = window;
     return {
-        width, height, vertical: width <= 1200, maxComponentHeight: height - 120
+        width, height, vertical: width <= 850, maxComponentHeight: height - 120
     }
 }
 
