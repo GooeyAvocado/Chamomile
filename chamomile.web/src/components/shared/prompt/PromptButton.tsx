@@ -11,7 +11,7 @@ import { usePingPong } from '../../hooks/usePingPong';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, Tooltip } from '@mui/material';
 import PreviewModal from './preview/PreviewModal';
 import { usePrompt } from '../../hooks/usePrompt';
-import { QuestionMark, Yard } from '@mui/icons-material';
+import { Yard } from '@mui/icons-material';
 import { useRef, useState } from 'react';
 
 export default function PromptButton(props: {
