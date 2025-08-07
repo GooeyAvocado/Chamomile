@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -9,8 +8,11 @@ import Popper from '@mui/material/Popper';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import { usePingPong } from '../../hooks/usePingPong';
-import { Divider, Tooltip } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, Tooltip } from '@mui/material';
 import PreviewModal from './preview/PreviewModal';
+import { usePrompt } from '../../hooks/usePrompt';
+import { QuestionMark, Yard } from '@mui/icons-material';
+import { useRef, useState } from 'react';
 
 export default function PromptButton(props: {
     onBrew: (amountOverride?: number) => void
@@ -22,11 +24,13 @@ export default function PromptButton(props: {
 }) {
 
     const { onBrew, onLoad, onSave, fullWidth, onSaveAs, saveAsEnabled } = props
+    const { prompt, orderAmount } = usePrompt();
 
-    const [open, setOpen] = React.useState(false);
-    const [previewOpen, setPreviewOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
+    const [seedWarning, setSeedWarning] = useState(false)
+    const [previewOpen, setPreviewOpen] = useState(false);
 
-    const anchorRef = React.useRef<HTMLDivElement>(null);
+    const anchorRef = useRef<HTMLDivElement>(null);
     const { pong } = usePingPong()
 
     const handleToggle = () => {
@@ -44,12 +48,16 @@ export default function PromptButton(props: {
             fullWidth={fullWidth}
         >
             <Tooltip title={!pong?.SD ? 'Kitchen\'s closed\n(Could not contact SD)' : 'Click to start brewing images'}>
-                <Button onClick={() => onBrew()} disabled={!pong?.SD}>Brew</Button>
+                <Button onClick={() => {
+                    if (prompt.seed > -1 && orderAmount > 1) setSeedWarning(true)
+                    else onBrew()
+                }} disabled={!pong?.SD}>Brew</Button>
             </Tooltip>
             <Button size="small" style={{ width: '40px' }} onClick={handleToggle} >
                 <ArrowDropDownIcon />
             </Button>
         </ButtonGroup>
+
         <Popper sx={{ zIndex: 2 }} open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
             {({ TransitionProps, placement }) => (
                 <Grow {...TransitionProps} style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom', }} >
@@ -93,7 +101,30 @@ export default function PromptButton(props: {
                 </Grow>
             )}
         </Popper>
+
         <PreviewModal open={previewOpen} setOpen={setPreviewOpen} />
+        <Dialog open={seedWarning} onClick={() => { setSeedWarning(false) }} maxWidth="sm" fullWidth>
+            <DialogTitle>
+                Are you sure you want to order more than one image?
+            </DialogTitle>
+            <DialogContent>
+                There's a <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: 'middle', gap: "10px" }}>
+                    <Yard /> Seed
+                </span> set for this prompt. All {orderAmount} images will be the same
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => {
+                    setSeedWarning(false)
+                    onBrew(1)
+                }}>Brew a single image</Button>
+                <Button onClick={() => setSeedWarning(false)}>No</Button>
+
+                <Button onClick={() => {
+                    setSeedWarning(false)
+                    onBrew();
+                }}>Yes</Button>
+            </DialogActions>
+        </Dialog>
     </>
 
 }
