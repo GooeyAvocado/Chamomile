@@ -102,9 +102,9 @@ export default function StatisticsModal(props: {
                     ? modelData?.filter(a => modelAvailable(a.keyword))
                     : modelData?.filter(a => !modelAvailable(a.keyword))}
                 filter={filter} keywordColumnOverride="Model" limit={limit}
-                getSampleImageId={(u) => models.find(a => a.title === u.keyword)?.bannerImage}
+                getSampleImageId={(u) => models?.find(a => a.title === u.keyword)?.bannerImage}
                 renderKeywordRow={(u) => {
-                    const m = models.find(a => a.title === u.keyword) ?? {
+                    const m = models?.find(a => a.title === u.keyword) ?? {
                         name: u.keyword, title: u.keyword, isAvailable: false, type: ""
                     }
                     return <div style={{ color: m.isAvailable ? "white" : "#DDD", fontSize: ".8em" }}>
@@ -126,9 +126,9 @@ export default function StatisticsModal(props: {
                     ? loraData?.filter(a => loraAvailable(a.keyword))
                     : loraData?.filter(a => !loraAvailable(a.keyword))}
                 filter={filter} keywordColumnOverride="LoRA" limit={limit}
-                getSampleImageId={(u) => loras.find(a => a.alias === u.keyword)?.bannerImage}
+                getSampleImageId={(u) => loras?.find(a => a.alias === u.keyword)?.bannerImage}
                 renderKeywordRow={(u) => {
-                    const m = loras.find(a => a.alias === u.keyword) ?? {
+                    const m = loras?.find(a => a.alias === u.keyword) ?? {
                         name: u.keyword, alias: u.keyword, isAvailable: false, type: ""
                     }
                     return <div style={{ color: m.isAvailable ? "white" : "#DDD", fontSize: ".8em" }}>
