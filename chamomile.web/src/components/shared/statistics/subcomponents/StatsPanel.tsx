@@ -37,13 +37,40 @@ export function StatsPanel({
     ) => void
 }) {
 
+    const colors = ["#e57373", "#64b5f6", "#81c784", "#ffd54f", "#ba68c8", "#4db6ac", "#f06292", "#9575cd"];
+    const darkColors = ["#683535ff", "#325a7aff", "#3f6141ff", "#756325ff", "#5a3361ff", "#265a55ff", "#6d2b41ff", "#483863ff"];
+    const max = usage?.[0]?.count
+    const rowHeight = rowHeightOverride ?? 36
+
+    const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+
+    const contentRef = useRef<HTMLDivElement>(null);
+    const tableRef = useRef<HTMLDivElement>(null)
+
+    const [pageSize, setPageSize] = useState(1)
+
+    useEffect(() => {
+        requestAnimationFrame(() => {
+            if (!tableRef.current) return;
+            setPageSize(1)
+            requestAnimationFrame(() => {
+                if (!tableRef.current) return;
+                const paddedRowHeight = rowHeight + 32
+                const headerHeight = 57
+                const footerHeight = 40 + 10
+                const padding = 10 * 2
+                const adjustments = headerHeight + footerHeight + padding - 60
+                setPageSize(Math.floor((tableRef.current.scrollHeight - adjustments) / paddedRowHeight))
+                setPage(0)
+            })
+        })
+    }, [windowHeight])
+
+    const pages = Math.ceil(usage.length / pageSize)
+
     const [page, setPage] = useState(0);
     const [imageView, setImageView] = useState<number | undefined>()
     const [mode, setMode] = useState<"table" | "graph">("table")
-    const pageSize = 6;
-    const pages = Math.ceil(usage.length / pageSize)
-    const contentRef = useRef<HTMLDivElement>(null);
-    const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
     const displayData = usage.slice(pageSize * page, pageSize * (page + 1))
     const nextPage = () => setPage(Math.min(page + 1, pages - 1))
@@ -80,14 +107,9 @@ export function StatsPanel({
         [keywordQuery, usage, selectedKeywords]
     );
 
-    const colors = ["#e57373", "#64b5f6", "#81c784", "#ffd54f", "#ba68c8", "#4db6ac", "#f06292", "#9575cd"];
-    const darkColors = ["#683535ff", "#325a7aff", "#3f6141ff", "#756325ff", "#5a3361ff", "#265a55ff", "#6d2b41ff", "#483863ff"];
-    const max = usage?.[0]?.count
-    const rowHeight = rowHeightOverride ?? 36
-
     return <>
         <div style={{ flex: "1", display: 'flex', flexDirection: 'column' }}>
-            {mode === "table" ? <TableContainer component={Paper} sx={{ width: '100%', flex: "1" }}>
+            {mode === "table" ? <TableContainer component={Paper} sx={{ width: '100%', flex: "1" }} ref={tableRef}>
                 <TableHead>
                     <TableRow>
                         <TableCell sx={{ width: 48 }}></TableCell>
