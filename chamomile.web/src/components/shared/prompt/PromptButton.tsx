@@ -58,9 +58,15 @@ export default function PromptButton(props: {
             </Button>
         </ButtonGroup>
 
-        <Popper sx={{ zIndex: 2 }} open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
+        <Popper sx={{ zIndex: 2 }}
+            open={open} anchorEl={anchorRef.current}
+            role={undefined} transition disablePortal
+            popperOptions={{
+                placement: "bottom-end"
+            }}
+        >
             {({ TransitionProps, placement }) => (
-                <Grow {...TransitionProps} style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom', }} >
+                <Grow {...TransitionProps} style={{ transformOrigin: placement === 'bottom-end' ? 'center top' : 'center bottom', }} >
                     <Paper>
                         <ClickAwayListener onClickAway={handleClose}>
                             <MenuList id="split-button-menu" >
