@@ -57,7 +57,6 @@ export function StatsPanel({
     const { fetch, data, loading } = useApi(datedUsageApi)
 
     useEffect(() => {
-        console.log(selectedKeywords.length)
         if (selectedKeywords.length > 0) {
             fetch(undefined, undefined, { ...filter, keyword: selectedKeywords.join(","), lastImage: limit } as KeywordFilterOptions)
         }
@@ -155,13 +154,14 @@ export function StatsPanel({
 
                                 // Vertical ticks (usage)
                                 const vTicks = 8;
-                                const maxUsage = data.maxUsage ?? 100;
+                                const maxUsage = (data.maxUsage ?? 100) * 1.1;
                                 const usageStep = maxUsage / vTicks;
 
                                 // Horizontal ticks (time)
                                 const hTicks = 15;
                                 const minTs = new Date((data.minTs ?? "").split("T")[0]);
                                 const maxTs = new Date((data.maxTs ?? "").split("T")[0]);
+                                const onlyOneDate = minTs.getTime() === maxTs.getTime()
                                 const timeStep = (maxTs.getTime() - minTs.getTime()) / (hTicks - 1);
 
                                 return (
@@ -231,7 +231,9 @@ export function StatsPanel({
                                             // Prepare points for polyline
                                             const polyPoints = points.map(pt => {
                                                 const date = new Date(pt.date.split("T")[0]);
-                                                const x = paddingLeft + ((date.getTime() - minTs.getTime()) / (maxTs.getTime() - minTs.getTime())) * innerWidth;
+                                                const x = onlyOneDate
+                                                    ? paddingLeft + (.5 * innerWidth)
+                                                    : paddingLeft + ((date.getTime() - minTs.getTime()) / (maxTs.getTime() - minTs.getTime())) * innerWidth;
                                                 const y = graphHeight - paddingBottom - (pt.count / maxUsage) * innerHeight;
                                                 return `${x},${y}`;
                                             }).join(" ");
@@ -247,7 +249,9 @@ export function StatsPanel({
                                                     {/* Draw circles for each point */}
                                                     {points.map(pt => {
                                                         const date = new Date(pt.date.split("T")[0]);
-                                                        const x = paddingLeft + ((date.getTime() - minTs.getTime()) / (maxTs.getTime() - minTs.getTime())) * innerWidth;
+                                                        const x = onlyOneDate
+                                                            ? paddingLeft + (.5 * innerWidth)
+                                                            : paddingLeft + ((date.getTime() - minTs.getTime()) / (maxTs.getTime() - minTs.getTime())) * innerWidth;
                                                         const y = graphHeight - paddingBottom - (pt.count / maxUsage) * innerHeight;
                                                         return (
                                                             <Tooltip title={<Card >
@@ -268,8 +272,7 @@ export function StatsPanel({
                                                                     </div>
                                                                 </CardActionArea>
                                                             </Card>}>
-                                                                <circle key={pt.date} cx={x} cy={y} r={3} fill={color} >
-                                                                </circle>
+                                                                <circle key={pt.date} cx={x} cy={y} r={onlyOneDate ? 5 : 3} fill={color} />
                                                             </Tooltip>
                                                         );
                                                     })}
