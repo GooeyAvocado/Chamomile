@@ -3,7 +3,7 @@ import { deletePrompt, getPrompts, updatePrompt } from "../../../api/Prompts";
 import { Prompt } from "../../../model/Prompt";
 import useApi from "../../hooks/useApi";
 import { Card, CardActionArea, CardContent, Dialog, DialogContent, DialogTitle, InputAdornment, TextField } from "@mui/material";
-import { ArrowUpward, Delete, Edit, Folder, Search } from "@mui/icons-material";
+import { ArrowUpward, Coffee, Delete, Edit, Folder, Search } from "@mui/icons-material";
 import PromptCard from "./PromptCard";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { useSnackbar } from "notistack";
@@ -12,6 +12,9 @@ import PromptReorderButton from "./PromptReorderButton";
 import PromptTile from "./PromptTile";
 import ContextMenu from "../ContextMenu";
 import { usePrompt } from "../../hooks/usePrompt";
+import { enqueuePrompts } from "../../../api/Images";
+import { hydratePrompt } from "../Utils";
+import { useSettings } from "../../hooks/useSettings";
 
 export default function PromptSelectorModal(props: {
     open: boolean,
@@ -24,12 +27,17 @@ export default function PromptSelectorModal(props: {
     const delPromptApi = useApi(deletePrompt)
     const updatePromptApi = useApi(updatePrompt)
     const { enqueueSnackbar } = useSnackbar();
+    const brewApi = useApi(enqueuePrompts)
+    const { settings } = useSettings();
 
     const [query, setQuery] = useState("")
     const [delPrompt, setDelPrompt] = useState(undefined as undefined | Prompt)
+    const [promptFolder, setPromptFolder] = useState(undefined as undefined | string)
     const [editPrompt, setEditPrompt] = useState(undefined as undefined | Prompt)
 
-    const { prompt, setPrompt } = usePrompt();
+    const { prompt, setPrompt, orderAmount, album, variables } = usePrompt();
+
+    const promptFolderPrompts = promptFolder ? promptsApi.data.filter(a => a.name.startsWith(promptFolder + '/')) : []
 
     const onDelete = () => {
         delPromptApi.fetch(() => {
@@ -44,6 +52,39 @@ export default function PromptSelectorModal(props: {
         }, () => {
             enqueueSnackbar("Could not delete prompt!", { variant: 'error' })
         }, delPrompt?.id)
+    }
+
+
+    const onPromptFolder = () => {
+        const orderPrompts = [] as Prompt[]
+        const allPrompts = [...promptFolderPrompts]
+        allPrompts.forEach((p) => {
+            for (let index = 0; index < orderAmount; index++) {
+                orderPrompts.push(hydratePrompt({
+                    ...p, ...{
+                        cfgScale: settings.globals.cfg ? prompt.cfgScale : p.cfgScale,
+                        sampler: settings.globals.sampler ? prompt.sampler : p.sampler,
+                        steps: settings.globals.steps ? prompt.steps : p.steps,
+                        width: settings.globals.width ? prompt.width : p.width,
+                        height: settings.globals.height ? prompt.height : p.height
+
+                    }, orderData: {
+                        sample: p.sampleImage ?? -1,
+                        source: "SAVED_PROMPT",
+                        albums: album?.id ? [album?.id] : []
+                    }
+                }, variables, index));
+            }
+        })
+
+        brewApi.fetch((val) => {
+            enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
+            setPromptFolder(undefined)
+        }, () => {
+            enqueueSnackbar("Could not queue images!", { variant: 'error' })
+        }, orderPrompts)
+
+
     }
 
     const onUpdate = (val: Prompt) => {
@@ -63,6 +104,7 @@ export default function PromptSelectorModal(props: {
         }
     }, [open])
 
+
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
         <DialogTitle>{promptsApi.data?.length} Recipes</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: "75vh" }}>
@@ -74,13 +116,27 @@ export default function PromptSelectorModal(props: {
                 />
             </div>
             <div style={{ flex: '1', overflowY: 'auto' }}>
-                <GridViewMode data={promptsApi.data} onOk={onOk} query={query} setDelPrompt={setDelPrompt} setEditPrompt={setEditPrompt} />
+                <GridViewMode
+                    data={promptsApi.data} onOk={onOk} query={query}
+                    setDelPrompt={setDelPrompt} setEditPrompt={setEditPrompt}
+                    setPromptFolder={setPromptFolder}
+                />
             </div>
 
         </DialogContent>
 
         <AreYouSureModal open={!!delPrompt} setOpen={() => setDelPrompt(undefined)} onYes={onDelete} loading={delPromptApi.loading} title="Delete this prompt?">
             <PromptCard prompt={delPrompt ?? { name: '', positivePrompt: '' } as Prompt} onClick={() => { }} />
+        </AreYouSureModal>
+
+
+
+        <AreYouSureModal open={!!promptFolder} setOpen={() => setPromptFolder(undefined)} onYes={onPromptFolder} loading={brewApi.loading} title={`Prompt all under ${promptFolder}?`}>
+            This will prompt {promptFolderPrompts.length} prompt(s) including:
+            <ul style={{ maxHeight: "50vh", overflowY: 'auto' }}>
+                {promptFolderPrompts.map(a => <li>{a.name}</li>)}
+            </ul>
+            Each will be prompted {orderAmount} times for a total of {promptFolderPrompts.length * orderAmount} images
         </AreYouSureModal>
 
         <PromptEditorModal
@@ -93,8 +149,14 @@ export default function PromptSelectorModal(props: {
 
 }
 
-function GridViewMode(props: { data: Prompt[], query: string, setEditPrompt: (val: Prompt) => void, setDelPrompt: (val: Prompt) => void, onOk: (val: Prompt) => void }) {
-    const { data, query, setDelPrompt, setEditPrompt, onOk } = props
+function GridViewMode(props: {
+    data: Prompt[], query: string,
+    setEditPrompt: (val: Prompt) => void,
+    setPromptFolder: (val: string) => void,
+    setDelPrompt: (val: Prompt) => void,
+    onOk: (val: Prompt) => void
+}) {
+    const { data, query, setDelPrompt, setEditPrompt, onOk, setPromptFolder } = props
 
     const [currLocation, setCurrLocation] = useState("")
 
@@ -164,14 +226,18 @@ function GridViewMode(props: { data: Prompt[], query: string, setEditPrompt: (va
                 </CardActionArea>
             </Card>}
             {folderList?.map(a => <div key={a} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <Card>
-                    <CardActionArea onClick={() => setCurrLocation(currLocation.length === 0 ? a : currLocation + "/" + a)}>
-                        <CardContent style={{ display: 'flex', gap: "5px", alignItems: "center" }}>
-                            <Folder fontSize="small" />
-                            <div>{a}</div>
-                        </CardContent>
-                    </CardActionArea>
-                </Card>
+                <ContextMenu options={[
+                    { icon: <Coffee />, text: 'Prompt all', onClick: () => setPromptFolder((currLocation.length > 0 ? currLocation + "/" : "") + a) }
+                ]}>
+                    <Card>
+                        <CardActionArea onClick={() => setCurrLocation(currLocation.length === 0 ? a : currLocation + "/" + a)}>
+                            <CardContent style={{ display: 'flex', gap: "5px", alignItems: "center" }}>
+                                <Folder fontSize="small" />
+                                <div>{a}</div>
+                            </CardContent>
+                        </CardActionArea>
+                    </Card>
+                </ContextMenu>
             </div>)}
         </div>
 
