@@ -101,7 +101,7 @@ export default function StatisticsModal(props: {
                 usage={availability === 0 ? modelData : availability === 1
                     ? modelData?.filter(a => modelAvailable(a.keyword))
                     : modelData?.filter(a => !modelAvailable(a.keyword))}
-                filter={filter} keywordColumnOverride="Model"
+                filter={filter} keywordColumnOverride="Model" limit={limit}
                 getSampleImageId={(u) => models.find(a => a.title === u.keyword)?.bannerImage}
                 renderKeywordRow={(u) => {
                     const m = models.find(a => a.title === u.keyword) ?? {
@@ -125,7 +125,7 @@ export default function StatisticsModal(props: {
                 usage={availability === 0 ? loraData : availability === 1
                     ? loraData?.filter(a => loraAvailable(a.keyword))
                     : loraData?.filter(a => !loraAvailable(a.keyword))}
-                filter={filter} keywordColumnOverride="LoRA"
+                filter={filter} keywordColumnOverride="LoRA" limit={limit}
                 getSampleImageId={(u) => loras.find(a => a.alias === u.keyword)?.bannerImage}
                 renderKeywordRow={(u) => {
                     const m = loras.find(a => a.alias === u.keyword) ?? {
@@ -148,7 +148,7 @@ export default function StatisticsModal(props: {
                 <StatsPanel
                     datedUsageApi={getKeywordUsageDated}
                     usage={keywordData}
-                    filter={filter}
+                    filter={filter} limit={limit}
                     renderCount={(total) => <Tooltip title="'Keywords' are determined by non-LoRA words split by commas, line breaks, or more than two spaces. This detection isn't perfect!">
                         <div style={{ opacity: ".7", fontSize: ".9em" }}> About {total} unique keywords</div>
                     </Tooltip>}

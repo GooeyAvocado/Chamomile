@@ -13,9 +13,15 @@ import { KeywordFilterOptions } from "../../../../model/KeywordFilterOptions";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
 import KeywordUsageDatedResult from "../../../../model/KeywordUsageDatedResult";
 
-export function StatsPanel({ usage, filter, datedUsageApi, keywordColumnOverride, renderImageTile, renderKeywordRow, rowHeightOverride, renderCount, getSampleImageId, minAutoCompleteLength: propMinACL }: {
+export function StatsPanel({
+    usage, filter, datedUsageApi, keywordColumnOverride,
+    renderImageTile, renderKeywordRow, rowHeightOverride,
+    renderCount, getSampleImageId, minAutoCompleteLength: propMinACL,
+    limit
+}: {
     usage: KeywordUsage[],
-    filter: FilterOptions
+    filter: FilterOptions,
+    limit: number,
     renderImageTile?: (usage: KeywordUsage, setImageView: (val: number) => void) => React.ReactNode
     renderKeywordRow?: (usage: KeywordUsage) => React.ReactNode
     renderCount?: (total: number) => React.ReactNode
@@ -53,7 +59,7 @@ export function StatsPanel({ usage, filter, datedUsageApi, keywordColumnOverride
     useEffect(() => {
         console.log(selectedKeywords.length)
         if (selectedKeywords.length > 0) {
-            fetch(undefined, undefined, { ...filter, keyword: selectedKeywords.join(",") } as KeywordFilterOptions)
+            fetch(undefined, undefined, { ...filter, keyword: selectedKeywords.join(","), lastImage: limit } as KeywordFilterOptions)
         }
     }, [selectedKeywords])
 
