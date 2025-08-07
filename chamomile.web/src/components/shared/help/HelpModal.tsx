@@ -13,24 +13,23 @@ export default function HelpModal(props: {
 }) {
 
     const { open, setOpen } = props
-    const { width } = useWindowDimensions();
+    const { width, height } = useWindowDimensions();
+
+    const minAboutHeight = 636
 
     return <TabbedModal
         open={open} setOpen={setOpen}
         maxWidth="md" fullWidth
+        contentStyle={{ overflowY: "hidden" }}
     >
         {width > 450 && <TabbedModalTitle>Help and About</TabbedModalTitle>}
-        <TabbedModalTabContent label="Help" style={{
-            height: "75vh",
-            display: 'flex', gap: '10px'
-        }}>
-
-            <HelpTab setOpen={setOpen} />
+        <TabbedModalTabContent label="Help">
+            <HelpTab setOpen={setOpen} height={`${height - 200}px`} />
         </TabbedModalTabContent>
         <TabbedModalTabContent label="About" style={{
-            height: "75vh",
+            height: `${height - 200}px`, overflowY: "auto",
             display: 'flex', flexDirection: 'column',
-            justifyContent: 'center', alignItems: 'center',
+            justifyContent: height > minAboutHeight ? 'center' : undefined, alignItems: "center",
         }}>
             <AboutTab />
 

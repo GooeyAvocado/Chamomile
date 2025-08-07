@@ -22,7 +22,7 @@ export default function HelpDisplay(props: {
     const helpSectionTitles = helpSections.map(a => a.props?.title) as string[];
 
     if (selectMode) {
-        return <div style={{ display: 'flex', flexDirection: 'column', gap: "10px", width: "100%", overflowY: 'hidden' }}>
+        return <div style={{ display: 'flex', flexDirection: 'column', gap: "10px", width: "100%", overflowY: 'hidden', height: props.height }}>
             <Select
                 value={selectedTab}
                 onChange={(e) => setSelectedTab(e.target.value as number)}
@@ -38,10 +38,47 @@ export default function HelpDisplay(props: {
                 {helpSections[selectedTab]}
             </div>
 
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: ".7em" }}>
+                <div style={{ maxWidth: "50%", textAlign: "left" }}>
+                    {selectedTab > 0 && (
+                        <Button
+                            startIcon={<ChevronLeft />}
+                            onClick={() => setSelectedTab(selectedTab - 1)}
+                            sx={{
+                                fontSize: "1em",
+                                textTransform: "none",
+                                justifyContent: "flex-start",
+                                textAlign: "left"
+                            }}
+                            fullWidth
+                        >
+                            {helpSectionTitles[selectedTab - 1]}
+                        </Button>
+                    )}
+                </div>
+                <div style={{ maxWidth: "50%", textAlign: "right" }}>
+                    {selectedTab < helpSectionTitles.length - 1 && (
+                        <Button
+                            endIcon={<ChevronRight />}
+                            onClick={() => setSelectedTab(selectedTab + 1)}
+                            sx={{
+                                fontSize: "1em",
+                                textTransform: "none",
+                                textAlign: 'right',
+                                justifyContent: "flex-end",
+                            }}
+                            fullWidth
+                        >
+                            {helpSectionTitles[selectedTab + 1]}
+                        </Button>
+                    )}
+                </div>
+            </div>
+
         </div>
     }
 
-    return <>
+    return <div style={{ display: 'flex', gap: '10px' }}>
         <div style={{ width: `${tabsWidth}px`, overflowY: "hidden" }}>
             <Tabs
                 value={selectedTab}
@@ -70,7 +107,7 @@ export default function HelpDisplay(props: {
             </Tabs>
         </div>
         <hr />
-        <div style={{ flex: "1", overflowY: "hidden", display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: "1", overflowY: "hidden", display: 'flex', flexDirection: 'column', height: props.height }}>
             <div>
                 <div style={{ fontSize: '1.75em', fontFamily: "Merriweather" }}>{helpSectionTitles[selectedTab]}</div>
                 <hr style={{ width: "100%" }} />
@@ -115,6 +152,6 @@ export default function HelpDisplay(props: {
                 </div>
             </div>
         </div>
-    </>
+    </div>
 
 }

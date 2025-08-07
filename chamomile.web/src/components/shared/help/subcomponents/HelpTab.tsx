@@ -10,6 +10,7 @@ import AdvSearchHelp from "../../filter/AdvSearchHelp";
 
 export default function HelpTab(props: {
     setOpen: (val: boolean) => void
+    height: string
 }) {
 
     const { setOpen } = props;
@@ -47,7 +48,7 @@ export default function HelpTab(props: {
 
     const samplePrompt = "man made of blue slime, slime man, slime, melting, liquid hair, ((furry)), dog, canine, anthro, twink, chubby, blue skin, transparent skin, translucent skin, polo, sweatpants, waving, looking at viewer, smile"
 
-    return <HelpDisplay height={"75vh"} tabsWidth={200}>
+    return <HelpDisplay height={props.height} tabsWidth={200}>
 
         <HelpSection title="Welcome to Chamomile" >
             <p>

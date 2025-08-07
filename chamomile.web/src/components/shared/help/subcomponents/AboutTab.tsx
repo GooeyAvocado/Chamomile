@@ -12,7 +12,7 @@ export default function AboutTab() {
     const buildTime = import.meta.env.VITE_BUILD_TIMESTAMP ? new Date(import.meta.env.VITE_BUILD_TIMESTAMP) : new Date();
 
     return <>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', width: "50%", minWidth: '300px', position: "relative" }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', width: "50%", minWidth: '300px' }}>
             <ChamomileLogo />
             <div>V3.0</div>
         </div>
