@@ -5,7 +5,7 @@ import { useSettings } from "../hooks/useSettings";
 
 export interface PromptContextType {
     prompt: Prompt,
-    setPrompt: (val: Prompt) => void,
+    setPrompt: (val: Prompt, globalOverride?: boolean) => void,
     orderAmount: number,
     setOrderAmount: (val: number) => void,
     variables: any,
@@ -39,7 +39,19 @@ export default function PromptProvider(props: { children: any }) {
 
     return <PromptContext.Provider value={{
         orderAmount: orderAmount, setOrderAmount: setOrderAmount,
-        prompt: prompt, setPrompt: setPrompt,
+        prompt: prompt, setPrompt: (val, override) => {
+            setPrompt(override ? val : {
+
+                ...val, ...{
+                    cfgScale: settings.globals.cfg ? prompt.cfgScale : val.cfgScale,
+                    sampler: settings.globals.sampler ? prompt.sampler : val.sampler,
+                    steps: settings.globals.steps ? prompt.steps : val.steps,
+                    width: settings.globals.width ? prompt.width : val.width,
+                    height: settings.globals.height ? prompt.height : val.height
+
+                }
+            })
+        },
         setVairables: setVariables, variables: variables,
         album: album, setAlbum: setAlbum
     } as PromptContextType}>

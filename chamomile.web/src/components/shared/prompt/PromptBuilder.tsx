@@ -59,7 +59,8 @@ export default function PromptBuilder(props: {
     const [loadOpen, setLoadOpen] = useState(false)
 
     const prompt = promptOverride ?? globalPrompt
-    const setPrompt = setPromptOverride ?? setGlobalPrompt
+    const updateGlobalPrompt = (val: Prompt) => setGlobalPrompt(val, true)
+    const setPrompt = setPromptOverride ?? updateGlobalPrompt
 
     const onBrew = (amountOverride?: number) => {
         const allPrompts = []
