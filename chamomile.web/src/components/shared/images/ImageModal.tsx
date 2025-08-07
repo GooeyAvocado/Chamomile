@@ -54,7 +54,8 @@ export default function ImageModal(props: {
 
     const { setPrompt } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
-    const { vertical } = useWindowDimensions()
+    const { width, height } = useWindowDimensions()
+    const vertical = width < (500) / 0.45 || height / width > 1.45
     const { pong } = usePingPong();
 
     const [collapse, setCollapse] = useState(collapseDefault)
