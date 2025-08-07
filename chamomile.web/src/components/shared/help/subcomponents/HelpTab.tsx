@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Gradient, Height, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Warning, Window, Yard } from "@mui/icons-material";
+import { BarChart, Bolt, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, Height, Image, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -104,9 +104,9 @@ export default function HelpTab(props: {
         <HelpSection title="Importing Your Existing Collection" >
             <img src="/screenshots/filedrop.png" style={{ width: "100%" }} />
             <p>
-                If you've previously generated images with your WebUI, you can import images to Chamomile by dragging and dropping one or
-                more files or folders into Chamomile. We'll take care of extracting the metadata already embedded on each image to populate
-                Prompt, Model, LoRAs, Scheduler, Seed, and other information.
+                If you've previously generated images with your WebUI, you can import them to Chamomile by dragging and dropping one or
+                more files or folders. We'll take care of extracting the metadata already embedded on each image to populate
+                Prompt, Model, LoRAs, Sampler, Seed, and other information.
             </p>
         </HelpSection>
 
@@ -172,7 +172,7 @@ export default function HelpTab(props: {
             </div>
             <p>
                 If SD is unavailable, an additional option on this menu will appear to refresh SD status. Generation will be paused if an image fails
-                to generate because SD becomes unavailable. The image that failed to generate will be re-added to the queue
+                to generate because SD went down. The image that failed to generate will be re-added to the queue
                 in the first position so it's generated as soon as SD becomes available and generation is resumed.
             </p>
 
@@ -188,8 +188,8 @@ export default function HelpTab(props: {
             <Alert severity="warning" style={{ fontSize: ".8em" }}>
                 <AlertTitle style={{ fontSize: "1.2em" }}>New models and LoRAs may not automatically be visible</AlertTitle>
                 While Chamomile refreshes models and availability every time you open the models dialog, your web
-                ui may not. If your newly downloaded models aren't showing up in Chamomile, open your Web UI and refresh
-                the list of models there, then open the dialog on Chamomile again. Or, simply restart your Web UI.
+                UI may not. If your newly downloaded models aren't showing up in Chamomile, open your web UI and refresh
+                the list of models there, then open the dialog on Chamomile again. Or, simply restart your web UI.
             </Alert>
             <p>
                 Models can only be set globally, and will affect pending generations. If you change your model while there's still
@@ -212,8 +212,8 @@ export default function HelpTab(props: {
         <HelpSection title="Model Sequencing" >
             <img src="/screenshots/modelsequence.png" style={{ width: "70%" }} />
             <p>
-                If you have a large batch of images ahead, and want to introduce further variety in your
-                outputs, you can consider setting up a model sequence. Based on the settings left here,
+                If you have a large batch of images on queue, and want to introduce further variety in your
+                outputs, you can consider setting up a model sequence. Based on the sequence,
                 Chamomile will dynamically switch models after generation of an image.
             </p>
             <p>
@@ -224,7 +224,7 @@ export default function HelpTab(props: {
                     <b>Chance to stay</b>:
                     Percentage chance that Chamomile will stay on this model rather than switch to
                     another model in the sequence. Setting this value too low may cause Chamomile to
-                    thrash between models<br /><br />
+                    thrash between models.<br /><br />
                 </li>
                 <li>
                     <b>Load weight</b>:
@@ -251,16 +251,17 @@ export default function HelpTab(props: {
             <img src="/screenshots/wildcards.png" width={"100%"} />
             <p>
                 Chamomile works with Dynamic Prompts and our Wildcard Browser extension. You can install them quickly by
-                downloading the github's contents and putting it in folders for them. You can download both here. Make sure
-                to restart your webui after installing them.
+                downloading the github's contents into individual folders under the following directory:
             </p>
+            <div style={codeStyle}>/(your webUI root)/extensions</div>
+            <p>You can download both here. Make sure to restart your webui after installing them.</p>
             <ul>
                 <li><GithubLink href="https://github.com/adieyal/sd-dynamic-prompts/tree/main">Dynamic Prompts</GithubLink></li>
                 <li><GithubLink href="https://github.com/GooeyAvocado/sd-wildcard-browser">Wildcard Browser</GithubLink></li>
             </ul>
             <p>
                 With Dynamic Prompts, you can add wildcards to your prompt, where one value will be picked from
-                a given text file. You can specify where the wildcard will be placed by using two underscores (IE: __body_types__)
+                a given text file. You can specify where the wildcard will be placed by using two underscores (IE: __body_types__).
                 Wildcard values can contain other wildcards, LoRAs, or other Dynamic Prompt syntax.
                 Your text files for wildcards should be placed here:
             </p>
@@ -275,7 +276,7 @@ export default function HelpTab(props: {
                 overrides on top of overrides, or wildcard presets for wildcards called on another selected wildcard preset
             </p>
             <p>
-                Chamomile will save both the actual prompt used by your WebUI to generate the image, named the "Prompt",
+                Chamomile will save both the actual prompt used by your web UI to generate the image, named the "Prompt",
                 and the prompt with the wildcards, variables, and overrides un-replaced, named the "Base Prompt",
                 so you can re-use a template from any generated image.
             </p>
@@ -318,7 +319,7 @@ export default function HelpTab(props: {
                 overrides on top of overrides, or wildcard presets for wildcards called on another selected wildcard preset
             </p>
             <p>
-                Chamomile will save both the actual prompt used by your WebUI to generate the image, named the "Prompt",
+                Chamomile will save both the actual prompt used by your web UI to generate the image, named the "Prompt",
                 and the prompt with the wildcards, variables, and overrides un-replaced, named the "Base Prompt",
                 so you can re-use a template from any generated image.
             </p>
@@ -374,9 +375,8 @@ export default function HelpTab(props: {
                 </div>
 
                 <div>
-                    <b><LabeledIcon label="Width"><Height sx={{ transform: 'rotate(90deg)', }} /></LabeledIcon> &
-                        <LabeledIcon label="Height"><Height style={{ marginRight: "-10px" }} /></LabeledIcon></b>:  Determines the dimensions of your image.
-                    <p>Clicking either icon on this textbox will bring up a modal with common size presets</p>
+                    <b><LabeledIcon label="Dimensions"><OpenWith /></LabeledIcon></b>:  Determines the dimensions of your image.
+                    <p>Clicking the icon on this component will bring up a modal with common size presets</p>
                 </div>
 
                 <div>
@@ -412,10 +412,52 @@ export default function HelpTab(props: {
                         draws out flavors differently, resulting in unique aromas and textures. Similarly, different
                         samplers can produce subtle or dramatic changes in your image's style, detail, and consistency.
                     </p>
-                    <p><i>
-                        While all samplers are presented, most models will tell you which sampler to pick. This is usually
-                        either DPM++ 2M for realistic results, or Euler A for softer, more stylized results.
-                    </i></p>
+                    <p>
+                        While we display all available samplers, 4 have been chosen as the most common and are displayed on top:
+                    </p>
+                    <div style={{ display: "flex", flexDirection: 'column', gap: "10px", marginLeft: "20px", marginBottom: "20px" }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                            <Bolt />
+                            <div style={{ flexShrink: "0", width: "70px" }}>
+                                <b>Fast</b>
+                                <div style={{ fontSize: ".8em", opacity: ".8" }}> (UniPC)</div>
+                            </div>:
+                            <div>
+                                The newest sampler which can generate images in fewer steps
+                            </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                            <Palette />
+                            <div style={{ flexShrink: "0", width: "70px" }}>
+                                <b>Styled</b>
+                                <div style={{ fontSize: ".8em", opacity: ".8" }}>(Euler Dy)</div>
+                            </div>:
+                            <div>
+                                Often resolves to simpler images giving a more cartoony or stylized look
+                            </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                            <Explore />
+                            <div style={{ flexShrink: "0", width: "70px" }}>
+                                <b>Standard</b>
+                                <div style={{ fontSize: ".8em", opacity: ".8" }}>(DPM++ 2M)</div>
+                            </div>:
+                            <div>
+                                Provides a balance of quality and speed
+                            </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                            <Image />
+                            <div style={{ flexShrink: "0", width: "70px" }}>
+                                <b>Quality</b>
+                                <div style={{ fontSize: ".8em", opacity: ".8" }}>(DPM2)</div>
+                            </div>:
+                            <div>
+                                Slower but resolves to higher quality, sharper images
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
                 {/* This is left here in case we ever want to bring this back */}
                 {/* <div>
@@ -467,7 +509,6 @@ export default function HelpTab(props: {
             </ul>
         </HelpSection>
 
-
         <HelpSection title="Previewing Recipes">
             <img src="/screenshots/preview.png" width={"70%"} />
             <p>
@@ -477,9 +518,10 @@ export default function HelpTab(props: {
                 in the {BrewButton} button's menu to launch the preview dialog.
             </p>
             <p>
-                You can edit the prompt and the image preview on
-                the top will a few seconds after your last edit. By default, previews are generated at 10 steps instead of 30
+                You can edit the prompt and the image preview on the top will update a few seconds
+                after your last edit. By default, previews are generated at 10 steps instead of 30
                 to make their generation faster. It may take a bit if Chamomile has a queue and is busy.
+                <LabeledIcon label="Pausing"><Pause color="warning" /></LabeledIcon> generation will not pause preview brewing.
             </p>
             <p>
                 The preview dialog will also generate using the same seed to make sure only
@@ -502,8 +544,8 @@ export default function HelpTab(props: {
                 When you right click on an image, you may be confused by seeing two options relating to the image's prompt.
             </p>
             <p>
-                Chamomile will save both the actual prompt used by your WebUI to generate the image, named the "Prompt",
-                and the prompt with the wildcards, variables, and overrides un-replaced, named the "Base Prompt",
+                Chamomile will save both the actual prompt used by your web UI to generate the image, named the "Prompt",
+                and the prompt with the wildcards, comments, and overrides un-replaced, named the "Base Prompt",
                 so you can re-use a template from any generated image.
             </p>
             <div style={{ display: 'flex', flexWrap: "wrap", gap: "20px" }}>
@@ -552,18 +594,19 @@ export default function HelpTab(props: {
             <p>
                 Additionally, each will let you use either the
                 <LabeledIcon label="Prompt"><Coffee /></LabeledIcon>, or
-                the <LabeledIcon label="Base Prompt"><CoffeeOutlined /></LabeledIcon> (if it is available).
+                the <LabeledIcon label="Base Prompt"><CoffeeOutlined /></LabeledIcon>. The Base
+                Prompt may not be available if the image was uploaded, or if the base prompt and
+                actual prompt are the same.
             </p>
-            <p>The first is by right clicking an image from the home grid:</p>
+            <p>You can right click on an image to bring up these options:</p>
             <img src="screenshots/imageContextMenu.png" width={"60%"} />
             <p>
-                The second and third ways are on the image display. You can select from the bottom nav options, where base or full prompts
-                can be chosen from a pop up menu when clicking either option:
+                You can also view these options from the image hotbar when viewing an image:
             </p>
             <img src="screenshots/imageNavGrid.png" width={"60%"} />
             <p>
-                You can also view the prompts and select from either of the two on the top right portion of the screen. Whether this is
-                the full or base prompt is determined by which of the two is currently being displayed
+                And lastly, you can view and re-use or re-order a prompt or base prompt from the side panel
+                when viewing an image. Which is used depends on which prompt tab is active:
             </p>
             <img src="screenshots/imagePrompt.png" width={"60%"} />
         </HelpSection>
@@ -572,9 +615,15 @@ export default function HelpTab(props: {
             <img src="/screenshots/saveRecipe.png" width={"50%"} />
 
             <p>
-                Just like an excellent coffee recipe, sometimes we want to save a prompt to re-use it later. You can either favorite an image and
+                Just like an excellent tea recipe, sometimes we want to save a prompt to re-use it later. You can either favorite an image and
                 find it through search, or you can specifically save a recipe. To do this, look in the menu on the {BrewButton} button, and
                 click <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Save this recipe</Card> option.
+            </p>
+            <p>
+                You can further organize your recipes into folders. Click
+                the  <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle", alignItems: 'center', gap: "5px" }}>
+                    <Folder fontSize="inherit" /> Root
+                </Card> button to select where to save your recipe, or specify a new folder by typing a path with slashes.
             </p>
             <p>
                 Once your recipe is saved, you can browse, edit, and load recipes using
@@ -589,7 +638,8 @@ export default function HelpTab(props: {
 
             <p>
                 Chamomile allows you to set up collections of images, which can automatically add images that match a custom search query. To
-                view them, Click on the <LabeledIcon label="Collections"><PhotoLibrary /></LabeledIcon> icon on the top of the screen.
+                view them, Click on the <LabeledIcon label="Collections"><PhotoLibrary /></LabeledIcon> icon on the menu on the top right of
+                the screen.
             </p>
 
             <p>
@@ -640,8 +690,8 @@ export default function HelpTab(props: {
         <HelpSection title="Usage Statistics" >
             <img src="/screenshots/stats.png" style={{ width: "70%" }} />
             <p>
-                You can view usage statistics for both LoRA and Model usage by clicking
-                the <LabeledIcon label="Statistics"><BarChart /></LabeledIcon> at the end
+                You can view usage statistics by clicking
+                the <LabeledIcon label="Statistics"><BarChart /></LabeledIcon> button at the end
                 of the search box. These statistics are based on your search query. If it is
                 blank, it'll show global overall statistics. You can further refine this to
                 show only models that are available or unavailable, and a limit to how many
@@ -707,13 +757,13 @@ export default function HelpTab(props: {
             <p>
                 The Chamomile Display is designed to keep a look at what Chamomile is generating. We generally expect this to be run on a second monitor or
                 a different computer. Once an image is generated, it keeps a small buffer of images that have been generated, and you can flip through them
-                on an image viewer. The image viewer will automatically pull a newly generated image if it's on the latest previous image.
+                on an image viewer. The image viewer will automatically pull a newly generated image if it's on the previous latest image.
             </p>
             <p>
                 While it's meant for viewing only, you can still hit the <LabeledIcon label="Menu"><Menu /></LabeledIcon> button on the top right of the
                 screen to bring up more information, and to brew more of the image based on their prompt or base prompt.
             </p>
-            <p>The Chamomile Display can be launched from the <LabeledIcon label="Display"><Monitor /></LabeledIcon> button</p>
+            <p>The Chamomile Display can be launched from the <LabeledIcon label="Display"><Monitor /></LabeledIcon> option on the menu on the top right of the screen</p>
         </HelpSection>
 
         <HelpSection title="Keyboard Shortcuts">
