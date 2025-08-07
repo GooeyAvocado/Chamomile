@@ -16,6 +16,7 @@ export default function WhatsNew({ open, setOpen }: {
     const whatsnew = `We added a lot with this one, including this dialog!
 
 ### What's new?
+- **Promptbox Autocomplete:** You can now get suggestions for LoRAs (<), Wildcards (__), and Dprompts variables ($\{var}) on the prompt box
 - **Collections:** It's now a lot easier to organize your images. You can set up collections to automatically add images based on a search, or generate images directly to an album.
 - **Settings:** You can now configure sound, defaults, and which values from the prompt box are fixed between orders.
 - **Keyword Statistics:** One new statistics category added so you can see what makes up your prompts.
@@ -30,16 +31,23 @@ export default function WhatsNew({ open, setOpen }: {
 - CTRL+D override to favorite images when viewing an image
 
 ### What's changed?
+- **UI Overhaul:** Chamomile is now a little wider, and leaves a bit more vertical space for images
+- **Better Sampler Dropdown:** Now with search, sorted, and some common samplers on top with user friendly text
 - **Better Statistics:** Statistics have been bolstered with usages over time, making it easier to see insights into your usage patterns.
 - **Recipe Folders:** Recipes can now be stored in different folders to make it easier to find them.
 - **Order previews:** Lost what you ordered? Don't worry. Now if you re-order prompts, or order a saved recipe, a sample image will show on your queued order.
 - **Additional Search Options:** You can now search for images you've upscaled, and images you've downloaded
 - **Accordions:** There's a lot of information for each image. We've collapsed some bits of information so you can focus on exactly what you're looking for.
-- **Variable Import/Export:** A little pair of buttons to import export variables, overrides, and wildcard overrides for later
+- **Override Import/Export:** A little pair of buttons to import export overrides for later
+- **Variables further deprecated:** Variables will only be available if the user adds a variable to the prompt (%myVar%)
+- **Order icon changed:** Ordering now uses ReceiptLong instead of Terminal
 - Models and LoRAs that are unavailable and have no images generated will automatically delete themselves
-- Statistics moved up to the top bar
 - You can now re-check SD status from the app rather than refreshing the page
 - Base prompts are now unavailable for images that have base prompts that match actual prompts
+- Advanced Prompt options have been re-ordered to wrap in a more sensible way
+- Welcome pane has been improved to direct users on how to brew their first image, upload their collection, or get to the help section
+- Expand is now smooth on search and prompt box
+- Search on Enter QOL improvement
 
 
 ### Fixed bugs
@@ -49,6 +57,9 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug that would make "unknown" model types show all models instead
 - Fixed bug that would make it impossible to upload images where the base model is unavailable
 - Fixed bug that would make cancelling a group of orders fail to completely appear cancelled on the frontend
+- Fixed bug that would make statistics for empty results crash the app
+- Fixed bug where grouped prompts modal would report steps as 10x what they actually were
+- Fixed some typos
 - Improved system stability
 
 ### Known bugs
