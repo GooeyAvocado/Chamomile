@@ -1,5 +1,5 @@
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material"
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 export default function AreYouSureModal(props: {
     open: boolean,
