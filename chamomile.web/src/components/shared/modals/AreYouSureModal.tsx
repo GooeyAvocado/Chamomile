@@ -1,4 +1,5 @@
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material"
+import { useEffect, useRef } from "react";
 
 export default function AreYouSureModal(props: {
     open: boolean,
@@ -9,9 +10,21 @@ export default function AreYouSureModal(props: {
     children: any
 }) {
 
-    const { onYes, open, setOpen, loading, children, title } = props;
+    const {
+        onYes, open, setOpen,
+        loading, children, title
+    } = props;
 
-    return <Dialog open={open} onClose={loading ? undefined : () => setOpen(false)} fullWidth maxWidth="xs">
+
+    const yesButtonRef = useRef<HTMLButtonElement>(null);
+    const focusYes = () => { if (open) yesButtonRef.current?.focus(); }
+
+    return <Dialog
+        open={open} onClose={loading ? undefined : () => setOpen(false)}
+        fullWidth maxWidth="xs"
+        onTransitionEnter={focusYes}
+        onTransitionEnd={focusYes} //Do it again so it looks highlighted too
+    >
 
         {title && <DialogTitle>{title}</DialogTitle>}
 
@@ -24,7 +37,7 @@ export default function AreYouSureModal(props: {
                 ? <CircularProgress size={32} />
                 : <>
                     <Button disabled={loading} onClick={() => setOpen(false)}>No</Button>
-                    <Button disabled={loading} onClick={() => onYes()}>Yes</Button>
+                    <Button disabled={loading} onClick={() => onYes()} ref={yesButtonRef}>Yes</Button>
                 </>
             }
         </DialogActions>
