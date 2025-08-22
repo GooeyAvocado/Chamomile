@@ -10,7 +10,7 @@ export default function LoraStrip({ loras: aliases, maxLength }: {
     const { loras } = useLoras();
 
     const images = useMemo(() =>
-        aliases.map(a => loras.find(b => b.alias === a)?.bannerImage)
+        aliases.map(a => loras?.find(b => b.alias === a)?.bannerImage)
         , [aliases, loras]);
 
     return <ImageStrip images={images ?? []} maxLength={maxLength} />
