@@ -4,6 +4,7 @@ import { Button, Card, CardActionArea, Dialog, DialogActions, DialogContent, Dia
 import { Cancel, DirectionsRun, EditNote, Numbers, OpenWith, Tune } from "@mui/icons-material";
 import PromptEditorModal from "./PromptEditorModal";
 import { imageUrl } from "../../../api/Images";
+import HighlightedPromptDiv from "./HighlightedPromptDiv";
 
 export default function PromptGroupModal(props: {
     open: boolean,
@@ -46,14 +47,16 @@ export default function PromptGroupModal(props: {
                     </CardActionArea></Card>
                     Based on {basedOn()}.
                 </div>}
-                <div style={{
-                    flex: "1",
-                    fontSize: ".7em", fontFamily: 'monospace',
-                    whiteSpace: 'pre-wrap', wordWrap: 'break-word',
-                    marginBottom: '20px', maxHeight: '192px', overflowY: 'auto'
-                }}>{
-                        prompts[0].positivePrompt
-                    }</div>
+                <HighlightedPromptDiv
+                    prompt={prompts[0].positivePrompt}
+                    style={{
+                        flex: "1",
+                        fontSize: ".7em", fontFamily: 'monospace',
+                        whiteSpace: 'pre-wrap', wordWrap: 'break-word',
+                        marginBottom: '20px', maxHeight: '192px', overflowY: 'auto',
+                        padding: '0px'
+                    }}
+                />
 
             </div>
 

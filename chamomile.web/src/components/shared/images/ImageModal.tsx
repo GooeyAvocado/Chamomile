@@ -24,6 +24,7 @@ import AlbumBrowser from "../albums/AlbumBrowser";
 import AlbumStrip from "../albums/AlbumStrip";
 import LoraStrip from "../lora/LoraStrip";
 import { usePingPong } from "../../hooks/usePingPong";
+import HighlightedPromptDiv from "../prompt/HighlightedPromptDiv";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -202,9 +203,9 @@ export default function ImageModal(props: {
                                 </Tabs>
                                 <CopyToClipboardButton text={promptMode === 0 ? image?.prompt : image?.basePrompt} style={{ paddingRight: "16px" }} />
                             </div>
-                            <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>
-                                {promptMode === 0 ? image?.prompt : image?.basePrompt}
-                            </div>
+                            <HighlightedPromptDiv
+                                prompt={promptMode === 0 ? image?.prompt : image?.basePrompt}
+                            />
                         </Card>
 
                         {/* Negative Prompt */}
