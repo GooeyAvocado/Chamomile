@@ -43,6 +43,7 @@ interface CursorContext {
     value: (val: any) => string
     minLength: number
     setName: string,
+    setSuffix?: string,
     total: number,
     resultsTotal: number
 
@@ -91,6 +92,7 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
         //OK now that we know what to do, let's save this all to our context
         setCursorContext({
             setName: autocomplete.name,
+            setSuffix: autocomplete.suffix,
             currentPos: caretIndex,
             prefix: replacePrefix,
             suffix: replaceSuffix,
@@ -127,7 +129,8 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
         pos: number,
         prefix: string,
         suffix: string,
-        replacement: string
+        replacement: string,
+        matchSuffix?: string
     ): {
         newValue: string;
         newCaretPosition: number;
@@ -139,7 +142,10 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
             throw new Error("Prefix/suffix out of bounds");
         }
 
-        const newValue = value.slice(0, start) + replacement + " " + value.slice(end + 1);
+        const endAdjust = value.substring(end).startsWith(matchSuffix ?? "") ? (matchSuffix?.length ?? 0) : 0
+        const includeSpace = !value.slice(end + endAdjust).startsWith(" ")
+
+        const newValue = value.slice(0, start) + replacement + (includeSpace ? " " : "") + value.slice(end + endAdjust);
         const newCaretPosition = start + replacement.length + 1;
 
         return { newValue, newCaretPosition };
@@ -289,7 +295,7 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
                                         closeSuggestions();
                                         const { newCaretPosition, newValue } = replaceAround(props.value as string ?? "",
                                             cursorContext?.currentPos, cursorContext.prefix, cursorContext.suffix,
-                                            cursorContext.value(cursorContext.suggestions[0])
+                                            cursorContext.value(cursorContext.suggestions[0]), cursorContext.setSuffix
                                         )
                                         updateInputValueWithCaret(inputRef, newValue, newCaretPosition, props.onChange)
                                     }} >
@@ -303,7 +309,7 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
                                         closeSuggestions();
                                         const { newCaretPosition, newValue } = replaceAround(props.value as string ?? "",
                                             cursorContext.currentPos, cursorContext.prefix, cursorContext.suffix,
-                                            cursorContext.value(s)
+                                            cursorContext.value(s), cursorContext.setSuffix
                                         )
                                         updateInputValueWithCaret(inputRef, newValue, newCaretPosition, props.onChange)
                                     }}>
