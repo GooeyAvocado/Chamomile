@@ -151,7 +151,7 @@ namespace Chamomile.Data {
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE, IMAGE_GEN_MS
-            ], IMAGES_TABLE, string.Join(", ", ImageColumns)), (cmd) => {
+            ], IMAGES_TABLE.Split(" ")[0], string.Join(", ", ImageColumns)), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
                 cmd.SetString(IMAGES_BASE_PROMPT, prompt?.PositivePrompt ?? "");
                 cmd.SetString(IMAGES_NEG_PROMPT, image.NegativePrompt);
@@ -214,11 +214,12 @@ namespace Chamomile.Data {
 
             //Create the album
             var id = await adoTemplate.QuerySingle(
-                    InsertSql([ALBUM_NAME, ALBUM_THUMB, ALBUM_QUERY], ALBUM_TABLE) +
+                    InsertSql([ALBUM_NAME, ALBUM_THUMB, ALBUM_QUERY, ALBUM_HIDDEN_IN], ALBUM_TABLE) +
                     " RETURNING " + string.Join(", ", [ALBUM_ID]), (cmd) => {
                         cmd.SetString(ALBUM_NAME, album.Name);
                         cmd.SetInt(ALBUM_THUMB, album.ThumbId);
                         cmd.SetString(ALBUM_QUERY, album.SearchQuery);
+                        cmd.SetBoolean(ALBUM_HIDDEN_IN, album.HideFromTimeline);
                     }
                 , reader => reader.GetInt(0));
 
@@ -284,6 +285,11 @@ namespace Chamomile.Data {
                     "img." + IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], ALBUM_MAP, new WhereConditionGroup([new(ALBUM_ID)])) + ")"
                 ));
             }
+            else {
+                conditions.Add(new(
+                    "img." + IMAGES_ID, WhereConditionOperator.NOT_IN, "(" + SelectSql([IMAGES_ID], $"{ALBUM_MAP} am left join {ALBUM_TABLE} at on am.{ALBUM_ID} = at.{ALBUM_ID} ", new WhereConditionGroup([new(ALBUM_HIDDEN_IN, WhereConditionOperator.EQUALS, "true")])) + ")"
+                ));
+            }
 
             if (!string.IsNullOrEmpty(filter.FromDate)) {
                 conditions.Add(new(CRE_TS, WhereConditionOperator.GREATER_THAN, "@FROM_DATE"));
@@ -297,7 +303,10 @@ namespace Chamomile.Data {
                 conditions.Add(new(IMAGES_ID, WhereConditionOperator.LESS_THAN, lastImage + ""));
             }
 
-            conditions.Add(new(IMAGE_HIDDEN, WhereConditionOperator.EQUALS, "FALSE"));
+
+            if (filter.Album == null || filter.Album < 0) {
+                conditions.Add(new(IMAGE_HIDDEN, WhereConditionOperator.EQUALS, "FALSE"));
+            }
 
             return conditions;
         }
@@ -623,15 +632,17 @@ namespace Chamomile.Data {
             existingAlbum.SearchQuery = album.SearchQuery;
             existingAlbum.ThumbId = album.ThumbId;
             existingAlbum.Name = album.Name;
+            existingAlbum.HideFromTimeline = album.HideFromTimeline;
 
             await adoTemplate.Execute(UpdateSql(
-                [ALBUM_QUERY, ALBUM_THUMB, ALBUM_NAME],
+                [ALBUM_QUERY, ALBUM_THUMB, ALBUM_NAME, ALBUM_HIDDEN_IN],
                 ALBUM_TABLE, new WhereConditionGroup([new(ALBUM_ID)])
                 ), (cmd) => {
                     cmd.SetInt(ALBUM_ID, album.Id);
                     cmd.SetString(ALBUM_NAME, album.Name);
                     cmd.SetInt(ALBUM_THUMB, album.ThumbId);
                     cmd.SetString(ALBUM_QUERY, album.SearchQuery);
+                    cmd.SetBoolean(ALBUM_HIDDEN_IN, album.HideFromTimeline);
                 });
 
             return existingAlbum;

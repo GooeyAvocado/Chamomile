@@ -1,4 +1,4 @@
-import { Button, Card, CircularProgress, Dialog, DialogActions, DialogTitle, Switch, TextField } from "@mui/material"
+import { Alert, AlertTitle, Button, Card, CircularProgress, Dialog, DialogActions, DialogTitle, Switch, TextField } from "@mui/material"
 import { Album } from "../../../model/Album"
 import useApi from "../../hooks/useApi"
 import { useEffect, useState } from "react"
@@ -23,7 +23,8 @@ export default function AlbumEditor({
     useEffect(() => {
         setInternalAlbum(album ?? {
             name: "",
-            searchQuery: ""
+            searchQuery: "",
+            hideFromTimeline: false
         })
         setAutoAdd((album?.searchQuery?.length ?? 0) > 0)
         setAddExisting((!album?.id || album?.id <= 0) && (album?.searchQuery?.length ?? 0) > 0)
@@ -44,7 +45,7 @@ export default function AlbumEditor({
         if (editing) {
             updateApi.fetch(onSuccess, onError, { ...internalAlbum, searchQuery: autoAdd ? internalAlbum.searchQuery : "" } as Album)
         } else {
-            createApi.fetch(onSuccess, onError, { addExisting: autoAdd && addExisting, name: internalAlbum.name, searchQuery: autoAdd ? internalAlbum.searchQuery : "" } as AlbumCreateRequest)
+            createApi.fetch(onSuccess, onError, { addExisting: autoAdd && addExisting, name: internalAlbum.name, searchQuery: autoAdd ? internalAlbum.searchQuery : "", hideFromTimeline: internalAlbum.hideFromTimeline } as AlbumCreateRequest)
         }
     }
 
@@ -65,6 +66,20 @@ export default function AlbumEditor({
                 <AlbumThumbImg album={internalAlbum ?? { firstFourImages: [], name: "", searchQuery: "" }} />
             </Card>
             <TextField label="Name" value={internalAlbum?.name} onChange={(e) => setInternalAlbum({ ...internalAlbum, name: e.target.value })} />
+            {autoAdd && internalAlbum.hideFromTimeline && <Alert severity="warning">
+                <AlertTitle>Careful!</AlertTitle>
+                Images generated may disappear from the timeline if they match the auto-add criteria
+            </Alert>}
+            <div style={{ display: 'flex', gap: "16px", alignItems: 'center' }}>
+                <Switch checked={internalAlbum.hideFromTimeline} onChange={(_, checked) => setInternalAlbum({ ...internalAlbum, hideFromTimeline: checked })} />
+                <div>
+                    <div>Hide Images from Timeline</div>
+                    <div style={{ fontSize: ".7em" }}>
+                        Images in this album will not appear in the home timeline.
+                    </div>
+
+                </div>
+            </div>
             <div style={{ display: 'flex', gap: "16px", alignItems: 'center' }}>
                 <Switch checked={autoAdd} onChange={(_, checked) => setAutoAdd(checked)} />
                 <div>
