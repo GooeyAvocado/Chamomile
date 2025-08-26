@@ -10,7 +10,7 @@ export default function AlbumStrip({ albums: albumIds, maxLength }: {
     const { albums } = useAlbums();
 
     const images = useMemo(() =>
-        albumIds.map(a => albums.find(b => b.id === a)?.firstFourImages?.[0])
+        albumIds.map(a => albums?.find(b => b.id === a)?.firstFourImages?.[0])
         , [albumIds, albums]);
 
     return <ImageStrip images={images ?? []} maxLength={maxLength} />

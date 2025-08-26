@@ -67,6 +67,12 @@
         /// <summary>Whether or not this image is favorited</summary>
         public bool Favorite { get; set; } = false;
 
+        /// <summary>Whether or not this image is hidden on the timeline</summary>
+        public bool Hidden { get; set; } = false;
+
+        ///<summary>Additional Information JSON</summary>
+        public Dictionary<string, object>? additionalInfo { get; set; }
+
         /// <summary>When this image was created</summary>
         public DateTime Created { get; set; } = DateTime.Now;
     }

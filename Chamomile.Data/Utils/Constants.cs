@@ -19,7 +19,7 @@
         public static readonly string LORA_AVAIL_IN      = "lora_avail_in";
         public static readonly string LORA_TYPE_CD       = "lora_type_cd";
 
-        public static readonly string IMAGES_TABLE       = $"{SCHEMA}.images";
+        public static readonly string IMAGES_TABLE       = $"{SCHEMA}.images img";
         public static readonly string IMAGES_ID          = "image_id";
         public static readonly string IMAGES_PROMPT      = "image_prompt_tx";
         public static readonly string IMAGES_BASE_PROMPT = "image_base_prompt_tx";
@@ -42,6 +42,8 @@
         public static readonly string IMAGE_GEN_MS       = "image_gen_ms_nb";
         public static readonly string IMAGES_DOWNLOAD_CT = "image_download_ct"; 
         public static readonly string IMAGE_SIZE         = "image_effective_size_nb";
+        public static readonly string IMAGE_HIDDEN       = "image_hidden_in";
+        public static readonly string IMAGE_ADDTL_INFO   = "img_addtl_info_mv";
 
         public static readonly string IMAGES_LORA_MAP = $"{SCHEMA}.images_lora_map";
 
@@ -68,6 +70,7 @@
         public static readonly string ALBUM_THUMB = "album_thumb_id";
         public static readonly string ALBUM_SAMPLE_IDS = "album_sample_ids";
         public static readonly string ALBUM_QUERY = "album_query_tx";
+        public static readonly string ALBUM_HIDDEN_IN = "album_hidden_in";
 
 
         public static readonly string ALBUM_MAP = $"{SCHEMA}.album_map";

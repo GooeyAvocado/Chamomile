@@ -102,38 +102,6 @@ CREATE INDEX idx_image_prompt_fts
 	CONSTRAINT albummap_album_fk FOREIGN KEY (album_id) REFERENCES chamomile.albums(album_id) on delete cascade
 );
 
-CREATE OR REPLACE VIEW chamomile.album_meta as 
-WITH first_four AS (
-    SELECT
-        album_id,
-        image_id
-    FROM (
-        SELECT
-            album_id,
-            image_id,
-            ROW_NUMBER() OVER (PARTITION BY album_id ORDER BY image_id) AS rn
-        FROM chamomile.album_map
-    ) ranked
-    WHERE rn <= 4
-)
-SELECT
-    a.album_id,
-    a.album_nm,
-    COUNT(am.image_id) AS album_image_ct,
-    a.album_thumb_id,
-    ff.album_sample_ids,
-    MIN(img.cre_ts) AS min_ts,
-    MAX(img.cre_ts) AS max_ts
-	a.album_query_tx
-FROM chamomile.albums a
-LEFT JOIN chamomile.album_map am ON a.album_id = am.album_id
-LEFT JOIN chamomile.images img ON am.image_id = img.image_id
-LEFT JOIN (
-    SELECT album_id, ARRAY_AGG(image_id ORDER BY image_id) AS album_sample_ids
-    FROM first_four
-    GROUP BY album_id
-) ff ON a.album_id = ff.album_id
-GROUP BY a.album_id, a.album_nm, a.album_thumb_id, ff.album_sample_ids, a.album_query_tx;
 
 ALTER TABLE chamomile.images ADD image_gen_ms_nb int4 NULL;
 alter table images add image_notes_tx DEFAULT '';
@@ -184,3 +152,37 @@ RETURNS TABLE (
   ) AS k
   WHERE TRIM(k) <> '';
 $$ LANGUAGE sql STABLE;
+
+ALTER TABLE chamomile.albums ADD album_hidden_in boolean DEFAULT false NULL;
+ALTER TABLE chamomile.images add image_hidden_in bool DEFAULT false NULL;
+ALTER TABLE chamomile.images add img_addtl_info_mv jsonb NULL,
+
+-- chamomile.album_meta source
+
+CREATE OR REPLACE VIEW chamomile.album_meta
+AS WITH first_four AS (
+         SELECT ranked.album_id,
+            ranked.image_id
+           FROM ( SELECT album_map.album_id,
+                    album_map.image_id,
+                    row_number() OVER (PARTITION BY album_map.album_id ORDER BY album_map.image_id) AS rn
+                   FROM album_map) ranked
+          WHERE ranked.rn <= 4
+        )
+ SELECT a.album_id,
+    a.album_nm,
+    count(am.image_id) AS album_image_ct,
+    a.album_thumb_id,
+    ff.album_sample_ids,
+    min(img.cre_ts) AS min_ts,
+    max(img.cre_ts) AS max_ts,
+    a.album_query_tx,
+    a.album_hidden_in
+   FROM albums a
+     LEFT JOIN album_map am ON a.album_id = am.album_id
+     LEFT JOIN images img ON am.image_id = img.image_id
+     LEFT JOIN ( SELECT first_four.album_id,
+            array_agg(first_four.image_id ORDER BY first_four.image_id) AS album_sample_ids
+           FROM first_four
+          GROUP BY first_four.album_id) ff ON a.album_id = ff.album_id
+  GROUP BY a.album_id, a.album_nm, a.album_thumb_id, ff.album_sample_ids, a.album_query_tx;

@@ -90,7 +90,7 @@ namespace Chamomile.Data {
         }
 
         private static string InnerImageSql(FilterOptions filter, int limit) {
-            return SelectSql([$"IMV.{LORA_ALIAS}", $"img.{CRE_TS}", $"img.{IMAGES_ID}"], $"{IMAGES_TABLE} img left join {IMAGES_LORA_MAP} imv on img.{IMAGES_ID} = imv.{IMAGES_ID}", 
+            return SelectSql([$"IMV.{LORA_ALIAS}", $"img.{CRE_TS}", $"img.{IMAGES_ID}"], $"{IMAGES_TABLE} left join {IMAGES_LORA_MAP} imv on img.{IMAGES_ID} = imv.{IMAGES_ID}", 
                 new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }

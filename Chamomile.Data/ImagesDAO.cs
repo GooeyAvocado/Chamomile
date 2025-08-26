@@ -2,6 +2,7 @@
 using Chamomile.Common;
 using Chamomile.Common.Exceptions;
 using MetadataExtractor;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using static Chamomile.Data.Utils.AdoTemplate;
 using static Chamomile.Data.Utils.Constants;
@@ -15,7 +16,7 @@ namespace Chamomile.Data {
         private static readonly List<string> ImageColumns = [IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP, IMAGES_CFG_SCL, IMAGES_DOWNLOAD_CT, IMAGES_NOTES,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN, IMAGE_SIZE,
-                MODEL_TITLE, CRE_TS, IMAGE_GEN_MS];
+                MODEL_TITLE, CRE_TS, IMAGE_GEN_MS, IMAGE_HIDDEN,IMAGE_ADDTL_INFO];
 
         private async Task<GeneratedImage> ImageRM(Getter reader) {
             return new() {
@@ -37,8 +38,11 @@ namespace Chamomile.Data {
                 HiResAvailable = reader.GetBoolean(IMAGES_HIRES_IN),
                 GenerationDurationMs = reader.GetOptionalInt(IMAGE_GEN_MS),
                 DownloadCount = reader.GetOptionalInt(IMAGES_DOWNLOAD_CT),
-                Size=reader.GetInt(IMAGE_SIZE),
-                
+                Size = reader.GetInt(IMAGE_SIZE),
+                Hidden = reader.GetBoolean(IMAGE_HIDDEN),
+                additionalInfo = JsonSerializer.Deserialize<Dictionary<string, object>>(reader.GetOptionalString(IMAGE_ADDTL_INFO) ?? "{}") ,
+
+
                 Loras = await adoTemplate.Query(
                     SelectSql(
                         [LORA_ALIAS],
@@ -69,7 +73,7 @@ namespace Chamomile.Data {
                 FirstFourImages = reader.IsNull(ALBUM_SAMPLE_IDS) ? [] : new((int[])reader.GetOptionalValue(ALBUM_SAMPLE_IDS)!),
                 Newest = reader.GetOptionalDateTime(MAX_TS),
                 Oldest = reader.GetOptionalDateTime(MIN_TS),
-
+                HideFromTimeline = reader.GetBoolean(ALBUM_HIDDEN_IN)
             };
         }
 
@@ -77,6 +81,7 @@ namespace Chamomile.Data {
             return new() {
                 Id = reader.GetInt(ALBUM_ID),
                 Name = reader.GetString(ALBUM_NAME),
+                HideFromTimeline = reader.GetBoolean(ALBUM_HIDDEN_IN),
                 SearchQuery = reader.GetString(ALBUM_QUERY),
                 ThumbId = reader.GetOptionalInt(ALBUM_THUMB),
             };
@@ -270,13 +275,13 @@ namespace Chamomile.Data {
 
             if (!string.IsNullOrEmpty(filter.Lora)) {
                 conditions.Add(new(
-                    IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
+                    "img." + IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
                 ));
             }
 
             if (filter.Album != null && filter.Album >= 0) {
                 conditions.Add(new(
-                    IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], ALBUM_MAP, new WhereConditionGroup([new(ALBUM_ID)])) + ")"
+                    "img." + IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], ALBUM_MAP, new WhereConditionGroup([new(ALBUM_ID)])) + ")"
                 ));
             }
 
@@ -291,6 +296,8 @@ namespace Chamomile.Data {
             if (lastImage != null && lastImage > 0) {
                 conditions.Add(new(IMAGES_ID, WhereConditionOperator.LESS_THAN, lastImage + ""));
             }
+
+            conditions.Add(new(IMAGE_HIDDEN, WhereConditionOperator.EQUALS, "FALSE"));
 
             return conditions;
         }
@@ -436,21 +443,21 @@ namespace Chamomile.Data {
 
         public async Task<List<Album>> GetAlbums() {
             return await adoTemplate.Query(SelectSql(
-                    [ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS],
+                    [ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS, ALBUM_HIDDEN_IN],
                     ALBUM_META_VIEW, new WhereConditionGroup([]), [new OrderBy(ALBUM_NAME)]
                 ), (cmd) => { }, AlbumMetaRM);
         }
 
         public async Task<Album?> GetAlbum(int album) {
             return await adoTemplate.QuerySingle(SelectSql(
-                    [ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS],
+                    [ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS, ALBUM_HIDDEN_IN],
                     ALBUM_META_VIEW, new WhereConditionGroup([new(ALBUM_ID)])
                 ), (cmd) => cmd.SetInt(ALBUM_ID, album), AlbumMetaRM);
         }
 
         private async Task<Album?> GetAlbumSimple(int album) {
             return await adoTemplate.QuerySingle(SelectSql(
-                    [ALBUM_ID, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB],
+                    [ALBUM_ID, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_HIDDEN_IN],
                     ALBUM_TABLE, new WhereConditionGroup([new(ALBUM_ID)])
                 ), (cmd) => cmd.SetInt(ALBUM_ID, album), AlbumRM);
         }
@@ -474,7 +481,7 @@ namespace Chamomile.Data {
         public async Task<List<Album>> GetImageAlbums(int image) {
             return await adoTemplate.Query(
                 SelectSql(
-                    ["map." + ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS]
+                    ["map." + ALBUM_ID, ALBUM_COUNT, ALBUM_NAME, ALBUM_QUERY, ALBUM_THUMB, ALBUM_SAMPLE_IDS, MAX_TS, MIN_TS, ALBUM_HIDDEN_IN]
                     , $"{ALBUM_MAP} map, {ALBUM_META_VIEW} inf", new WhereConditionGroup([new(IMAGES_ID), new JoinCondition("map", "inf", ALBUM_ID)])
                     , [new OrderBy(ALBUM_NAME)]
                 ), (cmd) => cmd.SetInt(IMAGES_ID, image), AlbumMetaRM);

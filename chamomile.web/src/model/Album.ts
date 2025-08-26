@@ -8,5 +8,6 @@ export interface Album {
     count?: number
     newest?: string,
     oldest?: string
+    hideFromTimeline?: boolean
 
 }

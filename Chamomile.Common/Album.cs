@@ -15,6 +15,9 @@
         /// <summary>Name of this Album</summary>
         public string Name { get; set; } = "";
 
+        /// <summary>Hides the images from this album in the timeline</summary>
+        public bool HideFromTimeline { get; set; } = false;
+
         /// <summary>Search Query that'll be used to auto-tag images</summary>
         public string SearchQuery { get; set; } = "";
 
