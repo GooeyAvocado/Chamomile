@@ -1,6 +1,7 @@
 import { Card, CardActionArea } from "@mui/material"
 import { Album } from "../../../model/Album"
 import AlbumThumbImg from "./AlbumThumbImg"
+import { VisibilityOff } from "@mui/icons-material"
 
 export default function AlbumTile({
     album, onClick
@@ -24,7 +25,7 @@ export default function AlbumTile({
                     textOverflow: "ellipsis",
                     width: "100%"
                 }}>
-                    <b>{album.name}</b>
+                    {album.hideFromTimeline && <VisibilityOff fontSize="inherit" />} <b>{album.name}</b>
                 </div>
                 <hr />
                 {(album.count ?? 0) > 2 && <div>{new Date(album.oldest ?? "").toLocaleDateString()} - {new Date(album.newest ?? "").toLocaleDateString()}</div>}

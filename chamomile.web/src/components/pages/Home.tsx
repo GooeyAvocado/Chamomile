@@ -76,7 +76,10 @@ export default function Home() {
 
                 {album && <>
                     <div style={{ width: "100%", }}>
-                        <AlbumHeader onBack={() => { setAlbumsOpen(true) }}
+                        <AlbumHeader onBack={() => {
+                            setAlbumsOpen(true)
+                            refreshAlbums();
+                        }}
                             album={album} setAlbum={(val) => {
                                 setAlbum(val)
                                 if (!val) setFilter({ ...filter, album: -1 })

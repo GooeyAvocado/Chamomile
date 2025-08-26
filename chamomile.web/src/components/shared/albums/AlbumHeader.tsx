@@ -1,6 +1,6 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { Album } from "../../../model/Album";
-import { ArrowBack, CheckCircle, Delete, Edit, Info } from "@mui/icons-material";
+import { ArrowBack, CheckCircle, Delete, Edit, Info, VisibilityOff } from "@mui/icons-material";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { useState } from "react";
 import useApi from "../../hooks/useApi";
@@ -51,6 +51,9 @@ export default function AlbumHeader({ album, setAlbum, style, forceVertical, onB
                     display: 'flex', gap: "10px", alignItems: "center"
                 }}>
                     {onBack && <IconButton size="small" onClick={onBack}><ArrowBack /></IconButton>}
+                    {album.hideFromTimeline && <Tooltip title="Images on this album are hidden on the timeline">
+                        <VisibilityOff fontSize="inherit" />
+                    </Tooltip>}
                     {album.name}
                 </div>
 
