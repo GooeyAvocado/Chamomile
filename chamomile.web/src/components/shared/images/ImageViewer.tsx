@@ -25,17 +25,25 @@ import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
 import ModelChangeTile from "./ModelChangeTile";
 import ImageModalFromId from "./ImageModalFromId";
 import { Prompt } from "../../../model/Prompt";
+import SelectedImageActions from "../selectedImageActions/SelectedImageActions";
 
 export default function ImageViewer(props: {
     filter: FilterOptions
     showBrewing?: boolean,
     showWelcome?: boolean,
     onClick?: (val: GeneratedImage) => void
+    selectedImages?: number[]
+    setSelectedImages?: (val: number[]) => void,
+    selectImage?: (id: number) => void
+    unselectImage?: (id: number) => void
+    onClearSelect?: () => void
+    selectMode?: boolean
     album?: Album
     setAlbum?: (val: Album) => void
 }) {
 
-    const { filter, showBrewing, onClick, showWelcome, album, setAlbum } = props;
+    const { filter, showBrewing, onClick, showWelcome, album, setAlbum, selectImage, selectedImages, unselectImage, selectMode, onClearSelect, setSelectedImages } = props;
+
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
     const favApi = useApi(favImage)
@@ -245,84 +253,110 @@ export default function ImageViewer(props: {
     }
 
     return <>
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '128' : 128 + 32 + 16}px, 1fr))`,
-            gap: '20px'
-        }}>
-            {showBrewing && groupedQueue.map(p =>
-                p.length === 0 || !promptsAlbumFilter(p) ? <></> :
-                    p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} onView={setPromptViewImageID} /> :
-                        <QueuedGroupImageTile prompts={p} onCancel={cancel} onView={setPromptViewImageID} />
-            )}
-
-            {showBrewing && nextModel && <ModelChangeTile nextModel={nextModel} />}
-
-            {showBrewing && activeJob && promptAlbumFilter(activeJob) && <>
-                <BrewingImageTile
-                    imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
-                    eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100}
-                />
-
-                <PromptEditorModal onOk={() => { }} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress} />
-            </>}
-
-            {showBrewing && currentUpload && <>
-                <BrewingImageTile imageSrc={uploadBrewBlob ?? ""} progress={uploadProgress} />
-            </>}
-
-            {imageApi.images?.map(a => <ImageTile
-                key={`image-${a.id}`} image={a} onDelete={onDelete}
-                onFavorite={onFavorite}
-                onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setViewerOpen(true) }}
-            />)}
-
-            {!onClick && <>
-                <ImageModal
-                    open={viewerOpen} setOpen={setViewerOpen} image={selectedImage}
-                    onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
-                    onFavorite={onFavorite} onDownload={onDownload} onLeft={onLeft} onRight={onRight}
-                    onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
-                />
-                <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
-                    Are you sure you want to delete this image?
-                </AreYouSureModal>
-            </>}
-
-            {promptViewImageId && <ImageModalFromId open={!!promptViewImageId} setOpen={() => setPromptViewImageID(undefined)} image={promptViewImageId} />}
-
-        </div>
-        {imageApi.count === 0 && !activeJob && (queue?.length ?? 0) === 0 && <>
-            {filterIsEmpty() && !imageApi.loading && showWelcome ? <>{album ? <AlbumWelcome /> : <WelcomePane />}</>
-                : <div style={{ height: '100%', display: "flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                    {imageApi.loading ? <>
-                        <img src="brewing.gif" style={{ width: "128px" }} />
-                        <div style={{ marginTop: "-20px" }}>Loading images</div>
-                    </> : <>
-                        <img src="outlinepadded.png" style={{ width: "128px" }} />
-                        <div style={{ marginTop: "-20px" }}>No images!</div>
-                    </>}
-                </div>}
-        </>}
-        {imageApi.error &&
-            <Stack gap={"10px"}>
-                <Alert variant="standard" severity="error">
-                    <AlertTitle>Could not retrieve images</AlertTitle>
-                    {imageApi.error.message ? `Server responded: ${imageApi.error.message}` : "Something happened! Check the console"}
-                </Alert>
-                {imageApi.error.message?.includes("tsquery") && <Alert variant="standard" severity="info">
-                    <AlertTitle>It looks like this is an Advanced Search related issue</AlertTitle>
-                    <Link onClick={() => { setAdvSearchOpen(true) }} color="textPrimary">Learn about Advanced Search</Link>
-                </Alert>}
-            </Stack>
+        {selectMode &&
+            <SelectedImageActions
+                selectedImageIds={selectedImages ?? []}
+                onClearSelect={onClearSelect ?? (() => { })}
+                albumId={album?.id}
+                onAddToAlbum={(val) => {
+                    selectedImages?.map(a => imageApi.images.find(b => b.id === a))
+                        .filter(a => !!a).forEach((i) => {
+                            imageApi.updateImage({ ...i, albums: [...i?.albums, val] })
+                        })
+                }}
+                onSelectAll={() => {
+                    setSelectedImages?.(imageApi.images.map(a => a.id))
+                }}
+                onDelete={() => {
+                    imageApi.removeImages(selectedImages ?? [])
+                    onClearSelect?.();
+                }}
+            />
         }
-        {imageApi.hasMore && (imageApi.images?.length ?? 0) > 0 && <>
-            <div style={{ textAlign: 'center', marginTop: "20px" }}>
-                <Button size="small" onClick={() => imageApi.showMore()} disabled={imageApi.loading}> {imageApi.loading ? <CircularProgress size={24} /> : "Show More"}</Button>
-                <div style={{ fontSize: ".7em" }}>Showing {imageApi.images.length.toLocaleString()} of {imageApi.count.toLocaleString()} images</div>
+        <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
+
+
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '128' : 128 + 32 + 16}px, 1fr))`,
+                gap: '20px'
+            }}>
+                {showBrewing && groupedQueue.map(p =>
+                    p.length === 0 || !promptsAlbumFilter(p) ? <></> :
+                        p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} onView={setPromptViewImageID} /> :
+                            <QueuedGroupImageTile prompts={p} onCancel={cancel} onView={setPromptViewImageID} />
+                )}
+
+                {showBrewing && nextModel && <ModelChangeTile nextModel={nextModel} />}
+
+                {showBrewing && activeJob && promptAlbumFilter(activeJob) && <>
+                    <BrewingImageTile
+                        imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
+                        eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100}
+                    />
+
+                    <PromptEditorModal onOk={() => { }} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress} />
+                </>}
+
+                {showBrewing && currentUpload && <>
+                    <BrewingImageTile imageSrc={uploadBrewBlob ?? ""} progress={uploadProgress} />
+                </>}
+
+                {imageApi.images?.map(a => <ImageTile
+                    key={`image-${a.id}`} image={a} onDelete={onDelete}
+                    onFavorite={onFavorite} selected={selectedImages?.includes(a.id)}
+                    onSelect={selectImage ? () => selectImage(a.id) : undefined} onUnselect={unselectImage ? () => unselectImage(a.id) : undefined} selectMode={selectMode}
+                    onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setViewerOpen(true) }}
+                />)}
+
+                {!onClick && <>
+                    <ImageModal
+                        open={viewerOpen} setOpen={setViewerOpen} image={selectedImage}
+                        onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
+                        onFavorite={onFavorite} onDownload={onDownload} onLeft={onLeft} onRight={onRight}
+                        onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
+                    />
+                    <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
+                        Are you sure you want to delete this image?
+                    </AreYouSureModal>
+                </>}
+
+                {promptViewImageId && <ImageModalFromId open={!!promptViewImageId} setOpen={() => setPromptViewImageID(undefined)} image={promptViewImageId} />}
+
             </div>
-        </>}
-        <AdvSearchModal onClose={() => setAdvSearchOpen(false)} open={advSearchOpen} />
+            {imageApi.count === 0 && !activeJob && (queue?.length ?? 0) === 0 && <>
+                {filterIsEmpty() && !imageApi.loading && showWelcome ? <>{album ? <AlbumWelcome /> : <WelcomePane />}</>
+                    : <div style={{ height: '100%', display: "flex", flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        {imageApi.loading ? <>
+                            <img src="brewing.gif" style={{ width: "128px" }} />
+                            <div style={{ marginTop: "-20px" }}>Loading images</div>
+                        </> : <>
+                            <img src="outlinepadded.png" style={{ width: "128px" }} />
+                            <div style={{ marginTop: "-20px" }}>No images!</div>
+                        </>}
+                    </div>}
+            </>}
+            {imageApi.error &&
+                <Stack gap={"10px"}>
+                    <Alert variant="standard" severity="error">
+                        <AlertTitle>Could not retrieve images</AlertTitle>
+                        {imageApi.error.message ? `Server responded: ${imageApi.error.message}` : "Something happened! Check the console"}
+                    </Alert>
+                    {imageApi.error.message?.includes("tsquery") && <Alert variant="standard" severity="info">
+                        <AlertTitle>It looks like this is an Advanced Search related issue</AlertTitle>
+                        <Link onClick={() => { setAdvSearchOpen(true) }} color="textPrimary">Learn about Advanced Search</Link>
+                    </Alert>}
+                </Stack>
+            }
+            {imageApi.hasMore && (imageApi.images?.length ?? 0) > 0 && <>
+                <div style={{ textAlign: 'center', marginTop: "20px" }}>
+                    <Button size="small" onClick={() => imageApi.showMore()} disabled={imageApi.loading}> {imageApi.loading ? <CircularProgress size={24} /> : "Show More"}</Button>
+                    <div style={{ fontSize: ".7em" }}>Showing {imageApi.images.length.toLocaleString()} of {imageApi.count.toLocaleString()} images</div>
+                </div>
+            </>}
+            <AdvSearchModal onClose={() => setAdvSearchOpen(false)} open={advSearchOpen} />
+        </div>
+
     </>
 
 

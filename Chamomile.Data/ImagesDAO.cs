@@ -144,12 +144,17 @@ namespace Chamomile.Data {
             return image;
         }
 
-        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, Prompt? prompt = null, int? generationDuration = null) {
+        public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, 
+                Prompt? prompt = null, 
+                int? generationDuration = null, 
+                object? additionalInfo = null,
+                bool? hidden = false
+            ) {
             var image = await ParseImage(imageBytes);
 
             var img = await adoTemplate.QuerySingle(InsertSql([
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
-                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,
+                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,IMAGE_ADDTL_INFO,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE, IMAGE_GEN_MS
             ], IMAGES_TABLE.Split(" ")[0], string.Join(", ", ImageColumns)), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
@@ -165,6 +170,8 @@ namespace Chamomile.Data {
                 cmd.SetBytea(IMAGES_BYTES, imageBytes);
                 cmd.SetString(MODEL_TITLE, image.Model);
                 cmd.SetInt(IMAGE_GEN_MS, generationDuration);
+                cmd.SetBoolean(IMAGE_HIDDEN, hidden);
+                if(additionalInfo!=null) cmd.SetValue(IMAGE_ADDTL_INFO, NpgsqlTypes.NpgsqlDbType.Jsonb , JsonSerializer.Serialize(additionalInfo));
             }, ImageRM) ?? throw new InvalidOperationException("This should never happen");
             
             await adoTemplate.ExecuteBatch(InsertSql([IMAGES_ID, LORA_ALIAS], IMAGES_LORA_MAP), (cmd, lora) => {

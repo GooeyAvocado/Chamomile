@@ -41,6 +41,13 @@ export const updateImageAlbums = (
     val: ImageAlbumRequest
 ) => Put(setLoading, setItem, onError, ENDPOINT + `${image}/Albums`, val)
 
+export const updateMultiImageAlbums = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: Album[]) => void,
+    onError: (value: any) => void,
+    val: ImageAlbumRequest
+) => Put(setLoading, setItem, onError, ENDPOINT + `multi/Albums`, val)
+
 export const deleteAlbum = (
     setLoading: (value: boolean) => void,
     onSuccess: () => void,

@@ -20,4 +20,6 @@ export class GeneratedImage {
     hiResAvailable: boolean = false;
     generationDurationMs?: number = 0;
     downloadCount?: number = 0;
+    hidden?: boolean
+    additionalInfo?: any
 }

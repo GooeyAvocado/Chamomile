@@ -15,7 +15,7 @@ export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
     hideAlbums?: number[]
 }) {
 
-    const { albums, loading } = useAlbums();
+    const { albums, loading, refresh: refreshAlbums } = useAlbums();
     const [query, setQuery] = useState("")
     const { isMobile } = useUserAgent();
     const [newOpen, setNewOpen] = useState(false)
@@ -55,7 +55,7 @@ export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
                     gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '192' : '256'}px, 1fr))`,
                     gap: '20px',
                 }}>
-                    {disableNew || query.trim().length === 0 && <NewAlbumTile onClick={() => setNewOpen(true)} />}
+                    {query.trim().length === 0 && <NewAlbumTile onClick={() => setNewOpen(true)} />}
                     {results?.map(a =>
                         <AlbumTile key={`album-${a.id}`} album={a} onClick={() => onClick(a)} />
                     )}
@@ -64,7 +64,8 @@ export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
 
         <AlbumEditor open={newOpen} setOpen={(val, result) => {
             setNewOpen(val);
-            if (result) onClick(result);
+            if (result && !disableNew) onClick(result)
+            else refreshAlbums();
         }} />
     </div>
 

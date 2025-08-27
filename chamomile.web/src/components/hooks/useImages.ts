@@ -62,6 +62,10 @@ export const useImages = (filter: FilterOptions | undefined) => {
         removeImage: (val: GeneratedImage) => {
             setImages((prevImages) => [...prevImages].filter(a => a.id !== val.id))
             setCount((count) => count - 1)
+        },
+        removeImages: (val: number[]) => {
+            setImages((prevImages) => [...prevImages].filter(a => !val.includes(a.id)))
+            setCount((count) => count - val.length)
         }
     };
 

@@ -3,7 +3,7 @@ import { CardActionArea } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CoffeeOutlined, Delete, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
+import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -12,30 +12,46 @@ import AreYouSureModal from "../modals/AreYouSureModal";
 
 export default function ImageTile(props: {
     image: GeneratedImage
+    selected?: boolean
+    selectMode?: boolean
+    onSelect?: () => void
+    onUnselect?: () => void
     onClick: () => void
     onFavorite: (val?: GeneratedImage) => void,
     onDelete: (val?: GeneratedImage) => void,
 }) {
 
-    const { image, onClick, onDelete, onFavorite } = props;
+    const { image, onClick, onDelete, onFavorite, onSelect, selectMode, selected, onUnselect } = props;
     const { setPrompt } = usePrompt();
+    const canSelect = onSelect && onUnselect
 
     const [deleteAys, setDeleteAys] = useState(false)
 
     return <>
         <ContextMenu options={[
-            { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) } },
+            { text: selected ? "Unselect" : "Select", icon: selected ? <CheckBox /> : <CheckBoxOutlineBlank />, onClick: selected ? onUnselect : onSelect, disabled: !canSelect },
+            { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) }, disabled: selectMode },
             { type: "divider" },
-            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image)} source="IMAGE" sample={image.id} menuButonMode onClick={onClose} /> },
-            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image, true)} source="IMAGE_BASE" sample={image.id} iconOverride={<CoffeeOutlined />} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={(image.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt} /> },
+            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image)} source="IMAGE" sample={image.id} menuButonMode onClick={onClose} disabled={selectMode} /> },
+            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image, true)} source="IMAGE_BASE" sample={image.id} iconOverride={<CoffeeOutlined />} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt} /> },
             { type: "divider" },
-            { text: "Use this prompt", icon: <ReceiptLong />, onClick: () => { setPrompt(imageToPrompt(image)) } },
-            { text: "Use this base prompt", icon: <ReceiptLongTwoTone />, onClick: () => { setPrompt(imageToPrompt(image, true)) }, disabled: (image.basePrompt?.trim()?.length ?? 0) === 0 || image.basePrompt === image.prompt },
+            { text: "Use this prompt", icon: <ReceiptLong />, onClick: () => { setPrompt(imageToPrompt(image)) }, disabled: selectMode },
+            { text: "Use this base prompt", icon: <ReceiptLongTwoTone />, onClick: () => { setPrompt(imageToPrompt(image, true)) }, disabled: selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image.basePrompt === image.prompt },
             { type: "divider" },
-            { text: "Delete", icon: <Delete />, onClick: () => { setDeleteAys(true) } },
+            { text: "Delete", icon: <Delete />, onClick: () => { setDeleteAys(true) }, disabled: selectMode },
         ]}>
-            <BaseImageTile>
-                <CardActionArea onClick={onClick} style={{ height: "100%", width: "100%", aspectRatio: "1/1", position: "relative" }}>
+            <BaseImageTile style={{
+                transform: `scale(${selectMode ? (selected ? 0.9 : 0.8) : 1})`,
+                opacity: selectMode ? selected ? 1 : .5 : 1,
+                transition: "transform 0.1s ease, opacity 0.1s ease"
+            }}>
+                <CardActionArea onClick={(e) => {
+                    if ((selectMode || e.shiftKey) && canSelect) {
+                        if (selected) onUnselect()
+                        else onSelect()
+                    }
+                    else onClick()
+                }} style={{ height: "100%", width: "100%", aspectRatio: "1/1", position: "relative" }}>
                     <img src={'/outline.png'} style={{ width: "50%", height: "50%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0', margin: '25%' }} />
                     <img loading="lazy" src={imageUrl(image.id)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
                     <div style={{ position: 'absolute', top: 7, left: 7, opacity: "0.3", display: 'flex', flexDirection: 'column', gap: '5px' }}>

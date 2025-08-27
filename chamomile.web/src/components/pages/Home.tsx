@@ -12,6 +12,7 @@ import AlbumHeader from "../shared/albums/AlbumHeader";
 import { usePrompt } from "../hooks/usePrompt";
 import Navbar from "../shared/navbar/Navbar";
 import { useAlbums } from "../hooks/useAlbums";
+import SelectedImageActions from "../shared/selectedImageActions/SelectedImageActions";
 
 export default function Home() {
 
@@ -34,6 +35,24 @@ export default function Home() {
 
     const [filter, setFilter] = useState(initialFilter)
     const [albumsOpen, setAlbumsOpen] = useState(false)
+    const [selectedImages, setSelectedImages] = useState<number[]>([])
+    const [selectMode, setSelectMode] = useState(false)
+
+    const selectImage = (id: number) => {
+        if (!selectMode) setSelectMode(true);
+        setSelectedImages([...selectedImages, id])
+    }
+
+    const unselectImage = (id: number) => {
+        const newImgs = selectedImages.filter(a => a !== id);
+        setSelectedImages(newImgs)
+        if (newImgs.length === 0) setSelectMode(false)
+    }
+
+    const onClearSelect = () => {
+        setSelectedImages([])
+        setSelectMode(false)
+    }
 
     useEffect(() => {
         let subtitle = "";
@@ -94,21 +113,22 @@ export default function Home() {
                         <PromptBuilder />
                     </div>
 
-                    <FilterBuilder
+                    {!selectMode && <FilterBuilder
                         filter={filter} setFilter={setFilter} setAlbum={setAlbum}
-                    />
+                    />}
                 </div>
 
                 {/* Upload progress panel */}
                 <UploadPanel />
 
                 {/* Image viewer */}
-                <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
-                    <ImageViewer key={album?.id} showBrewing filter={filter} showWelcome album={album} setAlbum={(val) => {
-                        setAlbum(val)
-                        setFilter({ album: val.id })
-                    }} />
-                </div>
+                <ImageViewer key={album?.id} showBrewing filter={filter} showWelcome album={album} setAlbum={(val) => {
+                    setAlbum(val)
+                    setFilter({ album: val.id })
+                }}
+                    onClearSelect={onClearSelect} setSelectedImages={setSelectedImages}
+                    selectImage={selectImage} selectedImages={selectedImages} selectMode={selectMode} unselectImage={unselectImage}
+                />
 
             </>}
         </div>

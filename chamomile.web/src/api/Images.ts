@@ -142,6 +142,14 @@ export const deleteImage = (
     id: number,
 ) => Delete(setLoading, onSuccess, onError, ENDPOINT + id)
 
+export const deleteMultiImage = (
+    setLoading: (value: boolean) => void,
+    onSuccess: () => void,
+    onError: (value: any) => void,
+    ids: number[],
+) => Delete(setLoading, onSuccess, onError, ENDPOINT, {
+    ids: ids
+})
 
 export const getModelSequence = (
     setLoading: (value: boolean) => void,

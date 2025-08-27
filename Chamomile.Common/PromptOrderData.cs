@@ -1,10 +1,12 @@
-﻿namespace Chamomile.Common {
+﻿namespace Chamomile.Common
+{
 
     /// <summary>Small trailer hitch to add information on where this prompt was copied from</summary>
-    public class PromptOrderData {
+    public class PromptOrderData
+    {
 
         /// <summary>
-        /// Source of this Prompt: "IMAGE_BASE","IMAGE","SAVED_PROMPT","PROMPTBOX"
+        /// Source of this Prompt: "IMAGE_BASE","IMAGE","SAVED_PROMPT","PROMPTBOX", "UPLOAD"
         /// </summary>
         public string Source { get; set; } = "";
 

@@ -34,8 +34,13 @@ namespace Chamomile.API.Controllers {
             await file.CopyToAsync(memoryStream);
             var fileBytes = memoryStream.ToArray();
 
+            var UploadDetails = new Dictionary<string, string>() {
+                {"Source","UPLOAD" },
+                {"filename",file.FileName }
+            };
+
             try {
-                var img = await dao.CreateImage(fileBytes);
+                var img = await dao.CreateImage(fileBytes, null, null, UploadDetails, false);
 
                 if (albumId.HasValue) {
                     try {
@@ -305,7 +310,7 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpPut("{ID}/Albums")]
-        public async Task<IActionResult> GetImageAlbums([FromBody] ImageAlbumRequest request, int ID) {
+        public async Task<IActionResult> UpdateImageAlbums([FromBody] ImageAlbumRequest request, int ID) {
             switch (request.Mode) {
                 case "ADD":
                     try {
@@ -325,6 +330,30 @@ namespace Chamomile.API.Controllers {
             return Ok();
         }
 
+        [HttpPut("multi/Albums")]
+        public async Task<IActionResult> UpdateImageAlbums([FromBody] ImageAlbumRequest request) {
+            if (request.ImageIDs == null || request.ImageIDs.Count == 0) return Ok();
+            switch (request.Mode) {
+                case "ADD":
+                    try {
+                        await dao.AddImagesToAlbum(request.ImageIDs, request.AlbumId);
+                    }
+                    catch (ValidationException e) {
+                        return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } });
+                    }
+
+                    break;
+                case "REMOVE":
+                    foreach (var ID in request.ImageIDs) {
+                        await dao.RemoveImageFromAlbum(ID, request.AlbumId);
+                    }
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid mode (Should be ADD or REMOVE): " + request.Mode);
+            }
+            return Ok();
+        }
+
         #endregion
 
         #region DELETE
@@ -333,6 +362,16 @@ namespace Chamomile.API.Controllers {
             await dao.DeleteImage(ID);
             return Ok();
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteMultiple([FromBody]Dictionary<string,List<int>> body) {
+            if (body["ids"] == null) return BadRequest("Use field 'ids'");
+            foreach (var item in body["ids"]) {
+                await dao.DeleteImage(item);
+            }
+            return Ok();
+        }
+
         #endregion
 
         [HttpDelete("Albums/{ID}")]

@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, ListAlt, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -25,6 +25,7 @@ import AlbumStrip from "../albums/AlbumStrip";
 import LoraStrip from "../lora/LoraStrip";
 import { usePingPong } from "../../hooks/usePingPong";
 import HighlightedPromptDiv from "../prompt/HighlightedPromptDiv";
+import AdditionalInfoRenderer from "./AdditionalInformationRenderer";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -294,12 +295,18 @@ export default function ImageModal(props: {
                             <ComplexAccordion elevation={2} title={<><Gradient color={
                                 image?.hiResAvailable ? "info" : "inherit"
                             } /> <div>Upscale{image?.hiResAvailable && "d"}</div></>} disabled={!onUpscale || !pong?.SD}>
-                                <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
-                                </ComplexAccordionActions>
+
                                 <ComplexAccordionBody>
                                     {!!onUpscale && pong?.SD && <HiResPanel image={image} updateImage={onUpscale} />}
                                 </ComplexAccordionBody>
                             </ComplexAccordion>
+
+                            <ComplexAccordion elevation={2} title={<><ListAlt /><div>Additional Info</div></>} disabled={Object.keys(image?.additionalInfo ?? {}).length === 0}>
+                                <ComplexAccordionBody>
+                                    <AdditionalInfoRenderer additionalInformation={image?.additionalInfo} />
+                                </ComplexAccordionBody>
+                            </ComplexAccordion>
+
 
 
                         </Stack>
