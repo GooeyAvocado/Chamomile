@@ -75,6 +75,25 @@
 
         public static readonly string ALBUM_MAP = $"{SCHEMA}.album_map";
 
+        public static readonly string GRID_TABLE = $"{SCHEMA}.grids";
+        public static readonly string GRID_ID = "grid_id";
+        public static readonly string GRID_NM = "grid_nm";
+        public static readonly string GRID_PROMPT_TX = "grid_prompt_tx";
+        public static readonly string GRID_NOTES_TX = "grid_notes_tx";
+        public static readonly string GRID_NEGATIVE_PROMPT_TX = "grid_negative_prompt_tx";
+        public static readonly string GRID_STEP_CNT = "grid_step_cnt";
+        public static readonly string GRID_SAMPLER_TX = "grid_sampler_tx";
+        public static readonly string GRID_SCHEDULE_TP = "grid_schedule_tp";
+        public static readonly string GRID_CFG_SCL_NUM = "grid_cfg_scl_num";
+        public static readonly string GRID_SEED_NUM = "grid_seed_num";
+        public static readonly string GRID_HGHT_NUM = "grid_hght_num";
+        public static readonly string GRID_WDTH_NUM = "grid_wdth_num";
+        public static readonly string GRID_GENERATION_DURATION_MS = "grid_generation_duration_ms";
+        public static readonly string GRID_XVAL_CD = "grid_xval_cd";
+        public static readonly string GRID_XVAL = "grid_xval";
+        public static readonly string GRID_YVAL_CD = "grid_yval_cd";
+        public static readonly string GRID_YVAL = "grid_yval";
+
         public static readonly string CRE_TS = "cre_ts";
         public static readonly string MIN_TS = "min_ts";
         public static readonly string MAX_TS = "max_ts";

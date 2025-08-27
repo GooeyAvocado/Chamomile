@@ -159,7 +159,7 @@ namespace Chamomile.API.Workers {
                                 prompt, 
                                 (int)stopwatch.ElapsedMilliseconds,
                                 prompt.OrderData,
-                                false
+                                prompt.OrderData?.Source == "GRID"
                             );
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
