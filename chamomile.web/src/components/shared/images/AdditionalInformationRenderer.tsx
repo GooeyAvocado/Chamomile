@@ -3,8 +3,6 @@ import ImageModalFromId from "./ImageModalFromId"
 import { useState } from "react"
 import { imageUrl } from "../../../api/Images"
 import { Coffee, ReceiptLong, ReceiptLongTwoTone, Upload } from "@mui/icons-material"
-import { getPrompts } from "../../../api/Prompts"
-import useApi from "../../hooks/useApi"
 
 export default function AdditionalInfoRenderer({
     additionalInformation,

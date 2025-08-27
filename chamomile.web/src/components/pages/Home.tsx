@@ -12,7 +12,6 @@ import AlbumHeader from "../shared/albums/AlbumHeader";
 import { usePrompt } from "../hooks/usePrompt";
 import Navbar from "../shared/navbar/Navbar";
 import { useAlbums } from "../hooks/useAlbums";
-import SelectedImageActions from "../shared/selectedImageActions/SelectedImageActions";
 
 export default function Home() {
 
