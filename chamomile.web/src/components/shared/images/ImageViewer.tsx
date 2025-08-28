@@ -67,7 +67,7 @@ export default function ImageViewer(props: {
     const location = useLocation();
 
     const { activeJob, cancel, progress, groupedQueue, queue, nextModel } = useQueue((val) => {
-        if (showBrewing && imageAlbumFilter(val)) {
+        if (showBrewing && imageAlbumFilter(val) && !val.hidden) {
             imageApi.appendImage(val)
         }
     })

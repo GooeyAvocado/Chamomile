@@ -19,7 +19,7 @@ export default function GridsPage() {
 
     const { vertical, height } = useWindowDimensions();
 
-    const { fetch, loading: gridLoading } = useApi(getGrid)
+    const { fetch } = useApi(getGrid)
     const { fetch: refreshGrids, data: grids, loading: loadingGrids } = useApi(getGrids, true)
 
     const { settings } = useSettings();

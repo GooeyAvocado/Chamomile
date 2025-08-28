@@ -331,7 +331,7 @@ export default function GridViewer({
                         <div style={{ fontSize: ".8em", textAlign: "right", flex: "1, 0" }}>
                             <div>
                                 <span>{grid.xVals.length} x {grid.yVals.length} ({grid.xVals.length * grid.yVals.length} images)</span>
-                                <span style={{ color: "#CC1155" }}> {missingImageCount > 0 && `(${missingImageCount} not generated)`}</span>
+                                <span style={{ color: "#CC1155" }}> {missingImageCount > 0 && !allMissing && `(${missingImageCount} not generated)`}</span>
                             </div>
                             <div>{grid.created && new Date(grid.created).toLocaleString()}</div>
                         </div>
@@ -349,17 +349,16 @@ export default function GridViewer({
         </div>
 
         <hr style={{ width: "100%" }} />
-        {!allMissing && !allMissingInProgress && <Card style={{ padding: "5px 10px" }}>
-            <Alert severity="warning" style={{ padding: "5px 10px" }} action={
+        {!allMissingInProgress && <Card style={{ padding: "5px 10px" }}>
+            <Alert severity={allMissing ? "info" : "warning"} style={{ padding: "5px 10px" }} action={
                 <Button
-                    onClick={queueMissingImages} startIcon={<Coffee />} variant="outlined"
+                    onClick={queueMissingImages} startIcon={<Coffee />} variant="outlined" color={allMissing ? "info" : "warning"}
                     size="small" style={{ marginRight: '8px', marginTop: "-2px" }}
                 >
-                    Brew remaining images
+                    Brew{allMissing ? "" : "remaining "} images
                 </Button>
             }>
-
-                Some images haven not been brewed yet for this grid
+                {allMissing ? "Start brewing whenever you're ready" : "Some images haven not been brewed yet for this grid"}
             </Alert>
         </Card>}
 
@@ -388,95 +387,84 @@ export default function GridViewer({
 
         </Card>}
 
-        {
-            (allMissing && filteredQueue.length === 0) ? <div style={{ flex: "1", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: "100%", overflowX: "auto" }}>
 
-                <img src="/grids.png" style={{ width: "128px", margin: "16px" }} />
-                <div>Images for this grid have not been generated</div>
-                <Button
-                    onClick={queueMissingImages} startIcon={<Coffee />} variant="outlined"
-                    size="small" style={{ marginTop: "12px" }}
-                >
-                    Brew images
-                </Button>
-
-            </div> : <div style={{ flex: "1", overflowY: "auto", overflowX: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: "1", overflowY: "auto", overflowX: 'auto', display: 'flex', flexDirection: 'column' }}>
 
 
-                {/* Header */}
-                <div style={{ display: 'flex', gap: "20px", padding: "0px 20px", position: "sticky", top: 0, zIndex: 2 }}>
-                    {/* Corner */}
-                    <div style={{ width: `${imageSize * .75}px`, flexShrink: '0' }} />
-                    {/* Column labels */}
-                    {grid.xVals.map(v => <div style={{ width: `${imageSize}px`, flexShrink: "0", textAlign: 'center', backgroundColor: "#0D0D0D", padding: "20px 0px" }}>{v}</div>)}
+            {/* Header */}
+            <div style={{ display: 'flex', gap: "20px", padding: "0px 20px", position: "sticky", top: 0, zIndex: 2 }}>
+                {/* Corner */}
+                <div style={{ width: `${imageSize * .75}px`, flexShrink: '0' }} />
+                {/* Column labels */}
+                {grid.xVals.map(v => <div style={{ width: `${imageSize}px`, flexShrink: "0", textAlign: 'center', backgroundColor: "#0D0D0D", padding: "20px 0px" }}>{v}</div>)}
+            </div>
+
+
+            <div style={{ display: "flex" }}>
+
+                {/* Row labels */}
+                <div style={{ width: `${imageSize * .75}px`, flexShrink: "0", position: 'sticky', left: 0, zIndex: 1 }}>
+                    {grid.yVals.map(val => <div style={{
+                        height: `${imageSize + 40}px`, width: `${imageSize * .75}px`, flexShrink: "0",
+                        display: 'flex', flexDirection: 'column', backgroundColor: "#0D0D0D",
+                        justifyContent: 'center', alignItems: 'center'
+                    }}>{val}</div>)}
                 </div>
 
+                {/* Images */}
+                <div style={{ flexShrink: "0" }}>
+                    {gridSizedArray<string>().map((row, r) => <div style={{
+                        display: 'flex', gap: "20px", backgroundColor:
+                            r % 2 === 0 ? "#1C1C1C" : "#151515"
+                        , paddingLeft: "40px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px",
+                    }}>
+                        {row.map((_, c) => {
 
-                <div style={{ display: "flex" }}>
+                            const y = r
+                            const x = c
 
-                    {/* Row labels */}
-                    <div style={{ width: `${imageSize * .75}px`, flexShrink: "0", position: 'sticky', left: 0, zIndex: 1 }}>
-                        {grid.yVals.map(val => <div style={{
-                            height: `${imageSize + 40}px`, width: `${imageSize * .75}px`, flexShrink: "0",
-                            display: 'flex', flexDirection: 'column', backgroundColor: "#0D0D0D",
-                            justifyContent: 'center', alignItems: 'center'
-                        }}>{val}</div>)}
-                    </div>
+                            if (imageMap?.[y]?.[x]) {
+                                return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }} >
+                                    <ImageTile
+                                        image={imageMap[y][x]} onDelete={onDeleteImage} onFavorite={onFavorite}
+                                        onClick={() => {
+                                            setSelectedImage(imageMap[y][x])
+                                            setViewerOpen(true)
+                                        }}
+                                    />
+                                </div>
+                            }
 
-                    {/* Images */}
-                    <div style={{ flexShrink: "0" }}>
-                        {gridSizedArray<string>().map((row, r) => <div style={{
-                            display: 'flex', gap: "20px", backgroundColor:
-                                r % 2 === 0 ? "#1C1C1C" : "#151515"
-                            , paddingLeft: "40px", paddingRight: "20px", paddingTop: "20px", paddingBottom: "20px",
-                        }}>
-                            {row.map((col, c) => {
+                            if (queueMap?.[y]?.[x]) {
+                                return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }}>
+                                    <QueuedImageTile
+                                        prompt={queueMap[y][x]}
+                                        onCancel={() => { cancelJob(queueMap[x][y].id ?? 0) }}
+                                    />
+                                </div>
+                            }
+                            const activeJobOrderData = activeJob?.orderData
+                            if (activeJobOrderData && activeJobOrderData.xPos === x && activeJobOrderData.yPos === y) {
+                                return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }}>
+                                    <BrewingImageTile
+                                        imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
+                                        eta={progress?.eta_relative}
+                                        progress={(progress?.progress ?? 0) * 100}
+                                    />
+                                </div>
+                            }
 
-                                const y = r
-                                const x = c
+                            return <Card elevation={5} style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <img src="/outline.png" width={imageSize / 2} />
+                            </Card>
 
-                                if (imageMap?.[y]?.[x]) {
-                                    return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }} >
-                                        <ImageTile
-                                            image={imageMap[y][x]} onDelete={onDeleteImage} onFavorite={onFavorite}
-                                            onClick={() => {
-                                                setSelectedImage(imageMap[y][x])
-                                                setViewerOpen(true)
-                                            }}
-                                        />
-                                    </div>
-                                }
-
-                                if (queueMap?.[y]?.[x]) {
-                                    return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }}>
-                                        <QueuedImageTile
-                                            prompt={queueMap[y][x]}
-                                            onCancel={() => { cancelJob(queueMap[x][y].id ?? 0) }}
-                                        />
-                                    </div>
-                                }
-                                const activeJobOrderData = activeJob?.orderData
-                                if (activeJobOrderData && activeJobOrderData.xPos === x && activeJobOrderData.yPos === y) {
-                                    return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }}>
-                                        <BrewingImageTile
-                                            imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
-                                            eta={progress?.eta_relative}
-                                            progress={(progress?.progress ?? 0) * 100}
-                                        />
-                                    </div>
-                                }
-
-                                return <Card elevation={5} style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                    <img src="/outline.png" width={imageSize / 2} />
-                                </Card>
-
-                            })}
-                        </div>)}
-                    </div>
+                        })}
+                    </div>)}
                 </div>
-            </div >
+            </div>
+        </div >
 
-        }
+
 
         <ImageModal
             open={viewerOpen} setOpen={setViewerOpen} image={selectedImage} onAddAlbum={onAddAlbum} onDelete={() => { setDeleteAys(true) }}
@@ -484,7 +472,7 @@ export default function GridViewer({
             onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum}
         />
 
-        <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
+        <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDeleteImage} loading={delApi.loading}>
             Are you sure you want to delete this image?
         </AreYouSureModal>
 

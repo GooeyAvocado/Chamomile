@@ -132,7 +132,7 @@ function GridValsEditor({
                         : type.type === "scheduler" ? <SchedulerSelector scheduler={a} setScheduler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} /> : <></>
                 }
             </div>)}
-            <Button style={{ marginTop: "10px" }} startIcon={<Add />} disabled={disabled} onClick={() => setVals(addToArray(vals, ""))}>Add new {axis === "X" ? "row" : "column"}</Button>
+            <Button style={{ marginTop: "10px" }} startIcon={<Add />} disabled={disabled} onClick={() => setVals(addToArray(vals, ""))}>Add new {axis === "Y" ? "row" : "column"}</Button>
         </>}
     </div>
 
