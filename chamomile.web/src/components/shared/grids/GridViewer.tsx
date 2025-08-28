@@ -181,6 +181,7 @@ export default function GridViewer({
 
     const imageMap = useMemo(() => {
         return imageApi.images.reduce((r, i) => {
+            if (!r[i.additionalInfo?.yPos ?? 0]) return r;
             r[i.additionalInfo?.yPos ?? 0][i.additionalInfo?.xPos ?? 0] = i
             return r;
         }, gridSizedArray<GeneratedImage>())

@@ -8,11 +8,17 @@ import Popper from '@mui/material/Popper';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import { usePingPong } from '../../hooks/usePingPong';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, Tooltip } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, ListItemIcon, Tooltip } from '@mui/material';
 import PreviewModal from './preview/PreviewModal';
 import { usePrompt } from '../../hooks/usePrompt';
-import { Yard } from '@mui/icons-material';
+import { Coffee, FileOpen, GridView, Preview, Save, SaveAs, Yard } from '@mui/icons-material';
 import { useRef, useState } from 'react';
+import GridEditor from '../grids/GridEditor';
+import { Grid } from '../../../model/Grid';
+import useApi from '../../hooks/useApi';
+import { createGrid } from '../../../api/Grid';
+import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 export default function PromptButton(props: {
     onBrew: (amountOverride?: number) => void
@@ -30,8 +36,14 @@ export default function PromptButton(props: {
     const [seedWarning, setSeedWarning] = useState(false)
     const [previewOpen, setPreviewOpen] = useState(false);
 
+    const [gridEditorState, setGridEditorState] = useState<Grid>()
+    const [gridEditorOpen, setGridEditorOpen] = useState(false);
+
+    const { fetch: create, loading: createLoading } = useApi(createGrid)
     const anchorRef = useRef<HTMLDivElement>(null);
+    const { enqueueSnackbar } = useSnackbar();
     const { pong } = usePingPong()
+    const nav = useNavigate();
 
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
@@ -40,6 +52,37 @@ export default function PromptButton(props: {
     const handleClose = () => {
         setOpen(false);
     };
+
+    const onEditorOk = () => {
+        if (!gridEditorState) return;
+        if (gridEditorState.xValMode === "NON" && gridEditorState.yValMode === "NON") {
+            enqueueSnackbar("Please specify at least one axis!", { variant: "error" })
+            return;
+        }
+
+        if (gridEditorState.xValMode === "NON") { gridEditorState.xVals = [""] } else {
+            if (gridEditorState.xVals.length === 0) {
+                enqueueSnackbar("Please specify at least one X axis value!", { variant: "error" })
+                return;
+            }
+        }
+
+        if (gridEditorState.yValMode === "NON") { gridEditorState.yVals = [""] } else {
+            if (gridEditorState.yVals.length === 0) {
+                enqueueSnackbar("Please specify at least one Y axis value!", { variant: "error" })
+                return;
+            }
+        }
+
+        create((val) => {
+            enqueueSnackbar("Grid created!", { variant: "success" })
+            nav(`/grid/${val?.id}`)
+            setGridEditorOpen(false)
+        }, () => {
+            enqueueSnackbar("Could not create grid", { variant: "error" })
+        }, { ...gridEditorState, seed: Math.floor(Math.random() * 1000000000), generationDurationMs: 0 } as Grid)
+
+    }
 
     return <>
         <ButtonGroup
@@ -74,32 +117,54 @@ export default function PromptButton(props: {
                                     handleClose();
                                     onBrew(1)
                                 }} >
-                                    Single Brew
+                                    <ListItemIcon><Coffee fontSize='small' /></ListItemIcon>
+                                    Single brew
                                 </MenuItem>
                                 <MenuItem key={"PreviewPromptButton"} style={{ fontSize: ".8em" }} disabled={!pong?.SD} onClick={() => {
                                     handleClose();
                                     setPreviewOpen(true);
                                 }} >
-                                    Preview Recipe
+                                    <ListItemIcon><Preview fontSize='small' /></ListItemIcon>
+                                    Preview recipe
                                 </MenuItem>
                                 <Divider />
                                 <MenuItem key={"SavePromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
                                     handleClose();
                                     onSave();
                                 }} >
+                                    <ListItemIcon><Save fontSize='small' /></ListItemIcon>
                                     Save this recipe
                                 </MenuItem>
                                 {saveAsEnabled && <MenuItem key={"SaveAsPromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
                                     handleClose();
                                     onSaveAs();
                                 }} >
+                                    <ListItemIcon><SaveAs fontSize='small' /></ListItemIcon>
                                     Save this recipe as...
                                 </MenuItem>}
                                 <MenuItem key={"LoadPromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
                                     handleClose();
                                     onLoad();
                                 }} >
+                                    <ListItemIcon><FileOpen fontSize='small' /></ListItemIcon>
                                     Load a recipe
+                                </MenuItem>
+                                <Divider />
+                                <MenuItem key={"GridButton"} style={{ fontSize: ".8em" }} onClick={() => {
+                                    handleClose();
+                                    setGridEditorState({
+                                        ...prompt,
+                                        prompt: prompt.positivePrompt,
+                                        name: "New Grid",
+                                        xValMode: "NON",
+                                        xVals: [],
+                                        yValMode: "NON",
+                                        yVals: []
+                                    } as Grid)
+                                    setGridEditorOpen(true)
+                                }} >
+                                    <ListItemIcon><GridView fontSize='small' /></ListItemIcon>
+                                    Use for grid
                                 </MenuItem>
                             </MenuList>
                         </ClickAwayListener>
@@ -131,6 +196,12 @@ export default function PromptButton(props: {
                 }}>Yes</Button>
             </DialogActions>
         </Dialog>
+
+        <GridEditor
+            grid={gridEditorState ?? {} as Grid} setGrid={setGridEditorState}
+            open={gridEditorOpen} setOpen={setGridEditorOpen} loading={createLoading}
+            onOk={onEditorOk}
+        />
     </>
 
 }

@@ -17,7 +17,7 @@ export default function QueuedGroupImageTile(props: {
     const [previewOpen, setPreviewOpen] = useState(false);
 
     const cancelAll = () => {
-        onCancel(prompts.map(a => a.id))
+        onCancel(prompts.map(a => a.id ?? 0))
     }
 
     const orderData = prompts.find(a => !!a.orderData)?.orderData;
