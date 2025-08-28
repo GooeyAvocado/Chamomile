@@ -1,18 +1,41 @@
-import { Card, CardActionArea } from "@mui/material"
+import { Card, CardActionArea, IconButton } from "@mui/material"
 import ImageModalFromId from "./ImageModalFromId"
 import { useState } from "react"
 import { imageUrl } from "../../../api/Images"
-import { Coffee, ReceiptLong, ReceiptLongTwoTone, Upload } from "@mui/icons-material"
+import { ChevronRight, Coffee, GridView, ReceiptLong, ReceiptLongTwoTone, Upload } from "@mui/icons-material"
+import PromptOrderData from "../../../model/PromptOrderData"
+import { useLocation, useNavigate } from "react-router-dom"
 
 export default function AdditionalInfoRenderer({
     additionalInformation,
 }: {
-    additionalInformation: any
+    additionalInformation: PromptOrderData
 }) {
 
     const [imageOpen, setImageOpen] = useState(false)
+    const nav = useNavigate();
+    const location = useLocation();
 
     switch (additionalInformation.source || additionalInformation.source) {
+        case "GRID":
+            return <>
+                <Card style={{ padding: "10px" }}>
+                    <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+                        <GridView />
+                        <div style={{ flex: "1" }}>
+                            <div>Grid</div>
+                            <div style={{ fontSize: ".7em" }}>This image is from a grid of other images</div>
+                        </div>
+                        <div style={{ fontFamily: 'monospace', textAlign: "center" }}>
+                            <div>{additionalInformation.xPos},{additionalInformation.yPos}</div>
+                            <div style={{ fontSize: ".5em" }}>X,Y</div>
+                        </div>
+                        {!location.pathname.includes("grid") && <IconButton onClick={() => nav(`/grid/${additionalInformation.gridId}`)}>
+                            <ChevronRight />
+                        </IconButton>}
+                    </div>
+                </Card>
+            </>
         case "SAVED_PROMPT":
             return <>
                 <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
@@ -85,7 +108,7 @@ export default function AdditionalInfoRenderer({
             <tbody>
                 {Object.keys(additionalInformation).map(k => <tr>
                     <td style={{ paddingRight: "20px" }}><b>{k}</b></td>
-                    <td>{additionalInformation[k]}</td>
+                    <td>{(additionalInformation as any)[k]}</td>
                 </tr>)}
             </tbody>
         </table>

@@ -404,7 +404,7 @@ export default function GridViewer({
 
 
                 {/* Header */}
-                <div style={{ display: 'flex', gap: "20px", padding: "0px 20px", position: "sticky", top: 0, zIndex: 1 }}>
+                <div style={{ display: 'flex', gap: "20px", padding: "0px 20px", position: "sticky", top: 0, zIndex: 2 }}>
                     {/* Corner */}
                     <div style={{ width: `${imageSize * .75}px`, flexShrink: '0' }} />
                     {/* Column labels */}
@@ -415,7 +415,7 @@ export default function GridViewer({
                 <div style={{ display: "flex" }}>
 
                     {/* Row labels */}
-                    <div style={{ width: `${imageSize * .75}px`, flexShrink: "0", position: 'sticky', left: 0 }}>
+                    <div style={{ width: `${imageSize * .75}px`, flexShrink: "0", position: 'sticky', left: 0, zIndex: 1 }}>
                         {grid.yVals.map(val => <div style={{
                             height: `${imageSize + 40}px`, width: `${imageSize * .75}px`, flexShrink: "0",
                             display: 'flex', flexDirection: 'column', backgroundColor: "#0D0D0D",
