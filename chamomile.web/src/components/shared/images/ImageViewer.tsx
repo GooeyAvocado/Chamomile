@@ -300,7 +300,7 @@ export default function ImageViewer(props: {
 
                 {showBrewing && nextModel && <ModelChangeTile nextModel={nextModel} />}
 
-                {showBrewing && activeJob && promptAlbumFilter(activeJob) && <>
+                {showBrewing && activeJob && activeJob.orderData?.source !== "GRID" && promptAlbumFilter(activeJob) && <>
                     <BrewingImageTile
                         imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
                         eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100}

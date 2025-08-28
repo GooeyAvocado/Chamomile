@@ -1,12 +1,12 @@
 import { Alert, Button, Card, IconButton, LinearProgress } from "@mui/material";
 import { Grid } from "../../../model/Grid";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
-import { ArrowBack, Coffee, Delete, Edit } from "@mui/icons-material";
+import { ArrowBack, Coffee, CopyAll, Delete, Edit } from "@mui/icons-material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useImages } from "../../hooks/useImages";
 import { useQueue } from "../../hooks/useQueue";
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
 import useApi from "../../hooks/useApi";
 import { deleteImage, enqueuePrompts, favImage, noteImage } from "../../../api/Images";
@@ -15,7 +15,7 @@ import { Album } from "../../../model/Album";
 import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
 import { useNavigate } from "react-router-dom";
 import { Prompt } from "../../../model/Prompt";
-import { updateGrid } from "../../../api/Grid";
+import { createGrid, updateGrid } from "../../../api/Grid";
 import GridEditor from "./GridEditor";
 import ImageModal from "../images/ImageModal";
 import AreYouSureModal from "../modals/AreYouSureModal";
@@ -36,10 +36,19 @@ export default function GridViewer({
 
     const { enqueueSnackbar } = useSnackbar();
     const { vertical } = useWindowDimensions();
-    const [filter] = useState({
+    const [filter, setFilter] = useState({
         grid: grid.id,
         disablePagination: true
     } as FilterOptions)
+
+    useEffect(() => {
+        if (filter.grid !== grid.id) {
+            setFilter({
+                grid: grid.id,
+                disablePagination: true
+            })
+        }
+    }, [grid])
 
     const imageApi = useImages(filter)
     const delApi = useApi(deleteImage);
@@ -47,6 +56,7 @@ export default function GridViewer({
     const notesApi = useApi(noteImage)
     const brewApi = useApi(enqueuePrompts)
     const { fetch: update, loading: updateLoading } = useApi(updateGrid)
+    const { fetch: create, loading: createLoading } = useApi(createGrid)
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
     const nav = useNavigate();
 
@@ -56,6 +66,7 @@ export default function GridViewer({
 
     const [deleteAys, setDeleteAys] = useState(false)
     const [editorOpen, setEditorOpen] = useState(false)
+    const [duplicate, setDuplicate] = useState(false)
     const [viewerOpen, setViewerOpen] = useState(false)
     const [editorState, setEditorState] = useState<Grid>()
     const [selectedImage, setSelectedImage] = useState(undefined as undefined | GeneratedImage)
@@ -261,6 +272,12 @@ export default function GridViewer({
 
     const onEdit = () => {
         setEditorState(grid)
+        setDuplicate(false);
+        setEditorOpen(true)
+    }
+    const onDuplicate = () => {
+        setEditorState(grid)
+        setDuplicate(true);
         setEditorOpen(true)
     }
 
@@ -287,13 +304,24 @@ export default function GridViewer({
 
 
 
-        update((val) => {
-            enqueueSnackbar("Grid updated!", { variant: "success" })
-            setGrid(val)
-            setEditorOpen(false)
-        }, () => {
-            enqueueSnackbar("Could not update grid", { variant: "error" })
-        }, editorState)
+        if (duplicate) {
+            create((val) => {
+                enqueueSnackbar("Grid duplicated!", { variant: "success" })
+                setGrid(val)
+                nav(`/grid/${val?.id}`)
+                setEditorOpen(false)
+            }, () => {
+                enqueueSnackbar("Could not duplicate grid", { variant: "error" })
+            }, { ...editorState, seed: Math.floor(Math.random() * 1000000000) } as Grid)
+        } else {
+            update((val) => {
+                enqueueSnackbar("Grid updated!", { variant: "success" })
+                setGrid(val)
+                setEditorOpen(false)
+            }, () => {
+                enqueueSnackbar("Could not update grid", { variant: "error" })
+            }, editorState)
+        }
 
     }
 
@@ -337,6 +365,7 @@ export default function GridViewer({
                         </div>
                         <div style={{ display: 'flex', gap: "8px" }}>
                             <IconButton onClick={() => onEdit()}><Edit fontSize="small" /></IconButton>
+                            <IconButton onClick={() => onDuplicate()}><CopyAll fontSize="small" /></IconButton>
                             <IconButton onClick={() => onDelete()}><Delete fontSize="small" /></IconButton>
                         </div>
                     </div>
@@ -479,7 +508,8 @@ export default function GridViewer({
         <GridEditor
             grid={editorState ?? grid} setGrid={setEditorState}
             open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk}
-            loading={updateLoading} generated={imageApi?.images?.length > 0}
+            loading={updateLoading || createLoading} generated={imageApi?.images?.length > 0}
+            duplicate={duplicate}
         />
 
     </>

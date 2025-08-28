@@ -8,7 +8,7 @@ import { GridTypes } from "./GridTypes";
 import SamplerSelector from "../prompt/SamplerSelector";
 import SchedulerSelector from "../prompt/SchedulerSelector";
 
-export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading, generated }: {
+export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading, generated, duplicate }: {
     open: boolean,
     setOpen: (val: boolean) => void
     grid: Grid
@@ -16,6 +16,7 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
     onOk: () => void
     loading?: boolean
     generated?: boolean
+    duplicate?: boolean
 }) {
 
     const editing = (grid.id ?? 0) > 0
@@ -26,7 +27,7 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
     }
 
     return <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{editing ? "Editing Grid" : "Create a new Grid"}</DialogTitle>
+        <DialogTitle>{duplicate ? "Duplicating existing grid" : editing ? "Editing Grid" : "Create a new Grid"}</DialogTitle>
         <DialogContent style={{ display: "flex", flexDirection: 'column', gap: "10px", overflowY: "unset" }}>
             <TextField
                 label="Name" value={grid.name} fullWidth
@@ -40,28 +41,28 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
                 <ComplexAccordionBody>
                     <PromptBuilder
                         alwaysExpand fullHeight noBrew prompt={{ ...grid, positivePrompt: grid.prompt, variables: {} }}
-                        setPrompt={(p) => setGrid({ ...grid, ...p, prompt: p.positivePrompt })} preview={generated || loading}
+                        setPrompt={(p) => setGrid({ ...grid, ...p, prompt: p.positivePrompt })} preview={(generated && !duplicate) || loading}
                     />
                 </ComplexAccordionBody>
             </ComplexAccordion>
             <ComplexAccordion title="Values">
                 <ComplexAccordionBody style={{ display: 'flex', gap: "10px" }}>
                     <div style={{ flex: "1" }}>
-                        <GridValsEditor axis="X" mode={grid.xValMode} vals={grid.xVals} disabled={generated || !!loading}
+                        <GridValsEditor axis="X" mode={grid.xValMode} vals={grid.xVals} disabled={(generated && !duplicate) || !!loading}
                             setVals={a => setGrid({ ...grid, xVals: a })}
                             setMode={a => setGrid({ ...grid, xValMode: a })}
                         />
                     </div>
                     <div style={{ alignSelf: 'center' }}>
                         <Tooltip title="Flip Axes">
-                            <IconButton onClick={() => flipAxes()} disabled={generated}>
+                            <IconButton onClick={() => flipAxes()} disabled={(generated && !duplicate) || !!loading}>
                                 <CompareArrows />
                             </IconButton>
                         </Tooltip>
 
                     </div>
                     <div style={{ flex: "1" }}>
-                        <GridValsEditor axis="Y" mode={grid.yValMode} vals={grid.yVals} disabled={generated || !!loading}
+                        <GridValsEditor axis="Y" mode={grid.yValMode} vals={grid.yVals} disabled={(generated && !duplicate) || !!loading}
                             setVals={a => setGrid({ ...grid, yVals: a })}
                             setMode={a => setGrid({ ...grid, yValMode: a })}
                         />

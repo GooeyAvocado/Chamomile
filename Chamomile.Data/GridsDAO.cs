@@ -9,6 +9,8 @@ namespace Chamomile.Data
     public class GridsDAO(string connectionString) : BaseDAO(connectionString)
     {
 
+        private ImagesDAO ImagesDAO = new(connectionString);
+
         private static readonly List<string> GridColumns = [
            GRID_ID,GRID_NM, GRID_PROMPT_TX, GRID_NOTES_TX, GRID_NEGATIVE_PROMPT_TX,
             GRID_STEP_CNT, GRID_SAMPLER_TX, GRID_SCHEDULE_TP, GRID_CFG_SCL_NUM,
@@ -131,12 +133,13 @@ namespace Chamomile.Data
         public async Task Delete(int Id)
         {
 
-            //First, delete all the images that were in this grid
+            //First get all the images in this album
+            var gridImages = await ImagesDAO.GetAll(new() {
+                Grid = Id,
+                DisablePagination = true
+            },-1,true);
 
-            await adoTemplate.Execute(DeleteSql(IMAGES_TABLE, new([new("(" + IMAGE_ADDTL_INFO + "->> 'gridId')::Int", WhereConditionOperator.EQUALS, "@" + GRID_ID)])), (cmd) =>
-            {
-                cmd.SetInt(GRID_ID, Id);
-            });
+            gridImages.ForEach(async (a) => await ImagesDAO.DeleteImage(a.Id));
 
             //Then delete the grid
             await adoTemplate.Execute(DeleteSql(GRID_TABLE, new([new(GRID_ID)])), (cmd) =>

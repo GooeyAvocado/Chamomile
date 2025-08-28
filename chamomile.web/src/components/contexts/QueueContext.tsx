@@ -59,7 +59,7 @@ export default function QueueProvider(props: { children: any }) {
         const groups = [] as Prompt[][];
         let currentGroup = [] as Prompt[]
 
-        queue.forEach((image) => {
+        queue.filter(a => a.orderData?.source !== "GRID").forEach((image) => {
             if (currentGroup.length === 0 || currentGroup[0].positivePrompt === image.positivePrompt) {
                 currentGroup.push(image);
             } else {
@@ -67,6 +67,7 @@ export default function QueueProvider(props: { children: any }) {
                 currentGroup = [image];
             }
         });
+
         //Push the last remaining group
         groups.push(currentGroup)
         return groups;
