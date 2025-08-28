@@ -1,9 +1,14 @@
 import { imageUrl } from "../../../api/Images";
-import { Album } from "../../../model/Album";
 
-export default function AlbumThumbImg({ album }: { album: Album }) {
+export default function AlbumThumbImg({ album, defaultImage }: {
+    album: {
+        thumbId?: number,
+        firstFourImages?: number[]
+    },
+    defaultImage?: string
+}) {
     return <div style={{ height: "100%", width: "100%", aspectRatio: "2/1", position: "relative" }}>
-        <img src={'/colorcollection.png'} style={{ width: "100%", height: "100%", aspectRatio: "2/1", objectFit: 'cover', objectPosition: 'center center', position: 'absolute', left: '0', top: '0', }} />
+        <img src={defaultImage ?? '/colorcollection.png'} style={{ width: "100%", height: "100%", aspectRatio: "2/1", objectFit: 'cover', objectPosition: 'center center', position: 'absolute', left: '0', top: '0', }} />
         {
             album.thumbId
                 ? <img src={imageUrl(album.thumbId)} style={{ width: "100%", height: "100%", aspectRatio: "2/1", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />

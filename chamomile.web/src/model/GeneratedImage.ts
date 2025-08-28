@@ -1,3 +1,5 @@
+import PromptOrderData from "./PromptOrderData";
+
 export class GeneratedImage {
     id: number = 0;
     prompt: string = "";
@@ -21,5 +23,5 @@ export class GeneratedImage {
     generationDurationMs?: number = 0;
     downloadCount?: number = 0;
     hidden?: boolean
-    additionalInfo?: any
+    additionalInfo?: PromptOrderData
 }

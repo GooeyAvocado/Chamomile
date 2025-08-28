@@ -7,14 +7,15 @@ export default function SchedulerSelector(props: {
     scheduler: string,
     setScheduler: (val: string) => void
     style?: React.CSSProperties
+    disabled?: boolean
 }) {
 
-    const { scheduler, setScheduler, style } = props
+    const { scheduler, setScheduler, style, disabled } = props
     const { data } = useApi(getSchedulers, true)
 
     return <FormControl fullWidth style={style}>
         <Select
-            disabled={!data}
+            disabled={!data || disabled}
             value={scheduler ?? ""}
             onChange={(e) => setScheduler(e.target.value)}
             startAdornment={

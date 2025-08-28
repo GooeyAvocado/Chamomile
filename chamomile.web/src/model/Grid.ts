@@ -1,6 +1,6 @@
 export interface Grid {
     /** ID of the image on DB */
-    id: number;
+    id?: number;
 
     name: string;
 
@@ -52,5 +52,5 @@ export interface Grid {
     firstFour?: number[];
 
     /** When this image was created */
-    created: Date;
+    created?: Date;
 }

@@ -26,6 +26,7 @@ import ModelChangeTile from "./ModelChangeTile";
 import ImageModalFromId from "./ImageModalFromId";
 import { Prompt } from "../../../model/Prompt";
 import SelectedImageActions from "../selectedImageActions/SelectedImageActions";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function ImageViewer(props: {
     filter: FilterOptions
@@ -40,15 +41,17 @@ export default function ImageViewer(props: {
     selectMode?: boolean
     album?: Album
     setAlbum?: (val: Album) => void
+    navToSelectedImage?: boolean
 }) {
 
-    const { filter, showBrewing, onClick, showWelcome, album, setAlbum, selectImage, selectedImages, unselectImage, selectMode, onClearSelect, setSelectedImages } = props;
+    const { filter, showBrewing, onClick, showWelcome, album, setAlbum, selectImage, selectedImages, unselectImage, selectMode, onClearSelect, setSelectedImages, navToSelectedImage } = props;
 
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
     const favApi = useApi(favImage)
     const notesApi = useApi(noteImage)
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
+    const nav = useNavigate();
 
     const [viewerOpen, setViewerOpen] = useState(false)
     const [deleteAys, setDeleteAys] = useState(false)
@@ -61,6 +64,7 @@ export default function ImageViewer(props: {
     const { enqueueSnackbar } = useSnackbar();
     const { isMobile } = useUserAgent();
     const { currentUpload, lastSuccess, progress: uploadProgress } = useImageUpload();
+    const location = useLocation();
 
     const { activeJob, cancel, progress, groupedQueue, queue, nextModel } = useQueue((val) => {
         if (showBrewing && imageAlbumFilter(val)) {
@@ -71,6 +75,12 @@ export default function ImageViewer(props: {
     useEffect(() => {
         imageApi.refresh()
     }, [filter])
+
+    useEffect(() => {
+        if (!navToSelectedImage) return;
+        console.log(location.pathname)
+        setViewerOpen(location.pathname.startsWith("/image"))
+    }, [location, navToSelectedImage])
 
     useEffect(() => {
         if (showBrewing && lastSuccess !== undefined && !!lastSuccess?.id) {
@@ -92,6 +102,7 @@ export default function ImageViewer(props: {
                 //If the count is 1, then we've deleted the last image
                 if (imageApi.count === 1) {
                     setSelectedImage(undefined)
+                    if (navToSelectedImage) nav("/")
                 } else if (selectedIndex() >= imageApi.count - 1) {
                     onLeft()
                 } else {
@@ -283,7 +294,7 @@ export default function ImageViewer(props: {
             }}>
                 {showBrewing && groupedQueue.map(p =>
                     p.length === 0 || !promptsAlbumFilter(p) ? <></> :
-                        p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id)} onView={setPromptViewImageID} /> :
+                        p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id ?? 0)} onView={setPromptViewImageID} /> :
                             <QueuedGroupImageTile prompts={p} onCancel={cancel} onView={setPromptViewImageID} />
                 )}
 
@@ -306,12 +317,15 @@ export default function ImageViewer(props: {
                     key={`image-${a.id}`} image={a} onDelete={onDelete}
                     onFavorite={onFavorite} selected={selectedImages?.includes(a.id)}
                     onSelect={selectImage ? () => selectImage(a.id) : undefined} onUnselect={unselectImage ? () => unselectImage(a.id) : undefined} selectMode={selectMode}
-                    onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setViewerOpen(true) }}
+                    onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setViewerOpen(true); if (navToSelectedImage) nav(`/image`) }}
                 />)}
 
                 {!onClick && <>
                     <ImageModal
-                        open={viewerOpen} setOpen={setViewerOpen} image={selectedImage}
+                        open={viewerOpen} setOpen={() => {
+                            setViewerOpen(false);
+                            if (navToSelectedImage) nav("/")
+                        }} image={selectedImage}
                         onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
                         onFavorite={onFavorite} onDownload={onDownload} onLeft={onLeft} onRight={onRight}
                         onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}

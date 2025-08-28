@@ -347,6 +347,7 @@ export default function PromptBuilder(props: {
                     sampler={prompt.sampler}
                     setSampler={(s) => { setPrompt({ ...prompt, sampler: s }) }}
                     style={{ flex: "1", minWidth: "260px" }}
+                    disabled={preview}
                 />
 
 

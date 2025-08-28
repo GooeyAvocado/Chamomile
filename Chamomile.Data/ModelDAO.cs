@@ -77,10 +77,10 @@ namespace Chamomile.Data {
         private async Task<List<string>> GetUnusedModels() {
             return await adoTemplate.Query($@"
                 select m.{MODEL_TITLE}
-                from {MODELS_TABLE} m left join {IMAGES_TABLE} i on m.{MODEL_TITLE} = i.{MODEL_TITLE} 
+                from {MODELS_TABLE} m left join {IMAGES_TABLE} on m.{MODEL_TITLE} = img.{MODEL_TITLE} 
                 where {MODEL_AVAIL_IN}  = false
                 group by  m.{MODEL_TITLE}
-                HAVING COUNT(i.{MODEL_TITLE}) = 0", (cmd) => { }, (reader) => reader.GetString(MODEL_TITLE));
+                HAVING COUNT(img.{MODEL_TITLE}) = 0", (cmd) => { }, (reader) => reader.GetString(MODEL_TITLE));
         }
 
         private static string InnerImageSql(FilterOptions filter, int limit) {

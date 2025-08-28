@@ -84,7 +84,7 @@ namespace Chamomile.Data.Utils {
         private readonly string ConnectionString = connectionString;
 
         public async Task<T?> QuerySingle<T>(string sql, Action<Setter> setter, Func<Getter, T> rowMapper) {
-            return (await Query(sql, setter, rowMapper)).FirstOrDefault();
+                return (await Query(sql, setter, rowMapper)).FirstOrDefault();
         }
 
         public async Task<T?> QuerySingle<T>(string sql, Action<Setter> setter, Func<Getter, Task<T>> rowMapper){
@@ -92,114 +92,140 @@ namespace Chamomile.Data.Utils {
         }
 
         public async Task<List<T>> Query<T>(string sql, Action<Setter> setter, Func<Getter, T> rowMapper){
-            var results = new List<T>();
+            try {
+                var results = new List<T>();
 
-            using var conn = new NpgsqlConnection(ConnectionString);
-            await conn.OpenAsync();
+                using var conn = new NpgsqlConnection(ConnectionString);
+                await conn.OpenAsync();
 
-            //Console.WriteLine(sql);
-            using var cmd = new NpgsqlCommand(sql, conn);
+                //Console.WriteLine(sql);
+                using var cmd = new NpgsqlCommand(sql, conn);
 
-            void setParam(string key, NpgsqlDbType type, object? val){
-                cmd.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                void setParam(string key, NpgsqlDbType type, object? val) {
+                    cmd.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                }
+
+                setter(new Setter(setParam));
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync()) { results.Add(rowMapper(new Getter(reader))); }
+
+                return results;
             }
-
-            setter(new Setter(setParam));
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync()) { results.Add(rowMapper(new Getter(reader))); }
-
-            return results;
+            catch (Exception) {
+                Console.Write(sql);
+                throw;
+            }
 
         }
 
         public async Task<List<T>> Query<T>(string sql, Action<Setter> setter, Func<Getter, Task<T>> rowMapper){
-            var results = new List<T>();
+            try { 
+                var results = new List<T>();
 
-            using var conn = new NpgsqlConnection(ConnectionString);
-            await conn.OpenAsync();
+                using var conn = new NpgsqlConnection(ConnectionString);
+                await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand(sql, conn);
+                using var cmd = new NpgsqlCommand(sql, conn);
 
-            void setParam(string key, NpgsqlDbType type, object? val)
-            {
-                cmd.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                void setParam(string key, NpgsqlDbType type, object? val)
+                {
+                    cmd.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                }
+
+                setter(new Setter(setParam));
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync()) { results.Add(await rowMapper(new Getter(reader))); }
+
+                return results;
             }
-
-            setter(new Setter(setParam));
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync()) { results.Add(await rowMapper(new Getter(reader))); }
-
-            return results;
+            catch (Exception) {
+                Console.Write(sql);
+                throw;
+            }
 
         }
 
         public async Task<int> Execute(string sql) { return await Execute(sql, (_) => { }); }
 
         public async Task<int> Execute(string sql, Action<Setter> setter){
-            using var conn = new NpgsqlConnection(ConnectionString);
-            await conn.OpenAsync();
+            try {
+                using var conn = new NpgsqlConnection(ConnectionString);
+                await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand(sql, conn);
+                using var cmd = new NpgsqlCommand(sql, conn);
 
-            void setParam(string key, NpgsqlDbType type, object? val){
-                cmd.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                void setParam(string key, NpgsqlDbType type, object? val) {
+                    cmd.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                }
+
+                setter(new Setter(setParam));
+
+                return await cmd.ExecuteNonQueryAsync();
             }
-
-            setter(new Setter(setParam));
-
-            return await cmd.ExecuteNonQueryAsync();
+            catch (Exception) {
+                Console.Write(sql);
+                throw;
+            }
         }
 
         public async Task<int> ExecuteBatch<T>(string sql, Action<Setter, T> setter, ICollection<T> items){
+            try {
+                if (items.Count == 0) return 0;
 
-            if (items.Count == 0) return 0;
+                using var conn = new NpgsqlConnection(ConnectionString);
+                await conn.OpenAsync();
 
-            using var conn = new NpgsqlConnection(ConnectionString);
-            await conn.OpenAsync();
+                using var batch = new NpgsqlBatch(conn);
 
-            using var batch = new NpgsqlBatch(conn);
+                foreach (var item in items) {
+                    var batchCommand = new NpgsqlBatchCommand(sql);
 
-            foreach (var item in items)
-            {
-                var batchCommand = new NpgsqlBatchCommand(sql);
+                    void setParam(string key, NpgsqlDbType type, object? val) {
+                        batchCommand.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                    }
 
-                void setParam(string key, NpgsqlDbType type, object? val)
-                {
-                    batchCommand.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                    setter(new Setter(setParam), item);
+
+                    batch.BatchCommands.Add(batchCommand);
                 }
 
-                setter(new Setter(setParam), item);
-
-                batch.BatchCommands.Add(batchCommand);
+                return await batch.ExecuteNonQueryAsync();
+            }
+            catch (Exception) {
+                Console.Write(sql);
+                throw;
             }
 
-            return await batch.ExecuteNonQueryAsync();
         }
 
         public async Task<int> ExecuteBatch<T>(string sql, Func<Setter, T, Task> setter, ICollection<T> items){
+            try {
+                if (items.Count == 0) return 0;
 
-            if (items.Count == 0) return 0;
+                using var conn = new NpgsqlConnection(ConnectionString);
+                await conn.OpenAsync();
 
-            using var conn = new NpgsqlConnection(ConnectionString);
-            await conn.OpenAsync();
+                using var batch = new NpgsqlBatch(conn);
 
-            using var batch = new NpgsqlBatch(conn);
+                foreach (var item in items) {
+                    var batchCommand = new NpgsqlBatchCommand(sql);
 
-            foreach (var item in items)
-            {
-                var batchCommand = new NpgsqlBatchCommand(sql);
+                    void setParam(string key, NpgsqlDbType type, object? val) {
+                        batchCommand.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                    }
 
-                void setParam(string key, NpgsqlDbType type, object? val)
-                {
-                    batchCommand.Parameters.Add(new NpgsqlParameter(key, type) { Value = val ?? DBNull.Value });
+                    await setter(new Setter(setParam), item);
+
+                    batch.BatchCommands.Add(batchCommand);
                 }
 
-                await setter(new Setter(setParam), item);
-
-                batch.BatchCommands.Add(batchCommand);
+                return await batch.ExecuteNonQueryAsync();
+            }
+            catch (Exception) {
+                Console.Write(sql);
+                throw;
             }
 
-            return await batch.ExecuteNonQueryAsync();
         }
     }
 }

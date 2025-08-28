@@ -10,11 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Immutable;
 using static Chamomile.API.Workers.ImageGeneratorWorker;
 
-namespace Chamomile.API.Controllers {
+namespace Chamomile.API.Controllers
+{
 
     [ApiController]
     [Route("api/images")]
-    public class ImageController(ImageGeneratorWorker worker) : ControllerBase {
+    public class ImageController(ImageGeneratorWorker worker) : ControllerBase
+    {
 
         readonly ImagesDAO dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
         readonly A111Api api = new(new EnvironmentKey("SD_URL", () => throw new InvalidOperationException("")).ToString());
@@ -23,10 +25,12 @@ namespace Chamomile.API.Controllers {
         #region CREATE
 
         [HttpPost]
-        public async Task<IActionResult> Create(IFormFile file, [FromQuery] int? albumId) {
+        public async Task<IActionResult> Create(IFormFile file, [FromQuery] int? albumId)
+        {
             if (file == null || file.Length == 0) { return BadRequest("No data!"); }
             if (file.Length > 5 * 1024 * 1024) { return BadRequest("File Too Large!"); }
-            if (!ImageDownload.AcceptableMimeTypeExtensions.ContainsKey(file.ContentType)) {
+            if (!ImageDownload.AcceptableMimeTypeExtensions.ContainsKey(file.ContentType))
+            {
                 return BadRequest("Unacceptable type, must be an image!");
             }
 
@@ -35,18 +39,22 @@ namespace Chamomile.API.Controllers {
             var fileBytes = memoryStream.ToArray();
 
             var UploadDetails = new Dictionary<string, string>() {
-                {"Source","UPLOAD" },
+                {"source","UPLOAD" },
                 {"filename",file.FileName }
             };
 
-            try {
+            try
+            {
                 var img = await dao.CreateImage(fileBytes, null, null, UploadDetails, false);
 
-                if (albumId.HasValue) {
-                    try {
+                if (albumId.HasValue)
+                {
+                    try
+                    {
                         await dao.AddImageToAlbum(img.Id, albumId.Value);
                     }
-                    catch (ValidationException e) {
+                    catch (ValidationException e)
+                    {
                         return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } });
                     }
                     img.Albums = [.. img.Albums.Union([albumId.Value])];
@@ -54,23 +62,27 @@ namespace Chamomile.API.Controllers {
 
                 return Ok(img);
             }
-            catch (InvalidOperationException e) {
-                return BadRequest(new Dictionary<string, string> { {"error" , e.Message } });
+            catch (InvalidOperationException e)
+            {
+                return BadRequest(new Dictionary<string, string> { { "error", e.Message } });
             }
         }
 
         [HttpPost("generate")]
-        public IActionResult Generate([FromBody] Prompt prompt) {
+        public IActionResult Generate([FromBody] Prompt prompt)
+        {
             return Ok(new Dictionary<string, object>() {
                 { "jobId", worker.EnqueuePrompt(prompt) }
             });
         }
 
         [HttpPost("preview")]
-        public async Task<IActionResult> Preview([FromBody] Prompt prompt) {
+        public async Task<IActionResult> Preview([FromBody] Prompt prompt)
+        {
 
             //We don't need to try catch this. if it fails it fails lmao
-            var response = await api.GenerateImage(new() {
+            var response = await api.GenerateImage(new()
+            {
                 batch_size = 1,
                 cfg_scale = prompt.CFGScale ?? 7.0,
                 prompt = CommentsPattern().Replace(prompt.PositivePrompt, ""),
@@ -88,22 +100,26 @@ namespace Chamomile.API.Controllers {
 
             var img = await dao.ParseImage(Convert.FromBase64String(response.images[0]));
 
-            return Ok(new PreviewReponse() { 
+            return Ok(new PreviewReponse()
+            {
                 Data = response.images[0],
                 Metadata = img
-            });               
-            
+            });
+
         }
 
         [HttpPost("generateMany")]
-        public IActionResult GenerateMany([FromBody] List<Prompt> prompts) {
+        public IActionResult GenerateMany([FromBody] List<Prompt> prompts)
+        {
             List<long> jobIds = [];
-            
-            foreach (var prompt in prompts) {
-                try {
-                    jobIds.Add(worker.EnqueuePrompt(prompt)) ;
+
+            foreach (var prompt in prompts)
+            {
+                try
+                {
+                    jobIds.Add(worker.EnqueuePrompt(prompt));
                 }
-                catch {}
+                catch { }
             }
 
             return Ok(new Dictionary<string, object>() {
@@ -112,7 +128,8 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpPost("Albums")]
-        public async Task<IActionResult> CreateAlbum([FromBody] AlbumCreateRequest request) {
+        public async Task<IActionResult> CreateAlbum([FromBody] AlbumCreateRequest request)
+        {
             try { return Ok(await dao.CreateAlbum(request, request.AddExisting)); }
             catch (ValidationException e) { return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } }); }
         }
@@ -123,19 +140,23 @@ namespace Chamomile.API.Controllers {
 
         [HttpGet("queue")]
         [Obsolete("This endpoint is deprecated. Use GET /status instead.")]
-        public IActionResult GetQueue() {
+        public IActionResult GetQueue()
+        {
             return Ok(worker.GetAllPrompts());
         }
 
         [HttpGet("current")]
         [Obsolete("This endpoint is deprecated. Use GET /status instead.")]
-        public IActionResult GetCurrent() {
+        public IActionResult GetCurrent()
+        {
             return Ok(worker.CurrentPrompt);
         }
 
         [HttpGet("status")]
-        public IActionResult GetStatus() {
-            return Ok(new ImageWorkerState {
+        public IActionResult GetStatus()
+        {
+            return Ok(new ImageWorkerState
+            {
                 CurrentJob = worker.CurrentPrompt,
                 Queue = worker.GetAllPrompts(),
                 Paused = worker.IsPaused
@@ -143,15 +164,17 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpPost("status")]
-        public IActionResult ChangeStatus([FromBody] ImageWorkerState state) {
-            if (state.Paused) {worker.Pause();}
+        public IActionResult ChangeStatus([FromBody] ImageWorkerState state)
+        {
+            if (state.Paused) { worker.Pause(); }
             else { worker.Resume(); }
 
             return GetStatus();
         }
 
         [HttpGet("cancel")]
-        public IActionResult CancelAll() {
+        public IActionResult CancelAll()
+        {
             worker.ClearQueue();
             return Ok();
         }
@@ -159,51 +182,61 @@ namespace Chamomile.API.Controllers {
 
 
         [HttpGet("cancel/{id}")]
-        public IActionResult CancelJob(long id) {
+        public IActionResult CancelJob(long id)
+        {
             return Ok(worker.CancelPrompt(id));
         }
 
         [HttpPost("cancel")]
-        public IActionResult CancelJobs([FromBody]List<long> id) {
+        public IActionResult CancelJobs([FromBody] List<long> id)
+        {
             return Ok(worker.CancelPrompts(id));
         }
 
         [HttpGet("progress")]
-        public async Task<IActionResult> CurrentProgress() {
+        public async Task<IActionResult> CurrentProgress()
+        {
             return Ok(await api.GetProgress());
         }
 
         [HttpGet("interrupt")]
-        public async Task<IActionResult> Interrupt() {
+        public async Task<IActionResult> Interrupt()
+        {
             await api.InterruptGeneration();
             return Ok();
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] FilterOptions options) {
-            try {
-                return Ok(await dao.GetAll(options, options.LastImage ?? 0));
+        public async Task<IActionResult> GetAll([FromQuery] FilterOptions options)
+        {
+            try
+            {
+                return Ok(await dao.GetAll(options, options.LastImage ?? 0, options.DisablePagination ?? false));
             }
-            catch (Npgsql.PostgresException e) {
+            catch (Npgsql.PostgresException e)
+            {
                 if (e.MessageText.Contains("tsquery"))
                     return BadRequest(new Exception(e.MessageText));
                 else throw;
-            } 
+            }
         }
 
         [HttpGet("count")]
-        public async Task<IActionResult> GetAllCount([FromQuery] FilterOptions options) {
+        public async Task<IActionResult> GetAllCount([FromQuery] FilterOptions options)
+        {
             var count = await dao.GetAllCount(options);
-            return Ok(new Dictionary<string,object>() { { "count", count } });
+            return Ok(new Dictionary<string, object>() { { "count", count } });
         }
 
         [HttpGet("{ID}")]
-        public async Task<IActionResult> Get(int ID) {
+        public async Task<IActionResult> Get(int ID)
+        {
             return Ok(await dao.Get(ID));
         }
 
         [HttpGet("{ID}/image")]
-        public async Task<IActionResult> GetImage(int ID, [FromQuery] bool NoCache = false, [FromQuery] bool CountDownload = false) {
+        public async Task<IActionResult> GetImage(int ID, [FromQuery] bool NoCache = false, [FromQuery] bool CountDownload = false)
+        {
             var file = await dao.GetImage(ID, CountDownload);
 
             if (file == null || file.Data == null || file.Mime == null) return NotFound();
@@ -218,7 +251,8 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpGet("{ID}/image/HiRes")]
-        public async Task<IActionResult> GetHiResImage(int ID, [FromQuery] bool NoCache = false, [FromQuery] bool CountDownload = false) {
+        public async Task<IActionResult> GetHiResImage(int ID, [FromQuery] bool NoCache = false, [FromQuery] bool CountDownload = false)
+        {
             var file = await dao.GetHiResImage(ID, CountDownload);
 
             if (file == null || file.Data == null || file.Mime == null) return NotFound();
@@ -233,45 +267,52 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpGet("{ID}/image.png")]
-        public async Task<IActionResult> GetImageDownload(int ID, [FromQuery] bool CountDownload = false) {
+        public async Task<IActionResult> GetImageDownload(int ID, [FromQuery] bool CountDownload = false)
+        {
             var file = await dao.GetImageOptionalHires(ID, CountDownload);
 
 
             if (file == null) return NotFound();
-            if (file == null || file.Data==null) return NotFound();
+            if (file == null || file.Data == null) return NotFound();
 
             // Not modified
             return File(file.Data, file.Mime ?? "image/png", new string([.. file.FullFilename.Where(c => c < 128)]));
         }
 
         [HttpGet("{ID}/Albums")]
-        public async Task<IActionResult> GetImageAlbums(int ID) { 
+        public async Task<IActionResult> GetImageAlbums(int ID)
+        {
             return Ok(await dao.GetImageAlbums(ID));
         }
 
         [HttpGet("Albums")]
-        public async Task<IActionResult> GetAlbums() {
+        public async Task<IActionResult> GetAlbums()
+        {
             return Ok(await dao.GetAlbums());
         }
 
         [HttpGet("modelSequence")]
-        public IActionResult GetModelSequence() {
+        public IActionResult GetModelSequence()
+        {
             return Ok(worker.Sequence);
         }
 
         [HttpPost("modelSequence")]
-        public IActionResult ChangeModelSequence([FromBody] List<ModelSequence> sequence) {
+        public IActionResult ChangeModelSequence([FromBody] List<ModelSequence> sequence)
+        {
             worker.Sequence = [.. sequence];
             return Ok(sequence);
         }
 
         [HttpGet("keywords/usage")]
-        public async Task<IActionResult> GetKeywordUsage([FromQuery] FilterOptions options) {
-            return Ok(await dao.GetKeywordUsage(options,options.LastImage ?? -1));
+        public async Task<IActionResult> GetKeywordUsage([FromQuery] FilterOptions options)
+        {
+            return Ok(await dao.GetKeywordUsage(options, options.LastImage ?? -1));
         }
 
         [HttpGet("keywords/datedusage")]
-        public async Task<IActionResult> GetKeywordDatedUsage([FromQuery] KeywordFilterOptions options) {
+        public async Task<IActionResult> GetKeywordDatedUsage([FromQuery] KeywordFilterOptions options)
+        {
             return Ok(await Utils.Utils.GetUsage(dao.GetKeywordDatedUsage, options));
         }
 
@@ -280,18 +321,22 @@ namespace Chamomile.API.Controllers {
         #region UPDATE
 
         [HttpPut]
-        public async Task<IActionResult> Favorite([FromBody] GeneratedImage image) {
+        public async Task<IActionResult> Favorite([FromBody] GeneratedImage image)
+        {
             return Ok(await dao.Favorite(image.Id, image.Favorite));
         }
 
         [HttpPut("notes")]
-        public async Task<IActionResult> Notes([FromBody] GeneratedImage image) {
+        public async Task<IActionResult> Notes([FromBody] GeneratedImage image)
+        {
             return Ok(await dao.UpdateNotes(image.Id, image.Notes ?? ""));
         }
 
         [HttpPost("hiRes")]
-        public async Task<IActionResult> HiRes([FromBody] HiResRequest options) {
-            var hiResParameters = new HiResParameters() { 
+        public async Task<IActionResult> HiRes([FromBody] HiResRequest options)
+        {
+            var hiResParameters = new HiResParameters()
+            {
                 upscaler_1 = options.Upscaler,
                 upscaling_resize = options.ResizeFactor,
                 image = Convert.ToBase64String((await dao.GetImage(options.ImageID))?.Data ?? throw new ArgumentNullException(nameof(options), "Image doesn't exist"))
@@ -304,25 +349,30 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpPut("Albums")]
-        public async Task<IActionResult> UpdateAlbum([FromBody] Album album) {
-            try { return Ok(await dao.UpdateAlbum(album));  }
-            catch (ValidationException e) { return BadRequest(new Dictionary<string, string> { { "field",e.Field}, { "message", e.Message } }); }
+        public async Task<IActionResult> UpdateAlbum([FromBody] Album album)
+        {
+            try { return Ok(await dao.UpdateAlbum(album)); }
+            catch (ValidationException e) { return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } }); }
         }
 
         [HttpPut("{ID}/Albums")]
-        public async Task<IActionResult> UpdateImageAlbums([FromBody] ImageAlbumRequest request, int ID) {
-            switch (request.Mode) {
+        public async Task<IActionResult> UpdateImageAlbums([FromBody] ImageAlbumRequest request, int ID)
+        {
+            switch (request.Mode)
+            {
                 case "ADD":
-                    try {
+                    try
+                    {
                         await dao.AddImageToAlbum(ID, request.AlbumId);
                     }
-                    catch (ValidationException e) {
+                    catch (ValidationException e)
+                    {
                         return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } });
                     }
-                    
+
                     break;
                 case "REMOVE":
-                    await dao.RemoveImageFromAlbum(ID,request.AlbumId);
+                    await dao.RemoveImageFromAlbum(ID, request.AlbumId);
                     break;
                 default:
                     throw new InvalidOperationException("Invalid mode (Should be ADD or REMOVE): " + request.Mode);
@@ -331,20 +381,25 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpPut("multi/Albums")]
-        public async Task<IActionResult> UpdateImageAlbums([FromBody] ImageAlbumRequest request) {
+        public async Task<IActionResult> UpdateImageAlbums([FromBody] ImageAlbumRequest request)
+        {
             if (request.ImageIDs == null || request.ImageIDs.Count == 0) return Ok();
-            switch (request.Mode) {
+            switch (request.Mode)
+            {
                 case "ADD":
-                    try {
+                    try
+                    {
                         await dao.AddImagesToAlbum(request.ImageIDs, request.AlbumId);
                     }
-                    catch (ValidationException e) {
+                    catch (ValidationException e)
+                    {
                         return BadRequest(new Dictionary<string, string> { { "field", e.Field }, { "message", e.Message } });
                     }
 
                     break;
                 case "REMOVE":
-                    foreach (var ID in request.ImageIDs) {
+                    foreach (var ID in request.ImageIDs)
+                    {
                         await dao.RemoveImageFromAlbum(ID, request.AlbumId);
                     }
                     break;
@@ -358,15 +413,18 @@ namespace Chamomile.API.Controllers {
 
         #region DELETE
         [HttpDelete("{ID}")]
-        public async Task<IActionResult> Delete(int ID) {
+        public async Task<IActionResult> Delete(int ID)
+        {
             await dao.DeleteImage(ID);
             return Ok();
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteMultiple([FromBody]Dictionary<string,List<int>> body) {
+        public async Task<IActionResult> DeleteMultiple([FromBody] Dictionary<string, List<int>> body)
+        {
             if (body["ids"] == null) return BadRequest("Use field 'ids'");
-            foreach (var item in body["ids"]) {
+            foreach (var item in body["ids"])
+            {
                 await dao.DeleteImage(item);
             }
             return Ok();
@@ -375,7 +433,8 @@ namespace Chamomile.API.Controllers {
         #endregion
 
         [HttpDelete("Albums/{ID}")]
-        public async Task<IActionResult> DeleteAlbum(int ID) {
+        public async Task<IActionResult> DeleteAlbum(int ID)
+        {
             await dao.DeleteAlbum(ID);
             return Ok();
         }

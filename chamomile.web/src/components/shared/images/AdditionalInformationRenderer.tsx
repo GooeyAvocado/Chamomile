@@ -12,13 +12,13 @@ export default function AdditionalInfoRenderer({
 
     const [imageOpen, setImageOpen] = useState(false)
 
-    switch (additionalInformation.Source || additionalInformation.source) {
+    switch (additionalInformation.source || additionalInformation.source) {
         case "SAVED_PROMPT":
             return <>
                 <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
                     <Card style={{ flexShrink: "0" }}>
                         <CardActionArea onClick={() => setImageOpen(true)}>
-                            <img src={imageUrl(additionalInformation.Sample)} width={48} />
+                            <img src={imageUrl(additionalInformation.sample)} width={48} />
                         </CardActionArea>
                     </Card>
                     <ReceiptLong />
@@ -27,14 +27,14 @@ export default function AdditionalInfoRenderer({
                         <div style={{ fontSize: ".7em" }}>This image is a re-order of an existing recipe</div>
                     </div>
                 </Card>
-                <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.Sample} />
+                <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.sample} />
             </>
         case "IMAGE_BASE":
             return <>
                 <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
                     <Card style={{ flexShrink: "0" }}>
                         <CardActionArea onClick={() => setImageOpen(true)}>
-                            <img src={imageUrl(additionalInformation.Sample)} width={48} />
+                            <img src={imageUrl(additionalInformation.sample)} width={48} />
                         </CardActionArea>
                     </Card>
                     <ReceiptLongTwoTone />
@@ -44,14 +44,14 @@ export default function AdditionalInfoRenderer({
                     </div>
 
                 </Card>
-                <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.Sample} />
+                <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.sample} />
             </>
         case "IMAGE":
             return <>
                 <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
                     <Card style={{ flexShrink: "0" }}>
                         <CardActionArea onClick={() => setImageOpen(true)}>
-                            <img src={imageUrl(additionalInformation.Sample)} width={48} />
+                            <img src={imageUrl(additionalInformation.sample)} width={48} />
                         </CardActionArea>
                     </Card>
                     <ReceiptLong />
@@ -61,7 +61,7 @@ export default function AdditionalInfoRenderer({
                     </div>
 
                 </Card>
-                <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.Sample} />
+                <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.sample} />
             </>
         case "PROMPTBOX":
             return <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>

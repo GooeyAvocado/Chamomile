@@ -1,7 +1,7 @@
 import PromptOrderData from "./PromptOrderData";
 
 export interface Prompt {
-    id: number
+    id?: number
     name: string
     positivePrompt: string
     negativePrompt: string

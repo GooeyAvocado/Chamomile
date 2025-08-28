@@ -15,5 +15,11 @@
 
         /// <summary>Albums to add this image to after generation. Usually will either be of length 0 or 1</summary>
         public List<int>? Albums { get; set; } = [];
+
+        public int? GridId { get; set; } = null;
+        public int? XPos { get; set; } = null;
+        public int? YPos { get; set; } = null;
+        public string? XVal { get; set; } = null;
+        public string? YVal { get; set; } = null;
     }
 }

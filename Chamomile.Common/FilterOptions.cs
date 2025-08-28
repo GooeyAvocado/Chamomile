@@ -9,6 +9,9 @@
         /// <summary>Album requested</summary>
         public int? Album { get; set; } = -1;
 
+        /// <summary>Grid requested</summary>
+        public int? Grid { get; set; } = -1;    
+
         /// <summary>LoRA requested</summary>
         public string? Lora { get; set; } = "";
 
@@ -34,6 +37,9 @@
 
         /// <summary>Last image returned from last request for pagination</summary>
         public int? LastImage { get; set; } = 0;
+
+        /// <summary>Gets everything</summary>
+        public bool? DisablePagination { get; set; } = false;
 
     }
 }

@@ -144,6 +144,11 @@ namespace Chamomile.Data {
             return image;
         }
 
+        public static readonly JsonSerializerOptions SerializationOptions = new() {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+        };
+
         public async Task<GeneratedImage?> CreateImage(byte[] imageBytes, 
                 Prompt? prompt = null, 
                 int? generationDuration = null, 
@@ -154,7 +159,7 @@ namespace Chamomile.Data {
 
             var img = await adoTemplate.QuerySingle(InsertSql([
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
-                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,IMAGE_ADDTL_INFO,
+                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,IMAGE_ADDTL_INFO, IMAGE_HIDDEN,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE, IMAGE_GEN_MS
             ], IMAGES_TABLE.Split(" ")[0], string.Join(", ", ImageColumns)), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
@@ -171,7 +176,7 @@ namespace Chamomile.Data {
                 cmd.SetString(MODEL_TITLE, image.Model);
                 cmd.SetInt(IMAGE_GEN_MS, generationDuration);
                 cmd.SetBoolean(IMAGE_HIDDEN, hidden);
-                if(additionalInfo!=null) cmd.SetValue(IMAGE_ADDTL_INFO, NpgsqlTypes.NpgsqlDbType.Jsonb , JsonSerializer.Serialize(additionalInfo));
+                if(additionalInfo!=null) cmd.SetValue(IMAGE_ADDTL_INFO, NpgsqlTypes.NpgsqlDbType.Jsonb , JsonSerializer.Serialize(additionalInfo,SerializationOptions));
             }, ImageRM) ?? throw new InvalidOperationException("This should never happen");
             
             await adoTemplate.ExecuteBatch(InsertSql([IMAGES_ID, LORA_ALIAS], IMAGES_LORA_MAP), (cmd, lora) => {
@@ -281,6 +286,10 @@ namespace Chamomile.Data {
                 conditions.Add(new(IMAGES_DOWNLOAD_CT, WhereConditionOperator.GREATER_THAN, "0"));
             }
 
+            if (filter.Grid != null && filter.Grid >= 0) {
+                conditions.Add(new("(" + IMAGE_ADDTL_INFO + "->> 'gridId')::Int", WhereConditionOperator.EQUALS, "@" + GRID_ID));
+            }
+
             if (!string.IsNullOrEmpty(filter.Lora)) {
                 conditions.Add(new(
                     "img." + IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
@@ -311,8 +320,18 @@ namespace Chamomile.Data {
             }
 
 
-            if (filter.Album == null || filter.Album < 0) {
-                conditions.Add(new(IMAGE_HIDDEN, WhereConditionOperator.EQUALS, "FALSE"));
+            if (
+                //We have no Album
+                (filter.Album == null || filter.Album < 0) &&
+                //We have no Grid
+                (filter.Grid==null || filter.Grid < 0)
+            ) {
+                conditions.Add(
+                    new WhereConditionSubgroup(new(WhereConditionUnion.OR,[
+                        new(IMAGE_HIDDEN,WhereConditionOperator.EQUALS,"false"),
+                        new(IMAGES_FAV_IN,WhereConditionOperator.EQUALS,"true")
+                    ]))
+                );
             }
 
             return conditions;
@@ -341,6 +360,8 @@ namespace Chamomile.Data {
             if (!string.IsNullOrEmpty(filter.Model)) { cmd.SetString(MODEL_TITLE, filter.Model); }
             if (!string.IsNullOrEmpty(filter.Lora)) { cmd.SetString(LORA_ALIAS, filter.Lora); }
             if (filter.Album != null && filter.Album >= 0) { cmd.SetInt(ALBUM_ID, filter.Album); }
+            if (filter.Grid != null && filter.Grid >= 0) {cmd.SetInt(GRID_ID,filter.Grid);}
+
 
             if (!string.IsNullOrEmpty(filter.FromDate)) {
                 cmd.SetDate("FROM_DATE", DateTime.Parse(filter.FromDate));

@@ -12,14 +12,33 @@ import AlbumHeader from "../shared/albums/AlbumHeader";
 import { usePrompt } from "../hooks/usePrompt";
 import Navbar from "../shared/navbar/Navbar";
 import { useAlbums } from "../hooks/useAlbums";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Home() {
 
     const { vertical, height } = useWindowDimensions();
     const { queue, progress } = useQueue(() => { })
     const { album, setAlbum } = usePrompt();
+    const { albums } = useAlbums();
     const { refresh: refreshAlbums } = useAlbums();
     const setTitle = usePageTitle();
+    const location = useLocation();
+    const nav = useNavigate();
+
+    useEffect(() => {
+        console.log("waos")
+        if (location.pathname.startsWith("/album/")) {
+            const id = Number.parseInt(location.pathname.replace("/album/", ""));
+            if (album?.id !== id) {
+                setAlbum(albums?.find(a => a.id === id))
+                setFilter({ ...filter, album: id })
+            }
+        } else {
+            setAlbum(undefined)
+            setFilter({ ...filter, album: -1 })
+        }
+    }, [location, albums])
+    const albumsOpen = location.pathname === "/album/"
 
     const initialFilter = {
         favorite: false,
@@ -33,7 +52,6 @@ export default function Home() {
     } as FilterOptions
 
     const [filter, setFilter] = useState(initialFilter)
-    const [albumsOpen, setAlbumsOpen] = useState(false)
     const [selectedImages, setSelectedImages] = useState<number[]>([])
     const [selectMode, setSelectMode] = useState(false)
 
@@ -69,33 +87,20 @@ export default function Home() {
 
         {/* Header */}
 
-        <Navbar
-            navAlbums={() => {
-                setAlbumsOpen(!albumsOpen)
-                refreshAlbums();
-            }}
-            navBrew={() => {
-                if (albumsOpen || album) {
-                    setFilter(initialFilter)
-                }
-                setAlbumsOpen(false)
-                setAlbum(undefined);
-
-            }}
-        />
+        <Navbar />
 
         <div style={{ display: "flex", flexDirection: 'column', width: "100%", flex: 1, padding: "0px 5%", overflowY: "hidden" }}>
 
             {albumsOpen ? <>
                 <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
-                    <AlbumsViewer onClick={(val) => { setAlbum(val); setFilter({ ...filter, album: val?.id ?? -1 }); setAlbumsOpen(false) }} />
+                    <AlbumsViewer onClick={(val) => { setAlbum(val); setFilter({ ...filter, album: val?.id ?? -1 }); nav(`/album/${val?.id}`) }} />
                 </div>
             </> : <>
 
                 {album && <>
                     <div style={{ width: "100%", }}>
                         <AlbumHeader onBack={() => {
-                            setAlbumsOpen(true)
+                            nav("/album/")
                             refreshAlbums();
                         }}
                             album={album} setAlbum={(val) => {

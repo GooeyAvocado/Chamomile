@@ -18,9 +18,10 @@ export default function SamplerSelector(props: {
     sampler: string,
     setSampler: (val: string) => void
     style?: React.CSSProperties
+    disabled?: boolean
 }) {
 
-    const { sampler, setSampler, style } = props
+    const { sampler, setSampler, style, disabled } = props
     const { data } = useApi(getSamplers, true)
 
     const groupedSamplers = useMemo(() => {
@@ -66,7 +67,7 @@ export default function SamplerSelector(props: {
     }, [data])
 
     return <Autocomplete key={sampler} disableClearable
-        freeSolo fullWidth
+        freeSolo fullWidth disabled={disabled}
         getOptionLabel={(option) => (option as GroupedSampler)?.name ?? ""}
         options={groupedSamplers ?? [{
             name: sampler

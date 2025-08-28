@@ -2,20 +2,19 @@ import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from "@mui/material
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import ChamomileLogo from "../ChamomileLogo";
 import StatusButton from "../StatusButton/StatusButton";
-import { Coffee, Launch, Menu as MenuIcon, Monitor, PhotoLibrary, Settings } from "@mui/icons-material";
+import { Coffee, GridView, Launch, Menu as MenuIcon, Monitor, PhotoLibrary, Settings } from "@mui/icons-material";
 import { useState } from "react";
 import SettingsSlidein from "../settings/SettingsSlidein";
 import HelpButton from "../help/HelpButton";
+import { useNavigate } from "react-router-dom";
 
-export default function Navbar({ navBrew, navAlbums }: {
-    navBrew: () => void
-    navAlbums: () => void
-}) {
+export default function Navbar() {
 
     const { width } = useWindowDimensions();
     const [promptAnchor, setPromptAnchor] = useState(null as any)
 
     const [settingsOpen, setSettingsOpen] = useState(false)
+    const nav = useNavigate();
 
     const onSettings = () => {
         onClose();
@@ -38,7 +37,7 @@ export default function Navbar({ navBrew, navAlbums }: {
             paddingLeft: "20px", paddingRight: "20px", paddingTop: "10px", paddingBottom: "20px"
 
         }}>
-            <div onClick={navBrew} style={{ cursor: 'pointer' }}>
+            <div onClick={() => { nav("/") }} style={{ cursor: 'pointer' }}>
                 <ChamomileLogo hideWords={width < 450} small />
             </div>
             {/* This translation is for visual purposes. The steam of the chamomile cup makes it look like this is out of alignment */}
@@ -59,14 +58,18 @@ export default function Navbar({ navBrew, navAlbums }: {
         >
 
 
-            <MenuItem onClick={() => { onClose(); navBrew(); }} style={{ fontSize: ".8em" }}>
+            <MenuItem onClick={() => { onClose(); nav("/"); }} style={{ fontSize: ".8em" }}>
                 <ListItemIcon><Coffee fontSize="small" /></ListItemIcon>
                 Home
             </MenuItem>
 
-            <MenuItem onClick={() => { onClose(); navAlbums(); }} style={{ fontSize: ".8em" }}>
+            <MenuItem onClick={() => { onClose(); nav("/album/"); }} style={{ fontSize: ".8em" }}>
                 <ListItemIcon><PhotoLibrary fontSize="small" /></ListItemIcon>
                 Collections
+            </MenuItem>
+            <MenuItem onClick={() => { onClose(); nav("/grid/"); }} style={{ fontSize: ".8em" }}>
+                <ListItemIcon><GridView fontSize="small" /></ListItemIcon>
+                Grids
             </MenuItem>
             <MenuItem onClick={() => { onClose(); onDisplay(); }} style={{ fontSize: ".8em" }}>
                 <ListItemIcon><Monitor fontSize="small" /></ListItemIcon>

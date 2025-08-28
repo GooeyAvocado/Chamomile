@@ -17,6 +17,7 @@ import DisplayPage from './components/pages/DisplayPage.tsx'
 import { AlbumsProvider } from './components/contexts/AlbumsContext.tsx'
 import QueueProvider from './components/contexts/QueueContext.tsx'
 import { SettingsProvider } from './components/contexts/SettingsContext.tsx'
+import GridsPage from './components/pages/GridsPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -37,6 +38,12 @@ createRoot(document.getElementById('root')!).render(
                           <QueueProvider>
                             <HashRouter>
                               <Routes>
+                                <Route path="/grid/*" element={
+                                  <QueueWatcher>
+                                    <GridsPage />
+                                  </QueueWatcher>
+                                }
+                                />
                                 <Route path="*" element={
                                   <QueueWatcher>
                                     <FullPageDropzone>
