@@ -9,12 +9,14 @@ import { useLocation, useNavigate } from "react-router-dom"
 export default function AdditionalInfoRenderer({
     additionalInformation,
 }: {
-    additionalInformation: PromptOrderData
+    additionalInformation?: PromptOrderData
 }) {
 
     const [imageOpen, setImageOpen] = useState(false)
     const nav = useNavigate();
     const location = useLocation();
+
+    if (!additionalInformation) return <>No additional information</>
 
     switch (additionalInformation.source || additionalInformation.source) {
         case "GRID":

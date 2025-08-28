@@ -82,7 +82,7 @@ export default function PromptGroupModal(props: {
                         {prompts.map(a => <tr key={a.id}>
                             <td style={{ display: 'flex', width: '100px' }}>
                                 <Tooltip title="Cancel this order">
-                                    <IconButton onClick={() => onCancel(a.id)}>
+                                    <IconButton onClick={() => onCancel(a.id ?? 0)}>
                                         <Cancel />
                                     </IconButton>
                                 </Tooltip>
