@@ -108,6 +108,7 @@ namespace Chamomile.Data
                 GRID_XVAL_CD, GRID_XVAL, GRID_YVAL_CD, GRID_YVAL
                 ], GRID_TABLE, new WhereConditionGroup([new(GRID_ID)])) + " RETURNING *", (cmd) =>
                 {
+                    cmd.SetInt(GRID_ID, grid.Id);
                     cmd.SetString(GRID_NM, grid.Name);
                     cmd.SetString(GRID_PROMPT_TX, grid.Prompt);
                     cmd.SetString(GRID_NOTES_TX, grid.Notes);
