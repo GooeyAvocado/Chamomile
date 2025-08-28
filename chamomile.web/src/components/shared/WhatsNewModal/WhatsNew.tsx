@@ -19,26 +19,25 @@ export default function WhatsNew({ open, setOpen }: {
 - **Promptbox Autocomplete:** You can now get suggestions for LoRAs (<), Wildcards (__), and Dprompts variables ($\{var}) on the prompt box
 - **Collections:** It's now a lot easier to organize your images. You can set up collections to automatically add images based on a search, or generate images directly to an album.
 - **Settings:** You can now configure sound, defaults, and which values from the prompt box are fixed between orders.
-- **Keyword Statistics:** One new statistics category added so you can see what makes up your prompts.
-- **LoRA and Wildcard autocomplete:** On your prompt box, you can now auto complete for LoRAs (<) or wildcards (__).
-- **Model Sequencing:** Chamomile can now sequence models and switch between them when conducting large numbers of brews.
-- **Pause Brewing:** Need to take a break? Don't want to lose your queue? Simply pause generation on the top right of the screen. You can close SD and bring it back up later
+- **Keyword statistics:** One new statistics category added so you can see what makes up your prompts.
+- **Model sequencing:** Chamomile can now sequence models and switch between them when conducting large numbers of brews.
+- **Pause brewing:** Need to take a break? Don't want to lose your queue? Simply pause generation on the top right of the screen. You can close SD and bring it back up later
 - **Image notes:** You can now write some small text notes on images
-- **Generation Time Measured:** See how long SD actually took to generate.
+- **Generation time measured:** See how long SD actually took to generate.
 - **Download button:** Directly download with your mouse, skipping a right click. You'll also be warned if you've already downloaded an image to keep your folders clean
-- **Copy Prompts to Clipboard:** (Requires HTTPS!)
-- **Single brew button:** For when you only want a single brew
+- **Copy prompts to clipboard:** (Requires HTTPS or localhost)
+- **Single brew:** The brew button now has an option to brew a single image
 - CTRL+D override to favorite images when viewing an image
 
 ### What's changed?
-- **UI Overhaul:** Chamomile is now a little wider, and leaves a bit more vertical space for images
-- **Better Sampler Dropdown:** Now with search, sorted, and some common samplers on top with user friendly text
-- **Better Statistics:** Statistics have been bolstered with usages over time, making it easier to see insights into your usage patterns.
-- **Recipe Folders:** Recipes can now be stored in different folders to make it easier to find them.
+- **UI overhaul:** Chamomile is now a little wider, and leaves a bit more vertical space for images
+- **Better sampler dropdown:** Now with search, sorted, and some common samplers on top with user friendly text
+- **Better statistics:** Statistics have been bolstered with usages over time, making it easier to see insights into your usage patterns.
+- **Recipe folders:** Recipes can now be stored in different folders to make it easier to find them.
 - **Order previews:** Lost what you ordered? Don't worry. Now if you re-order prompts, or order a saved recipe, a sample image will show on your queued order.
-- **Additional Search Options:** You can now search for images you've upscaled, and images you've downloaded
+- **Additional search options:** You can now search for images you've upscaled, and images you've downloaded
 - **Accordions:** There's a lot of information for each image. We've collapsed some bits of information so you can focus on exactly what you're looking for.
-- **Override Import/Export:** A little pair of buttons to import export overrides for later
+- **Override import/export:** A little pair of buttons to import export overrides for later
 - **Variables further deprecated:** Variables will only be available if the user adds a variable to the prompt (%myVar%)
 - **Order icon changed:** Ordering now uses ReceiptLong instead of Terminal
 - Models and LoRAs that are unavailable and have no images generated will automatically delete themselves
@@ -59,11 +58,11 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug that would make cancelling a group of orders fail to completely appear cancelled on the frontend
 - Fixed bug that would make statistics for empty results crash the app
 - Fixed bug where grouped prompts modal would report steps as 10x what they actually were
+- Fixed bug where LoRA usage statistics was unavailable if searching for a specific LoRA
+- Fixed bug where left or right navigation on an image immediately after editing a Model or LoRA would cause the app to crash
 - Fixed some typos
 - Improved system stability
 
-### Known bugs
-- LoRA usage statistics are unavailable if viewing a collection or searching for a specific LoRA
 `
 
     const { settings } = useSettings();
