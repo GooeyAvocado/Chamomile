@@ -393,7 +393,13 @@ namespace Chamomile.Data {
 
         public async Task<GeneratedImage?> GetRandom() {
             return await adoTemplate.QuerySingle(
-                $"select * from {IMAGES_TABLE} TABLESAMPLE SYSTEM (1) limit 1",
+                $@"
+                    WITH t AS (SELECT count(*) AS c FROM images)
+                    SELECT *
+                    FROM {IMAGES_TABLE}
+                    OFFSET floor(random() * (SELECT c FROM t))
+                    LIMIT 1;
+                ",
                 (cmd) => { }, ImageRM
             );
         }
