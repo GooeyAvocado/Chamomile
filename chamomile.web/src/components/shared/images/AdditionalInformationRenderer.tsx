@@ -5,7 +5,6 @@ import { imageUrl } from "../../../api/Images"
 import { ChevronRight, Coffee, GridView, ReceiptLong, ReceiptLongTwoTone, Upload } from "@mui/icons-material"
 import PromptOrderData from "../../../model/PromptOrderData"
 import { useLocation, useNavigate } from "react-router-dom"
-import { GridTypes } from "../grids/GridTypes"
 
 export default function AdditionalInfoRenderer({
     additionalInformation,

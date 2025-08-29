@@ -19,8 +19,6 @@ import useApi from '../../hooks/useApi';
 import { createGrid } from '../../../api/Grid';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
-import { getRandomImage } from '../../../api/Images';
-import { GeneratedImage } from '../../../model/GeneratedImage';
 import RandomImageModal from '../images/RandomImageModal';
 
 export default function PromptButton(props: {
@@ -33,7 +31,7 @@ export default function PromptButton(props: {
 }) {
 
     const { onBrew, onLoad, onSave, fullWidth, onSaveAs, saveAsEnabled } = props
-    const { prompt, orderAmount, setPrompt } = usePrompt();
+    const { prompt, orderAmount } = usePrompt();
 
     const [open, setOpen] = useState(false);
     const [seedWarning, setSeedWarning] = useState(false)
