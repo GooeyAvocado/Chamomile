@@ -391,6 +391,13 @@ namespace Chamomile.Data {
                 );
         }
 
+        public async Task<GeneratedImage?> GetRandom() {
+            return await adoTemplate.QuerySingle(
+                $"select * from {IMAGES_TABLE} TABLESAMPLE SYSTEM (1) limit 1",
+                (cmd) => { }, ImageRM
+            );
+        }
+
         public async Task<GeneratedImage?> Get(int id) {
             return await adoTemplate.QuerySingle(
                 SelectSql(ImageColumns, IMAGES_TABLE,
@@ -538,6 +545,82 @@ namespace Chamomile.Data {
             }
         }
 
+        public async Task<GeneralStatistics?> GetGenStatistics(FilterOptions filter, int limit) {
+
+            var favsCount = "FAVS_COUNT";
+            var hiresCount = "HIRES_COUNT";
+            var downloadCount = "DOWNLOAD_COUNT";
+            var totalDownloads = "TOTAL_DOWNLOADS";
+            var count = "COUNT";
+            var source = "SOURCE";
+
+            var sql = SelectSql([
+                $"min({ CRE_TS}) as { MIN_TS}",
+	            $"max({ CRE_TS}) as { MAX_TS}",
+	            $"count(*) filter(where { IMAGES_FAV_IN} = true) as { favsCount}",
+	            $"count(*) filter(where { IMAGES_HIRES_IN} = true) as { hiresCount}",
+	            $"count(*) filter(where { IMAGES_DOWNLOAD_CT} > 0) as { downloadCount}",
+	            $"sum({ IMAGES_DOWNLOAD_CT}) as { totalDownloads}",
+	            $"count(*) as { count}",
+                ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1)));
+
+            var result = await adoTemplate.QuerySingle(sql + (limit > 0 ? $" LIMIT {limit}" : ""), (cmd) => {
+                SetterFromFilter(cmd, filter);
+            }, (reader) => new GeneralStatistics {
+                DownloadCount = reader.GetInt(downloadCount),
+                FavCount = reader.GetInt(favsCount),
+                MaxTs = reader.GetDateTime(MAX_TS),
+                MinTs = reader.GetDateTime(MIN_TS),
+                TotalDownloads = reader.GetInt(totalDownloads),
+                UpscaledCount = reader.GetInt(hiresCount),
+                CountBySource = []
+            });
+
+            if (result == null) return null;
+
+            var groupedCountsSql = SelectSql([
+                $"count(*) as {count}",
+                $"{IMAGE_ADDTL_INFO} ->>'source' as {source}",
+                ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1)));
+
+            await adoTemplate.Query(
+                groupedCountsSql + $" GROUP BY {IMAGE_ADDTL_INFO} ->>'source'" + (limit > 0 ? $" LIMIT {limit}" : ""), 
+                (cmd) => SetterFromFilter(cmd, filter), (reader) => {
+                    result.CountBySource.Add(reader.GetOptionalString(source) ?? "UNKNOWN", reader.GetInt(count));
+                    return 1;
+                }
+            );
+            
+            return result;
+
+        }
+
+//This is necessary because we want to keep using this with the datedUsage formatter
+#pragma warning disable IDE0060 // Remove unused parameter
+        public async Task<List<KeywordUsageDated>> GetGenStatsDated(FilterOptions filter, int limit, string keyword) {
+            return await adoTemplate.Query(SelectSql(
+                [
+                    $"date({CRE_TS}) as {KEYWORD_USAGE_DATE}",
+                    $"count(*) as {MODEL_USAGE_COUNT}",
+                    $"min({IMAGES_ID}) as {IMAGES_ID}" ,
+                ],
+                "(" + InnerStatsImageSql(filter, limit) + ")")
+                + $@" 
+                    GROUP BY {KEYWORD_USAGE_DATE} 
+                    ORDER BY {KEYWORD_USAGE_DATE} ASC
+                ", (cmd) => {
+                    SetterFromFilter(cmd, filter);
+                }, (reader) =>
+                new KeywordUsageDated() {
+                    Keyword = "Generated Images",
+                    Count = reader.GetInt(MODEL_USAGE_COUNT),
+                    Date = reader.GetDateTime(KEYWORD_USAGE_DATE),
+                    Sample = reader.GetInt(IMAGES_ID)
+                }
+            );
+        }
+#pragma warning restore IDE0060 // Remove unused parameter
+
         public async Task<List<KeywordUsage>> GetKeywordUsage(FilterOptions filter, int limit) {
             var sql = $@"
                 SELECT
@@ -598,6 +681,10 @@ namespace Chamomile.Data {
             });
         }
 
+        private static string InnerStatsImageSql(FilterOptions filter, int limit) {
+            return SelectSql([CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
+                [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
+        }
 
         #endregion
 

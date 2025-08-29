@@ -234,6 +234,11 @@ namespace Chamomile.API.Controllers
             return Ok(await dao.Get(ID));
         }
 
+        [HttpGet("random")]
+        public async Task<IActionResult> GetRandom() {
+            return Ok(await dao.GetRandom());
+        }
+
         [HttpGet("{ID}/image")]
         public async Task<IActionResult> GetImage(int ID, [FromQuery] bool NoCache = false, [FromQuery] bool CountDownload = false)
         {
@@ -302,6 +307,16 @@ namespace Chamomile.API.Controllers
         {
             worker.Sequence = [.. sequence];
             return Ok(sequence);
+        }
+
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetStats([FromQuery] FilterOptions options) {
+            return Ok(await dao.GetGenStatistics(options, options.LastImage ?? -1));
+        }
+
+        [HttpGet("datedstats")]
+        public async Task<IActionResult> GetDatedStats([FromQuery] KeywordFilterOptions options) {
+            return Ok(await Utils.Utils.GetUsage(dao.GetGenStatsDated, options));
         }
 
         [HttpGet("keywords/usage")]
