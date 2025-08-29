@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { useWindowDimensions } from "../hooks/useWindowDimensions";
 import Navbar from "../shared/navbar/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 import useApi from "../hooks/useApi";
 import { Grid } from "../../model/Grid";
 import { createGrid, deleteGrid, getGrid, getGrids } from "../../api/Grid";
-import { InputAdornment, TextField } from "@mui/material";
+import { Alert, InputAdornment, TextField } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import GridTile from "../shared/grids/GridTile";
 import NewGridTile from "../shared/grids/NewGridTile";
@@ -14,10 +13,11 @@ import GridEditor from "../shared/grids/GridEditor";
 import { useSnackbar } from "notistack";
 import AreYouSureModal from "../shared/modals/AreYouSureModal";
 import GridViewer from "../shared/grids/GridViewer";
+import useUserAgent from "../hooks/useUserAgent";
 
 export default function GridsPage() {
 
-    const { vertical, height } = useWindowDimensions();
+    const { isMobile } = useUserAgent()
 
     const { fetch } = useApi(getGrid)
     const { fetch: refreshGrids, data: grids, loading: loadingGrids } = useApi(getGrids, true)
@@ -103,7 +103,7 @@ export default function GridsPage() {
 
 
     return <div style={{
-        height: vertical || height < 768 ? undefined : "100vh",
+        height: "100vh",
         overflow: 'hidden', display: "flex",
         flexDirection: "column", alignItems: 'center',
         margin: "0 auto"
@@ -116,6 +116,9 @@ export default function GridsPage() {
         <div style={{ display: "flex", flexDirection: 'column', width: "100%", flex: 1, padding: "0px 5%", overflowY: "hidden" }}>
 
             {gridsOpen ? <>
+                {isMobile && <Alert style={{ paddingTop: "20px" }} severity="warning" >
+                    Grids aren't designed for mobile. Proceed with caution!
+                </Alert>}
                 <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
                     <TextField
                         value={query} onChange={(e) => setQuery(e.target.value)}

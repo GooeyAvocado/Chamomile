@@ -82,7 +82,10 @@ export default function StatusButton() {
 
             {
                 !pong?.SD && <MenuItem
-                    onClick={() => { onClose(); refreshPing() }}
+                    onClick={() => {
+                        onClose();
+                        refreshPing()
+                    }}
                     style={{ fontSize: ".8em" }}
                 >
                     <ListItemIcon><Refresh fontSize="small" /></ListItemIcon>

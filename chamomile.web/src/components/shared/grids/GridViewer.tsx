@@ -1,7 +1,7 @@
-import { Alert, Button, Card, IconButton, LinearProgress } from "@mui/material";
+import { Alert, Button, Card, IconButton, LinearProgress, Switch, Tooltip } from "@mui/material";
 import { Grid } from "../../../model/Grid";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
-import { ArrowBack, Coffee, CopyAll, Delete, Edit } from "@mui/icons-material";
+import { ArrowBack, BorderClear, Coffee, CopyAll, Delete, Edit } from "@mui/icons-material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useImages } from "../../hooks/useImages";
 import { useQueue } from "../../hooks/useQueue";
@@ -9,7 +9,7 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useEffect, useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
 import useApi from "../../hooks/useApi";
-import { deleteImage, enqueuePrompts, favImage, noteImage } from "../../../api/Images";
+import { deleteImage, deleteMultiImage, enqueuePrompts, favImage, noteImage } from "../../../api/Images";
 import { updateImageAlbums } from "../../../api/Albums";
 import { Album } from "../../../model/Album";
 import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
@@ -20,7 +20,7 @@ import GridEditor from "./GridEditor";
 import ImageModal from "../images/ImageModal";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import QueuedImageTile from "../images/QueuedImageTile";
-import { GridTypes } from "./GridTypes";
+import { GridType, GridTypes } from "./GridTypes";
 import BrewingImageTile from "../images/BrewingImageTile";
 import PromptOrderData from "../../../model/PromptOrderData";
 import ImageTile from "../images/ImageTile";
@@ -52,6 +52,7 @@ export default function GridViewer({
 
     const imageApi = useImages(filter)
     const delApi = useApi(deleteImage);
+    const delMultiApi = useApi(deleteMultiImage)
     const favApi = useApi(favImage)
     const notesApi = useApi(noteImage)
     const brewApi = useApi(enqueuePrompts)
@@ -65,9 +66,11 @@ export default function GridViewer({
     })
 
     const [deleteAys, setDeleteAys] = useState(false)
+    const [clearAys, setClearAys] = useState(false)
     const [editorOpen, setEditorOpen] = useState(false)
     const [duplicate, setDuplicate] = useState(false)
     const [viewerOpen, setViewerOpen] = useState(false)
+    const [rerollSeed, setRerollSeed] = useState(true)
     const [editorState, setEditorState] = useState<Grid>()
     const [selectedImage, setSelectedImage] = useState(undefined as undefined | GeneratedImage)
 
@@ -87,6 +90,23 @@ export default function GridViewer({
         }, () => {
             enqueueSnackbar("Image could not be deleted!", { variant: 'error' })
         }, (override ?? selectedImage)?.id)
+    }
+
+    const onClearGrid = () => {
+        setClearAys(false)
+
+        if (rerollSeed) update(undefined, undefined, {
+            ...grid,
+            seed: Math.floor(Math.random() * 1000000000)
+        } as Grid)
+
+
+        delMultiApi.fetch(() => {
+            enqueueSnackbar("Grid cleared!", { variant: 'success' })
+            imageApi.refresh();
+        }, () => {
+            enqueueSnackbar("Image could not be deleted!", { variant: 'error' })
+        }, imageApi.images.map(a => a.id))
     }
 
     const onFavorite = (override?: GeneratedImage) => {
@@ -206,22 +226,39 @@ export default function GridViewer({
         const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
         const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
 
-        if (currentRow === 0 && currentCol === 0) return;
-        if (currentCol === 0) setSelectedImage(imageMap[currentRow - 1][grid.xVals.length - 1]);
+        //Disable wrap tbh
+        // if (currentRow === 0 && currentCol === 0) return;
+        // if (currentCol === 0) setSelectedImage(imageMap[currentRow - 1][grid.xVals.length - 1]);
+        if (currentCol === 0) return;
         else setSelectedImage(imageMap[currentRow][currentCol - 1]);
     }
 
     const onRight = () => {
-
         const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
         const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
 
-        console.log(currentRow, currentCol)
-
-        if (currentRow === grid.yVals.length - 1 && currentCol === grid.xVals.length - 1) return;
-        if (currentCol === grid.xVals.length - 1) setSelectedImage(imageMap[currentRow + 1][0]);
+        // if (currentRow === grid.yVals.length - 1 && currentCol === grid.xVals.length - 1) return;
+        // if (currentCol === grid.xVals.length - 1) setSelectedImage(imageMap[currentRow + 1][0]);
+        if (currentCol === grid.xVals.length - 1) return;
         else setSelectedImage(imageMap[currentRow][currentCol + 1]);
     }
+
+    const onUp = () => {
+        const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
+        const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
+
+        if (currentRow === 0) return;
+        else setSelectedImage(imageMap[currentRow - 1][currentCol])
+    }
+
+    const onDown = () => {
+        const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
+        const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
+
+        if (currentRow === grid.yVals.length - 1) return;
+        else setSelectedImage(imageMap[currentRow + 1][currentCol]);
+    }
+
 
     const queueMissingImages = () => {
 
@@ -332,6 +369,9 @@ export default function GridViewer({
     const allMissingInProgress = missingImageCount === 0 || missingImageCount === inProgressImages + (activeJob?.orderData?.gridId === grid.id ? 1 : 0)
     const allMissing = imageApi?.images?.length === 0 && !allMissingInProgress
 
+    const xType = GridTypes.find(a => a.code === grid.xValMode)
+    const yType = GridTypes.find(a => a.code === grid.xValMode)
+
     const imageSize = 256
 
     return <>
@@ -365,9 +405,10 @@ export default function GridViewer({
                             <div>{grid.created && new Date(grid.created).toLocaleString()}</div>
                         </div>
                         <div style={{ display: 'flex', gap: "8px" }}>
-                            <IconButton onClick={() => onEdit()}><Edit fontSize="small" /></IconButton>
-                            <IconButton onClick={() => onDuplicate()}><CopyAll fontSize="small" /></IconButton>
-                            <IconButton onClick={() => onDelete()}><Delete fontSize="small" /></IconButton>
+                            <Tooltip title="Edit grid"><IconButton onClick={() => onEdit()}><Edit fontSize="small" /></IconButton></Tooltip>
+                            <Tooltip title="Duplicate grid"><IconButton onClick={() => onDuplicate()}><CopyAll fontSize="small" /></IconButton></Tooltip>
+                            <Tooltip title="Clear grid"><IconButton onClick={() => { setClearAys(true); setRerollSeed(true) }}><BorderClear fontSize="small" /></IconButton></Tooltip>
+                            <Tooltip title="Delete grid"><IconButton onClick={() => onDelete()}><Delete fontSize="small" /></IconButton></Tooltip>
                         </div>
                     </div>
 
@@ -379,7 +420,7 @@ export default function GridViewer({
         </div>
 
         <hr style={{ width: "100%" }} />
-        {!allMissingInProgress && <Card style={{ padding: "5px 10px" }}>
+        {!imageApi.loading && !allMissingInProgress && <Card style={{ padding: "5px 10px" }}>
             <Alert severity={allMissing ? "info" : "warning"} style={{ padding: "5px 10px" }} action={
                 <Button
                     onClick={queueMissingImages} startIcon={<Coffee />} variant="outlined" color={allMissing ? "info" : "warning"}
@@ -417,16 +458,15 @@ export default function GridViewer({
 
         </Card>}
 
-
         <div style={{ flex: "1", overflowY: "auto", overflowX: 'auto', display: 'flex', flexDirection: 'column' }}>
 
 
             {/* Header */}
             <div style={{ display: 'flex', gap: "20px", padding: "0px 20px", position: "sticky", top: 0, zIndex: 2 }}>
                 {/* Corner */}
-                <div style={{ width: `${imageSize * .75}px`, flexShrink: '0' }} />
+                <div style={{ width: `${imageSize * .75}px`, flexShrink: '0', textAlign: "center", }} />
                 {/* Column labels */}
-                {grid.xVals.map(v => <div style={{ width: `${imageSize}px`, flexShrink: "0", textAlign: 'center', backgroundColor: "#0D0D0D", padding: "20px 0px" }}>{v}</div>)}
+                {grid.xVals.map(v => <div style={{ width: `${imageSize}px`, flexShrink: "0", textAlign: 'center', backgroundColor: "#0D0D0D", padding: "20px 0px" }}>{v}{xType?.suffix}</div>)}
             </div>
 
 
@@ -438,7 +478,7 @@ export default function GridViewer({
                         height: `${imageSize + 40}px`, width: `${imageSize * .75}px`, flexShrink: "0",
                         display: 'flex', flexDirection: 'column', backgroundColor: "#0D0D0D",
                         justifyContent: 'center', alignItems: 'center'
-                    }}>{val}</div>)}
+                    }}>{val}{yType?.suffix}</div>)}
                 </div>
 
                 {/* Images */}
@@ -494,16 +534,33 @@ export default function GridViewer({
             </div>
         </div >
 
-
-
         <ImageModal
             open={viewerOpen} setOpen={setViewerOpen} image={selectedImage} onAddAlbum={onAddAlbum} onDelete={() => { setDeleteAys(true) }}
             onDeleteForce={onDeleteImage} onDownload={onDownload} onLeft={onLeft} onRight={onRight} onFavorite={onFavorite} onRemoveAlbum={onRemoveAlbum}
-            onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum}
+            onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum} onUp={onUp} onDown={onDown}
+            imageChildren={() => <GridImageHUD
+                xPos={selectedImage?.additionalInfo?.xPos ?? 0} yPos={selectedImage?.additionalInfo?.yPos ?? 0}
+                xVal={selectedImage?.additionalInfo?.xVal ?? ""} yVal={selectedImage?.additionalInfo?.yVal ?? ""}
+                xSize={grid?.xVals?.length} ySize={grid?.yVals?.length} xType={xType} yType={yType}
+            />}
         />
 
         <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDeleteImage} loading={delApi.loading}>
             Are you sure you want to delete this image?
+        </AreYouSureModal>
+
+        <AreYouSureModal open={clearAys} setOpen={setClearAys} title="Clear this grid?" onYes={onClearGrid} loading={delApi.loading}>
+            <div>This will delete all images on this grid</div>
+            <div style={{ display: 'flex', gap: "16px", alignItems: 'center', marginTop: "16px" }}>
+                <Switch checked={rerollSeed} onChange={(_, checked) => setRerollSeed(checked)} size="small" />
+                <div style={{ fontSize: ".9em" }}>
+                    <div>Reroll seed</div>
+                    <div style={{ fontSize: ".7em" }}>
+                        This will set a new seed for this grid
+                    </div>
+
+                </div>
+            </div>
         </AreYouSureModal>
 
         <GridEditor
@@ -515,4 +572,94 @@ export default function GridViewer({
 
     </>
 
+}
+
+function GridImageHUD({
+    xPos, yPos,
+    xSize, ySize,
+    xType, yType,
+    xVal, yVal
+}: {
+    xPos: number,
+    yPos: number,
+    xSize: number,
+    ySize: number,
+    xVal: string,
+    yVal: string,
+    xType?: GridType
+    yType?: GridType
+}) {
+
+    const [hovered, setHovered] = useState(false)
+
+    const activeColor = "#02678fff"
+    const inactiveColor = "#000"
+    const cellSize = 8
+
+    const nwCorner = xPos === 0 && yPos === 0
+    const neCorner = xPos === xSize - 1 && yPos === 0
+    const swCorner = xPos === 0 && yPos === ySize - 1
+    const seCorner = xPos === xSize - 1 && yPos === ySize - 1
+    const nEdge = yPos === 0 && !nwCorner && !neCorner
+    const sEdge = yPos === ySize - 1 && !swCorner && !seCorner
+    const wEdge = xPos === 0 && !nwCorner && !swCorner
+    const eEdge = xPos === xSize - 1 && !neCorner && !seCorner
+    const somewhereElse = xPos > 0 && yPos > 0 && xPos < xSize - 1 && yPos < ySize - 1
+
+    return <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '1' }}>
+        <Card style={{ padding: "10px", opacity: hovered ? "1" : "0.2", transition: "opacity 0.2s ease" }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+            <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+
+                <div style={{ width: "32px", height: "32px", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: "2px" }}>
+                    <div style={{ display: 'flex', gap: "2px" }}>
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: nwCorner ? activeColor : inactiveColor }} />
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: nEdge ? activeColor : inactiveColor }} />
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: neCorner ? activeColor : inactiveColor }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: "2px" }}>
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: wEdge ? activeColor : inactiveColor }} />
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: somewhereElse ? activeColor : inactiveColor }} />
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: eEdge ? activeColor : inactiveColor }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: "2px" }}>
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: swCorner ? activeColor : inactiveColor }} />
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: sEdge ? activeColor : inactiveColor }} />
+                        <div style={{ width: `${cellSize}px`, height: `${cellSize}px`, backgroundColor: seCorner ? activeColor : inactiveColor }} />
+                    </div>
+                </div>
+                <div style={{ fontFamily: 'monospace', textAlign: "center" }}>
+                    <div>{xPos},{yPos}</div>
+                    <div style={{ fontSize: ".5em" }}>X,Y</div>
+                </div>
+                <div>
+                    <div style={{ display: 'flex', gap: "10px", alignItems: 'center', fontSize: ".8em", fontFamily: 'monospace' }}>
+                        {xType?.prefix}
+                        <div
+                            style={{
+                                width: "200px",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                textAlign: 'left'
+                            }}
+                        >
+                            {xVal?.trim().length === 0 ? "(Nothing)" : xVal}{xType?.suffix}
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: "10px", alignItems: 'center', fontSize: ".8em", fontFamily: 'monospace' }}>
+                        {yType?.prefix}
+                        <div style={{
+                            width: "200px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textAlign: 'left'
+                        }}>
+                            {yVal?.trim().length === 0 ? "(Nothing)" : yVal}{yType?.suffix}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Card>
+    </div>
 }

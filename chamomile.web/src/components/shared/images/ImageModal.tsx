@@ -38,6 +38,8 @@ export default function ImageModal(props: {
     onDeleteForce?: () => void,
     onLeft?: () => void,
     onRight?: () => void,
+    onUp?: () => void,
+    onDown?: () => void,
     onUpscale?: (val: GeneratedImage) => void
     onAddAlbum?: (val: Album) => void
     onRemoveAlbum?: (val: Album) => void
@@ -51,7 +53,8 @@ export default function ImageModal(props: {
         image, open, setOpen, onDelete, onFavorite,
         onLeft, onRight, onDeleteForce, onUpscale,
         collapseDefault, onAddAlbum, onRemoveAlbum,
-        onViewAlbum, onDownload, onUpdateNotes
+        onViewAlbum, onDownload, onUpdateNotes,
+        onUp, onDown
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -112,6 +115,12 @@ export default function ImageModal(props: {
                     break;
                 case "ArrowRight":
                     onRight?.();
+                    break;
+                case "ArrowUp":
+                    onUp?.()
+                    break;
+                case "ArrowDown":
+                    onDown?.();
                     break;
                 case "s":
                     if (e.ctrlKey) {

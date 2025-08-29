@@ -5,6 +5,7 @@ import { imageUrl } from "../../../api/Images"
 import { ChevronRight, Coffee, GridView, ReceiptLong, ReceiptLongTwoTone, Upload } from "@mui/icons-material"
 import PromptOrderData from "../../../model/PromptOrderData"
 import { useLocation, useNavigate } from "react-router-dom"
+import { GridTypes } from "../grids/GridTypes"
 
 export default function AdditionalInfoRenderer({
     additionalInformation,
@@ -35,6 +36,17 @@ export default function AdditionalInfoRenderer({
                         {!location.pathname.includes("grid") && <IconButton onClick={() => nav(`/grid/${additionalInformation.gridId}`)}>
                             <ChevronRight />
                         </IconButton>}
+                    </div>
+                    <hr />
+                    <div style={{ fontFamily: "monospace", fontSize: '.7em' }}>
+                        <div style={{ display: 'flex', gap: "10px", alignItems: 'flex-start' }}>
+                            <div style={{ flexShrink: 0 }}>X:</div>
+                            <div style={{ flex: "1" }}>{additionalInformation.xVal}</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: "10px", alignItems: 'flex-start' }}>
+                            <div style={{ flexShrink: 0 }}>Y:</div>
+                            <div style={{ flex: "1" }}>{additionalInformation.yVal}</div>
+                        </div>
                     </div>
                 </Card>
             </>

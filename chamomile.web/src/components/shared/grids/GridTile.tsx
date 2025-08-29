@@ -17,16 +17,33 @@ export default function GridTile({ grid, onClick }: {
             <AlbumThumbImg album={{ firstFourImages: grid.firstFour }} defaultImage="/grids.png" />
 
             <div style={{ padding: "10px", height: "85px" }}>
-                <div style={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    width: "100%"
-                }}>
-                    <b>{grid.name}</b>
+                <div style={{ display: 'flex' }}>
+                    <div style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        width: "100%", flex: "1"
+                    }}>
+                        <b>{grid.name}</b>
+                    </div>
+                    <div style={{ flexShrink: '0' }}>
+                        {grid.xVals.length} x {grid.yVals.length}
+                    </div>
                 </div>
                 <hr />
-                {grid.xVals.length} x {grid.yVals.length}
+                <div
+                    style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        width: "100%",
+                        whiteSpace: "normal"
+                    }}
+                >
+                    {grid.notes}
+                </div>
             </div>
 
         </CardActionArea>
