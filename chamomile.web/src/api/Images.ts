@@ -113,6 +113,12 @@ export const getImage = (
     id: number
 ) => Get(setLoading, setItem, onError, ENDPOINT + id);
 
+export const getRandomImage = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: GeneratedImage) => void,
+    onError: (value: any) => void,
+) => Get(setLoading, setItem, onError, ENDPOINT + "random");
+
 export const favImage = (
     setLoading: (value: boolean) => void,
     setItem: (value?: GeneratedImage) => void,

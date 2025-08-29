@@ -11,7 +11,7 @@ import { usePingPong } from '../../hooks/usePingPong';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, ListItemIcon, Tooltip } from '@mui/material';
 import PreviewModal from './preview/PreviewModal';
 import { usePrompt } from '../../hooks/usePrompt';
-import { Coffee, FileOpen, GridView, Preview, Save, SaveAs, Yard } from '@mui/icons-material';
+import { Casino, Coffee, FileOpen, GridView, Preview, Save, SaveAs, Yard } from '@mui/icons-material';
 import { useRef, useState } from 'react';
 import GridEditor from '../grids/GridEditor';
 import { Grid } from '../../../model/Grid';
@@ -19,6 +19,9 @@ import useApi from '../../hooks/useApi';
 import { createGrid } from '../../../api/Grid';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
+import { getRandomImage } from '../../../api/Images';
+import { GeneratedImage } from '../../../model/GeneratedImage';
+import RandomImageModal from '../images/RandomImageModal';
 
 export default function PromptButton(props: {
     onBrew: (amountOverride?: number) => void
@@ -30,7 +33,7 @@ export default function PromptButton(props: {
 }) {
 
     const { onBrew, onLoad, onSave, fullWidth, onSaveAs, saveAsEnabled } = props
-    const { prompt, orderAmount } = usePrompt();
+    const { prompt, orderAmount, setPrompt } = usePrompt();
 
     const [open, setOpen] = useState(false);
     const [seedWarning, setSeedWarning] = useState(false)
@@ -44,6 +47,9 @@ export default function PromptButton(props: {
     const { enqueueSnackbar } = useSnackbar();
     const { pong } = usePingPong()
     const nav = useNavigate();
+
+    const [luckyOpen, setLuckyOpen] = useState(false)
+    const [luckyEverOpen, setLuckyEverOpen] = useState(false)
 
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
@@ -83,7 +89,6 @@ export default function PromptButton(props: {
         }, { ...gridEditorState, seed: Math.floor(Math.random() * 1000000000), generationDurationMs: 0 } as Grid)
 
     }
-
     return <>
         <ButtonGroup
             variant="contained"
@@ -166,6 +171,15 @@ export default function PromptButton(props: {
                                     <ListItemIcon><GridView fontSize='small' /></ListItemIcon>
                                     Use for grid
                                 </MenuItem>
+                                <Divider />
+                                <MenuItem key={"I'mFeelingLucky"} style={{ fontSize: ".8em" }} onClick={() => {
+                                    handleClose();
+                                    setLuckyEverOpen(true);
+                                    setLuckyOpen(true)
+                                }} >
+                                    <ListItemIcon><Casino fontSize='small' /></ListItemIcon>
+                                    I'm Feeling Lucky
+                                </MenuItem>
                             </MenuList>
                         </ClickAwayListener>
                     </Paper>
@@ -196,6 +210,8 @@ export default function PromptButton(props: {
                 }}>Yes</Button>
             </DialogActions>
         </Dialog>
+
+        {luckyEverOpen && <RandomImageModal open={luckyOpen} setOpen={setLuckyOpen} />}
 
         <GridEditor
             grid={gridEditorState ?? {} as Grid} setGrid={setGridEditorState}
