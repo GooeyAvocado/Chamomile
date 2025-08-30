@@ -1,4 +1,4 @@
-import { DirectionsRun, Height, ReceiptLong, Schedule, Tune, Window, Yard } from "@mui/icons-material";
+import { DirectionsRun, OpenWith, ReceiptLong, Schedule, Tune, Window, Yard } from "@mui/icons-material";
 import { Prompt } from "../../../model/Prompt";
 
 export interface GridType {
@@ -26,6 +26,7 @@ export const GridTypes: GridType[] = [
         prefix: <ReceiptLong fontSize="inherit" />,
         suffix: "",
         applyToPrompt: (prompt: Prompt, val: string, vals: string[]) => {
+            if (!val || val?.trim().length === 0) return prompt;
             return {
                 ...prompt,
                 positivePrompt: prompt.positivePrompt.replaceAll(vals[0], val),
@@ -40,6 +41,7 @@ export const GridTypes: GridType[] = [
         prefix: <Tune fontSize="inherit" />,
         suffix: "",
         applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
             return {
                 ...prompt,
                 cfgScale: Number.parseFloat(val)
@@ -53,6 +55,7 @@ export const GridTypes: GridType[] = [
         prefix: <Yard fontSize="inherit" />,
         suffix: "",
         applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
             return {
                 ...prompt,
                 seed: Number.parseInt(val)
@@ -60,28 +63,17 @@ export const GridTypes: GridType[] = [
         }
     },
     {
-        code: "WDTH",
-        name: "Width",
-        type: "int",
-        prefix: <Height style={{ transform: "rotate(90deg)" }} fontSize="inherit" />,
+        code: "DIMN",
+        name: "Dimensions",
+        type: "dimensions",
+        prefix: <OpenWith fontSize="inherit" />,
         suffix: "px",
         applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
             return {
                 ...prompt,
-                width: Number.parseInt(val)
-            } as Prompt
-        }
-    },
-    {
-        code: "HGHT",
-        name: "Height",
-        type: "int",
-        prefix: <Height fontSize="inherit" />,
-        suffix: "px",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            return {
-                ...prompt,
-                height: Number.parseInt(val)
+                width: Number.parseInt(val.split("x")[0] ?? "1024"),
+                height: Number.parseInt(val.split("x")[1] ?? "1024")
             } as Prompt
         }
     },
@@ -92,6 +84,7 @@ export const GridTypes: GridType[] = [
         suffix: "",
         prefix: <DirectionsRun fontSize="inherit" />,
         applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
             return {
                 ...prompt,
                 steps: Number.parseInt(val)
@@ -105,6 +98,7 @@ export const GridTypes: GridType[] = [
         prefix: <Window fontSize="inherit" />,
         suffix: "",
         applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
             return {
                 ...prompt,
                 sampler: val
@@ -118,6 +112,7 @@ export const GridTypes: GridType[] = [
         prefix: <Schedule fontSize="inherit" />,
         suffix: "",
         applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
             return {
                 ...prompt,
                 scheduleType: val

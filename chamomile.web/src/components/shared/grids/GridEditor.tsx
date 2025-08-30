@@ -3,7 +3,7 @@ import { Grid } from "../../../model/Grid";
 import ComplexAccordion from "../complexAccordion/ComplexAccordion";
 import ComplexAccordionBody from "../complexAccordion/ComplexAccordionBody";
 import PromptBuilder from "../prompt/PromptBuilder";
-import { Add, CompareArrows, Remove } from "@mui/icons-material";
+import { Add, Close, CompareArrows, OpenWith, Remove } from "@mui/icons-material";
 import { GridTypes } from "./GridTypes";
 import SamplerSelector from "../prompt/SamplerSelector";
 import SchedulerSelector from "../prompt/SchedulerSelector";
@@ -130,7 +130,39 @@ function GridValsEditor({
                         }} disabled={disabled}
                         onChange={(e) => setVals(updateInArray(vals, i, e.target.value))}
                     /> : type.type === "sampler" ? <SamplerSelector sampler={a} setSampler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} />
-                        : type.type === "scheduler" ? <SchedulerSelector scheduler={a} setScheduler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} /> : <></>
+                        : type.type === "scheduler" ? <SchedulerSelector scheduler={a} setScheduler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} />
+                            : type.type === "dimensions" ?
+                                <div style={{
+                                    flex: "1", alignItems: 'center', borderRadius: "4px",
+                                    border: "1px solid rgba(255,255,255, 0.23)", minWidth: "260px"
+                                }}>
+
+                                    {/* This is necessary. If this isn't in a sub-div, the padding adds to the width and makes flex:1 not be half and half */}
+                                    {/* border-box does not solve this issue either. I have no idea why, but hey, this works. So we're good */}
+                                    <div style={{ display: 'flex', gap: "10px", width: "100%", height: "56px", alignItems: 'center', padding: "0 16px" }}>
+                                        <OpenWith sx={{ margin: "-7px", marginRight: "5px" }} />
+
+                                        {/* Width */}
+                                        <TextField type="number" disabled={disabled}
+                                            value={a.split('x')[0]} onChange={(e) => setVals(updateInArray(vals, i, [e.target.value, a.split('x')[1] ?? ""].join("x")))}
+                                            placeholder="1024" fullWidth slotProps={{ htmlInput: { min: 1 }, }} variant="standard"
+                                            style={{ flex: "1", minWidth: "45px" }}
+                                            size="small"
+                                        />
+                                        <Close fontSize="inherit" />
+                                        {/* Height */}
+                                        <TextField type="number" disabled={disabled}
+                                            value={a.split('x')[1] ?? ""} onChange={(e) => setVals(updateInArray(vals, i, [a.split('x')[0] ?? "", e.target.value].join("x")))}
+                                            placeholder="1024" fullWidth slotProps={{ htmlInput: { min: 1 }, }} variant="standard"
+                                            style={{ flex: "1", minWidth: "45px" }}
+                                            size="small"
+                                        />
+                                        <div>px</div>
+
+
+                                    </div>
+                                </div>
+                                : <></>
                 }
             </div>)}
             <Button style={{ marginTop: "10px" }} startIcon={<Add />} disabled={disabled} onClick={() => setVals(addToArray(vals, ""))}>Add new {axis === "Y" ? "row" : "column"}</Button>
