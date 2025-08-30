@@ -98,7 +98,7 @@ export default function StatisticsModal(props: {
             {open ? (keywordLoading || !keywordData) ? <LoadingSpinner text="Loading general statistics" /> : <StatsPanel
                 datedUsageApi={getGenStatsDated} usage={[{
                     keyword: "Generated Images", count: 0, minTs: "", maxTs: "", sample: 1
-                }]} filter={filter} limit={limit} hidePagination renderCount={() => <></>}
+                }]} filter={filter} limit={limit} hidePagination renderCount={() => <>Show usage graph</>}
             >
                 <GeneralStatsDisplay
                     limit={limit}
@@ -172,12 +172,11 @@ export default function StatisticsModal(props: {
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Sources">
             {open ? (generalLoading || !generalData) ? <LoadingSpinner text="Keyword usage information" /> : <StatsPanel
-                datedUsageApi={getGenStatsDated} usage={[{
-                    keyword: "Generated Images", count: 0, minTs: "", maxTs: "", sample: 1
-                }]} filter={filter} limit={limit} hidePagination renderCount={() => <></>}
+                datedUsageApi={getGenStatsDated} usage={[]}
+                filter={filter} limit={limit} hidePagination hideGraph
+                renderCount={() => <></>}
             >
                 <SourceStats data={generalData} />
-
             </StatsPanel> : ""}
         </TabbedModalTabContent>
         <TabbedModalActions><Button onClick={() => setOpen(false)}>OK</Button></TabbedModalActions>

@@ -18,7 +18,7 @@ export function StatsPanel({
     usage, filter, datedUsageApi, keywordColumnOverride,
     renderImageTile, renderKeywordRow, rowHeightOverride,
     renderCount, getSampleImageId, minAutoCompleteLength: propMinACL,
-    limit, children, hidePagination
+    limit, children, hidePagination, hideGraph
 }: {
     usage: KeywordUsage[],
     filter: FilterOptions,
@@ -32,6 +32,7 @@ export function StatsPanel({
     minAutoCompleteLength?: number
     children?: React.ReactNode,
     hidePagination?: boolean
+    hideGraph?: boolean
     datedUsageApi: (
         setLoading: (value: boolean) => void,
         setItem: (value?: KeywordUsageDatedResult) => void,
@@ -148,21 +149,21 @@ export function StatsPanel({
                     renderKeywordRow={renderKeywordRow}
                 />}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: "10px" }}>
+        {(!hideGraph || !hidePagination) && <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: "10px" }}>
             <div style={{ display: "flex", gap: "10px", marginLeft: "10px", alignItems: 'center', flex: "1" }}>
-                <IconButton disabled={usage?.length === 0} onClick={() => {
+                {!hideGraph && <IconButton disabled={usage?.length === 0} onClick={() => {
                     if (mode === "table") {
                         if (usage?.length === 1) setSelectedKeywords([usage[0].keyword])
                     }
                     setMode(mode === "table" ? "graph" : "table")
                 }}>
                     {mode === "table" ? <Timeline /> : <TableView />}
-                </IconButton>
+                </IconButton>}
                 {mode === "table" && (
                     renderCount ? renderCount(usage.length) :
                         <div style={{ opacity: ".7", fontSize: ".9em" }}> {usage.length} {keywordColumnOverride ?? "Keyword"}s</div>
                 )}
-                {mode === "graph" && keywordOptions?.length > 1 && <Autocomplete
+                {mode === "graph" && (usage?.length > 1 ? <Autocomplete
                     multiple fullWidth style={{ flex: "1" }}
                     options={keywordOptions} noOptionsText={keywordQuery.length >= minAutoCompleteLength ? 'No options' : `Type at least ${minAutoCompleteLength} characters`}
                     value={selectedKeywords}
@@ -189,7 +190,7 @@ export function StatsPanel({
                         ))
                     }
                     disabled={usage.length === 0}
-                />}
+                /> : usage.length === 1 ? usage[0].keyword : "")}
             </div>
             {mode === "table" && !hidePagination && <div style={{ display: 'flex', gap: "5px", alignItems: 'center' }}>
                 <IconButton onClick={() => setPage(0)} disabled={page === 0}><FirstPage /></IconButton>
@@ -198,7 +199,7 @@ export function StatsPanel({
                 <IconButton onClick={() => nextPage()} disabled={page === pages - 1}> <ChevronRight /></IconButton>
                 <IconButton onClick={() => setPage(pages - 1)} disabled={page === pages - 1}><LastPage /></IconButton>
             </div>}
-        </div>
+        </div>}
 
         <ImageModalFromId image={imageView} open={!!imageView && imageView > 0} setOpen={() => setImageView(-1)} />
     </>
