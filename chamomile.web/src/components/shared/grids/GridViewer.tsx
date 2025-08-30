@@ -264,7 +264,7 @@ export default function GridViewer({
 
         const allPrompts = [] as Prompt[]
         const xType = GridTypes.find(a => a.code === grid.xValMode)
-        const yType = GridTypes.find(a => a.code === grid.xValMode)
+        const yType = GridTypes.find(a => a.code === grid.yValMode)
         if (!xType || !yType) {
             enqueueSnackbar("Unknown axis modes set",)
             return;
