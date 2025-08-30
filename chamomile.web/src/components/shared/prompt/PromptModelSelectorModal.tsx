@@ -138,11 +138,11 @@ export default function PromptModelSelectorModal(props: {
 
 
                 </>
-                : <Alert severity="warning">
+                : !pong?.SD ? <Alert severity="warning">
                     <AlertTitle>Stable diffusion is unavailable</AlertTitle>
                     You cannot change the current model because there is no current model. However, you can still set LoRAs for this prompt that you're building
 
-                </Alert>
+                </Alert> : <></>
             }
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: "100%" }}>
