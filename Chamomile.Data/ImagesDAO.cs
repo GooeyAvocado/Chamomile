@@ -560,6 +560,11 @@ namespace Chamomile.Data {
             var count = "COUNT";
             var source = "SOURCE";
 
+            var innerImageSql = SelectSql([
+                CRE_TS,IMAGES_FAV_IN,IMAGES_HIRES_IN,IMAGES_DOWNLOAD_CT,IMAGE_ADDTL_INFO
+            ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1)), [new(CRE_TS,SortOrder.DESC)])
+                + (limit > 0 ? $" LIMIT {limit}" : "");
+
             var sql = SelectSql([
                 $"min({ CRE_TS}) as { MIN_TS}",
 	            $"max({ CRE_TS}) as { MAX_TS}",
@@ -568,9 +573,9 @@ namespace Chamomile.Data {
 	            $"count(*) filter(where { IMAGES_DOWNLOAD_CT} > 0) as { downloadCount}",
 	            $"sum({ IMAGES_DOWNLOAD_CT}) as { totalDownloads}",
 	            $"count(*) as { count}",
-                ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1)));
+                ], "(" + innerImageSql + ")");
 
-            var result = await adoTemplate.QuerySingle(sql + (limit > 0 ? $" LIMIT {limit}" : ""), (cmd) => {
+            var result = await adoTemplate.QuerySingle(sql, (cmd) => {
                 SetterFromFilter(cmd, filter);
             }, (reader) => new GeneralStatistics {
                 DownloadCount = reader.GetInt(downloadCount),
@@ -579,6 +584,7 @@ namespace Chamomile.Data {
                 MinTs = reader.GetDateTime(MIN_TS),
                 TotalDownloads = reader.GetInt(totalDownloads),
                 UpscaledCount = reader.GetInt(hiresCount),
+                TotalCount = reader.GetInt(count),
                 CountBySource = []
             });
 
@@ -587,10 +593,10 @@ namespace Chamomile.Data {
             var groupedCountsSql = SelectSql([
                 $"count(*) as {count}",
                 $"{IMAGE_ADDTL_INFO} ->>'source' as {source}",
-                ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1)));
+                ], "(" + innerImageSql + ")");
 
             await adoTemplate.Query(
-                groupedCountsSql + $" GROUP BY {IMAGE_ADDTL_INFO} ->>'source'" + (limit > 0 ? $" LIMIT {limit}" : ""), 
+                groupedCountsSql + $" GROUP BY {IMAGE_ADDTL_INFO} ->>'source'", 
                 (cmd) => SetterFromFilter(cmd, filter), (reader) => {
                     result.CountBySource.Add(reader.GetOptionalString(source) ?? "UNKNOWN", reader.GetInt(count));
                     return 1;
