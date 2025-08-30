@@ -580,9 +580,9 @@ namespace Chamomile.Data {
             }, (reader) => new GeneralStatistics {
                 DownloadCount = reader.GetInt(downloadCount),
                 FavCount = reader.GetInt(favsCount),
-                MaxTs = reader.GetDateTime(MAX_TS),
-                MinTs = reader.GetDateTime(MIN_TS),
-                TotalDownloads = reader.GetInt(totalDownloads),
+                MaxTs = reader.GetOptionalDateTime(MAX_TS),
+                MinTs = reader.GetOptionalDateTime(MIN_TS),
+                TotalDownloads = reader.GetOptionalInt(totalDownloads) ?? 0,
                 UpscaledCount = reader.GetInt(hiresCount),
                 TotalCount = reader.GetInt(count),
                 CountBySource = []

@@ -7,6 +7,7 @@ import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
 import AdvSearchHelp from "../../filter/AdvSearchHelp";
+import HighlightedPromptDiv from "../../prompt/HighlightedPromptDiv";
 
 export default function HelpTab(props: {
     setOpen: (val: boolean) => void
@@ -15,6 +16,7 @@ export default function HelpTab(props: {
 
     const { setOpen } = props;
     const codeStyle = { background: "#222", padding: "5px", fontFamily: "monospace" };
+    const highlightedCodeStyle = { ...codeStyle, fontSize: "1em" }
     const { setPrompt, prompt } = usePrompt();
     const { width } = useWindowDimensions();
 
@@ -87,7 +89,7 @@ export default function HelpTab(props: {
             </ul>
             <p>
                 Once you've installed your Automatic1111, start it up and make sure you're able to generate an image. You can later import
-                it to Chamomile anyways.
+                it to Chamomile.
             </p>
             <p>
                 Once you've got a working Stable Diffusion WebUI, you'll need to enable the API. You can do this by adding <span style={codeStyle}>
@@ -565,12 +567,10 @@ export default function HelpTab(props: {
                 <Card style={{ minWidth: width < 400 ? "0px" : "400px", flex: "1" }}>
                     <CardContent>
                         <LabeledIcon label="Base Prompt"><CoffeeOutlined /></LabeledIcon>
-                        <div style={codeStyle}>
-                            # The Googgo<br />
-                            man made of blue slime, slime man, slime, melting, liquid hair, <b>__species__</b>, blue
-                            skin, <b>__body_types__</b>, transparent skin, translucent skin, polo, sweatpants,
-                            waving, looking at viewer, smile
-                        </div>
+                        <HighlightedPromptDiv
+                            style={highlightedCodeStyle}
+                            prompt={`# The Googgo
+man made of blue slime, slime man, slime, melting, liquid hair, __species__, blue skin, __body_types__, transparent skin, translucent skin, polo, sweatpants, waving, looking at viewer, smile`} />
                     </CardContent>
                 </Card>
 
@@ -699,9 +699,10 @@ export default function HelpTab(props: {
                 images to analyze.
             </p>
             <p>
-                You can view three different usage statistics:
+                You can view five different statistics:
             </p>
             <ul>
+                <li><b>General:</b> A small dashboard including image counts, your most common model, LoRA, and keyword</li>
                 <li><b>Models:</b> SD Models used in generation</li>
                 <li><b>LoRAs:</b> LoRAs used in generation, including a statistic for no LoRAs used</li>
                 <li><b>Keywords:</b> Usage statistics on keywords* in your prompts</li>

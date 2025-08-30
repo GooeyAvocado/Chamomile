@@ -25,8 +25,8 @@ export default function GeneralStatsDisplay({
     const [viewerOpen, setViewerOpen] = useState(false)
     const [image, setImage] = useState<number>()
 
-    const mostUsedModel = models?.find(a => a.title === modelData?.[0].keyword)
-    const mostUsedLora = loras?.find(a => a.alias === loraData?.[0].keyword) ?? loras?.find(a => a.alias === loraData?.[1]?.keyword)
+    const mostUsedModel = models?.find(a => a.title === modelData?.[0]?.keyword)
+    const mostUsedLora = loras?.find(a => a.alias === loraData?.[0]?.keyword) ?? loras?.find(a => a.alias === loraData?.[1]?.keyword)
 
     return <>
         <div style={{ flex: "1", overflowY: 'auto', display: "flex", gap: "10px", flexDirection: 'column', textAlign: 'center', marginTop: "32px" }}>
@@ -39,20 +39,20 @@ export default function GeneralStatsDisplay({
 
                 <PreviewTile
                     setImage={setImage} setViewerOpen={setViewerOpen}
-                    id={mostUsedModel?.bannerImage === 0 ? modelData?.[0].sample : mostUsedModel?.bannerImage ?? modelData?.[0].sample}
-                    label="Most used model" value={mostUsedModel?.name ?? modelData?.[0].keyword}
+                    id={mostUsedModel?.bannerImage === 0 ? modelData?.[0]?.sample : mostUsedModel?.bannerImage ?? modelData?.[0]?.sample}
+                    label="Most used model" value={mostUsedModel?.name ?? modelData?.[0]?.keyword}
                 />
 
                 <PreviewTile
                     setImage={setImage} setViewerOpen={setViewerOpen}
-                    id={mostUsedLora?.bannerImage === 0 ? loraData?.[0].sample : mostUsedLora?.bannerImage ?? loraData?.[0].sample}
-                    label="Most used LoRA" value={mostUsedLora?.name ?? loraData?.[0].keyword}
+                    id={mostUsedLora?.bannerImage === 0 ? loraData?.[0]?.sample : mostUsedLora?.bannerImage ?? loraData?.[0]?.sample}
+                    label="Most used LoRA" value={mostUsedLora?.name ?? loraData?.[0]?.keyword}
                 />
 
                 <PreviewTile
                     setImage={setImage} setViewerOpen={setViewerOpen}
-                    id={keywordData?.[0].sample}
-                    label="Most used keyword" value={keywordData?.[0].keyword}
+                    id={keywordData?.[0]?.sample}
+                    label="Most used keyword" value={keywordData?.[0]?.keyword}
                 />
 
             </div>
