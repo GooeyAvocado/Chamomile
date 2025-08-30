@@ -28,7 +28,9 @@ export default function PromptGroupModal(props: {
             case "SAVED_PROMPT":
                 return "saved recipe"
             case "PROMPTBOX":
-            default: return ""
+                return "modified recipe"
+            default:
+                return ""
         }
     }
 

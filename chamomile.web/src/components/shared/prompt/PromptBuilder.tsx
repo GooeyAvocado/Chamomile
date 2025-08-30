@@ -67,7 +67,7 @@ export default function PromptBuilder(props: {
         for (let index = 0; index < (amountOverride ?? orderAmount); index++) {
             allPrompts.push(hydratePrompt({
                 ...prompt, orderData: {
-                    sample: -1,
+                    sample: prompt.sampleImage ?? -1,
                     source: "PROMPTBOX",
                     albums: album?.id ? [album?.id] : []
                 }
@@ -84,7 +84,6 @@ export default function PromptBuilder(props: {
                     enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
                 }
             }
-
         }, () => {
             enqueueSnackbar("Could not queue images!", { variant: 'error' })
         }, allPrompts)

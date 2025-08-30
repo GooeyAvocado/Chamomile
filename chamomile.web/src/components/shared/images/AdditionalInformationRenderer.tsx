@@ -101,12 +101,22 @@ export default function AdditionalInfoRenderer({
             </>
         case "PROMPTBOX":
             return <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
+                {additionalInformation.sample && additionalInformation.sample > 0 && <Card style={{ flexShrink: "0" }}>
+                    <CardActionArea onClick={() => setImageOpen(true)}>
+                        <img src={imageUrl(additionalInformation.sample)} width={48} />
+                    </CardActionArea>
+                </Card>}
                 <Coffee />
                 <div>
-                    <div>Original prompt</div>
-                    <div style={{ fontSize: ".7em" }}>This image is an original prompt from the prompt box</div>
+                    <div>{!additionalInformation.sample || additionalInformation?.sample === -1 ? "Original Prompt" : "Modified recipe"}</div>
+                    <div style={{ fontSize: ".7em" }}>
+                        {!additionalInformation.sample || additionalInformation?.sample === -1
+                            ? "This image is an original prompt from the prompt box"
+                            : "This image may be based on this prompt previously loaded on the prompt box"
+                        }
+                    </div>
                 </div>
-
+                <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.sample} />
             </Card>
         case "UPLOAD":
             return <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
