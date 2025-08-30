@@ -13,9 +13,11 @@ import { useWindowDimensions } from "../../hooks/useWindowDimensions"
 import AvailabilitySelector from "../model/availabilitySelector/AvailabilitySelector"
 import { useModels } from "../../hooks/useModels"
 import { useLoras } from "../../hooks/useLoras"
-import { getKeywordUsage, getKeywordUsageDated } from "../../../api/Images"
+import { getGenStats, getGenStatsDated, getKeywordUsage, getKeywordUsageDated } from "../../../api/Images"
 import { StatsPanel } from "./subcomponents/StatsPanel"
 import ModelTypePill from "../model/ModelType/ModelTypePill"
+import GeneralStatsDisplay from "./subcomponents/GeneralStatsDisplay"
+import SourceStats from "./subcomponents/SourceStats"
 
 export default function StatisticsModal(props: {
     open: boolean,
@@ -28,7 +30,7 @@ export default function StatisticsModal(props: {
     const [availability, setAvailability] = useState<0 | 1 | -1>(0);
     const [filterDirty, setFilterDirty] = useState(false)
 
-    const { width } = useWindowDimensions();
+    const { width, vertical } = useWindowDimensions();
     const { models } = useModels();
     const { loras } = useLoras();
     const stacked = width < 450
@@ -39,17 +41,14 @@ export default function StatisticsModal(props: {
     const { data: loraData, fetch: fetchLoraUsage, loading: loraLoading } = useApi(getLoraUsage)
     const { data: modelData, fetch: fetchModelUsage, loading: modelLoading } = useApi(getModelUsage)
     const { data: keywordData, fetch: fetchKeywordUsage, loading: keywordLoading } = useApi(getKeywordUsage)
+    const { data: generalData, fetch: fetchGeneralData, loading: generalLoading } = useApi(getGenStats)
 
     const refreshData = () => {
-
-
         setFilterDirty(false)
-
         fetchLoraUsage(undefined, undefined, { ...filter, lastImage: limit } as FilterOptions)
-
         fetchModelUsage(undefined, undefined, { ...filter, lastImage: limit } as FilterOptions)
-
         fetchKeywordUsage(undefined, undefined, { ...filter, lastImage: limit } as FilterOptions)
+        fetchGeneralData(undefined, undefined, { ...filter, lastImage: limit } as FilterOptions)
     }
 
     useEffect(() => {
@@ -74,7 +73,7 @@ export default function StatisticsModal(props: {
         fullWidth maxWidth="md" titleTabStack={stacked}
         tabContentStyle={{ height: "60vh", display: 'flex', flexDirection: 'column', overflowY: 'auto', backgroundColor: "#222", padding: "10px" }}
     >
-        <TabbedModalTitle>Usage Statistics</TabbedModalTitle>
+        {!vertical && <TabbedModalTitle>Usage Statistics</TabbedModalTitle>}
         <TabbedModalConsistentContent position="top" style={{ display: 'flex', gap: '10px', marginBottom: '10px', marginTop: '5px' }}>
             <AvailabilitySelector availability={availability} setAvailability={setAvailability} />
             <FormControl fullWidth>
@@ -95,6 +94,22 @@ export default function StatisticsModal(props: {
                 </Select>
             </FormControl>
         </TabbedModalConsistentContent>
+        <TabbedModalTabContent label="General">
+            {open ? (keywordLoading || !keywordData) ? <LoadingSpinner text="Loading general statistics" /> : <StatsPanel
+                datedUsageApi={getGenStatsDated} usage={[{
+                    keyword: "Generated Images", count: 0, minTs: "", maxTs: "", sample: 1
+                }]} filter={filter} limit={limit} hidePagination renderCount={() => <></>}
+            >
+                <GeneralStatsDisplay
+                    limit={limit}
+                    data={generalData}
+                    loraData={loraData}
+                    modelData={modelData}
+                    keywordData={keywordData}
+                />
+
+            </StatsPanel> : ""}
+        </TabbedModalTabContent>
         <TabbedModalTabContent label="Models">
             {open ? (modelLoading || !modelData) ? <LoadingSpinner text="Loading model usage information" /> : <StatsPanel
                 datedUsageApi={getModelUsageDated} minAutoCompleteLength={0}
@@ -154,6 +169,16 @@ export default function StatisticsModal(props: {
                     </Tooltip>}
                 />
             </> : ""}
+        </TabbedModalTabContent>
+        <TabbedModalTabContent label="Sources">
+            {open ? (generalLoading || !generalData) ? <LoadingSpinner text="Keyword usage information" /> : <StatsPanel
+                datedUsageApi={getGenStatsDated} usage={[{
+                    keyword: "Generated Images", count: 0, minTs: "", maxTs: "", sample: 1
+                }]} filter={filter} limit={limit} hidePagination renderCount={() => <></>}
+            >
+                <SourceStats data={generalData} />
+
+            </StatsPanel> : ""}
         </TabbedModalTabContent>
         <TabbedModalActions><Button onClick={() => setOpen(false)}>OK</Button></TabbedModalActions>
     </TabbedModal>
