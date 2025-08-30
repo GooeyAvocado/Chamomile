@@ -230,7 +230,7 @@ export default function GridViewer({
         // if (currentRow === 0 && currentCol === 0) return;
         // if (currentCol === 0) setSelectedImage(imageMap[currentRow - 1][grid.xVals.length - 1]);
         if (currentCol === 0) return;
-        else setSelectedImage(imageMap[currentRow][currentCol - 1]);
+        else setSelectedImage(imageMap[currentRow][currentCol - 1] ?? selectedImage);
     }
 
     const onRight = () => {
@@ -240,7 +240,7 @@ export default function GridViewer({
         // if (currentRow === grid.yVals.length - 1 && currentCol === grid.xVals.length - 1) return;
         // if (currentCol === grid.xVals.length - 1) setSelectedImage(imageMap[currentRow + 1][0]);
         if (currentCol === grid.xVals.length - 1) return;
-        else setSelectedImage(imageMap[currentRow][currentCol + 1]);
+        else setSelectedImage(imageMap[currentRow][currentCol + 1] ?? selectedImage);
     }
 
     const onUp = () => {
@@ -248,7 +248,7 @@ export default function GridViewer({
         const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
 
         if (currentRow === 0) return;
-        else setSelectedImage(imageMap[currentRow - 1][currentCol])
+        else setSelectedImage(imageMap[currentRow - 1][currentCol] ?? selectedImage)
     }
 
     const onDown = () => {
@@ -256,7 +256,7 @@ export default function GridViewer({
         const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
 
         if (currentRow === grid.yVals.length - 1) return;
-        else setSelectedImage(imageMap[currentRow + 1][currentCol]);
+        else setSelectedImage(imageMap[currentRow + 1][currentCol] ?? selectedImage);
     }
 
 
