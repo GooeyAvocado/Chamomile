@@ -509,7 +509,7 @@ export default function GridViewer({
                                 return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }}>
                                     <QueuedImageTile
                                         prompt={queueMap[y][x]}
-                                        onCancel={() => { cancelJob(queueMap[x][y].id ?? 0) }}
+                                        onCancel={() => { cancelJob(queueMap[y][x].id ?? 0) }}
                                     />
                                 </div>
                             }
