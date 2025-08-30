@@ -274,8 +274,9 @@ export default function GridViewer({
             r.forEach((_, x) => {
                 const alreadyBrewed = !!imageMap?.[y]?.[x]
                 const alreadyQueued = !!queueMap?.[y]?.[x]
+                const inProgress = activeJob?.orderData?.xPos === x && activeJob?.orderData?.yPos === y
 
-                if (!alreadyBrewed && !alreadyQueued) {
+                if (!alreadyBrewed && !alreadyQueued && !inProgress) {
                     const prompt = {
                         ...grid,
                         positivePrompt: grid.prompt,
@@ -426,7 +427,7 @@ export default function GridViewer({
                     onClick={queueMissingImages} startIcon={<Coffee />} variant="outlined" color={allMissing ? "info" : "warning"}
                     size="small" style={{ marginRight: '8px', marginTop: "-2px" }}
                 >
-                    Brew{allMissing ? "" : "remaining "} images
+                    Brew{allMissing ? "" : " remaining"} images
                 </Button>
             }>
                 {allMissing ? "Start brewing whenever you're ready" : "Some images haven not been brewed yet for this grid"}
