@@ -29,11 +29,12 @@ export default function RandomImageModal(props: {
     const nav = useNavigate();
 
     const imageApi = useApi(getRandomImage)
+    const rollTheDice = () => imageApi.fetch((val) => { if (val) setRandomImage(val) })
+
+
     useEffect(() => {
         if (!open) return; //If we're not even being asked to show it, we don't bother the backend
-        imageApi.fetch((val) => {
-            setRandomImage(val)
-        })
+        rollTheDice();
     }, [open])
 
     const onDeleteImage = (override?: GeneratedImage) => {
@@ -131,9 +132,9 @@ export default function RandomImageModal(props: {
         <ImageModal
             open={open} setOpen={setOpen} image={randomImage} onAddAlbum={onAddAlbum} onDelete={() => { setDeleteAys(true) }}
             onDeleteForce={onDeleteImage} onDownload={onDownload} onFavorite={onFavorite} onRemoveAlbum={onRemoveAlbum}
-            onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum}
+            onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum} onRight={rollTheDice}
             imageChildren={() => <RandomHUD
-                onImFeelingLucky={() => imageApi.fetch((val) => { if (val) setRandomImage(val) })}
+                onImFeelingLucky={rollTheDice}
             />}
         />
 

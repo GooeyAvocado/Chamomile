@@ -29,7 +29,7 @@ export default function ImageHotbar(props: {
     const [brewAnchor, setBrewAnchor] = useState(null as any)
     const [promptAnchor, setPromptAnchor] = useState(null as any)
 
-    if (isMobile || !onLeft) return <></>
+    if (isMobile || !onRight) return <></>
 
     return <>
         <Card style={{ marginBottom: '5px', transition: 'opacity 0.2s ease-in-out' }} className="hover-hotbar">
