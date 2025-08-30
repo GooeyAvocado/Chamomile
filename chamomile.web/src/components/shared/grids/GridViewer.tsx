@@ -370,7 +370,7 @@ export default function GridViewer({
     const allMissing = imageApi?.images?.length === 0 && !allMissingInProgress
 
     const xType = GridTypes.find(a => a.code === grid.xValMode)
-    const yType = GridTypes.find(a => a.code === grid.xValMode)
+    const yType = GridTypes.find(a => a.code === grid.yValMode)
 
     const imageSize = 256
 
