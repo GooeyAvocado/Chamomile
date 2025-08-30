@@ -1,6 +1,7 @@
 import { objectToQueryString } from "../components/shared/Utils";
 import { Progress } from "../model/Automatic1111/Progress";
 import { FilterOptions } from "../model/FilterOptions";
+import GeneralStatistics from "../model/GeneralStatistics";
 import { GeneratedImage } from "../model/GeneratedImage";
 import { HiResRequest } from "../model/HiResRequest";
 import ImageWorkerStatus from "../model/ImageWorkerStatus";
@@ -13,7 +14,7 @@ import { API_PREFIX, Delete, Get, Post, Put, Upload } from "./Common";
 
 const ENDPOINT = API_PREFIX + "images/"
 
-export const imageUrl = (id: number, hiResAvailable?: boolean) => ENDPOINT + `${id}/image` + (hiResAvailable ? "/HiRes" : "")
+export const imageUrl = (id?: number, hiResAvailable?: boolean) => !id || id === 0 ? "/color.png" : ENDPOINT + `${id}/image` + (hiResAvailable ? "/HiRes" : "")
 
 //#region 
 export const uploadExistingImage = (
@@ -183,3 +184,17 @@ export const getKeywordUsageDated = (
     onError: (value: any) => void,
     filter: KeywordFilterOptions
 ) => Get(setLoading, setItem, onError, ENDPOINT + "keywords/datedusage" + objectToQueryString(filter));
+
+export const getGenStats = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: GeneralStatistics) => void,
+    onError: (value: any) => void,
+    filter: FilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + "stats" + objectToQueryString(filter));
+
+export const getGenStatsDated = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: KeywordUsageDatedResult) => void,
+    onError: (value: any) => void,
+    filter: KeywordFilterOptions
+) => Get(setLoading, setItem, onError, ENDPOINT + "datedstats" + objectToQueryString(filter));
