@@ -1,8 +1,8 @@
 import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
-import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, Bolt, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, Image, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Warning, Window, Yard } from "@mui/icons-material";
+import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
+import { BarChart, Bolt, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, ReceiptLongTwoTone, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -672,6 +672,106 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
 
         </HelpSection>
 
+        <HelpSection title="Grids">
+            <img src="/screenshots/grid.png" width="100%" />
+
+            <p>
+                Chamomile allows you to create grids of images with different values for rows
+                and columns. This makes it easy to try and compare different tweaks to the
+                parameters of your prompts. Columns and rows can be of the following types:
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px", marginBottom: "20px" }}>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Prompt search/replace"><ReceiptLong /></LabeledIcon>: </b>
+                    Search for the first value and replace it with the value of the current cell
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="CFG Scale"><Tune /></LabeledIcon>: </b>
+                    <div>CFG Scale of the image in this cell</div>
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Seed"><Yard /></LabeledIcon>: </b>
+                    <div>Seed for the cell. Only one cell will be used if this is not set</div>
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Dimensions"><OpenWith /></LabeledIcon>: </b>
+                    <div>Dimensions of the image of a cell</div>
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Sampler"><Window /></LabeledIcon>: </b>
+                    <div>Sampler to generate the image of a cell (See Advanced Prompting)</div>
+                </div>
+            </div>
+
+            <Stack gap={"8px"}>
+                <Alert severity="warning" style={{ fontSize: ".8em" }}>
+                    <AlertTitle style={{ fontSize: "1.2em" }}>Do not re-use axis types</AlertTitle>
+                    Aside from Prompt search/replace, you should not use two of the same axis type. Only the Y values will be used
+                </Alert>
+
+                <Alert severity="warning" style={{ fontSize: ".8em" }}>
+                    <AlertTitle style={{ fontSize: "1.2em" }}>Grids are not optimized for mobile</AlertTitle>
+                    Proceed with caution if you plan to use this on a mobile or touch screen device
+                </Alert>
+
+                <Alert severity="info" style={{ fontSize: ".8em" }}>
+                    <AlertTitle style={{ fontSize: "1.2em" }}>Images from grids are not shown on the home page</AlertTitle>
+                    You can favorite an image and it will be shown on the home page though
+                </Alert>
+            </Stack>
+
+            <hr />
+
+            <img src="/screenshots/gridhud.png" />
+
+            <p>
+                When viewing an image on a grid, you'll see a small card on the top left of the screen showing
+                where you are in the grid, your coordinates, and what the value on each axis is. The grid
+                depiction on this card is always 3x3, and shows if you're on an edge of the grid, or somewhere
+                in the middle of it.
+            </p>
+        </HelpSection>
+
+        <HelpSection title="Prompt Source">
+            <img src="/screenshots/promptsource.png" />
+            <p>
+                Images on Chamomile can come from a few different places. This accordion on the image viewer
+                lets you trace back an image, it's prompt, and it's history. Images on Chamomile can have the
+                following sources:
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px", marginBottom: "20px" }}>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Grids"><GridView /></LabeledIcon>: </b>
+                    <div>Images that come from a grid</div>
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Image Base"><ReceiptLong /></LabeledIcon>: </b>
+                    <div>Base prompt of an existing image</div>
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Image"><ReceiptLong /></LabeledIcon>: </b>
+                    <div>Full prompt of an existing image</div>
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Prompt box"><Coffee /></LabeledIcon>: </b>
+                    <div>An original, or modified existing prompt</div>
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Upload"><Upload /></LabeledIcon>: </b>
+                    <div>An image that was uploaded to Chamomile</div>
+                </div>
+            </div>
+
+            <Alert severity="info" style={{ fontSize: ".8em" }}>
+                <AlertTitle style={{ fontSize: "1.2em" }}>This is a new feature!</AlertTitle>
+                If you had previously generated images, this accordion will not open because chamomile
+                did not track this information previously.
+            </Alert>
+
+        </HelpSection>
+
         <HelpSection title="Upscaling Images" >
             <img src="/screenshots/upscaling.png" width={"70%"} />
             <p>
@@ -702,10 +802,11 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 You can view five different statistics:
             </p>
             <ul>
-                <li><b>General:</b> A small dashboard including image counts, your most common model, LoRA, and keyword</li>
+                <li><b>General:</b> A small dashboard including image counts, your most common model, LoRA, and keyword, and the date range of image generation</li>
                 <li><b>Models:</b> SD Models used in generation</li>
                 <li><b>LoRAs:</b> LoRAs used in generation, including a statistic for no LoRAs used</li>
                 <li><b>Keywords:</b> Usage statistics on keywords* in your prompts</li>
+                <li><b>Source:</b> A table showing where the prompts you've sent in are sourced form. See Prompt Source for more info</li>
             </ul>
             <div style={{ fontSize: ".8em", fontStyle: 'italic', opacity: ".8" }}>
                 *Keywords are determined by splitting your prompts by commas, line breaks, or more than one
@@ -719,6 +820,20 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
 
             {/* <hr /> */}
             {/* <img src="/screenshots/statsgraph.png" style={{ width: "70%" }} /> */}
+        </HelpSection>
+
+        <HelpSection title="I'm Feeling Lucky">
+            <img src="screenshots/lucky.png" />
+            <p>
+                This is a small feature that brings up a random image on Chamomile. The original internalPrompt
+                was to prompt that random image immediately, but we decided against that since LoRA combinations
+                and prompting can change with different active models.
+            </p>
+            <p>
+                When an image is open, on the top left of the screen, you'll see a card with a button to roll
+                the dice again, and bring up another random image. You can also hit {keyCombo(["->"])} to
+                get another image.
+            </p>
         </HelpSection>
 
         <HelpSection title="Advanced Full Text Search">
