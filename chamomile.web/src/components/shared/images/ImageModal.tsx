@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, ListAlt, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -310,7 +310,7 @@ export default function ImageModal(props: {
                                 </ComplexAccordionBody>
                             </ComplexAccordion>
 
-                            <ComplexAccordion elevation={2} title={<><ListAlt /><div>Additional Info</div></>} disabled={Object.keys(image?.additionalInfo ?? {}).length === 0}>
+                            <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled={Object.keys(image?.additionalInfo ?? {}).length === 0}>
                                 <ComplexAccordionBody>
                                     <AdditionalInfoRenderer additionalInformation={image?.additionalInfo} />
                                 </ComplexAccordionBody>
