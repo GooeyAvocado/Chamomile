@@ -326,7 +326,7 @@ export default function ImageModal(props: {
                             <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled={Object.keys(image?.additionalInfo ?? {}).length === 0}>
                                 <ComplexAccordionBody>
                                     <AdditionalInfoRenderer
-                                        filter={filter} setFilter={setFilter}
+                                        filter={filter} setFilter={setFilter} imageId={image?.id ?? 0}
                                         additionalInformation={image?.additionalInfo}
                                     />
                                 </ComplexAccordionBody>

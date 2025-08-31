@@ -9,9 +9,11 @@ import { FilterOptions } from "../../../model/FilterOptions"
 import { clearFilter } from "../Utils"
 
 export default function AdditionalInfoRenderer({
+    imageId,
     additionalInformation,
     filter, setFilter
 }: {
+    imageId: number
     additionalInformation?: PromptOrderData
     filter?: FilterOptions, setFilter?: (val: FilterOptions) => void
 }) {
@@ -68,7 +70,7 @@ export default function AdditionalInfoRenderer({
                     </div>
                 </Card>
 
-                {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
+                {setFilter && filter && <div style={{ textAlign: 'right' }}>
                     <Button
                         onClick={() => { setFilter({ ...clearFilter(filter), sample: additionalInformation.sample }) }}
                         startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
@@ -93,7 +95,7 @@ export default function AdditionalInfoRenderer({
 
                 </Card>
 
-                {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
+                {setFilter && filter && <div style={{ textAlign: 'right' }}>
                     <Button
                         onClick={() => { setFilter({ ...clearFilter(filter), sample: additionalInformation.sample }) }}
                         startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
@@ -117,7 +119,7 @@ export default function AdditionalInfoRenderer({
                     </div>
                 </Card>
 
-                {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
+                {setFilter && filter && <div style={{ textAlign: 'right' }}>
                     <Button
                         onClick={() => { setFilter({ ...clearFilter(filter), sample: additionalInformation.sample }) }}
                         startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
@@ -147,9 +149,16 @@ export default function AdditionalInfoRenderer({
 
                 </Card>
 
-                {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
+                {setFilter && filter && <div style={{ textAlign: 'right' }}>
                     <Button
-                        onClick={() => { setFilter({ ...clearFilter(filter), sample: additionalInformation.sample }) }}
+                        onClick={() => {
+                            setFilter({
+                                ...clearFilter(filter), sample:
+                                    additionalInformation.sample && additionalInformation.sample > 0
+                                        ? additionalInformation.sample
+                                        : imageId
+                            })
+                        }}
                         startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
                     >More like this</Button>
                 </div>}
@@ -158,14 +167,29 @@ export default function AdditionalInfoRenderer({
 
             </>
         case "UPLOAD":
-            return <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
-                <Upload />
-                <div>
-                    <div>Upload</div>
-                    <div style={{ fontSize: ".7em" }}>This image was externally generated</div>
-                </div>
+            return <>
+                <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
+                    <Upload />
+                    <div>
+                        <div>Upload</div>
+                        <div style={{ fontSize: ".7em" }}>This image was externally generated</div>
+                    </div>
+                </Card>
 
-            </Card>
+                {setFilter && filter && <div style={{ textAlign: 'right' }}>
+                    <Button
+                        onClick={() => {
+                            setFilter({
+                                ...clearFilter(filter), sample:
+                                    additionalInformation.sample && additionalInformation.sample > 0
+                                        ? additionalInformation.sample
+                                        : imageId
+                            })
+                        }}
+                        startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
+                    >More like this</Button>
+                </div>}
+            </>
         default: return <table>
             <tbody>
                 {Object.keys(additionalInformation).map(k => <tr>
