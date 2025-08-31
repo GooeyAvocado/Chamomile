@@ -284,6 +284,20 @@ export default function ImageViewer(props: {
                 }}
             />
         }
+
+        {imageApi.error &&
+            <Stack gap={"10px"}>
+                <Alert variant="standard" severity="error">
+                    <AlertTitle>Could not retrieve images</AlertTitle>
+                    {imageApi.error.message ? `Server responded: ${imageApi.error.message}` : "Something happened! Check the console"}
+                </Alert>
+                {imageApi.error.message?.includes("tsquery") && <Alert variant="standard" severity="info">
+                    <AlertTitle>It looks like this is an Advanced Search related issue</AlertTitle>
+                    <Link onClick={() => { setAdvSearchOpen(true) }} color="textPrimary">Learn about Advanced Search</Link>
+                </Alert>}
+            </Stack>
+        }
+
         <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
 
 
@@ -350,18 +364,6 @@ export default function ImageViewer(props: {
                         </>}
                     </div>}
             </>}
-            {imageApi.error &&
-                <Stack gap={"10px"}>
-                    <Alert variant="standard" severity="error">
-                        <AlertTitle>Could not retrieve images</AlertTitle>
-                        {imageApi.error.message ? `Server responded: ${imageApi.error.message}` : "Something happened! Check the console"}
-                    </Alert>
-                    {imageApi.error.message?.includes("tsquery") && <Alert variant="standard" severity="info">
-                        <AlertTitle>It looks like this is an Advanced Search related issue</AlertTitle>
-                        <Link onClick={() => { setAdvSearchOpen(true) }} color="textPrimary">Learn about Advanced Search</Link>
-                    </Alert>}
-                </Stack>
-            }
             {imageApi.hasMore && (imageApi.images?.length ?? 0) > 0 && <>
                 <div style={{ textAlign: 'center', marginTop: "20px" }}>
                     <Button size="small" onClick={() => imageApi.showMore()} disabled={imageApi.loading}> {imageApi.loading ? <CircularProgress size={24} /> : "Show More"}</Button>

@@ -135,7 +135,7 @@ export const objectToQueryString = (obj: any) => obj ? "?" + Object.keys(obj)
         let value = obj[k];
         if (typeof value === "string") {
             value = value.replace(/&/g, "%26").replace(/=/g, "%3D").replace(/\?/g, "%3F");
-        }
+        } else if (typeof value === "number" && Number.isNaN(value)) return null
         return `${k}=${value}`;
     })
     .join("&") : "";
