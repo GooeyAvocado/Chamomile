@@ -73,7 +73,6 @@ export default function RandomImageModal(props: {
 
     const onDownload = () => {
         if (!randomImage) return;
-        console.log("Updating image count")
         const img = { ...randomImage, downloadCount: (randomImage.downloadCount ?? 0) + 1 } as GeneratedImage;
         setRandomImage(img)
     }

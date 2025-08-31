@@ -26,7 +26,6 @@ export default function Home() {
     const nav = useNavigate();
 
     useEffect(() => {
-        console.log("waos")
         if (location.pathname.startsWith("/album/")) {
             const id = Number.parseInt(location.pathname.replace("/album/", ""));
             if (album?.id !== id) {

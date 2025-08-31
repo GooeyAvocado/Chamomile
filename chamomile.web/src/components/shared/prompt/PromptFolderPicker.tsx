@@ -52,7 +52,6 @@ export default function PromptFolderPicker(props: {
                         <div>{key}</div>
                     </div>}
                     onClick={(e) => {
-                        console.log(currentPath)
                         setInternalFolder(currentPath)
                         e.stopPropagation()
                     }}

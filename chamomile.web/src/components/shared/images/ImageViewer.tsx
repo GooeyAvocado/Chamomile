@@ -78,7 +78,6 @@ export default function ImageViewer(props: {
 
     useEffect(() => {
         if (!navToSelectedImage) return;
-        console.log(location.pathname)
         setViewerOpen(location.pathname.startsWith("/image"))
     }, [location, navToSelectedImage])
 
@@ -139,7 +138,6 @@ export default function ImageViewer(props: {
 
     const onDownload = () => {
         if (!selectedImage) return;
-        console.log("Updating image count")
         const img = { ...selectedImage, downloadCount: (selectedImage.downloadCount ?? 0) + 1 } as GeneratedImage;
         imageApi.updateImage(img)
         setSelectedImage(img)
