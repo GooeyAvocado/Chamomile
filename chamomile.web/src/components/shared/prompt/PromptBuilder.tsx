@@ -274,6 +274,8 @@ export default function PromptBuilder(props: {
                         onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)}
                         onSaveAs={() => setSaveOpen(true)}
                         saveAsEnabled={existingPrompt}
+                        setFilter={setFilter}
+                        filter={filter}
                     />
                 </div>}
         </div>
@@ -451,6 +453,8 @@ export default function PromptBuilder(props: {
                 onSaveAs={() => setSaveOpen(true)}
                 saveAsEnabled={existingPrompt}
                 fullWidth
+                setFilter={setFilter}
+                filter={filter}
             />
         </div>}
 

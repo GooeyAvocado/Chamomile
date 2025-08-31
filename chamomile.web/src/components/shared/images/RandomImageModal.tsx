@@ -11,13 +11,16 @@ import ImageAlbumRequest from "../../../model/ImageAlbumRequest"
 import AreYouSureModal from "../modals/AreYouSureModal"
 import { Button, Card } from "@mui/material"
 import { Casino } from "@mui/icons-material"
+import { FilterOptions } from "../../../model/FilterOptions"
 
 export default function RandomImageModal(props: {
     open: boolean,
     setOpen: (val: boolean) => void
+    filter?: FilterOptions
+    setFilter?: (val: FilterOptions) => void
 }) {
 
-    const { open, setOpen } = props
+    const { open, setOpen, filter, setFilter } = props
     const [deleteAys, setDeleteAys] = useState(false)
     const [randomImage, setRandomImage] = useState<GeneratedImage>()
 
@@ -132,6 +135,10 @@ export default function RandomImageModal(props: {
             open={open} setOpen={setOpen} image={randomImage} onAddAlbum={onAddAlbum} onDelete={() => { setDeleteAys(true) }}
             onDeleteForce={onDeleteImage} onDownload={onDownload} onFavorite={onFavorite} onRemoveAlbum={onRemoveAlbum}
             onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum} onRight={rollTheDice}
+            setFilter={setFilter ? (val) => {
+                setFilter(val)
+                setOpen(false)
+            } : undefined} filter={filter}
             imageChildren={() => <RandomHUD
                 onImFeelingLucky={rollTheDice}
             />}

@@ -20,17 +20,20 @@ import { createGrid } from '../../../api/Grid';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import RandomImageModal from '../images/RandomImageModal';
+import { FilterOptions } from '../../../model/FilterOptions';
 
 export default function PromptButton(props: {
     onBrew: (amountOverride?: number) => void
     onSaveAs: () => void
     onSave: () => void
     onLoad: () => void
+    filter?: FilterOptions
+    setFilter?: (val: FilterOptions) => void
     saveAsEnabled?: boolean
     fullWidth?: boolean
 }) {
 
-    const { onBrew, onLoad, onSave, fullWidth, onSaveAs, saveAsEnabled } = props
+    const { onBrew, onLoad, onSave, fullWidth, onSaveAs, saveAsEnabled, filter, setFilter } = props
     const { prompt, orderAmount } = usePrompt();
 
     const [open, setOpen] = useState(false);
@@ -209,7 +212,10 @@ export default function PromptButton(props: {
             </DialogActions>
         </Dialog>
 
-        {luckyEverOpen && <RandomImageModal open={luckyOpen} setOpen={setLuckyOpen} />}
+        {luckyEverOpen && <RandomImageModal
+            open={luckyOpen} setOpen={setLuckyOpen}
+            setFilter={setFilter} filter={filter}
+        />}
 
         <GridEditor
             grid={gridEditorState ?? {} as Grid} setGrid={setGridEditorState}
