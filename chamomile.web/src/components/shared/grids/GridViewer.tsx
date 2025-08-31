@@ -9,7 +9,7 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useEffect, useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
 import useApi from "../../hooks/useApi";
-import { deleteImage, deleteMultiImage, enqueuePrompts, favImage, noteImage } from "../../../api/Images";
+import { cancelJobs, deleteImage, deleteMultiImage, enqueuePrompts, favImage, noteImage } from "../../../api/Images";
 import { updateImageAlbums } from "../../../api/Albums";
 import { Album } from "../../../model/Album";
 import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
@@ -53,6 +53,7 @@ export default function GridViewer({
     const imageApi = useImages(filter)
     const delApi = useApi(deleteImage);
     const delMultiApi = useApi(deleteMultiImage)
+    const cancelMultiApi = useApi(cancelJobs)
     const favApi = useApi(favImage)
     const notesApi = useApi(noteImage)
     const brewApi = useApi(enqueuePrompts)
@@ -439,6 +440,12 @@ export default function GridViewer({
                 <img src="/brewing.gif" width={48} />
                 <div>Generating grid images </div>
             </div>
+
+            <Button
+                variant="outlined" size="small"
+                onClick={() => cancelMultiApi.fetch(undefined, undefined, filteredQueue.map(a => a.id))}
+            >Cancel</Button>
+
             <div style={{ flex: "1", display: "flex", flexDirection: 'column', gap: "10px", fontSize: ".8em" }}>
                 <div style={{ display: "flex", gap: "10px", alignItems: 'center' }}>
                     <LinearProgress value={((expectedImageCount - missingImageCount) / expectedImageCount) * 100} variant="determinate" style={{ flex: "1" }} />
@@ -455,7 +462,6 @@ export default function GridViewer({
                         : <>Waiting for next job</>}</div>
                 </div>
             </div>
-
         </Card>}
 
         <div style={{ flex: "1", overflowY: "auto", overflowX: 'auto', display: 'flex', flexDirection: 'column' }}>
