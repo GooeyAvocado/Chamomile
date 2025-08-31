@@ -20,6 +20,7 @@ export default function WhatsNew({ open, setOpen }: {
 - **Collections:** It's now a lot easier to organize your images. You can set up collections to automatically add images based on a search, or generate images directly to an album.
 - **Grids:** You can now render several images to test out small tweaks to a variety of different parameters across rows and columns.
 - **Images are now selectable:** A major QOL improvement if you need to delete or add several images to a collection.
+- **More like this:** It's now easier to search for images either from the viewer or the context menu.
 - **Keyword statistics:** One new statistics category added so you can see what makes up your prompts.
 - **General statistics:** Another new statistics category added so you can see general information and image counts based on your filters.
 - **Image source statistics:** We now log where the prompt for an image came from, including existing images (base or full prompts), saved recipes, the promptbox, or from a grid. This is also visible in one final new statistics category.
