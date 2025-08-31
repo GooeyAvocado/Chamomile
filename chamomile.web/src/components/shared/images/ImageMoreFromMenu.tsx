@@ -78,14 +78,20 @@ export default function ImageMoreFromMenu({
                 <div style={{ fontSize: ".7em", opacity: ".7" }}>{l.name}</div>
             </div>
         </MenuItem>)}
-        {(image.additionalInfo?.sample ?? -1) > 0 && <>
-            <Divider />
-            <MenuItem
-                onClick={() => { setFilter({ ...clearFilter(filter), sample: image.additionalInfo?.sample }) }}
-                disabled={(image.additionalInfo?.sample ?? -1) <= 0}
-            >
-                <ListItemIcon>
+        <Divider />
+        <MenuItem
+            onClick={() => {
+                setFilter({
+                    ...clearFilter(filter), sample:
+                        (image.additionalInfo?.sample ?? -1) > 0
+                            ? image.additionalInfo?.sample
+                            : image.id
+                })
+            }}
+        >
+            <ListItemIcon>
 
+                {(image.additionalInfo?.sample ?? -1) > 0 ?
                     <Card style={{ width: "24px", aspectRatio: "1/1" }}>
                         <img src={imageUrl(image.additionalInfo?.sample)}
                             style={{
@@ -94,13 +100,14 @@ export default function ImageMoreFromMenu({
                             }}
                         />
                     </Card>
-                </ListItemIcon>
-                <div>
-                    <div style={{ fontSize: '.8em' }}>Source</div>
-                    <div style={{ fontSize: ".7em", opacity: ".7" }}>{SOURCE_FRIENDLY_NAMES[image.additionalInfo?.source ?? ""] ?? "Unknown"}</div>
-                </div>
-            </MenuItem>
-        </>}
+                    : <ImageSearch />
+                }
+            </ListItemIcon>
+            <div>
+                <div style={{ fontSize: '.8em' }}>{(image.additionalInfo?.sample ?? -1) > 0 ? "Source" : "Derivations"}</div>
+                <div style={{ fontSize: ".7em", opacity: ".7" }}>{SOURCE_FRIENDLY_NAMES[image.additionalInfo?.source ?? ""] ?? "Unknown"}</div>
+            </div>
+        </MenuItem>
     </MenuItemWithSubMenu>
 
 }
