@@ -22,6 +22,7 @@ import { usePingPong } from "../../hooks/usePingPong";
 import { useLoras } from "../../hooks/useLoras"
 import AutocompleteTextfield, { AutoCompletes } from "../autocompleteTextField/AutocompleteTextField";
 import { Lora } from "../../../model/Lora";
+import PromptboxImageSample from "./preview/PromptboxImageSample";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -224,14 +225,18 @@ export default function PromptBuilder(props: {
                     }>,
                 ]}
 
-
-
                 fullWidth slotProps={{
                     htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } },
                     input: {
 
                         startAdornment: (
-                            <InputAdornment position="start"> <ReceiptLong /> </InputAdornment>
+                            <InputAdornment position="start">
+                                <div style={{ display: "flex", alignSelf: "center", alignItems: 'center' }}>
+                                    {(prompt.sampleImage ?? -1) > 0 || prompt.id //if we have an ID (from a saved prompt) or Sample Image (from an existing image)
+                                        ? <PromptboxImageSample prompt={prompt} clearSample={() => { setPrompt({ ...prompt, sampleImage: undefined, id: undefined, name: "" }) }} />
+                                        : <ReceiptLong />}
+                                </div>
+                            </InputAdornment>
                         ),
                         endAdornment: (
                             <InputAdornment position="end">
