@@ -38,7 +38,7 @@ export function HighlightedDiv({ text, highlights, style }: HighlightedTextProps
 
         parts.push(
             renderer ? renderer(match)
-                : <span key={offset} style={style}>
+                : <span key={match + offset} style={style}>
                     {match}
                 </span>
         );

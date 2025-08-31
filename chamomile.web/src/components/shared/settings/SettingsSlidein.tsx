@@ -37,7 +37,7 @@ export default function SettingsSlidein({ open, setOpen }: {
                     Do you want to hear them?
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'row', rowGap: "10px", columnGap: "0px", flexWrap: "wrap", marginBottom: "20px" }}>
-                    {sounds.map(a => <div style={{ display: 'flex', width: "50%", alignItems: 'center', fontSize: ".8em", gap: "10px" }}>
+                    {sounds.map(a => <div key={a.name + "-sound"} style={{ display: 'flex', width: "50%", alignItems: 'center', fontSize: ".8em", gap: "10px" }}>
                         <IconButton onClick={() => { new Audio(a.sound).play() }} size="small"><VolumeUp fontSize="inherit" /></IconButton>
                         <div>{a.name}</div>
                     </div>)}
