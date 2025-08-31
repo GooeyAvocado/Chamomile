@@ -7,6 +7,7 @@ import { TravelExplore } from "@mui/icons-material";
 import { Card, Divider, ListItemIcon, MenuItem } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { imageUrl } from "../../../api/Images";
+import { clearFilter } from "../Utils";
 
 export const SOURCE_FRIENDLY_NAMES = {
     "GRID": "Grid",
@@ -41,7 +42,7 @@ export default function ImageMoreFromMenu({
         icon={<TravelExplore />}
     >
         <MenuItem
-            onClick={() => { setFilter({ ...filter, model: image.model }) }}
+            onClick={() => { setFilter({ ...clearFilter(filter), model: image.model }) }}
         >
             <ListItemIcon >{
                 <Card style={{ width: "24px", aspectRatio: "1/1" }}>
@@ -60,7 +61,7 @@ export default function ImageMoreFromMenu({
         </MenuItem>
         {imageLoras?.length > 0 && <Divider />}
         {imageLoras?.map(l => <MenuItem key={image.id + "-showMore-" + l.alias}
-            onClick={() => { setFilter({ ...filter, lora: l.alias }) }}
+            onClick={() => { setFilter({ ...clearFilter(filter), lora: l.alias }) }}
         >
             <ListItemIcon >{
                 <Card style={{ width: "24px", aspectRatio: "1/1" }}>
@@ -80,7 +81,7 @@ export default function ImageMoreFromMenu({
         {(image.additionalInfo?.sample ?? -1) > 0 && <>
             <Divider />
             <MenuItem
-                onClick={() => { setFilter({ ...filter, sample: image.additionalInfo?.sample }) }}
+                onClick={() => { setFilter({ ...clearFilter(filter), sample: image.additionalInfo?.sample }) }}
                 disabled={(image.additionalInfo?.sample ?? -1) <= 0}
             >
                 <ListItemIcon>

@@ -6,6 +6,7 @@ import { ChevronRight, Coffee, GridView, ImageSearch, ReceiptLong, ReceiptLongTw
 import PromptOrderData from "../../../model/PromptOrderData"
 import { useLocation, useNavigate } from "react-router-dom"
 import { FilterOptions } from "../../../model/FilterOptions"
+import { clearFilter } from "../Utils"
 
 export default function AdditionalInfoRenderer({
     additionalInformation,
@@ -69,7 +70,7 @@ export default function AdditionalInfoRenderer({
 
                 {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
                     <Button
-                        onClick={() => { setFilter({ ...filter, sample: additionalInformation.sample }) }}
+                        onClick={() => { setFilter({ ...clearFilter(filter), sample: additionalInformation.sample }) }}
                         startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
                     >More like this</Button>
                 </div>}
@@ -94,7 +95,7 @@ export default function AdditionalInfoRenderer({
 
                 {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
                     <Button
-                        onClick={() => { setFilter({ ...filter, sample: additionalInformation.sample }) }}
+                        onClick={() => { setFilter({ ...clearFilter(filter), sample: additionalInformation.sample }) }}
                         startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
                     >More like this</Button>
                 </div>}
@@ -118,7 +119,7 @@ export default function AdditionalInfoRenderer({
 
                 {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
                     <Button
-                        onClick={() => { setFilter({ ...filter, sample: additionalInformation.sample }) }}
+                        onClick={() => { setFilter({ ...clearFilter(filter), sample: additionalInformation.sample }) }}
                         startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
                     >More like this</Button>
                 </div>}
@@ -148,7 +149,7 @@ export default function AdditionalInfoRenderer({
 
                 {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
                     <Button
-                        onClick={() => { setFilter({ ...filter, sample: additionalInformation.sample }) }}
+                        onClick={() => { setFilter({ ...clearFilter(filter), sample: additionalInformation.sample }) }}
                         startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
                     >More like this</Button>
                 </div>}

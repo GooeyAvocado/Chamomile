@@ -1,3 +1,4 @@
+import { FilterOptions } from "../../model/FilterOptions";
 import { GeneratedImage } from "../../model/GeneratedImage";
 import { Prompt } from "../../model/Prompt";
 
@@ -140,14 +141,7 @@ export const objectToQueryString = (obj: any) => obj ? "?" + Object.keys(obj)
     })
     .join("&") : "";
 
-export const currencies = {
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-    PHP: "₽",
-    MEX: "MX$",
-    AUD: "AU$",
-} as any
+export const clearFilter = (filter: FilterOptions): FilterOptions => ({ ...filter, favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', sample: -1 })
 
 export const imageToPrompt = (image?: GeneratedImage, useBasePrompt?: boolean, reuseSeed?: boolean): Prompt => {
     return {

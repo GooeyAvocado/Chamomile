@@ -13,6 +13,7 @@ import ModelTypePill from "../model/ModelType/ModelTypePill";
 import { AddPhotoAlternate, Edit, Image, ImageSearch, MoreVert } from "@mui/icons-material";
 import LoraEditorModal from "./LoraEditorModal";
 import { FilterOptions } from "../../../model/FilterOptions";
+import { clearFilter } from "../Utils";
 
 export default function LoraCard(props: {
     loraAlias: string
@@ -152,7 +153,7 @@ export default function LoraCard(props: {
                 {filter && setFilter && <>
                     <Divider />
                     <MenuItem onClick={() => {
-                        setFilter({ ...filter, lora: lora.alias })
+                        setFilter({ ...clearFilter(filter), lora: lora.alias })
                     }}>
                         <ListItemIcon><ImageSearch /></ListItemIcon>
                         View images with this LoRA

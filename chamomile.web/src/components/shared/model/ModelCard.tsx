@@ -13,6 +13,7 @@ import ModelTypePill from "./ModelType/ModelTypePill";
 import { AddPhotoAlternate, Edit, Image, ImageSearch, MoreVert } from "@mui/icons-material";
 import ModelEditorModal from "./ModelEditorModal";
 import { FilterOptions } from "../../../model/FilterOptions";
+import { clearFilter } from "../Utils";
 
 export default function ModelCard(props: {
     modelTitle: string
@@ -155,7 +156,7 @@ export default function ModelCard(props: {
                 {filter && setFilter && <>
                     <Divider />
                     <MenuItem onClick={() => {
-                        setFilter({ ...filter, model: model.title })
+                        setFilter({ ...clearFilter(filter), model: model.title })
                     }}>
                         <ListItemIcon><ImageSearch /></ListItemIcon>
                         View images with this model

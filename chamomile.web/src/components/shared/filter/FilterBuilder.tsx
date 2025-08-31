@@ -10,6 +10,7 @@ import AlbumEditor from "../albums/AlbumEditor";
 import { Album } from "../../../model/Album";
 import StatsButton from "../StatsButton/StatsButton";
 import PromptboxImageSample from "../prompt/preview/PromptboxImageSample";
+import { clearFilter } from "../Utils";
 
 export default function FilterBuilder(props: {
     filter: FilterOptions
@@ -85,7 +86,7 @@ export default function FilterBuilder(props: {
                                 </Tooltip>}
                                 {!filterEmpty && <Tooltip title="Clear filter">
                                     <IconButton
-                                        onClick={() => { setFilter({ ...filter, favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', sample: -1 } as FilterOptions) }}>
+                                        onClick={() => { setFilter(clearFilter(filter)) }}>
                                         <Close />
                                     </IconButton>
                                 </Tooltip>}
