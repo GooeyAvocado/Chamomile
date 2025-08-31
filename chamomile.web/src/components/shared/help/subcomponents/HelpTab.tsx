@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, Bolt, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
+import { BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -678,9 +678,11 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <p>
                 Chamomile allows you to create grids of images with different values for rows
                 and columns. This makes it easy to try and compare different tweaks to the
-                parameters of your prompts. Columns and rows can be of the following types:
+                parameters of your prompts. Grids (unless specified) have a set seed. You can
+                re-roll the seed and re-create a grid by using
+                the <LabeledIcon label="Clear grid"><BorderClear /></LabeledIcon> or <LabeledIcon label="Duplicate grid"><CopyAll /></LabeledIcon> buttons.
             </p>
-
+            <p>Columns and rows can be of the following types:</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px", marginBottom: "20px" }}>
                 <div style={{ display: 'flex', gap: "10px" }}>
                     <b style={{ flexShrink: "0" }}><LabeledIcon label="Prompt search/replace"><ReceiptLong /></LabeledIcon>: </b>
@@ -692,7 +694,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 </div>
                 <div style={{ display: 'flex', gap: "10px" }}>
                     <b style={{ flexShrink: "0" }}><LabeledIcon label="Seed"><Yard /></LabeledIcon>: </b>
-                    <div>Seed for the cell. Only one cell will be used if this is not set</div>
+                    <div>Seed for the cell. This overrides the grid's seed</div>
                 </div>
                 <div style={{ display: 'flex', gap: "10px" }}>
                     <b style={{ flexShrink: "0" }}><LabeledIcon label="Dimensions"><OpenWith /></LabeledIcon>: </b>
@@ -707,17 +709,17 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <Stack gap={"8px"}>
                 <Alert severity="warning" style={{ fontSize: ".8em" }}>
                     <AlertTitle style={{ fontSize: "1.2em" }}>Do not re-use axis types</AlertTitle>
-                    Aside from Prompt search/replace, you should not use two of the same axis type. Only the Y values will be used
+                    Aside from Prompt search/replace, you should not use two of the same axis type. Only the Y values will be used.
                 </Alert>
 
                 <Alert severity="warning" style={{ fontSize: ".8em" }}>
                     <AlertTitle style={{ fontSize: "1.2em" }}>Grids are not optimized for mobile</AlertTitle>
-                    Proceed with caution if you plan to use this on a mobile or touch screen device
+                    Proceed with caution if you plan to use this on a mobile or touch screen device.
                 </Alert>
 
                 <Alert severity="info" style={{ fontSize: ".8em" }}>
-                    <AlertTitle style={{ fontSize: "1.2em" }}>Images from grids are not shown on the home page</AlertTitle>
-                    You can favorite an image and it will be shown on the home page though
+                    <AlertTitle style={{ fontSize: "1.2em" }}>Images from grids are hidden</AlertTitle>
+                    Only images from grids that are favorites will be shown on the home page. Images from grids will always appear on collections.
                 </Alert>
             </Stack>
 
@@ -728,8 +730,8 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <p>
                 When viewing an image on a grid, you'll see a small card on the top left of the screen showing
                 where you are in the grid, your coordinates, and what the value on each axis is. The grid
-                depiction on this card is always 3x3, and shows if you're on an edge of the grid, or somewhere
-                in the middle of it.
+                depiction on this card is always 3x3, and shows if you're on an edge, a corner, or somewhere
+                in the middle of the grid.
             </p>
         </HelpSection>
 
@@ -766,8 +768,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
 
             <Alert severity="info" style={{ fontSize: ".8em" }}>
                 <AlertTitle style={{ fontSize: "1.2em" }}>This is a new feature!</AlertTitle>
-                If you had previously generated images, this accordion will not open because chamomile
-                did not track this information previously.
+                This accordion will not open because chamomile on images generated before 3.0
             </Alert>
 
         </HelpSection>
@@ -825,7 +826,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
         <HelpSection title="I'm Feeling Lucky">
             <img src="screenshots/lucky.png" />
             <p>
-                This is a small feature that brings up a random image on Chamomile. The original internalPrompt
+                This is a small feature that brings up a random image on Chamomile. The original intent
                 was to prompt that random image immediately, but we decided against that since LoRA combinations
                 and prompting can change with different active models.
             </p>
