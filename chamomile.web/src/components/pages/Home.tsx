@@ -113,7 +113,7 @@ export default function Home() {
 
                 <div style={{ marginBottom: '5px', width: "100%", marginTop: "15px", display: "flex", flexDirection: "column", gap: "15px" }}>
                     <div style={{ width: "100%" }}>
-                        <PromptBuilder />
+                        <PromptBuilder filter={filter} setFilter={setFilter} />
                     </div>
 
                     {!selectMode && <FilterBuilder

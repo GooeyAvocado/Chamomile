@@ -3,7 +3,7 @@ import { deletePrompt, getPrompts, updatePrompt } from "../../../api/Prompts";
 import { Prompt } from "../../../model/Prompt";
 import useApi from "../../hooks/useApi";
 import { Card, CardActionArea, CardContent, Dialog, DialogContent, DialogTitle, InputAdornment, TextField } from "@mui/material";
-import { ArrowUpward, Coffee, Delete, Edit, Folder, Search } from "@mui/icons-material";
+import { ArrowUpward, Coffee, Delete, Edit, Folder, ImageSearch, Search } from "@mui/icons-material";
 import PromptCard from "./PromptCard";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { useSnackbar } from "notistack";
@@ -13,16 +13,19 @@ import PromptTile from "./PromptTile";
 import ContextMenu from "../ContextMenu";
 import { usePrompt } from "../../hooks/usePrompt";
 import { enqueuePrompts } from "../../../api/Images";
-import { hydratePrompt } from "../Utils";
+import { clearFilter, hydratePrompt } from "../Utils";
 import { useSettings } from "../../hooks/useSettings";
+import { FilterOptions } from "../../../model/FilterOptions";
 
 export default function PromptSelectorModal(props: {
     open: boolean,
+    filter?: FilterOptions,
+    setFilter?: (val: FilterOptions) => void
     setOpen: (val: boolean) => void,
     onOk: (val: Prompt) => void
 }) {
 
-    const { onOk, open, setOpen } = props;
+    const { onOk, open, setOpen, filter, setFilter } = props;
     const promptsApi = useApi(getPrompts);
     const delPromptApi = useApi(deletePrompt)
     const updatePromptApi = useApi(updatePrompt)
@@ -119,7 +122,7 @@ export default function PromptSelectorModal(props: {
                 <GridViewMode
                     data={promptsApi.data} onOk={onOk} query={query}
                     setDelPrompt={setDelPrompt} setEditPrompt={setEditPrompt}
-                    setPromptFolder={setPromptFolder}
+                    setPromptFolder={setPromptFolder} filter={filter} setFilter={setFilter}
                 />
             </div>
 
@@ -154,9 +157,11 @@ function GridViewMode(props: {
     setEditPrompt: (val: Prompt) => void,
     setPromptFolder: (val: string) => void,
     setDelPrompt: (val: Prompt) => void,
-    onOk: (val: Prompt) => void
+    onOk: (val: Prompt) => void,
+    filter?: FilterOptions,
+    setFilter?: (val: FilterOptions) => void
 }) {
-    const { data, query, setDelPrompt, setEditPrompt, onOk, setPromptFolder } = props
+    const { data, query, setDelPrompt, setEditPrompt, onOk, setPromptFolder, filter, setFilter } = props
 
     const [currLocation, setCurrLocation] = useState("")
 
@@ -199,6 +204,8 @@ function GridViewMode(props: {
                 <ContextMenu options={[
                     { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
+                    filter && setFilter && (a.sampleImage ?? 0) > 0 ? { icon: <ImageSearch />, text: "Images like this", onClick: () => setFilter({ ...clearFilter(filter), sample: a.sampleImage }) } : undefined,
+                    filter && setFilter && (a.sampleImage ?? 0) ? { type: 'divider' } : undefined,
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
                 ]}>
@@ -250,6 +257,8 @@ function GridViewMode(props: {
                 <ContextMenu options={[
                     { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
+                    filter && setFilter && (a.sampleImage ?? 0) > 0 ? { icon: <ImageSearch />, text: "Images like this", onClick: () => setFilter({ ...clearFilter(filter), sample: a.sampleImage }) } : undefined,
+                    filter && setFilter && (a.sampleImage ?? 0) ? { type: 'divider' } : undefined,
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
                 ]}>

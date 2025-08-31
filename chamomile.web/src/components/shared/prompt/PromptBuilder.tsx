@@ -23,6 +23,7 @@ import { useLoras } from "../../hooks/useLoras"
 import AutocompleteTextfield, { AutoCompletes } from "../autocompleteTextField/AutocompleteTextField";
 import { Lora } from "../../../model/Lora";
 import PromptboxImageSample from "./preview/PromptboxImageSample";
+import { FilterOptions } from "../../../model/FilterOptions";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -31,9 +32,11 @@ export default function PromptBuilder(props: {
     alwaysExpand?: boolean,
     noBrew?: boolean,
     preview?: boolean
+    filter?: FilterOptions
+    setFilter?: (val: FilterOptions) => void
 }) {
 
-    const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight } = props
+    const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight, filter, setFilter } = props
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount, variables } = usePrompt()
     const [expanded, setExpanded] = useState(false)
     const [expandedHeight, setExpandedHeight] = useState("0px")
@@ -465,7 +468,10 @@ export default function PromptBuilder(props: {
                 <PromptCard prompt={prompt} />
             </AreYouSureModal>
             <PromptEditorModal prompt={globalPrompt} open={saveOpen} setOpen={setSaveOpen} onOk={onSaveAs} title={`Save Recipe${existingPrompt ? " as..." : ""}`} />
-            <PromptSelectorModal open={loadOpen} setOpen={setLoadOpen} onOk={onLoad} />
+            <PromptSelectorModal open={loadOpen} setOpen={setLoadOpen} onOk={onLoad} filter={filter} setFilter={setFilter ? (val) => {
+                setFilter(val)
+                setLoadOpen(false)
+            } : undefined} />
         </>}
 
     </>
