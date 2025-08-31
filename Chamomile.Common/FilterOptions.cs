@@ -10,7 +10,10 @@
         public int? Album { get; set; } = -1;
 
         /// <summary>Grid requested</summary>
-        public int? Grid { get; set; } = -1;    
+        public int? Grid { get; set; } = -1;
+
+        /// <summary>Sample image to search by </summary>
+        public int? Sample { get; set; } = -1;
 
         /// <summary>LoRA requested</summary>
         public string? Lora { get; set; } = "";

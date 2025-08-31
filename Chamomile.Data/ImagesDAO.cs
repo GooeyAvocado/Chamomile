@@ -290,6 +290,10 @@ namespace Chamomile.Data {
                 conditions.Add(new("(" + IMAGE_ADDTL_INFO + "->> 'gridId')::Int", WhereConditionOperator.EQUALS, "@" + GRID_ID));
             }
 
+            if (filter.Sample != null && filter.Sample >= 0) {
+                conditions.Add(new("(" + IMAGE_ADDTL_INFO + "->> 'gridId')::Int", WhereConditionOperator.EQUALS, "@" + IMAGE_SAMPLE_ID));
+            }
+
             if (!string.IsNullOrEmpty(filter.Lora)) {
                 conditions.Add(new(
                     "img." + IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
@@ -324,7 +328,9 @@ namespace Chamomile.Data {
                 //We have no Album
                 (filter.Album == null || filter.Album < 0) &&
                 //We have no Grid
-                (filter.Grid==null || filter.Grid < 0)
+                (filter.Grid==null || filter.Grid < 0) &&
+                //And we have no sample to search for
+                (filter.Sample==null || filter.Sample< 0)
             ) {
                 conditions.Add(
                     new WhereConditionSubgroup(new(WhereConditionUnion.OR,[
@@ -361,6 +367,7 @@ namespace Chamomile.Data {
             if (!string.IsNullOrEmpty(filter.Lora)) { cmd.SetString(LORA_ALIAS, filter.Lora); }
             if (filter.Album != null && filter.Album >= 0) { cmd.SetInt(ALBUM_ID, filter.Album); }
             if (filter.Grid != null && filter.Grid >= 0) {cmd.SetInt(GRID_ID,filter.Grid);}
+            if (filter.Sample != null && filter.Sample >= 0) { cmd.SetInt(IMAGE_SAMPLE_ID, filter.Sample); }
 
 
             if (!string.IsNullOrEmpty(filter.FromDate)) {

@@ -45,6 +45,9 @@
         public static readonly string IMAGE_HIDDEN       = "image_hidden_in";
         public static readonly string IMAGE_ADDTL_INFO   = "img_addtl_info_mv";
 
+        //This is a virtual column in a JSONB column but I don't care
+        public static readonly string IMAGE_SAMPLE_ID    = "img_sample_id";
+
         public static readonly string IMAGES_LORA_MAP = $"{SCHEMA}.images_lora_map";
 
         public static readonly string PROMPT_TABLE       = $"{SCHEMA}.prompts";
