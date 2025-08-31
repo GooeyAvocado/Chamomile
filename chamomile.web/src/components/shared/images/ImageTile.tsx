@@ -32,8 +32,22 @@ export default function ImageTile(props: {
             { text: selected ? "Unselect" : "Select", icon: selected ? <CheckBox /> : <CheckBoxOutlineBlank />, onClick: selected ? onUnselect : onSelect, disabled: !canSelect },
             { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) }, disabled: selectMode },
             { type: "divider" },
-            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image)} source="IMAGE" sample={image.id} menuButonMode onClick={onClose} disabled={selectMode} /> },
-            { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={imageToPrompt(image, true)} source="IMAGE_BASE" sample={image.id} iconOverride={<CoffeeOutlined />} menuButonMode onClick={onClose} textSuffix="(base prompt)" disabled={selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt} /> },
+            {
+                type: "custom", customContent: (onClose) => <PromptReorderButton
+                    prompt={imageToPrompt(image)} source="IMAGE"
+                    // sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id}
+                    sample={image?.additionalInfo?.sample}
+                    menuButonMode onClick={onClose} disabled={selectMode}
+                />
+            },
+            {
+                type: "custom", customContent: (onClose) => <PromptReorderButton
+                    prompt={imageToPrompt(image, true)} source="IMAGE_BASE"
+                    sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id} iconOverride={<CoffeeOutlined />}
+                    menuButonMode onClick={onClose} textSuffix="(base prompt)"
+                    disabled={selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt}
+                />
+            },
             { type: "divider" },
             { text: "Use this prompt", icon: <ReceiptLong />, onClick: () => { setPrompt(imageToPrompt(image)) }, disabled: selectMode },
             { text: "Use this base prompt", icon: <ReceiptLongTwoTone />, onClick: () => { setPrompt(imageToPrompt(image, true)) }, disabled: selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image.basePrompt === image.prompt },

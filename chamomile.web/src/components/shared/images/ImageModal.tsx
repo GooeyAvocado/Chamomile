@@ -191,7 +191,11 @@ export default function ImageModal(props: {
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }} >
-                            <PromptReorderButton prompt={imageToPrompt(image, promptMode === 1)} source={promptMode === 1 ? "IMAGE_BASE" : "IMAGE"} sample={image?.id} iconOverride={promptMode === 1 ? <CoffeeOutlined /> : undefined} />
+                            <PromptReorderButton
+                                prompt={imageToPrompt(image, promptMode === 1)} source={promptMode === 1 ? "IMAGE_BASE" : "IMAGE"}
+                                sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id}
+                                iconOverride={promptMode === 1 ? <CoffeeOutlined /> : undefined}
+                            />
                             <Tooltip title={promptMode === 1 ? 'Use this base prompt' : 'Use this prompt'}>
                                 <IconButton onClick={() => onUsePrompt()}>
                                     {promptMode === 1 ? <ReceiptLongTwoTone /> : <ReceiptLong />}

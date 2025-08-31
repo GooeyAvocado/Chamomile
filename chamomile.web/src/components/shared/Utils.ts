@@ -75,45 +75,45 @@ export const daysUntil = (date: Date): number => {
 
 }
 
-export const availableVars = (prompt:Prompt) => {
+export const availableVars = (prompt: Prompt) => {
     const matches = [...prompt.positivePrompt.matchAll(/%([^%]+)%/g)].map(m => m[0]);
-        // Get unique values
-        return [...new Set(matches)];
+    // Get unique values
+    return [...new Set(matches)];
 }
 
-export const hydratePrompt = (prompt:Prompt, variables:any, index?: number) => {
-    
+export const hydratePrompt = (prompt: Prompt, variables: any, index?: number) => {
+
     let hydrated = {}
-    
-    Object.keys(variables).filter(a=>a.includes("%")).forEach(key=>{
-          const val =   variables[key].split('|')
-          let replaceVal = val[0]
-          if(val.length > 0 && index){
+
+    Object.keys(variables).filter(a => a.includes("%")).forEach(key => {
+        const val = variables[key].split('|')
+        let replaceVal = val[0]
+        if (val.length > 0 && index) {
             replaceVal = val[index % val.length]
-          }
+        }
 
-          replaceVal = (replaceVal as string).trim();
-          if(replaceVal.length > 0) hydrated = {...hydrated,[key]:replaceVal}
-     });
+        replaceVal = (replaceVal as string).trim();
+        if (replaceVal.length > 0) hydrated = { ...hydrated, [key]: replaceVal }
+    });
 
-     Object.keys(variables).filter(a=>!a.includes("%")).forEach(key=>{
-          const replaceVal =   (variables[key] as string).trim()
-          if(replaceVal.length > 0) hydrated = {...hydrated,[key]:replaceVal}
-     });
-     
-     return {...prompt, variables:hydrated} as Prompt;
+    Object.keys(variables).filter(a => !a.includes("%")).forEach(key => {
+        const replaceVal = (variables[key] as string).trim()
+        if (replaceVal.length > 0) hydrated = { ...hydrated, [key]: replaceVal }
+    });
+
+    return { ...prompt, variables: hydrated } as Prompt;
 }
 
-export const promptPreview = (prompt:Prompt, variables:any) => {
+export const promptPreview = (prompt: Prompt, variables: any) => {
 
     const RECURSION_LIMIT = 10;
     let recursionCount = 0;
     let hydrated = prompt.positivePrompt;
 
-    while (Object.keys(variables).filter(a => hydrated.includes(a) && (variables[a] as string).trim().length!==0)) {
+    while (Object.keys(variables).filter(a => hydrated.includes(a) && (variables[a] as string).trim().length !== 0)) {
         //We need to do this so that its caluclated before we enter the loop
         //Maybe funky things could happen if not
-        var replacementList = Object.keys(variables).filter(a => hydrated.includes(a) && (variables[a] as string).trim().length!==0);
+        var replacementList = Object.keys(variables).filter(a => hydrated.includes(a) && (variables[a] as string).trim().length !== 0);
 
         for (var replacement of replacementList) {
             hydrated = hydrated.replaceAll(replacement, variables[replacement]);
@@ -149,7 +149,7 @@ export const currencies = {
     AUD: "AU$",
 } as any
 
-export const imageToPrompt = (image?:GeneratedImage, useBasePrompt?:boolean, reuseSeed?:boolean) : Prompt => {
+export const imageToPrompt = (image?: GeneratedImage, useBasePrompt?: boolean, reuseSeed?: boolean): Prompt => {
     return {
         cfgScale: image?.cfgScale,
         height: image?.height,
@@ -160,6 +160,6 @@ export const imageToPrompt = (image?:GeneratedImage, useBasePrompt?:boolean, reu
         seed: reuseSeed ? image?.seed : -1,
         scheduleType: image?.scheduleType,
         steps: image?.steps,
-        sampleImage: image?.id
+        sampleImage: (image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id,
     } as Prompt
 }
