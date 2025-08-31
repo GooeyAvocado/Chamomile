@@ -232,7 +232,7 @@ export default function PromptBuilder(props: {
                         startAdornment: (
                             <InputAdornment position="start">
                                 <div style={{ display: "flex", alignSelf: "center", alignItems: 'center' }}>
-                                    {(prompt.sampleImage ?? -1) > 0 || prompt.id //if we have an ID (from a saved prompt) or Sample Image (from an existing image)
+                                    {(((prompt.sampleImage ?? -1) > 0 || prompt.id) && !noBrew) //if we have an ID (from a saved prompt) or Sample Image (from an existing image)
                                         ? <PromptboxImageSample prompt={prompt} clearSample={() => { setPrompt({ ...prompt, sampleImage: undefined, id: undefined, name: "" }) }} />
                                         : <ReceiptLong />}
                                 </div>
