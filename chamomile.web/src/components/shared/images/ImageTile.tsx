@@ -3,13 +3,14 @@ import { CardActionArea } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline, TravelExplore } from "@mui/icons-material";
+import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useState } from "react";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { FilterOptions } from "../../../model/FilterOptions";
+import ImageMoreFromMenu from "./ImageMoreFromMenu";
 
 export default function ImageTile(props: {
     image: GeneratedImage
@@ -29,6 +30,7 @@ export default function ImageTile(props: {
         onSelect, selectMode, selected, onUnselect,
         filter, setFilter
     } = props;
+
     const { setPrompt } = usePrompt();
     const canSelect = onSelect && onUnselect
 
@@ -39,7 +41,13 @@ export default function ImageTile(props: {
             canSelect ? { text: selected ? "Unselect" : "Select", icon: selected ? <CheckBox /> : <CheckBoxOutlineBlank />, onClick: selected ? onUnselect : onSelect } : undefined,
             { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) }, disabled: selectMode },
             { type: "divider" },
-            filter && setFilter ? { text: "More like this", icon: <TravelExplore />, onClick: () => { setFilter({ ...filter, sample: image.additionalInfo?.sample }) }, disabled: (image.additionalInfo?.sample ?? -1) <= 0 } : undefined,
+            filter && setFilter ? {
+                type: "custom",
+                customContent: () => <ImageMoreFromMenu
+                    filter={filter} setFilter={setFilter}
+                    image={image}
+                />
+            } : undefined,
             { type: "divider" },
             {
                 type: "custom", customContent: (onClose) => <PromptReorderButton
