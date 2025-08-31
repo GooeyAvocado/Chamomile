@@ -3,7 +3,7 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useLoras } from "../../hooks/useLoras";
 import { useModels } from "../../hooks/useModels";
 import { MenuItemWithSubMenu } from "../mui/MenuItemWithSubmenu";
-import { TravelExplore } from "@mui/icons-material";
+import { ImageSearch } from "@mui/icons-material";
 import { Card, Divider, ListItemIcon, MenuItem } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { imageUrl } from "../../../api/Images";
@@ -39,7 +39,7 @@ export default function ImageMoreFromMenu({
 
     return <MenuItemWithSubMenu
         label="More like this by..."
-        icon={<TravelExplore />}
+        icon={<ImageSearch />}
     >
         <MenuItem
             onClick={() => { setFilter({ ...clearFilter(filter), model: image.model }) }}
