@@ -48,7 +48,7 @@ export default function ImageTile(props: {
                     image={image}
                 />
             } : undefined,
-            { type: "divider" },
+            filter && setFilter ? { type: "divider" } : undefined,
             {
                 type: "custom", customContent: (onClose) => <PromptReorderButton
                     prompt={imageToPrompt(image)} source="IMAGE"
