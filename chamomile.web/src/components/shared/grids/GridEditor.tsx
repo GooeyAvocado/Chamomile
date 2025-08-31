@@ -39,7 +39,11 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
             />
             <ComplexAccordion title="Prompt">
                 <ComplexAccordionBody>
+<<<<<<< HEAD
                     {(grid?.prompt?.includes("__") || grid?.negativePrompt?.includes("__")) && <Alert style={{ fontSize: '.8', marginBottom: '10px' }} severity="warning">
+=======
+                    {(grid.prompt.includes("__") || grid.negativePrompt.includes("__")) && <Alert style={{ fontSize: '.8', marginBottom: '10px' }} severity="warning">
+>>>>>>> 5b4a15158dd86723b59a2e43641a408e56f42701
                         Wildcards will be recalculated for each cell
                     </Alert>}
                     <PromptBuilder

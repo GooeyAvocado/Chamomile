@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
+import { BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -768,9 +768,27 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
 
             <Alert severity="info" style={{ fontSize: ".8em" }}>
                 <AlertTitle style={{ fontSize: "1.2em" }}>This is a new feature!</AlertTitle>
-                This accordion will not open because chamomile on images generated before 3.0
+                This accordion will not open because chamomile on images generated before 3.0 and you have
+                not run the <Link href="https://github.com/GooeyAvocado/Chamomile/blob/master/Chamomile.Data/DDLs/ImageAddtlInfo_migration.sql" target="@blank">
+                    optional migration script
+                </Link>.
             </Alert>
 
+        </HelpSection>
+
+        <HelpSection title="More Like This">
+            <img src="/screenshots/morelikethis.png" width={"80%"} />
+            <p>
+                Based on your prompt source, model, and used LoRAs, you'll be able to search for more images similar to it.
+                Clicking an option here will clear the filter and replace it to search by the selected criteria of similarity
+            </p>
+            <p>
+                If an image is the original, you can search for images that have marked the right clicked image as a sample
+            </p>
+            <p>
+                <LabeledIcon label="More like this"><ImageSearch /></LabeledIcon> is also available on the image modal under
+                source, the model card, or LoRA cards, as well as on Prompts (as "Images like this").
+            </p>
         </HelpSection>
 
         <HelpSection title="Upscaling Images" >
