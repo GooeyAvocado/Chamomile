@@ -41,6 +41,7 @@ export default function FilterBuilder(props: {
         && filter.lora === ''
         && filter.model === ''
         && filter.query?.trim() === ''
+        && (filter.sample ?? 0) < 1
 
     const onBlur = () => {
         if (filter.query?.trim() !== query.trim()) { setFilter({ ...filter, query: query.trim() }) }
@@ -84,7 +85,7 @@ export default function FilterBuilder(props: {
                                 </Tooltip>}
                                 {!filterEmpty && <Tooltip title="Clear filter">
                                     <IconButton
-                                        onClick={() => { setFilter({ favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', album: filter.album } as FilterOptions) }}>
+                                        onClick={() => { setFilter({ ...filter, favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', sample: -1 } as FilterOptions) }}>
                                         <Close />
                                     </IconButton>
                                 </Tooltip>}
