@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, Bolt, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, ReceiptLongTwoTone, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
+import { BarChart, Bolt, CalendarMonth, Coffee, CoffeeOutlined, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
