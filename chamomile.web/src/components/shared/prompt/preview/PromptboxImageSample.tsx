@@ -3,9 +3,11 @@ import { imageUrl } from "../../../../api/Images"
 import { useState } from "react"
 import { Close } from "@mui/icons-material"
 import { Prompt } from "../../../../model/Prompt"
+import { FilterOptions } from "../../../../model/FilterOptions"
 
-export default function PromptboxImageSample({ prompt, clearSample }: {
-    prompt: Prompt
+export default function PromptboxImageSample({ prompt, filter, clearSample }: {
+    prompt?: Prompt
+    filter?: FilterOptions
     clearSample: () => void
 }) {
 
@@ -17,14 +19,18 @@ export default function PromptboxImageSample({ prompt, clearSample }: {
         aspectRatio: "1/1"
     }}>
         <Tooltip placement="top" title={<>
-            {prompt.id
+            {prompt?.id
                 ? <>
                     <div>Currently tied to a saved prompt </div>
                     <div>"{prompt.name}"</div>
                 </>
-                : <>Currently tied to an existing image's prompt</>
+                : filter ? <>
+                    Currently tied to an existing image's prompt
+                </> : <>
+                    Currently searching for images based on an existing image.
+                </>
             }
-            <div style={{ marginTop: '10px' }}>Click to unlink</div>
+            <div style={{ marginTop: '10px' }}>Click to {filter ? "clear" : "unlink"}</div>
         </>}>
             <CardActionArea
                 onMouseEnter={() => setHovered(true)}
@@ -33,7 +39,7 @@ export default function PromptboxImageSample({ prompt, clearSample }: {
                 style={{ position: "relative" }}
             >
                 <img
-                    src={imageUrl(prompt?.sampleImage)}
+                    src={imageUrl(filter?.sample ?? prompt?.sampleImage)}
                     style={{ width: "100%", aspectRatio: "1/1", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }}
                 />
                 {

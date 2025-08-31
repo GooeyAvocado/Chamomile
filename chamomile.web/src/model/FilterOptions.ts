@@ -2,6 +2,7 @@ export class FilterOptions {
     query?: string = "";
     album?: number = -1;
     grid?: number = -1;
+    sample?: number = -1
     lora?: string = "";
     model?: string = "";
     favorite?: boolean = false;

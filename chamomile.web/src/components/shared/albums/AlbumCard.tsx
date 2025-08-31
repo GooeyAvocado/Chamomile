@@ -1,7 +1,7 @@
-import { Card, IconButton, Menu, MenuItem, Typography } from "@mui/material"
+import { Card, IconButton, ListItemIcon, Menu, MenuItem, Typography } from "@mui/material"
 import { Album } from "../../../model/Album"
 import { useState } from "react"
-import { MoreVert } from "@mui/icons-material"
+import { CancelPresentation, Collections, MoreVert } from "@mui/icons-material"
 import AlbumThumbImg from "./AlbumThumbImg"
 import { useAlbums } from "../../hooks/useAlbums"
 import AreYouSureModal from "../modals/AreYouSureModal"
@@ -68,11 +68,17 @@ export default function AlbumCard({ album: albumId, onView, onRemove, elevation 
                 {onView && <MenuItem onClick={() => {
                     handleClose();
                     onView?.(album)
-                }}>View collection</MenuItem>}
+                }}>
+                    <ListItemIcon><Collections /></ListItemIcon>
+                    View collection
+                </MenuItem>}
                 {onRemove && <MenuItem onClick={() => {
                     handleClose();
                     setAys(true)
-                }} >Remove from collection</MenuItem>}
+                }} >
+                    <ListItemIcon><CancelPresentation /></ListItemIcon>
+                    Remove from collection
+                </MenuItem>}
             </Menu>
         </>}
     </>

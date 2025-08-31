@@ -15,7 +15,7 @@ export class ContextMenuOption {
 
 export default function ContextMenu(props: {
   children: React.ReactNode
-  options: ContextMenuOption[]
+  options: (ContextMenuOption | undefined)[]
   style?: React.CSSProperties
 }) {
   const [contextMenu, setContextMenu] = React.useState<{

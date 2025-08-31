@@ -29,7 +29,8 @@ import SelectedImageActions from "../selectedImageActions/SelectedImageActions";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function ImageViewer(props: {
-    filter: FilterOptions
+    filter: FilterOptions,
+    setFilter?: (val: FilterOptions) => void
     showBrewing?: boolean,
     showWelcome?: boolean,
     onClick?: (val: GeneratedImage) => void
@@ -44,7 +45,12 @@ export default function ImageViewer(props: {
     navToSelectedImage?: boolean
 }) {
 
-    const { filter, showBrewing, onClick, showWelcome, album, setAlbum, selectImage, selectedImages, unselectImage, selectMode, onClearSelect, setSelectedImages, navToSelectedImage } = props;
+    const {
+        filter, showBrewing, onClick, showWelcome,
+        album, setAlbum, selectImage, selectedImages,
+        unselectImage, selectMode, onClearSelect,
+        setSelectedImages, navToSelectedImage, setFilter
+    } = props;
 
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
@@ -326,7 +332,7 @@ export default function ImageViewer(props: {
                 </>}
 
                 {imageApi.images?.map(a => <ImageTile
-                    key={`image-${a.id}`} image={a} onDelete={onDelete}
+                    key={`image-${a.id}`} image={a} onDelete={onDelete} filter={filter} setFilter={setFilter}
                     onFavorite={onFavorite} selected={selectedImages?.includes(a.id)}
                     onSelect={selectImage ? () => selectImage(a.id) : undefined} onUnselect={unselectImage ? () => unselectImage(a.id) : undefined} selectMode={selectMode}
                     onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setViewerOpen(true); if (navToSelectedImage) nav(`/image`) }}
@@ -337,7 +343,10 @@ export default function ImageViewer(props: {
                         open={viewerOpen} setOpen={() => {
                             setViewerOpen(false);
                             if (navToSelectedImage) nav("/")
-                        }} image={selectedImage}
+                        }} image={selectedImage} filter={filter} setFilter={setFilter ? (val) => {
+                            setFilter(val)
+                            setViewerOpen(false)
+                        } : undefined}
                         onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
                         onFavorite={onFavorite} onDownload={onDownload} onLeft={onLeft} onRight={onRight}
                         onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}

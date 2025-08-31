@@ -26,9 +26,12 @@ import LoraStrip from "../lora/LoraStrip";
 import { usePingPong } from "../../hooks/usePingPong";
 import HighlightedPromptDiv from "../prompt/HighlightedPromptDiv";
 import AdditionalInfoRenderer from "./AdditionalInformationRenderer";
+import { FilterOptions } from "../../../model/FilterOptions";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
+    filter?: FilterOptions
+    setFilter?: (val: FilterOptions) => void
     open: boolean,
     setOpen: (val: boolean) => void
     onFavorite?: () => void,
@@ -54,7 +57,7 @@ export default function ImageModal(props: {
         onLeft, onRight, onDeleteForce, onUpscale,
         collapseDefault, onAddAlbum, onRemoveAlbum,
         onViewAlbum, onDownload, onUpdateNotes,
-        onUp, onDown
+        onUp, onDown, filter, setFilter
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -233,7 +236,10 @@ export default function ImageModal(props: {
 
                         {/* Model */}
                         <div style={{ marginTop: "20px" }}><b>Model</b></div>
-                        <ModelCard modelTitle={image?.model ?? ""} currentImage={image} elevation={5} />
+                        <ModelCard
+                            filter={filter} setFilter={setFilter}
+                            modelTitle={image?.model ?? ""} currentImage={image} elevation={5}
+                        />
 
                         <Stack style={{ marginTop: "20px" }} gap={"10px"}>
                             {/* LORAs */}
@@ -243,7 +249,10 @@ export default function ImageModal(props: {
                                 </ComplexAccordionActions>
                                 <ComplexAccordionBody>
                                     <Stack gap={"5px"}>
-                                        {image?.loras?.map(a => <LoraCard key={a} loraAlias={a} currentImage={image} elevation={5} />)}
+                                        {image?.loras?.map(a => <LoraCard
+                                            filter={filter} setFilter={setFilter}
+                                            key={a} loraAlias={a} currentImage={image} elevation={5}
+                                        />)}
                                     </Stack>
                                 </ComplexAccordionBody>
                             </ComplexAccordion>}
@@ -316,7 +325,10 @@ export default function ImageModal(props: {
 
                             <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled={Object.keys(image?.additionalInfo ?? {}).length === 0}>
                                 <ComplexAccordionBody>
-                                    <AdditionalInfoRenderer additionalInformation={image?.additionalInfo} />
+                                    <AdditionalInfoRenderer
+                                        filter={filter} setFilter={setFilter}
+                                        additionalInformation={image?.additionalInfo}
+                                    />
                                 </ComplexAccordionBody>
                             </ComplexAccordion>
 

@@ -1,4 +1,4 @@
-import { Card, CardActionArea, Divider, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import { Card, CardActionArea, Divider, IconButton, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
 import { Model } from "../../../model/Model";
 import { useModels } from "../../hooks/useModels";
 import { imageUrl } from "../../../api/Images";
@@ -10,8 +10,9 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import ImageModalFromId from "../images/ImageModalFromId";
 import ModelTypePill from "./ModelType/ModelTypePill";
-import { MoreVert } from "@mui/icons-material";
+import { AddPhotoAlternate, Edit, Image, ImageSearch, MoreVert } from "@mui/icons-material";
 import ModelEditorModal from "./ModelEditorModal";
+import { FilterOptions } from "../../../model/FilterOptions";
 
 export default function ModelCard(props: {
     modelTitle: string
@@ -19,10 +20,12 @@ export default function ModelCard(props: {
     onClick?: () => void
     tiny?: boolean
     imageStyle?: CSSProperties
-    elevation?: number
+    elevation?: number,
+    filter?: FilterOptions,
+    setFilter?: (val: FilterOptions) => void
 }) {
 
-    const { modelTitle, onClick, currentImage, tiny, elevation } = props;
+    const { modelTitle, onClick, currentImage, tiny, elevation, filter, setFilter } = props;
     const { models, refresh } = useModels();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -136,10 +139,28 @@ export default function ModelCard(props: {
 
         {!onClick && !modelUnavailable() && <>
             <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
-                <MenuItem onClick={openEditor} disabled={modelUnavailable()}>Edit Model</MenuItem>
+                <MenuItem onClick={openEditor} disabled={modelUnavailable()}>
+                    <ListItemIcon><Edit /></ListItemIcon>
+                    Edit Model
+                </MenuItem>
                 <Divider />
-                <MenuItem onClick={viewImage} disabled={!model.bannerImage || model.bannerImage === currentImage?.id} >View sample image</MenuItem>
-                <MenuItem onClick={updateImage} disabled={!currentImage}>Set this as sample image</MenuItem>
+                <MenuItem onClick={viewImage} disabled={!model.bannerImage || model.bannerImage === currentImage?.id} >
+                    <ListItemIcon><Image /></ListItemIcon>
+                    View sample image
+                </MenuItem>
+                <MenuItem onClick={updateImage} disabled={!currentImage}>
+                    <ListItemIcon><AddPhotoAlternate /></ListItemIcon>
+                    Set this as sample image
+                </MenuItem>
+                {filter && setFilter && <>
+                    <Divider />
+                    <MenuItem onClick={() => {
+                        setFilter({ ...filter, model: model.title })
+                    }}>
+                        <ListItemIcon><ImageSearch /></ListItemIcon>
+                        View images with this model
+                    </MenuItem>
+                </>}
             </Menu>
             <AreYouSureModal open={updateAys} setOpen={setUpdateAys} onYes={realUpdateImage} title="Set this image as sample?">
                 Are you sure you want to set this image as the sample for this model?

@@ -9,6 +9,7 @@ import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import AlbumEditor from "../albums/AlbumEditor";
 import { Album } from "../../../model/Album";
 import StatsButton from "../StatsButton/StatsButton";
+import PromptboxImageSample from "../prompt/preview/PromptboxImageSample";
 
 export default function FilterBuilder(props: {
     filter: FilterOptions
@@ -63,9 +64,15 @@ export default function FilterBuilder(props: {
                 slotProps={{
                     input: {
                         startAdornment: <InputAdornment position="start">
-                            <Tooltip title="Learn about Advanced Search">
-                                <IconButton onClick={() => setAdvSearchOpen(true)}><Search /></IconButton>
-                            </Tooltip>
+
+                            <div style={{ display: "flex", alignSelf: "center", alignItems: 'center' }}>
+                                {(((filter.sample ?? -1) > 0)) //if we have an ID (from a saved prompt) or Sample Image (from an existing image)
+                                    ? <PromptboxImageSample filter={filter} clearSample={() => { setFilter({ ...filter, sample: -1 }) }} />
+                                    : <Tooltip title="Learn about Advanced Search">
+                                        <IconButton onClick={() => setAdvSearchOpen(true)}><Search /></IconButton>
+                                    </Tooltip>}
+                            </div>
+
                         </InputAdornment>,
                         endAdornment: <InputAdornment position="end">
                             <div style={{ display: 'flex', flexDirection: vertical ? 'column' : undefined }}>

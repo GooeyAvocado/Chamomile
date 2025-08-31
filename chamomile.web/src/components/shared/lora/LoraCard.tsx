@@ -1,4 +1,4 @@
-import { Card, CardActionArea, Divider, IconButton, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
+import { Card, CardActionArea, Divider, IconButton, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { useLoras } from "../../hooks/useLoras";
 import { Lora } from "../../../model/Lora";
@@ -10,8 +10,9 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useSnackbar } from "notistack";
 import ImageModalFromId from "../images/ImageModalFromId";
 import ModelTypePill from "../model/ModelType/ModelTypePill";
-import { MoreVert } from "@mui/icons-material";
+import { AddPhotoAlternate, Edit, Image, ImageSearch, MoreVert } from "@mui/icons-material";
 import LoraEditorModal from "./LoraEditorModal";
+import { FilterOptions } from "../../../model/FilterOptions";
 
 export default function LoraCard(props: {
     loraAlias: string
@@ -20,9 +21,11 @@ export default function LoraCard(props: {
     tiny?: boolean
     imageStyle?: CSSProperties
     elevation?: number
+    filter?: FilterOptions,
+    setFilter?: (val: FilterOptions) => void
 }) {
 
-    const { loraAlias, onClick, currentImage, tiny, elevation } = props;
+    const { loraAlias, onClick, currentImage, tiny, elevation, filter, setFilter } = props;
     const { loras, refresh } = useLoras();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -133,10 +136,28 @@ export default function LoraCard(props: {
 
         {!onClick && !loraUnavailable() && <>
             <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
-                <MenuItem onClick={openEditor} disabled={loraUnavailable()}>Edit LoRA</MenuItem>
+                <MenuItem onClick={openEditor} disabled={loraUnavailable()}>
+                    <ListItemIcon><Edit /></ListItemIcon>
+                    Edit LoRA
+                </MenuItem>
                 <Divider />
-                <MenuItem onClick={viewImage} disabled={!lora.bannerImage || lora.bannerImage === currentImage?.id} >View sample image</MenuItem>
-                <MenuItem onClick={updateImage} disabled={!currentImage}>Set this as sample image</MenuItem>
+                <MenuItem onClick={viewImage} disabled={!lora.bannerImage || lora.bannerImage === currentImage?.id} >
+                    <ListItemIcon><Image /></ListItemIcon>
+                    View sample image
+                </MenuItem>
+                <MenuItem onClick={updateImage} disabled={!currentImage}>
+                    <ListItemIcon><AddPhotoAlternate /></ListItemIcon>
+                    Set this as sample image
+                </MenuItem>
+                {filter && setFilter && <>
+                    <Divider />
+                    <MenuItem onClick={() => {
+                        setFilter({ ...filter, lora: lora.alias })
+                    }}>
+                        <ListItemIcon><ImageSearch /></ListItemIcon>
+                        View images with this LoRA
+                    </MenuItem>
+                </>}
             </Menu>
             <AreYouSureModal open={updateAys} setOpen={setUpdateAys} onYes={realUpdateImage} title="Set this image as sample?">
                 Are you sure you want to set this image as the sample for this LoRA?

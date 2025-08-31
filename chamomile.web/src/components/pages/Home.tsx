@@ -125,10 +125,12 @@ export default function Home() {
                 <UploadPanel />
 
                 {/* Image viewer */}
-                <ImageViewer key={album?.id} showBrewing filter={filter} showWelcome album={album} setAlbum={(val) => {
-                    setAlbum(val)
-                    setFilter({ album: val.id })
-                }}
+                <ImageViewer key={album?.id} setFilter={setFilter}
+                    showBrewing filter={filter} showWelcome
+                    album={album} setAlbum={(val) => {
+                        setAlbum(val)
+                        setFilter({ album: val.id })
+                    }}
                     onClearSelect={onClearSelect} setSelectedImages={setSelectedImages}
                     selectImage={selectImage} selectedImages={selectedImages} selectMode={selectMode} unselectImage={unselectImage}
                 />

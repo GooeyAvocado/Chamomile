@@ -1,15 +1,18 @@
-import { Card, CardActionArea, IconButton } from "@mui/material"
+import { Button, Card, CardActionArea, IconButton } from "@mui/material"
 import ImageModalFromId from "./ImageModalFromId"
 import { useState } from "react"
 import { imageUrl } from "../../../api/Images"
-import { ChevronRight, Coffee, GridView, ReceiptLong, ReceiptLongTwoTone, Upload } from "@mui/icons-material"
+import { ChevronRight, Coffee, GridView, ImageSearch, ReceiptLong, ReceiptLongTwoTone, Upload } from "@mui/icons-material"
 import PromptOrderData from "../../../model/PromptOrderData"
 import { useLocation, useNavigate } from "react-router-dom"
+import { FilterOptions } from "../../../model/FilterOptions"
 
 export default function AdditionalInfoRenderer({
     additionalInformation,
+    filter, setFilter
 }: {
     additionalInformation?: PromptOrderData
+    filter?: FilterOptions, setFilter?: (val: FilterOptions) => void
 }) {
 
     const [imageOpen, setImageOpen] = useState(false)
@@ -63,6 +66,14 @@ export default function AdditionalInfoRenderer({
                         <div style={{ fontSize: ".7em" }}>This image is a re-order of an existing recipe</div>
                     </div>
                 </Card>
+
+                {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
+                    <Button
+                        onClick={() => { setFilter({ ...filter, sample: additionalInformation.sample }) }}
+                        startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
+                    >More like this</Button>
+                </div>}
+
                 <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.sample} />
             </>
         case "IMAGE_BASE":
@@ -80,6 +91,14 @@ export default function AdditionalInfoRenderer({
                     </div>
 
                 </Card>
+
+                {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
+                    <Button
+                        onClick={() => { setFilter({ ...filter, sample: additionalInformation.sample }) }}
+                        startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
+                    >More like this</Button>
+                </div>}
+
                 <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.sample} />
             </>
         case "IMAGE":
@@ -95,29 +114,48 @@ export default function AdditionalInfoRenderer({
                         <div>Re-Order</div>
                         <div style={{ fontSize: ".7em" }}>This image is a re-order of an existing image</div>
                     </div>
-
                 </Card>
+
+                {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
+                    <Button
+                        onClick={() => { setFilter({ ...filter, sample: additionalInformation.sample }) }}
+                        startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
+                    >More like this</Button>
+                </div>}
+
                 <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.sample} />
             </>
         case "PROMPTBOX":
-            return <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
-                {additionalInformation.sample && additionalInformation.sample > 0 && <Card style={{ flexShrink: "0" }}>
-                    <CardActionArea onClick={() => setImageOpen(true)}>
-                        <img src={imageUrl(additionalInformation.sample)} width={48} />
-                    </CardActionArea>
-                </Card>}
-                <Coffee />
-                <div>
-                    <div>{!additionalInformation.sample || additionalInformation?.sample === -1 ? "Original Prompt" : "Modified recipe"}</div>
-                    <div style={{ fontSize: ".7em" }}>
-                        {!additionalInformation.sample || additionalInformation?.sample === -1
-                            ? "This image is an original prompt from the prompt box"
-                            : "This image may be based on this prompt previously loaded on the prompt box"
-                        }
+            return <>
+                <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
+                    {additionalInformation.sample && additionalInformation.sample > 0 && <Card style={{ flexShrink: "0" }}>
+                        <CardActionArea onClick={() => setImageOpen(true)}>
+                            <img src={imageUrl(additionalInformation.sample)} width={48} />
+                        </CardActionArea>
+                    </Card>}
+                    <Coffee />
+                    <div>
+                        <div>{!additionalInformation.sample || additionalInformation?.sample === -1 ? "Original Prompt" : "Modified recipe"}</div>
+                        <div style={{ fontSize: ".7em" }}>
+                            {!additionalInformation.sample || additionalInformation?.sample === -1
+                                ? "This image is an original prompt from the prompt box"
+                                : "This image may be based on this prompt previously loaded on the prompt box"
+                            }
+                        </div>
                     </div>
-                </div>
+
+                </Card>
+
+                {additionalInformation.sample && additionalInformation.sample > 0 && setFilter && filter && <div style={{ textAlign: 'right' }}>
+                    <Button
+                        onClick={() => { setFilter({ ...filter, sample: additionalInformation.sample }) }}
+                        startIcon={<ImageSearch />} size="small" style={{ marginTop: "10px" }}
+                    >More like this</Button>
+                </div>}
+
                 <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={additionalInformation.sample} />
-            </Card>
+
+            </>
         case "UPLOAD":
             return <Card style={{ padding: "10px", display: 'flex', gap: "10px", alignItems: 'center' }}>
                 <Upload />
