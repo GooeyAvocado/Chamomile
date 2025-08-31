@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, MenuItem, Select, TextField, Tooltip } from "@mui/material";
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, MenuItem, Select, TextField, Tooltip } from "@mui/material";
 import { Grid } from "../../../model/Grid";
 import ComplexAccordion from "../complexAccordion/ComplexAccordion";
 import ComplexAccordionBody from "../complexAccordion/ComplexAccordionBody";
@@ -39,6 +39,9 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
             />
             <ComplexAccordion title="Prompt">
                 <ComplexAccordionBody>
+                    {(grid?.prompt?.includes("__") || grid?.negativePrompt?.includes("__")) && <Alert style={{ fontSize: '.8', marginBottom: '10px' }} severity="warning">
+                        Wildcards will be recalculated for each cell
+                    </Alert>}
                     <PromptBuilder
                         alwaysExpand fullHeight noBrew prompt={{ ...grid, positivePrompt: grid.prompt, variables: {} }}
                         setPrompt={(p) => setGrid({ ...grid, ...p, prompt: p.positivePrompt })} preview={(generated && !duplicate) || loading}
