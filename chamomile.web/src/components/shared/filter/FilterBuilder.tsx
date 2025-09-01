@@ -1,7 +1,7 @@
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useRef, useState } from "react";
-import { CalendarMonth, Close, Download, ExpandMore, Gradient, LibraryAdd, Search, Star, StarBorder } from "@mui/icons-material";
+import { CalendarMonth, Close, Download, ExpandMore, Gradient, LibraryAdd, Search, Star, StarBorder, Today } from "@mui/icons-material";
 import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 import AdvSearchModal from "./AdvSearchModal";
@@ -34,6 +34,8 @@ export default function FilterBuilder(props: {
 
     useEffect(() => {
         setQuery(filter.query ?? "");
+        setFromDate(filter.fromDate ?? "")
+        setToDate(filter.toDate ?? "")
     }, [filter])
 
     const filterEmpty = filter.favorite === false
@@ -141,16 +143,24 @@ export default function FilterBuilder(props: {
                 <div style={{ display: "flex", flexWrap: 'wrap', width: '100%', marginBottom: "0px", gap: "10px", flex: '1', }}>
 
                     <div style={{ display: "flex", gap: "10px", flex: 1, flexWrap: width < 605 ? "wrap" : undefined }}>
-                        <TextField type="date" value={fromDate} onChange={(e) => { setFromDate(e.target.value) }} placeholder="" label="From" onBlur={() => {
-                            if (filter.fromDate?.trim() !== fromDate.trim()) { setFilter({ ...filter, fromDate: fromDate.trim() }) }
-                        }}
+                        <TextField type="date"
+                            value={fromDate} placeholder="" label="From" onChange={(e) => {
+                                setFromDate(e.target.value)
+                                const year = Number.parseInt(e.target.value.split("-")[0]);
+                                if (year < 2020 || year > 9999) return;
+                                setFilter({ ...filter, fromDate: e.target.value.trim() })
+                            }}
                             slotProps={{ input: { startAdornment: <InputAdornment position="start"><CalendarMonth /></InputAdornment>, } }}
                             style={{ flex: "1", minWidth: "180px" }}
                         />
 
-                        <TextField type="date" value={toDate} onChange={(e) => { setToDate(e.target.value) }} placeholder="" label="To" onBlur={() => {
-                            if (filter.toDate?.trim() !== toDate.trim()) { setFilter({ ...filter, toDate: toDate.trim() }) }
-                        }}
+                        <TextField type="date"
+                            value={toDate} placeholder="" label="To" onChange={(e) => {
+                                setToDate(e.target.value)
+                                const year = Number.parseInt(e.target.value.split("-")[0]);
+                                if (year < 2020 || year > 9999) return;
+                                setFilter({ ...filter, toDate: e.target.value.trim() })
+                            }}
                             slotProps={{ input: { startAdornment: <InputAdornment position="start"><CalendarMonth /></InputAdornment>, } }}
                             style={{ flex: "1", minWidth: "180px" }}
                         />
