@@ -1,7 +1,7 @@
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useRef, useState } from "react";
-import { CalendarMonth, Close, Download, ExpandMore, Gradient, LibraryAdd, Search, Star, StarBorder, Today } from "@mui/icons-material";
+import { CalendarMonth, Close, Download, ExpandMore, Gradient, LibraryAdd, Search, Star, StarBorder } from "@mui/icons-material";
 import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 import AdvSearchModal from "./AdvSearchModal";
