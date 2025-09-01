@@ -840,15 +840,53 @@ namespace Chamomile.Data {
         #region DELETE
 
         public async Task DeleteImage(int id) {
+
+            //Unassign the image from any model that uses it as a sample
             await adoTemplate.Execute(UpdateSql([IMAGES_ID], MODELS_TABLE, new([new(IMAGES_ID, WhereConditionOperator.EQUALS, "@ORIGINAL_ID")])), (cmd) => {
                 cmd.SetInt(IMAGES_ID, null);
                 cmd.SetInt("ORIGINAL_ID", id);
             });
+
+            //Unassign the image from any LoRA that uses it as a sample
             await adoTemplate.Execute(UpdateSql([IMAGES_ID], LORA_TABLE, new([new(IMAGES_ID, WhereConditionOperator.EQUALS, "@ORIGINAL_ID")])), (cmd) => {
                 cmd.SetInt(IMAGES_ID, null);
                 cmd.SetInt("ORIGINAL_ID", id);
             });
+
+            //Delete the Image Lora Maps associated with the image
             await adoTemplate.Execute(DeleteSql(IMAGES_LORA_MAP, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
+
+            //Re-adjust any that use this image as the sample
+            var sql = @$"
+-- Suppose the deleted image ID is passed as :deleted_id
+with affected_images as (
+    select *
+    from {IMAGES_TABLE}
+    where ({IMAGE_ADDTL_INFO} ->> 'sample')::int = @{IMAGES_ID}
+),
+new_samples as (
+    select i.image_prompt_tx,
+           min(i.image_id) as new_sample_id
+    from images i
+    join affected_images a
+      on i.image_prompt_tx = a.image_prompt_tx
+     and i.image_id <> @{IMAGES_ID}  -- exclude the deleted one
+    group by i.image_prompt_tx
+)
+update images i
+set img_addtl_info_mv = jsonb_set(
+        i.img_addtl_info_mv,
+        '{{sample}}',
+        to_jsonb(n.new_sample_id)
+    )
+from new_samples n
+where i.image_prompt_tx = n.image_prompt_tx
+  and (i.img_addtl_info_mv ->> 'sample')::int = @{IMAGES_ID};
+";
+
+            await adoTemplate.Execute(sql, (cmd) => cmd.SetInt(IMAGES_ID, id));
+
+            //Delete the image
             await adoTemplate.Execute(DeleteSql(IMAGES_TABLE, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
         }
 
