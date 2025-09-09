@@ -7,4 +7,5 @@ export default interface PromptOrderData {
     yPos?: number;
     xVal?: string;
     yVal?: string;
+    model?: string
 }

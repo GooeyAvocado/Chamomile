@@ -131,6 +131,12 @@ namespace Chamomile.API.Workers {
                         try {
                             var model = await api.GetCurrentModel();
 
+                            if (!string.IsNullOrWhiteSpace(prompt?.OrderData?.Model) && model!=prompt.OrderData.Model) {
+                                _ = _hubContext.Clients.All.SendAsync("ModelRerollStarted", prompt.OrderData.Model);
+                                await api.ChangeModel(prompt.OrderData.Model);
+                                _ = _hubContext.Clients.All.SendAsync("ModelRerollComplete", prompt.OrderData.Model);
+                            }
+
                             stopwatch.Restart();
                             
                             var img = await api.GenerateImage(new() {

@@ -280,22 +280,21 @@ export default function GridViewer({
                     const prompt = {
                         ...grid,
                         positivePrompt: grid.prompt,
-                        variables: {}
+                        variables: {},
+                        orderData: {
+                            source: "GRID",
+                            gridId: grid.id,
+                            xPos: x,
+                            yPos: y,
+                            xVal: grid.xVals[x],
+                            yVal: grid.yVals[y],
+                        } as PromptOrderData
                     } as Prompt
 
-                    const orderData = {
-                        source: "GRID",
-                        gridId: grid.id,
-                        xPos: x,
-                        yPos: y,
-                        xVal: grid.xVals[x],
-                        yVal: grid.yVals[y],
-                    } as PromptOrderData
-
-                    const finalPrompt = {
-                        ...yType.applyToPrompt(xType.applyToPrompt(prompt, grid.xVals[x], grid.xVals), grid.yVals[y], grid.yVals),
-                        orderData: orderData
-                    } as Prompt
+                    const finalPrompt = yType.applyToPrompt(
+                        xType.applyToPrompt(prompt, grid.xVals[x], grid.xVals),
+                        grid.yVals[y], grid.yVals
+                    )
 
                     allPrompts.push(finalPrompt)
                 }
@@ -472,7 +471,21 @@ export default function GridViewer({
                 {/* Corner */}
                 <div style={{ width: `${imageSize * .75}px`, flexShrink: '0', textAlign: "center", }} />
                 {/* Column labels */}
-                {grid.xVals.map(v => <div style={{ width: `${imageSize}px`, flexShrink: "0", textAlign: 'center', backgroundColor: "#0D0D0D", padding: "20px 0px" }}>{v}{xType?.suffix}</div>)}
+                {grid.xVals.map(v => <div style={{
+                    width: `${imageSize}px`,
+                    flexShrink: "0", textAlign: 'center',
+                    backgroundColor: "#0D0D0D", padding: "20px 0px",
+
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    maxHeight: "95px",
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "normal"
+                }}>
+                    {xType?.displayValue?.(v) ?? v}{xType?.suffix}
+                </div>)}
             </div>
 
 
@@ -484,7 +497,7 @@ export default function GridViewer({
                         height: `${imageSize + 40}px`, width: `${imageSize * .75}px`, flexShrink: "0",
                         display: 'flex', flexDirection: 'column', backgroundColor: "#0D0D0D",
                         justifyContent: 'center', alignItems: 'center'
-                    }}>{val}{yType?.suffix}</div>)}
+                    }}>{yType?.displayValue?.(val) ?? val}{yType?.suffix}</div>)}
                 </div>
 
                 {/* Images */}

@@ -1,4 +1,4 @@
-import { DirectionsRun, OpenWith, ReceiptLong, Schedule, Tune, Window, Yard } from "@mui/icons-material";
+import { DirectionsRun, ModelTraining, OpenWith, ReceiptLong, Schedule, Tune, Window, Yard } from "@mui/icons-material";
 import { Prompt } from "../../../model/Prompt";
 
 export interface GridType {
@@ -7,6 +7,7 @@ export interface GridType {
     type: string;
     prefix: React.ReactNode;
     suffix: string;
+    displayValue?: (val: string) => React.ReactNode
     applyToPrompt: (prompt: Prompt, val: string, vals: string[]) => Prompt;
 }
 
@@ -31,6 +32,22 @@ export const GridTypes: GridType[] = [
                 ...prompt,
                 positivePrompt: prompt.positivePrompt.replaceAll(vals[0], val),
                 negativePrompt: prompt.negativePrompt.replaceAll(vals[0], val)
+            } as Prompt
+        }
+    },
+    {
+        code: "MOD",
+        name: "Model",
+        type: "model",
+        prefix: <ModelTraining fontSize="inherit" />,
+        suffix: "",
+        displayValue: (val: string) => <>{val.replace(".safetensors", "").replaceAll("_", " ")}</>,
+        applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
+            return {
+                ...prompt,
+                orderData: { ...prompt.orderData, model: val }
+
             } as Prompt
         }
     },
