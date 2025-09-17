@@ -141,7 +141,7 @@ export const objectToQueryString = (obj: any) => obj ? "?" + Object.keys(obj)
     })
     .join("&") : "";
 
-export const clearFilter = (filter: FilterOptions): FilterOptions => ({ ...filter, favorite: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', sample: -1 })
+export const clearFilter = (filter: FilterOptions): FilterOptions => ({ ...filter, favorite: false, upscaled: false, downloaded: false, fromDate: "", toDate: "", lora: '', model: '', lastImage: 0, query: '', sample: -1 })
 
 export const imageToPrompt = (image?: GeneratedImage, useBasePrompt?: boolean, reuseSeed?: boolean): Prompt => {
     return {
