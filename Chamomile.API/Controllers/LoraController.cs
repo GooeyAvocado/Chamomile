@@ -36,6 +36,7 @@ namespace Chamomile.API.Controllers {
         [HttpGet("refresh")]
         public async Task<IActionResult> Refresh() {
             try {
+                await api.RefreshLoras();
                 var availableLoras = await api.GetLoras();
                 await dao.UpdateAll(availableLoras);
             }

@@ -58,6 +58,7 @@ namespace Chamomile.API.Controllers {
         [HttpGet("refresh")]
         public async Task<IActionResult> Refresh() {
             try {
+                await api.RefreshModels();
                 var availableModels = await api.GetModels();
                 await dao.UpdateAll(availableModels);
             }
