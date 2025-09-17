@@ -15,7 +15,7 @@ export const SOURCE_FRIENDLY_NAMES = {
     "IMAGE_BASE": "Existing image",
     "IMAGE": "Existing image",
     "PROMPTBOX": "Prompt",
-    "UPLOAD": "This shouldn't happen... ?"
+    "UPLOAD": "Upload"
 } as Record<string, string>
 
 export default function ImageMoreFromMenu({
