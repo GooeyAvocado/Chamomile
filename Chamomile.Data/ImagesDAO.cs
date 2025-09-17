@@ -706,7 +706,7 @@ namespace Chamomile.Data {
         }
 
         private static string InnerStatsImageSql(FilterOptions filter, int limit) {
-            return SelectSql([CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0, FilterOptions.IsEmpty(filter))),
+            return SelectSql([CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, 0, FilterOptions.IsEmpty(filter))),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
 
