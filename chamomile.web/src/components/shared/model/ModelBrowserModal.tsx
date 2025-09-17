@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTitle, InputAdornment, TextField, } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import { CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, InputAdornment, TextField, } from "@mui/material";
+import { Refresh, Search } from "@mui/icons-material";
 import { Model } from "../../../model/Model";
 import { useModels } from "../../hooks/useModels";
 import ModelTile from "./ModelTile";
@@ -20,16 +20,19 @@ export default function ModelBrowserModal(props: {
 }) {
 
     const { onOk, open, setOpen, showNone } = props;
-    const { models } = useModels();
+    const { models, refresh, loading } = useModels();
 
     const [query, setQuery] = useState("")
     const [type, setType] = useState("");
     const [availability, setAvailability] = useState<0 | 1 | -1>(0);
 
-    return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
+    return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='xl'>
         <DialogTitle>Select a Model</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: "75vh" }}>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <IconButton onClick={() => { refresh(true) }} disabled={loading}>{
+                    loading ? <CircularProgress size={24} /> : <Refresh />
+                }</IconButton>
                 <div style={{ flex: "1" }}>
                     <TextField
                         value={query} onChange={(e) => setQuery(e.target.value)}

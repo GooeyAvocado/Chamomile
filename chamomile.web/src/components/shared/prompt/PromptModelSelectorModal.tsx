@@ -29,8 +29,6 @@ export default function PromptModelSelectorModal(props: {
     const { open, setOpen, noBrew, prompt: promptOverride, setPrompt: setPromptOverride } = props
 
     const [addOpen, setAddOpen] = useState(false)
-    const { refresh: refreshLoras } = useLoras()
-    const { refresh: refreshModels } = useModels()
 
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt } = usePrompt();
     const currentModelApi = useApi(currentModel)
@@ -46,9 +44,7 @@ export default function PromptModelSelectorModal(props: {
 
     useEffect(() => {
         if (open) {
-            refreshLoras();
             if (!noBrew) {
-                refreshModels();
                 currentModelApi.fetch();
                 currentSequenceApi.fetch();
             }
