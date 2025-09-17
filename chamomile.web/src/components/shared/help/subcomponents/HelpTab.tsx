@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
+import { BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DataObject, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Refresh, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -46,7 +46,13 @@ export default function HelpTab(props: {
     const LabeledIcon = (props: {
         children: ReactNode,
         label: string
-    }) => <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: 'middle', gap: "10px" }}>{props.children} {props.label}</span>
+    }) => <span style={{
+        display: "inline-flex", alignItems: "center", verticalAlign: 'middle',
+        gap: "10px", background: "rgba(0,0,0,0.5)",
+        padding: "2px 4px", borderRadius: "5px", fontSize: ".8em"
+    }}>
+            {props.children} {props.label}
+        </span>
 
     const samplePrompt = "man made of blue slime, slime man, slime, melting, liquid hair, ((furry)), dog, canine, anthro, twink, chubby, blue skin, transparent skin, translucent skin, polo, sweatpants, waving, looking at viewer, smile"
 
@@ -186,13 +192,12 @@ export default function HelpTab(props: {
             <p>
                 One of the basic ways to generate different images beyond prompting differently is to use different models and low-rank
                 adaptations (LoRAs) on top of said models. Chamomile makes it easy to select your model and add or remove LoRAs to your
-                prompt. Click on the <LabeledIcon label="Models button"><ModelTraining /></LabeledIcon> on the prompt box.
+                prompt. Click on the <LabeledIcon label="Models"><ModelTraining /></LabeledIcon> button on the prompt box.
             </p>
             <Alert severity="warning" style={{ fontSize: ".8em" }}>
                 <AlertTitle style={{ fontSize: "1.2em" }}>New models and LoRAs may not automatically be visible</AlertTitle>
-                While Chamomile refreshes models and availability every time you open the models dialog, your web
-                UI may not. If your newly downloaded models aren't showing up in Chamomile, open your web UI and refresh
-                the list of models there, then open the dialog on Chamomile again. Or, simply restart your web UI.
+                Open the Model or Lora Browsers using the <LabeledIcon label="Browser"> <GridView /></LabeledIcon> button and click
+                the <LabeledIcon label="Refresh"><Refresh /></LabeledIcon> button on the upper left corner.
             </Alert>
             <p>
                 Models can only be set globally, and will affect pending generations. If you change your model while there's still
@@ -216,8 +221,9 @@ export default function HelpTab(props: {
             <img src="/screenshots/modelsequence.png" style={{ width: "70%" }} />
             <p>
                 If you have a large batch of images on queue, and want to introduce further variety in your
-                outputs, you can consider setting up a model sequence. Based on the sequence,
-                Chamomile will dynamically switch models after generation of an image.
+                outputs, you can consider setting up a model sequence. You can do this by clicking the
+                <LabeledIcon label="Sequence"> <Schedule /></LabeledIcon> button next to the model selector.
+                Based on the sequence, Chamomile will dynamically switch models after generation of an image.
             </p>
             <p>
                 Each model has two properties:
@@ -271,7 +277,8 @@ export default function HelpTab(props: {
             <div style={codeStyle}>/(your webUI root)/extensions/sd-dynamic-prompts/wildcards</div>
             <p>
                 With the Wildcard Browser extension, Chamomile will be able to look into those wildcards to allow you
-                to add, and pre-select values in your prompt.
+                to add, and pre-select values in your prompt. This is accessible from
+                the <LabeledIcon label="Wildcards and Overrides"> <DataObject /></LabeledIcon> button on the prompt box.
             </p>
             <p>
                 Overrides, wildcard presets, and variables run until no instances of them exist in the prompt to generate,
@@ -296,7 +303,9 @@ export default function HelpTab(props: {
         <HelpSection title="What are Overrides" >
             <img src="/screenshots/overrides.png" style={{ width: "100%" }} />
             <p>
-                Along with wildcards, Chamomile supports two other ways to alter a prompt at generation time
+                Along with wildcards, Chamomile supports two other ways to alter a prompt at generation time. This is
+                accessible from the <LabeledIcon label="Wildcards and Overrides"> <DataObject /></LabeledIcon> button
+                on the prompt box.
             </p>
             <h2 style={{ fontFamily: 'Merriweather' }}>Overrides</h2>
             <p>
