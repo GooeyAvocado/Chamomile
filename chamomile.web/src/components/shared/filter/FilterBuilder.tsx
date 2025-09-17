@@ -39,6 +39,8 @@ export default function FilterBuilder(props: {
     }, [filter])
 
     const filterEmpty = filter.favorite === false
+        && filter.upscaled === false
+        && filter.downloaded === false
         && filter.fromDate === ''
         && filter.toDate === ''
         && filter.lora === ''
