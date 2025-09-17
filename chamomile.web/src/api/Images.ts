@@ -91,7 +91,8 @@ export const interruptGeneration = (
     setLoading: (value: boolean) => void,
     setItem: (value?: Progress) => void,
     onError: (value: any) => void,
-) => Get(setLoading, setItem, onError, ENDPOINT + "interrupt");
+    id: number
+) => Get(setLoading, setItem, onError, ENDPOINT + `interrupt/${id}`);
 
 export const getImages = (
     setLoading: (value: boolean) => void,

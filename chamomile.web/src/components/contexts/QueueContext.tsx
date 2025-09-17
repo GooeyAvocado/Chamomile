@@ -122,6 +122,18 @@ export default function QueueProvider(props: { children: any }) {
         setActiveJob(undefined)
     });
 
+    useSignalR("JobCancelled", (jobId: number, prompt: Prompt, queue: Prompt[], message: string) => {
+        console.error(`Job ${jobId} has been cancelled`)
+        console.error(prompt)
+        console.error(message)
+
+        enqueueSnackbar("Job cancelled!", { variant: 'warning' })
+
+        setQueue(queue)
+        setCurrentProgress(undefined)
+        setActiveJob(undefined)
+    });
+
     useSignalR("ModelRerollStarted", (nextModel: string) => {
         console.log("Changing model " + nextModel)
         setModelSequenceChangeBusy(nextModel)

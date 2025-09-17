@@ -164,6 +164,7 @@ namespace Chamomile.API.Workers {
                             stopwatch.Stop();
 
                             if (jobId == _lastInterruptedJobId) {
+                                _currentPrompt = null;
                                 _hubContext.Clients.All.SendAsync("JobCancelled", jobId, prompt, GetAllPrompts());
                                 continue;
                             }
@@ -198,7 +199,8 @@ namespace Chamomile.API.Workers {
                             //Reset the loop count because we are going to check SD availability `now`
                             //loopCount = 0;
 
-                            if (!await CheckSd()) {
+                            //If we haven't cancelled and SD is no longer available
+                            if (jobId != _lastInterruptedJobId && !await CheckSd()) {
                                 //Requeue the current prompt 
                                 _queue[-1] = prompt; //-1 so it's handled first next time
                                 _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());

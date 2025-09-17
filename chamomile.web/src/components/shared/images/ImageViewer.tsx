@@ -8,7 +8,7 @@ import { useSnackbar } from "notistack";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import BrewingImageTile from "./BrewingImageTile";
 import useApi from "../../hooks/useApi";
-import { deleteImage, favImage, noteImage } from "../../../api/Images";
+import { deleteImage, favImage, interruptGeneration, noteImage } from "../../../api/Images";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { Alert, AlertTitle, Button, CircularProgress, Link, Stack } from "@mui/material";
 import WelcomePane from "../welcome/WelcomePane";
@@ -27,6 +27,8 @@ import ImageModalFromId from "./ImageModalFromId";
 import { Prompt } from "../../../model/Prompt";
 import SelectedImageActions from "../selectedImageActions/SelectedImageActions";
 import { useLocation, useNavigate } from "react-router-dom";
+import ContextMenu from "../ContextMenu";
+import { Cancel } from "@mui/icons-material";
 
 export default function ImageViewer(props: {
     filter: FilterOptions,
@@ -56,6 +58,7 @@ export default function ImageViewer(props: {
     const delApi = useApi(deleteImage);
     const favApi = useApi(favImage)
     const notesApi = useApi(noteImage)
+    const interruptApi = useApi(interruptGeneration)
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
     const nav = useNavigate();
 
@@ -218,6 +221,12 @@ export default function ImageViewer(props: {
         setViewerOpen(false)
     } : undefined
 
+    const onInterrupt = () => {
+        if (!activeJob) return;
+        SetInterruptOpen(false);
+        interruptApi.fetch(undefined, undefined, activeJob.id)
+    }
+
     const selectedIndex = () => {
         return imageApi.images.map(a => a.id).indexOf(selectedImage?.id ?? 0);
     }
@@ -319,12 +328,18 @@ export default function ImageViewer(props: {
                 {showBrewing && nextModel && <ModelChangeTile nextModel={nextModel} />}
 
                 {showBrewing && activeJob && activeJob.orderData?.source !== "GRID" && promptAlbumFilter(activeJob) && <>
-                    <BrewingImageTile
-                        imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
-                        eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100}
-                    />
+                    <ContextMenu options={[
+                        { icon: <Cancel />, text: "Cancel", onClick: onInterrupt }
+                    ]}>
 
-                    <PromptEditorModal onOk={() => { }} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} title="Brewing image" preview progress={progress} />
+                        <BrewingImageTile
+                            imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
+                            eta={progress?.eta_relative} onClick={() => { SetInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100}
+                        />
+                    </ContextMenu>
+
+                    <PromptEditorModal onOk={onInterrupt} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} cancelable title="Brewing image" preview progress={progress} />
+
                 </>}
 
                 {showBrewing && currentUpload && <>
