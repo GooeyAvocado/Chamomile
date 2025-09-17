@@ -34,11 +34,21 @@ namespace Automatic1111.API {
             }
         }
 
+        public async Task RefreshModels() {
+            var client = new HttpClient();
+            await client.PostAsync(api + "/sdapi/v1/refresh-checkpoints", null);
+        }
+
         public async Task<List<Model>> GetModels() {
             var client = new HttpClient();
             var response = await client.GetStringAsync(api + "/sdapi/v1/sd-models");
 
             return JsonSerializer.Deserialize<List<Model>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No models found");
+        }
+
+        public async Task RefreshLoras() {
+            var client = new HttpClient();
+            await client.PostAsync(api + "/sdapi/v1/refresh-loras", null);
         }
 
         public async Task<List<Lora>> GetLoras() {
@@ -104,8 +114,9 @@ namespace Automatic1111.API {
         }
 
         public async Task InterruptGeneration() {
+            //Somehow we never checked this and just assumed it was broken
             var client = new HttpClient();
-            await client.PostAsync(api + "/sdapi/v1/progress", null );
+            await client.PostAsync(api + "/sdapi/v1/interrupt", null );
         }
 
         public async Task<string> GetCurrentModel() {
