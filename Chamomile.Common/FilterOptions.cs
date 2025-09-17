@@ -44,5 +44,34 @@
         /// <summary>Gets everything</summary>
         public bool? DisablePagination { get; set; } = false;
 
+        /// <summary>Checks if a filter is "Empty" as should be reported by the UI</summary>
+        /// <param name="filter"></param>
+        /// <returns>True if the following fields are empty:
+        /// <ul>
+        /// <li>From Date</li>
+        /// <li>To Date</li>
+        /// <li>LoRA</li>
+        /// <li>Model</li>
+        /// <li>Query</li>
+        /// <li>Sample</li>
+        /// </ul>
+        /// AND if the following fields are false
+        /// <ul>
+        /// <li>Favorite</li>
+        /// <li>Upscale</li>
+        /// <li>Download</li>
+        /// </ul>
+        /// </returns>
+        public static bool IsEmpty(FilterOptions filter) => 
+            filter.Favorite == false
+            && filter.Upscaled == false
+            && filter.Downloaded == false
+            && filter.FromDate == ""
+            && filter.ToDate == ""
+            && filter.Lora == ""
+            && filter.Model == ""
+            && filter.Query?.Trim() == ""
+            && (filter.Sample ?? 0) < 1;
+
     }
 }

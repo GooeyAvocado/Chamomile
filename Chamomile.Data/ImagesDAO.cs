@@ -249,7 +249,7 @@ namespace Chamomile.Data {
 
         #region READ
 
-        public static List<WhereCondition> ConditionsFromFilter(FilterOptions filter, int? lastImage) {
+        public static List<WhereCondition> ConditionsFromFilter(FilterOptions filter, int? lastImage, bool showHidden = false) {
             var conditions = new List<WhereCondition>();
 
             if (!string.IsNullOrEmpty(filter.Query)) {
@@ -328,6 +328,8 @@ namespace Chamomile.Data {
 
 
             if (
+                //We haven't been specifically asked to show hidden images
+                !showHidden &&
                 //We have no Album
                 (filter.Album == null || filter.Album < 0) &&
                 //We have no Grid
@@ -572,7 +574,7 @@ namespace Chamomile.Data {
 
             var innerImageSql = SelectSql([
                 CRE_TS,IMAGES_FAV_IN,IMAGES_HIRES_IN,IMAGES_DOWNLOAD_CT,IMAGE_ADDTL_INFO
-            ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1)), [new(CRE_TS,SortOrder.DESC)])
+            ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1, FilterOptions.IsEmpty(filter))), [new(CRE_TS,SortOrder.DESC)])
                 + (limit > 0 ? $" LIMIT {limit}" : "");
 
             var sql = SelectSql([
@@ -704,7 +706,7 @@ namespace Chamomile.Data {
         }
 
         private static string InnerStatsImageSql(FilterOptions filter, int limit) {
-            return SelectSql([CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
+            return SelectSql([CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0, FilterOptions.IsEmpty(filter))),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
 
