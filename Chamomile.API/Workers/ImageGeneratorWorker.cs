@@ -37,9 +37,10 @@ namespace Chamomile.API.Workers {
         } 
 
         public ImmutableList<ModelSequence> Sequence { get; set; } = [];
-        
 
         private volatile Prompt? _currentPrompt;
+        private volatile int _lastInterruptedJobId = -1;
+
         public Prompt? CurrentPrompt => _currentPrompt;
 
         public ImageGeneratorWorker(IHubContext<ImageGenerateHub> hubContext) {
@@ -93,6 +94,10 @@ namespace Chamomile.API.Workers {
             return true;
         }
 
+        public void InterruptJobId(int id) {
+            _lastInterruptedJobId = id;
+        }
+
         /// <summary>
         /// Clears the queue of all prompts.
         /// </summary>
@@ -119,12 +124,12 @@ namespace Chamomile.API.Workers {
                     if (_queue.TryRemove(jobId, out _)) {
                         Console.WriteLine($"[Processing] Generating image for Job {jobId}: {prompt}");
 
+                        if (jobId == _lastInterruptedJobId) continue ;
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                         //We don't have to wait to send this
                         _hubContext.Clients.All.SendAsync("JobStarted", jobId, prompt, GetAllPrompts());
                         _currentPrompt = prompt;
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
                         var stopwatch = new Stopwatch();
 
@@ -132,6 +137,7 @@ namespace Chamomile.API.Workers {
                             var model = await api.GetCurrentModel();
 
                             if (!string.IsNullOrWhiteSpace(prompt?.OrderData?.Model) && model!=prompt.OrderData.Model) {
+                                
                                 _ = _hubContext.Clients.All.SendAsync("ModelRerollStarted", prompt.OrderData.Model);
                                 await api.ChangeModel(prompt.OrderData.Model);
                                 _ = _hubContext.Clients.All.SendAsync("ModelRerollComplete", prompt.OrderData.Model);
@@ -157,6 +163,11 @@ namespace Chamomile.API.Workers {
 
                             stopwatch.Stop();
 
+                            if (jobId == _lastInterruptedJobId) {
+                                _hubContext.Clients.All.SendAsync("JobCancelled", jobId, prompt, GetAllPrompts());
+                                continue;
+                            }
+
                             Console.WriteLine($"[Completed] Image generated for Job {jobId}: {stopwatch.ElapsedMilliseconds/1000.0}s");
 
                             //We don't replace the comments here because we want to preserve all of it
@@ -168,7 +179,6 @@ namespace Chamomile.API.Workers {
                                 prompt.OrderData?.Source == "GRID"
                             );
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this
                             _currentPrompt = null;
                             _hubContext.Clients.All.SendAsync("JobCompleted", jobId, prompt, GetAllPrompts(), savedImg);

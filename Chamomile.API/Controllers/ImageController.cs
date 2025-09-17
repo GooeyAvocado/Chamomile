@@ -199,9 +199,10 @@ namespace Chamomile.API.Controllers
             return Ok(await api.GetProgress());
         }
 
-        [HttpGet("interrupt")]
-        public async Task<IActionResult> Interrupt()
+        [HttpGet("interrupt/{id}")]
+        public async Task<IActionResult> Interrupt(int id)
         {
+            worker.InterruptJobId(id);
             await api.InterruptGeneration();
             return Ok();
         }
