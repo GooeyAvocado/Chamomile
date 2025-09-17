@@ -533,7 +533,7 @@ export default function GridViewer({
                                 </div>
                             }
                             const activeJobOrderData = activeJob?.orderData
-                            if (activeJobOrderData && activeJobOrderData.xPos === x && activeJobOrderData.yPos === y) {
+                            if (activeJobOrderData && activeJobOrderData?.gridId === grid.id && activeJobOrderData.xPos === x && activeJobOrderData.yPos === y) {
                                 return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }}>
                                     <BrewingImageTile
                                         imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
