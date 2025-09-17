@@ -63,15 +63,15 @@
         /// </ul>
         /// </returns>
         public static bool IsEmpty(FilterOptions filter) =>
-    filter.Favorite == false
-    && filter.Upscaled == false
-    && filter.Downloaded == false
-    && string.IsNullOrWhiteSpace(filter.FromDate)
-    && string.IsNullOrWhiteSpace(filter.ToDate)
-    && string.IsNullOrWhiteSpace(filter.Lora)
-    && string.IsNullOrWhiteSpace(filter.Model)
-    && string.IsNullOrWhiteSpace(filter.Query)
-    && (filter.Sample ?? 0) < 1;
+            filter.Favorite == false
+            && filter.Upscaled == false
+            && filter.Downloaded == false
+            && string.IsNullOrWhiteSpace(filter.FromDate)
+            && string.IsNullOrWhiteSpace(filter.ToDate)
+            && string.IsNullOrWhiteSpace(filter.Lora)
+            && string.IsNullOrWhiteSpace(filter.Model)
+            && string.IsNullOrWhiteSpace(filter.Query)
+            && (filter.Sample ?? 0) < 1;
 
     }
 }
