@@ -72,10 +72,10 @@ export default function SelectedImageActions({
             <Tooltip title="Deselect all">
                 <IconButton onClick={onClearSelect}><Deselect /></IconButton>
             </Tooltip>
-            <Tooltip title="Deselect all">
+            <Tooltip title="Select all">
                 <IconButton onClick={onSelectAll}><SelectAll /></IconButton>
             </Tooltip>
-            {selectedImageIds.length} image(s) selected
+            {selectedImageIds.length} image{selectedImageIds.length === 1 ? "" : "s"} selected
         </div>
 
         <div style={{ display: 'flex', gap: "10px" }}>
