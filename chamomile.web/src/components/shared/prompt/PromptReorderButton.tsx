@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, ListItemIcon, MenuItem, Tooltip } from "@mui/material";
+import { Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, ListItemIcon, MenuItem, Tooltip } from "@mui/material";
 import { Prompt } from "../../../model/Prompt";
 import { usePingPong } from "../../hooks/usePingPong";
 import { usePrompt } from "../../hooks/usePrompt";

@@ -12,8 +12,6 @@ import LoraSelector from "../lora/LoraSelector";
 import { useSnackbar } from "notistack";
 import { ModelRequest } from "../../../model/ModelRequest";
 import { Prompt } from "../../../model/Prompt";
-import { useLoras } from "../../hooks/useLoras";
-import { useModels } from "../../hooks/useModels";
 import { usePingPong } from "../../hooks/usePingPong";
 import { getModelSequence, setModelSequence } from "../../../api/Images";
 import ModelSequenceEditor from "../model/ModelSequenceEditor";

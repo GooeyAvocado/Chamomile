@@ -1,4 +1,4 @@
-import { Divider, Drawer, IconButton, ListItemIcon, Menu, ListItem, ListItemButton, List, Box, Tooltip } from "@mui/material";
+import { Divider, Drawer, IconButton, ListItemIcon, ListItem, ListItemButton, List, Box, Tooltip } from "@mui/material";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import ChamomileLogo from "../ChamomileLogo";
 import StatusButton from "../StatusButton/StatusButton";
@@ -43,7 +43,7 @@ export default function Navbar() {
 
         }}>
             <div style={{ display: "flex", gap: "10px" }}>
-                <IconButton onClick={(e) => setMenuOpen(true)} style={{ transform: "translateY(7px)" }} >
+                <IconButton onClick={() => setMenuOpen(true)} style={{ transform: "translateY(7px)" }} >
                     <MenuIcon />
                 </IconButton>
                 <div onClick={() => { nav("/") }} style={{ cursor: 'pointer' }}>
