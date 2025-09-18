@@ -3,6 +3,7 @@ export class FilterOptions {
     album?: number = -1;
     grid?: number = -1;
     sample?: number = -1
+    sampleMode?: "SAMPLE"|"HASH"|"BASE_HASH"
     lora?: string = "";
     model?: string = "";
     favorite?: boolean = false;

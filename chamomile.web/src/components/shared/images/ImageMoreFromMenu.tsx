@@ -3,7 +3,7 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useLoras } from "../../hooks/useLoras";
 import { useModels } from "../../hooks/useModels";
 import { MenuItemWithSubMenu } from "../mui/MenuItemWithSubmenu";
-import { ImageSearch } from "@mui/icons-material";
+import { ImageSearch, ReceiptLong, ReceiptLongTwoTone } from "@mui/icons-material";
 import { Card, Divider, ListItemIcon, MenuItem } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { imageUrl } from "../../../api/Images";
@@ -79,10 +79,27 @@ export default function ImageMoreFromMenu({
             </div>
         </MenuItem>)}
         <Divider />
+        <MenuItem onClick={() => { setFilter({ ...clearFilter(filter), sampleMode: "HASH", sample: image.id }) }}>
+            <ListItemIcon>
+                <ReceiptLong />
+            </ListItemIcon>
+            <div>
+                <div style={{ fontSize: '.8em' }}>Prompt (+/-)</div>
+            </div>
+        </MenuItem>
+        {image.basePrompt && image.basePrompt.trim().length > 0 && image.prompt !== image.basePrompt && <MenuItem onClick={() => { setFilter({ ...clearFilter(filter), sampleMode: "BASE_HASH", sample: image.id }) }}>
+            <ListItemIcon>
+                <ReceiptLongTwoTone />
+            </ListItemIcon>
+            <div>
+                <div style={{ fontSize: '.8em' }}>Base prompt</div>
+            </div>
+        </MenuItem>}
+        <Divider />
         <MenuItem
             onClick={() => {
                 setFilter({
-                    ...clearFilter(filter), sample:
+                    ...clearFilter(filter), sampleMode: "SAMPLE", sample:
                         (image.additionalInfo?.sample ?? -1) > 0
                             ? image.additionalInfo?.sample
                             : image.id
