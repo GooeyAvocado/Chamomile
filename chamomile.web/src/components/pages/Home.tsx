@@ -41,6 +41,8 @@ export default function Home() {
 
     const initialFilter = {
         favorite: false,
+        upscaled: false,
+        downloaded: false,
         album: -1,
         lora: "",
         model: "",
