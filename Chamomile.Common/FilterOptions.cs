@@ -15,6 +15,14 @@
         /// <summary>Sample image to search by </summary>
         public int? Sample { get; set; } = -1;
 
+        /// <summary>
+        /// Mode in which to use the sample:
+        /// "SAMPLE" (Default): Search for images that have labeled the provided sample as its sample
+        /// "HASH": Search for images with a prompt and negative prompt hash that matches the hash of the given sample
+        /// "BASE_HASH": Search for images with a base prompt hash that matches the hash of the given sample
+        /// </summary>
+        public string? SampleMode { get; set; } = null;
+
         /// <summary>LoRA requested</summary>
         public string? Lora { get; set; } = "";
 

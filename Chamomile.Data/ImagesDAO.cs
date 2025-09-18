@@ -291,10 +291,22 @@ namespace Chamomile.Data {
             }
 
             if (filter.Sample != null && filter.Sample >= 0) {
-                conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
-                    new("(" + IMAGE_ADDTL_INFO + "->> 'sample')::Int", WhereConditionOperator.EQUALS, "@" + IMAGE_SAMPLE_ID),
-                    new(IMAGES_ID,WhereConditionOperator.EQUALS,"@" + IMAGE_SAMPLE_ID)
-                    ])));
+                switch (filter.SampleMode) {
+                    case "HASH":
+                        conditions.Add(new(IMAGE_PROMPTS_HASH, WhereConditionOperator.EQUALS, $"(select {IMAGE_PROMPTS_HASH} from {IMAGES_TABLE} where {IMAGES_ID} = @{IMAGE_SAMPLE_ID})"));
+                        break;
+                    case "BASE_HASH":
+                        conditions.Add(new(IMAGE_BASE_PROMPT_HASH, WhereConditionOperator.EQUALS, $"(select {IMAGE_BASE_PROMPT_HASH} from {IMAGES_TABLE} where {IMAGES_ID} = @{IMAGE_SAMPLE_ID})"));
+                        break;
+                    case "SAMPLE":
+                    default:
+                        conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
+                            new("(" + IMAGE_ADDTL_INFO + "->> 'sample')::Int", WhereConditionOperator.EQUALS, "@" + IMAGE_SAMPLE_ID),
+                            new(IMAGES_ID,WhereConditionOperator.EQUALS,"@" + IMAGE_SAMPLE_ID)
+                            ])));
+                        break;
+                }
+                
             }
 
             if (!string.IsNullOrEmpty(filter.Lora)) {
