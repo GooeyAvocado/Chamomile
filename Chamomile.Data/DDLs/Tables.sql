@@ -210,3 +210,30 @@ CREATE TABLE grids (
     cre_ts TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT pk_grid PRIMARY KEY (grid_id)
 );
+
+
+
+CREATE OR REPLACE FUNCTION hash_prompt(input_text text)
+RETURNS text AS $$
+DECLARE
+    normalized text;
+BEGIN
+    -- normalize: lowercase, trim, collapse all whitespace (space, tabs, newlines) to single space
+    normalized := regexp_replace(lower(trim(input_text)), '\s+', ' ', 'g');
+    RETURN md5(normalized);
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+ALTER TABLE images
+ADD COLUMN image_prompts_hash text GENERATED ALWAYS AS (
+    hash_prompt(image_prompt_tx) || hash_prompt(image_neg_prompt_tx)
+) STORED;
+
+CREATE INDEX idx_images_prompts_hash ON images(image_prompts_hash);
+
+ALTER TABLE images
+ADD COLUMN image_base_prompt_hash text GENERATED ALWAYS AS (
+    hash_prompt(image_base_prompt_tx)
+) STORED;
+
+CREATE INDEX idx_images_base_prompts_hash ON images(image_base_prompt_hash);

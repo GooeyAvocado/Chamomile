@@ -44,6 +44,9 @@
         public static readonly string IMAGE_SIZE         = "image_effective_size_nb";
         public static readonly string IMAGE_HIDDEN       = "image_hidden_in";
         public static readonly string IMAGE_ADDTL_INFO   = "img_addtl_info_mv";
+        public static readonly string IMAGE_PROMPTS_HASH = "image_prompts_hash";
+        public static readonly string IMAGE_BASE_PROMPT_HASH = "image_base_prompt_hash";
+
 
         //This is a virtual column in a JSONB column but I don't care
         public static readonly string IMAGE_SAMPLE_ID    = "img_sample_id";
