@@ -1,19 +1,22 @@
-import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from "@mui/material";
+import { Divider, Drawer, IconButton, ListItemIcon, Menu, ListItem, ListItemButton, List, Box, Tooltip } from "@mui/material";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import ChamomileLogo from "../ChamomileLogo";
 import StatusButton from "../StatusButton/StatusButton";
-import { Coffee, GridView, Launch, Menu as MenuIcon, Monitor, PhotoLibrary, Settings } from "@mui/icons-material";
+import { Coffee, GridView, HelpOutline, Launch, Menu as MenuIcon, Monitor, PhotoLibrary, Settings } from "@mui/icons-material";
 import { useState } from "react";
 import SettingsSlidein from "../settings/SettingsSlidein";
-import HelpButton from "../help/HelpButton";
 import { useNavigate } from "react-router-dom";
+import HelpModal from "../help/HelpModal";
 
 export default function Navbar() {
 
     const { width } = useWindowDimensions();
-    const [promptAnchor, setPromptAnchor] = useState(null as any)
+    const [menuOpen, setMenuOpen] = useState(false)
 
     const [settingsOpen, setSettingsOpen] = useState(false)
+    const [helpOpen, setHelpOpen] = useState(false);
+    const [helpEverOpened, setHelpEverOpened] = useState(false);
+
     const nav = useNavigate();
 
     const onSettings = () => {
@@ -21,15 +24,17 @@ export default function Navbar() {
         setSettingsOpen(true)
     }
 
-    const onClose = () => {
-        setPromptAnchor(null)
-    }
+    const onClose = () => { setMenuOpen(false) }
 
     const onDisplay = () => {
         window.open('/#/display', '_blank');
     };
 
-
+    const onHelp = () => {
+        if (!helpEverOpened) setHelpEverOpened(true)
+        onClose();
+        setHelpOpen(true);
+    }
 
     return <>
         <div style={{
@@ -37,58 +42,81 @@ export default function Navbar() {
             paddingLeft: "20px", paddingRight: "20px", paddingTop: "10px", paddingBottom: "20px"
 
         }}>
-            <div onClick={() => { nav("/") }} style={{ cursor: 'pointer' }}>
-                <ChamomileLogo hideWords={width < 450} small />
+            <div style={{ display: "flex", gap: "10px" }}>
+                <IconButton onClick={(e) => setMenuOpen(true)} style={{ transform: "translateY(7px)" }} >
+                    <MenuIcon />
+                </IconButton>
+                <div onClick={() => { nav("/") }} style={{ cursor: 'pointer' }}>
+                    <ChamomileLogo hideWords={width < 450} small />
+                </div>
             </div>
             {/* This translation is for visual purposes. The steam of the chamomile cup makes it look like this is out of alignment */}
             <div style={{ display: 'flex', gap: "10px", transform: "translateY(7px)" }}>
                 <StatusButton />
-                <HelpButton />
-                <IconButton onClick={(e) => setPromptAnchor(e.currentTarget)} >
-                    <MenuIcon />
-                </IconButton>
+                <Tooltip title="Help and About">
+                    <IconButton onClick={onHelp}><HelpOutline /></IconButton>
+                </Tooltip>
             </div>
         </div>
 
-        <Menu
-            anchorEl={promptAnchor} open={!!promptAnchor} onClose={onClose}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'left', }}
-            transformOrigin={{ vertical: 'top', horizontal: 'left', }}
+        <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} >
+            <Box sx={{ width: 225, height: "100vh", display: "flex", flexDirection: 'column', overflow: "hidden" }} onClick={close} onKeyDown={close}>
+                <div style={{ display: "flex", width: "100%", justifyContent: 'center', padding: "20px 0px" }}>
+                    <ChamomileLogo hideWords />
+                </div>
+                <Divider />
+                <List style={{ flex: "1" }}>
+                    <ListItem disablePadding >
+                        <ListItemButton onClick={() => { onClose(); nav("/"); }}>
+                            <ListItemIcon><Coffee /></ListItemIcon>
+                            <div style={{ padding: "5px 0px" }}>Home</div>
+                        </ListItemButton>
+                    </ListItem>
 
-        >
+                    <ListItem disablePadding >
+                        <ListItemButton onClick={() => { onClose(); nav("/album/"); }}>
+                            <ListItemIcon><PhotoLibrary /></ListItemIcon>
+                            <div style={{ padding: "5px 0px" }}>Collections</div>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton onClick={() => { onClose(); nav("/grid/"); }} >
+                            <ListItemIcon><GridView /></ListItemIcon>
+                            <div style={{ padding: "5px 0px" }}>Grids</div>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton onClick={() => { onClose(); onDisplay(); }} >
+                            <ListItemIcon><Monitor /></ListItemIcon>
+                            <div style={{ padding: "5px 0px", display: 'flex', alignItems: 'center' }}>
+                                Display
+                                <Launch fontSize="small" style={{ marginLeft: "2px", scale: ".8" }} />
+                            </div>
+                        </ListItemButton>
+                    </ListItem>
+                </List>
 
+                <Divider />
+                <List>
+                    <ListItem disablePadding >
+                        <ListItemButton onClick={() => { onHelp(); }}>
+                            <ListItemIcon><HelpOutline /></ListItemIcon>
+                            <div style={{ padding: "5px 0px" }}>Help and About</div>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding >
+                        <ListItemButton onClick={() => { onSettings(); }}>
+                            <ListItemIcon><Settings /></ListItemIcon>
+                            <div style={{ padding: "5px 0px" }}>Settings</div>
+                        </ListItemButton>
+                    </ListItem>
+                </List>
+            </Box>
 
-            <MenuItem onClick={() => { onClose(); nav("/"); }} style={{ fontSize: ".8em" }}>
-                <ListItemIcon><Coffee fontSize="small" /></ListItemIcon>
-                Home
-            </MenuItem>
-
-            <MenuItem onClick={() => { onClose(); nav("/album/"); }} style={{ fontSize: ".8em" }}>
-                <ListItemIcon><PhotoLibrary fontSize="small" /></ListItemIcon>
-                Collections
-            </MenuItem>
-            <MenuItem onClick={() => { onClose(); nav("/grid/"); }} style={{ fontSize: ".8em" }}>
-                <ListItemIcon><GridView fontSize="small" /></ListItemIcon>
-                Grids
-            </MenuItem>
-            <MenuItem onClick={() => { onClose(); onDisplay(); }} style={{ fontSize: ".8em" }}>
-                <ListItemIcon><Monitor fontSize="small" /></ListItemIcon>
-                Display
-                <Launch fontSize="small" style={{ marginLeft: "2px", scale: ".8" }} />
-            </MenuItem>
-
-            <Divider />
-
-            <MenuItem onClick={() => { onSettings(); }} style={{ fontSize: ".8em" }}>
-                <ListItemIcon><Settings fontSize="small" /></ListItemIcon>
-                Settings
-            </MenuItem>
-
-
-
-        </Menu>
+        </Drawer>
 
         <SettingsSlidein open={settingsOpen} setOpen={setSettingsOpen} />
+        {helpEverOpened && <HelpModal open={helpOpen} setOpen={setHelpOpen} />}
 
     </>
 }

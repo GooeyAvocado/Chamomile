@@ -20,7 +20,7 @@ export default function SettingsSlidein({ open, setOpen }: {
         { name: "What's New", sound: "/sounds/wnew.mp3" }
     ]
 
-    return <Drawer open={open} onClose={() => { setOpen(false) }} title="Settings" anchor="right">
+    return <Drawer open={open} onClose={() => { setOpen(false) }} title="Settings" anchor="left">
         <div style={{ padding: "20px", width: "400px" }}>
             <div style={{ marginBottom: "10px", fontSize: "1.7em", fontFamily: "Merriweather" }}>
                 Settings
