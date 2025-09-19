@@ -713,6 +713,10 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <p>Columns and rows can be of the following types:</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px", marginBottom: "20px" }}>
                 <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Positive or Negative Prompt"><ReceiptLong /></LabeledIcon>: </b>
+                    Replace the entire positive or negative prompt on an axis
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
                     <b style={{ flexShrink: "0" }}><LabeledIcon label="Prompt search/replace"><ReceiptLong /></LabeledIcon>: </b>
                     Search for the first value and replace it with the value of the current cell
                 </div>
