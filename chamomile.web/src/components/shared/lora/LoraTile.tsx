@@ -3,7 +3,7 @@ import { imageUrl } from "../../../api/Images";
 import { Lora } from "../../../model/Lora";
 import ModelTypePill from "../model/ModelType/ModelTypePill";
 import ContextMenu from "../ContextMenu";
-import { DoNotDisturbAlt } from "@mui/icons-material";
+import { DoNotDisturbAlt, Edit, Image } from "@mui/icons-material";
 
 export default function LoraTile(props: {
     lora: Lora
@@ -16,9 +16,9 @@ export default function LoraTile(props: {
 
     return <Card>
         <ContextMenu options={[
-            { text: 'Edit', onClick: onEdit },
+            { text: 'Edit', onClick: onEdit, icon: <Edit /> },
             { type: 'divider' },
-            { text: 'View Image', onClick: onViewImage, disabled: lora.bannerImage === undefined },
+            { text: 'View Image', onClick: onViewImage, disabled: lora.bannerImage === undefined || lora.bannerImage === null, icon: <Image /> },
         ]}>
             <CardActionArea onClick={onClick} style={{ aspectRatio: 1 / 1, width: '100%' }}>
                 <div style={{ alignItems: 'center', position: 'relative' }}>
