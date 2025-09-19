@@ -302,7 +302,7 @@ namespace Chamomile.Data {
                     default:
                         conditions.Add(new WhereConditionSubgroup(new(WhereConditionUnion.OR, [
                             new("(" + IMAGE_ADDTL_INFO + "->> 'sample')::Int", WhereConditionOperator.EQUALS, "@" + IMAGE_SAMPLE_ID),
-                            new(IMAGES_ID,WhereConditionOperator.EQUALS,"@" + IMAGE_SAMPLE_ID)
+                            new("img."+IMAGES_ID,WhereConditionOperator.EQUALS,"@" + IMAGE_SAMPLE_ID)
                             ])));
                         break;
                 }
