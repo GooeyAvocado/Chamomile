@@ -121,8 +121,9 @@ function GridValsEditor({
             {vals.map((a, i) => <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
                 <IconButton onClick={() => setVals(removeFromArray(vals, i))} disabled={disabled}><Remove /></IconButton>
                 {
-                    ["float", "int", "string"].includes(type.type) ? <TextField fullWidth
+                    ["float", "int", "string", "multiline"].includes(type.type) ? <TextField fullWidth
                         value={a} type={["float", "int"].includes(type.type) ? "number" : undefined}
+                        multiline={type.type === "multiline"}
                         slotProps={{
                             htmlInput: {
                                 step: type.type === "float" ? 0.1 : type.type === "int" ? 1 : undefined,

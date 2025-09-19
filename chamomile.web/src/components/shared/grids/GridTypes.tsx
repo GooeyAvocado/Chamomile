@@ -4,7 +4,7 @@ import { Prompt } from "../../../model/Prompt";
 export interface GridType {
     code: string;
     name: string;
-    type: string;
+    type: "none" | "string" | "multiline" | "float" | "int" | "sampler" | "model" | "dimensions" | "scheduler";
     prefix: React.ReactNode;
     suffix: string;
     displayValue?: (val: string) => React.ReactNode
@@ -19,6 +19,28 @@ export const GridTypes: GridType[] = [
         prefix: <></>,
         suffix: "",
         applyToPrompt: (prompt: Prompt) => prompt
+    },
+    {
+        code: "POS",
+        name: "Positive Prompt",
+        type: "multiline",
+        prefix: <ReceiptLong fontSize="inherit" />,
+        suffix: "",
+        applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
+            return { ...prompt, positivePrompt: val } as Prompt
+        }
+    },
+    {
+        code: "NEG",
+        name: "Negative Prompt",
+        type: "multiline",
+        prefix: <ReceiptLong fontSize="inherit" />,
+        suffix: "",
+        applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
+            return { ...prompt, negativePrompt: val } as Prompt
+        }
     },
     {
         code: "PSR",
