@@ -61,20 +61,19 @@ export default function HelpTab(props: {
         <HelpSection title="Welcome to Chamomile" >
             <p>
                 Welcome to Chamomile! We hope that Chamomile helps you easily generate more images from Stable Diffusion,
-                as well as manage and browse your collection of images.
+                as well as manage and browse your collection.
             </p>
             <p>Click on a section on the left to learn more about Chamomile's features</p>
             <div style={{ marginTop: '50px' }}>
                 <p>Please report any bugs you find to our <GithubLink href="https://github.com/GooeyAvocado/Chamomile">Github!</GithubLink> </p>
-
             </div>
         </HelpSection>
 
         <HelpSection title="Setting up Stable Diffusion" >
             <p>
-                Chamomile is a wrapper for an A1111 or equivalent Stable Diffusion webui . That means that if you've set up
+                Chamomile is a wrapper for an A1111 or equivalent Stable Diffusion web UI. That means that if you've set up
                 the docker container for this app, you're only really halfway there if you're starting from scratch.
-                If you don't have one of these already set up on your system, consider downloading one from the list below:
+                If you don't have one of these already set up on your computer, consider downloading one from the list below:
             </p>
             <ul>
                 <li>
@@ -94,11 +93,11 @@ export default function HelpTab(props: {
                 </li>
             </ul>
             <p>
-                Once you've installed your Automatic1111, start it up and make sure you're able to generate an image. You can later import
-                it to Chamomile.
+                Once you've installed your web UI, start it up and make sure you're able to generate an image.
+                You can later import it to Chamomile.
             </p>
             <p>
-                Once you've got a working Stable Diffusion WebUI, you'll need to enable the API. You can do this by adding <span style={codeStyle}>
+                Once you've got a working Stable Diffusion web UI, you'll need to enable the API. You can do this by adding <span style={codeStyle}>
                     --api
                 </span> to your <span style={codeStyle}>
                     COMMANDLINE_ARGS
@@ -106,16 +105,16 @@ export default function HelpTab(props: {
                     webui-user.bat
                 </span>. If you have your web ui running, restart it so this argument takes effect.
             </p>
-            <p>If you've completed this set up
-                successfully, your {BrewButton} button should now be enabled!</p>
+            <p>If you've completed this set up successfully, refresh Chamomile,
+                and your {BrewButton} button should now be enabled!</p>
         </HelpSection>
 
         <HelpSection title="Importing Your Existing Collection" >
             <img src="/screenshots/filedrop.png" style={{ width: "100%" }} />
             <p>
-                If you've previously generated images with your WebUI, you can import them to Chamomile by dragging and dropping one or
+                If you've previously generated images with your web UI, you can import them into Chamomile by dragging and dropping one or
                 more files or folders. We'll take care of extracting the metadata already embedded on each image to populate
-                Prompt, checkpoint, LoRAs, Sampler, Seed, and other information.
+                prompt, checkpoint, LoRAs, sampler, seed, and other information.
             </p>
         </HelpSection>
 
@@ -146,16 +145,16 @@ export default function HelpTab(props: {
                 this easily. Simply click on the <LabeledIcon label="More Options"> <ExpandMore /></LabeledIcon> button
                 on the prompt box and set your <LabeledIcon label="Amount"><Coffee /></LabeledIcon> of images up or down.
                 You can also change this default in the <LabeledIcon label="Settings"><Settings /></LabeledIcon> drawer
-                accessible through the icon on the top right of the screen.
+                accessible through the menu on the top left of the screen.
             </div>
         </HelpSection>
 
         <HelpSection title="System Status" >
             <img src="/screenshots/statusbutton.png" />
             <p>
-                You may have noticed a play button on the top right of the screen change to two circular progress bars.
-                This button allows you to change and view the current system status. Chamomile can be in a few statuses
-                including:
+                You may have noticed a play button on the top right of the screen change to two circular progress bars
+                when you brew images. This button allows you to view and change the current system status. Chamomile
+                can be in a few states including:
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
                 <div>
@@ -175,8 +174,10 @@ export default function HelpTab(props: {
                 <div>
                     <b><LabeledIcon label="Paused"><Pause color="warning" /></LabeledIcon></b>: Generation is paused, and no job is currently active
                 </div>
-                <div>
-                    <b><LabeledIcon label="SD Unavailable"><Warning color="warning" /></LabeledIcon></b>: Unable to generate images.
+                <div style={{ display: 'flex', gap: "5px" }}>
+                    <div style={{ flexShrink: "0" }}><b><LabeledIcon label="SD Unavailable"><Warning color="warning" /></LabeledIcon></b>: </div>
+                    <div>Chamomile
+                        was unable to contact your web UI, and is unable to brew any images.</div>
                 </div>
             </div>
             <p>
@@ -201,14 +202,14 @@ export default function HelpTab(props: {
             </Alert>
             <p>
                 Checkpoints can only be set globally, and will affect pending generations. If you change your checkpoint while there's still
-                prompts pending, they will be generated using the new checkpoint. Checkpoints are pulled from your WebUI and should be downloaded
-                to the following directory: <div style={codeStyle}>/(your webUI root)/models/stable-diffusion</div>
+                prompts pending, they will be generated using the new checkpoint. Checkpoints are pulled from your web UI and should be downloaded
+                to the following directory: <div style={codeStyle}>/(your web UI root)/models/stable-diffusion</div>
             </p>
             <p>
                 LoRAs can be set on an individual prompt level, and will appear on your prompt between greater than and less than signs.
-                IE: <span style={codeStyle}>{"<lora:MyLora:1>"}</span>. That "1" at the end is the weight. Different LoRAs have different
+                (IE: <span style={codeStyle}>{"<lora:MyLora:1>"}</span>). That "1" at the end is the weight. Different LoRAs have different
                 recommended, minimum, and maximum weights which you should check when you download them. LoRAs are also pulled from your
-                WebUI and should be downloaded to the following directory: <div style={codeStyle}>/(your webUI root)/models/lora</div>
+                web UI and should be downloaded to the following directory: <div style={codeStyle}>/(your web UI root)/models/lora</div>
             </p>
             <p>
                 Hint: If your images come out looking like a garbled mess of colors, you may have too many LoRAs, or the weights of one or
@@ -222,11 +223,11 @@ export default function HelpTab(props: {
             <p>
                 If you have a large batch of images on queue, and want to introduce further variety in your
                 outputs, you can consider setting up a checkpoint sequence. You can do this by clicking the
-                <LabeledIcon label="Sequence"> <Schedule /></LabeledIcon> button next to the checkpoint selector.
-                Based on the sequence, Chamomile will dynamically switch checkpointss after generation of an image.
+                <LabeledIcon label="Sequence"> <Schedule /></LabeledIcon> button next to the edit checkpoint button.
+                Based on the sequence, Chamomile will dynamically switch checkpoints after generation of an image.
             </p>
             <p>
-                Each checkpoint has two properties:
+                Each entry in the sequence has two properties:
             </p>
             <ul>
                 <li>
@@ -262,8 +263,8 @@ export default function HelpTab(props: {
                 Chamomile works with Dynamic Prompts and our Wildcard Browser extension. You can install them quickly by
                 downloading the github's contents into individual folders under the following directory:
             </p>
-            <div style={codeStyle}>/(your webUI root)/extensions</div>
-            <p>You can download both here. Make sure to restart your webui after installing them.</p>
+            <div style={codeStyle}>/(your web UI root)/extensions</div>
+            <p>You can download both here. Make sure to restart your web UI after installing them.</p>
             <ul>
                 <li><GithubLink href="https://github.com/adieyal/sd-dynamic-prompts/tree/main">Dynamic Prompts</GithubLink></li>
                 <li><GithubLink href="https://github.com/GooeyAvocado/sd-wildcard-browser">Wildcard Browser</GithubLink></li>
@@ -274,7 +275,7 @@ export default function HelpTab(props: {
                 Wildcard values can contain other wildcards, LoRAs, or other Dynamic Prompt syntax.
                 Your text files for wildcards should be placed here:
             </p>
-            <div style={codeStyle}>/(your webUI root)/extensions/sd-dynamic-prompts/wildcards</div>
+            <div style={codeStyle}>/(your web UI root)/extensions/sd-dynamic-prompts/wildcards</div>
             <p>
                 With the Wildcard Browser extension, Chamomile will be able to look into those wildcards to allow you
                 to add, and pre-select values in your prompt. This is accessible from
@@ -344,7 +345,7 @@ export default function HelpTab(props: {
         <HelpSection title="Comments on Prompts">
             <p>
                 Chamomile lets you write comments on your prompts in a few ways. This is useful especially if you want to disable certain
-                parts of a prompt, or leave some notes and structure for later. Comments are removed at generation time, so your Web UI will
+                parts of a prompt, or leave some notes and structure for later. Comments are removed at generation time, so your web UI will
                 never see them. However, they are preserved on the Base Prompt, so you can see them later.
             </p>
             <Table>
@@ -375,50 +376,29 @@ export default function HelpTab(props: {
             <img src="/screenshots/expandedPromptBar.png" width={"100%"} />
             Chamomile allows you to fine tune your results with more than just a prompt and models.
             Clicking the <LabeledIcon label="More Options"> <ExpandMore /></LabeledIcon> button on the prompt bar reveals
-            additional settings for your prompts including
+            additional settings for your prompts including:
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
+
                 <div>
                     <b><LabeledIcon label="Negative Prompt"><ThumbDown /></LabeledIcon></b>: What the diffusion checkpoint should avoid
                 </div>
 
-                <div>
-                    <b><LabeledIcon label="Amount"><Coffee /></LabeledIcon></b>: Amount of images to enqueue when you hit {BrewButton}
+                <div style={{ display: 'flex', gap: "5px" }}>
+                    <div style={{ flexShrink: "0" }}>
+                        <b><LabeledIcon label="Dimensions"><OpenWith /></LabeledIcon></b>:
+                    </div>
+                    <div>
+                        <div>Determines the dimensions of your image.</div>
+                        <div style={{ fontSize: ".9em", opacity: ".8" }}>
+                            <i>Clicking the icon on this component will bring up a dialog with common size presets</i>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <b><LabeledIcon label="Dimensions"><OpenWith /></LabeledIcon></b>:  Determines the dimensions of your image.
-                    <p>Clicking the icon on this component will bring up a modal with common size presets</p>
-                </div>
-
-                <div>
-                    <b><LabeledIcon label="Steps"><DirectionsRun /></LabeledIcon></b>: Amount of iterations the diffusion model should run for.
-                    <img src="/images/charts/steps.png" width={"100%"} />
-                    <p>
-                        Think of this as how long your image will "brew" for. Fewer steps are like a quick tea brew:
-                        faster, but with less depth and subtlety. More steps allow for richer, more refined images,
-                        but take longer to generate. However, just like over-brewing tea, increasing steps beyond a
-                        certain point won't improve quality and may even waste time, as image improvements eventually plateau.
-                    </p>
-                    <p>10 steps or less are usually too un-detailed, while more than 30 usually nets no benefit in quality</p>
-                </div>
-
-                <div>
-                    <b><LabeledIcon label="CFG Scale"><Tune /></LabeledIcon></b>: Controls how strictly the model follows your prompt.
-                    <img src="/images/charts/cfg.png" width={"100%"} />
-                    <p>
-                        Think of this like adjusting the tea-to-water ratio when brewing tea. A higher CFG Scale is like using more tea leaves for a stronger,
-                        more defined flavor (closer to your prompt), while a lower CFG Scale is like using fewer leaves for a milder, more subtle result
-                        (more creative freedom for the model).
-                    </p>
-                    <p>
-                        You can add too much water and then there's no taste (no image), and you can add too many tea leaves and then it's
-                        too bitter (too much image). Staying around 2.0 to 7.0 is usually good enough for most models.
-                    </p>
-                </div>
                 <div>
                     <b><LabeledIcon label="Sampler"><Window /></LabeledIcon></b>: Determines the algorithm used to generate your image.
-                    <img src="/images/charts/sampler.png" width={"100%"} />
+                    <img src="/images/charts/sampler.png" width={"100%"} style={{ marginTop: "10px" }} />
                     <p>
                         Think of the sampler like choosing a tea brewing method (steeping, cold brew, etc). Each method
                         draws out flavors differently, resulting in unique aromas and textures. Similarly, different
@@ -471,6 +451,34 @@ export default function HelpTab(props: {
 
                     </div>
                 </div>
+
+
+                <div>
+                    <b><LabeledIcon label="Steps"><DirectionsRun /></LabeledIcon></b>: Amount of iterations the diffusion model should run for.
+                    <img src="/images/charts/steps.png" width={"100%"} style={{ marginTop: "10px" }} />
+                    <p>
+                        Think of this as how long your image will "brew" for. Fewer steps are like a quick tea brew:
+                        faster, but with less depth and subtlety. More steps allow for richer, more refined images,
+                        but take longer to generate. However, just like over-brewing tea, increasing steps beyond a
+                        certain point won't improve quality and may even waste time, as image improvements eventually plateau.
+                    </p>
+                    <p>10 steps or less are usually too un-detailed, while more than 30 usually nets no benefit in quality</p>
+                </div>
+
+                <div>
+                    <b><LabeledIcon label="CFG Scale"><Tune /></LabeledIcon></b>: Controls how strictly the model follows your prompt.
+                    <img src="/images/charts/cfg.png" width={"100%"} style={{ marginTop: '10px' }} />
+                    <p>
+                        Think of this like adjusting the tea-to-water ratio when brewing tea. A higher CFG Scale is like using more tea leaves for a stronger,
+                        more defined flavor (closer to your prompt), while a lower CFG Scale is like using fewer leaves for a milder, more subtle result
+                        (more creative freedom for the model).
+                    </p>
+                    <p>
+                        You can add too much water and then there's no taste (no image), and you can add too many tea leaves and then it's
+                        too bitter (too much image). Staying around 2.0 to 7.0 is usually good enough for most models.
+                    </p>
+                </div>
+
                 {/* This is left here in case we ever want to bring this back */}
                 {/* <div>
                     <b><LabeledIcon label="Scheduler"><Schedule /></LabeledIcon></b>: Controls the schedule or timing of how noise is added and 
@@ -483,6 +491,7 @@ export default function HelpTab(props: {
                     <p><i>Most users can stick with the default scheduler for their sampler, but experimenting with others can sometimes yield 
                         different artistic results or improve consistency for certain models.</i></p>
                 </div> */}
+
                 <div>
                     <b><LabeledIcon label="Seed"><Yard /></LabeledIcon></b>: Seed to generate the initial noise of the image
                     <p>
@@ -495,13 +504,23 @@ export default function HelpTab(props: {
                     <p>
                         Your seed value is also used to select wildcards. Prompts with the same seed will always choose the same wildcard value!
                     </p>
-                    <p><i>
-                        If you wish to experiment further without saving each image,
-                        you can use the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Preview Recipe</Card> option in
-                        the {BrewButton} button's menu
-                    </i></p>
+
                 </div>
-                <div>Most of these have defaults that are configurable in the <LabeledIcon label="Settings"><Settings /></LabeledIcon> drawer</div>
+
+                <div>
+                    <b><LabeledIcon label="Amount"><Coffee /></LabeledIcon></b>: Amount of images to enqueue when you hit {BrewButton}
+                </div>
+
+                <hr style={{ width: "100%" }} />
+
+                <div >Most of these have defaults that are configurable in the <LabeledIcon label="Settings"><Settings /></LabeledIcon> drawer</div>
+
+                <p><i>
+                    If you wish to experiment further without saving each image,
+                    you can use the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Preview Recipe</Card> option in
+                    the {BrewButton} button's menu
+                </i></p>
+
             </div>
         </HelpSection>
 
@@ -636,9 +655,9 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 </Card> button to select where to save your recipe, or specify a new folder by typing a path with slashes.
             </p>
             <p>
-                Once your recipe is saved, you can browse, edit, and load recipes using
-                the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Load a recipe</Card> or
-                make further alterations and overwrite or save your current recipe as another name.
+                You can browse, edit, and load recipes using
+                the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Load a recipe</Card>.
+                You can also make further alterations and overwrite or save your current recipe as another name.
             </p>
 
         </HelpSection>
@@ -648,7 +667,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
 
             <p>
                 Chamomile allows you to set up collections of images, which can automatically add images that match a custom search query. To
-                view them, Click on the <LabeledIcon label="Collections"><PhotoLibrary /></LabeledIcon> icon on the menu on the top right of
+                view them, Click on the <LabeledIcon label="Collections"><PhotoLibrary /></LabeledIcon> icon on the menu on the top left of
                 the screen.
             </p>
 
@@ -713,12 +732,16 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                     <b style={{ flexShrink: "0" }}><LabeledIcon label="Sampler"><Window /></LabeledIcon>: </b>
                     <div>Sampler to generate the image of a cell (See Advanced Prompting)</div>
                 </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Checkpoint"><ModelTraining /></LabeledIcon>: </b>
+                    <div>Stable Diffusion checkpoint for this cell</div>
+                </div>
             </div>
 
             <Stack gap={"8px"}>
                 <Alert severity="warning" style={{ fontSize: ".8em" }}>
                     <AlertTitle style={{ fontSize: "1.2em" }}>Do not re-use axis types</AlertTitle>
-                    Aside from Prompt search/replace, you should not use two of the same axis type. Only the Y values will be used.
+                    Aside from Prompt search/replace, you should not use two of the same axis type. Only one of the values will be used.
                 </Alert>
 
                 <Alert severity="warning" style={{ fontSize: ".8em" }}>
@@ -777,7 +800,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
 
             <Alert severity="info" style={{ fontSize: ".8em" }}>
                 <AlertTitle style={{ fontSize: "1.2em" }}>This is a new feature!</AlertTitle>
-                This accordion will not open because chamomile on images generated before 3.0 and you have
+                This accordion will not open because Chamomile on images generated before 3.0 and you have
                 not run the <Link href="https://github.com/GooeyAvocado/Chamomile/blob/master/Chamomile.Data/DDLs/ImageAddtlInfo_migration.sql" target="@blank">
                     optional migration script
                 </Link>.
@@ -788,31 +811,30 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
         <HelpSection title="More Like This">
             <img src="/screenshots/morelikethis.png" width={"80%"} />
             <p>
-                Based on your  prompt source, checkpoint, and used LoRAs, you'll be able to search for more images similar to it.
-                Clicking an option here will clear the filter and replace it to search by the selected criteria of similarity
+                Based on your prompt, source, checkpoint, and used LoRAs, you'll be able to search for more images similar to another.
+                Clicking an option here will clear the filter and replace it to search by the selected criteria of similarity.
             </p>
             <p>
-                If an image is the original, you can search for images that have marked the right clicked image as a sample
+                If an image is the original or an upload, you can search for images that have marked the right clicked image as a sample
             </p>
             <p>
                 <LabeledIcon label="More like this"><ImageSearch /></LabeledIcon> is also available on the image modal under
-                source,, the checkpoint card, or LoRA cards, as well as on Prompts (as "Images like this").
+                the prompt, source accordion, the checkpoint card, and LoRA cards.
             </p>
         </HelpSection>
 
         <HelpSection title="Upscaling Images" >
             <img src="/screenshots/upscaling.png" width={"70%"} />
             <p>
-                Images that have been added to Chamomile can be upscaled using your Web UI. You can select which upscaler and
-                by how much to upscale the image. The upscaled image is saved on Chamomile, and will be immediately available
-                for download.
+                Images that have been added to Chamomile can be upscaled using your web UI. You can select which upscaler to use and
+                by how much to upscale the image. The upscaled image replaces the original image.
             </p>
             <p>
-                While your Web UI might come bundled with several uspcalers, we personally recommend RealESRGAN models, which can
+                While your web UI might come bundled with several uspcalers, we personally recommend RealESRGAN models, which can
                 be downloaded and placed in the following directory:
             </p>
             <div style={codeStyle}>
-                /(your webUI root)/models/RealESRGAN
+                /(your web UI root)/models/RealESRGAN
             </div>
         </HelpSection>
 
@@ -823,7 +845,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 the <LabeledIcon label="Statistics"><BarChart /></LabeledIcon> button at the end
                 of the search box. These statistics are based on your search query. If it is
                 blank, it'll show global overall statistics. You can further refine this to
-                show only models that are available or unavailable, and a limit to how many
+                show only models that are available or unavailable, and limit how many
                 images to analyze.
             </p>
             <p>
@@ -841,7 +863,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 space after having removed all LoRAs and parentheses. It's not perfect!
             </div>
             <p>
-                You can also view usage statistics over time for these three data categories. Simply
+                You can also view usage statistics over time for image generation, checkpoints, LoRAs, and keywords. Simply
                 click the <LabeledIcon label="Chart"><Timeline /></LabeledIcon> button on the bottom,
                 and choose what elements to plot.
             </p>
