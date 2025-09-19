@@ -240,7 +240,7 @@ export default function ImageModal(props: {
                                 <b style={{ flex: "1" }}>Negative Prompt</b>
                                 <CopyToClipboardButton text={image?.negativePrompt} style={{ paddingRight: "16px" }} />
                             </div>
-                            <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{image?.negativePrompt}</div>
+                            <div style={{ fontSize: ".6em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{image?.negativePrompt}</div>
                         </>}
 
                         {/* Model */}
