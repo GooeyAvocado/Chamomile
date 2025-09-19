@@ -16,7 +16,7 @@ export default function CopyToClipboardButton({ text, style }: {
     };
 
     return <Tooltip title={copied ? "Copied!" : "Copy to Clipboard"}>
-        <IconButton onClick={handleCopy} color={copied ? "success" : "default"} size="small" style={style}>
+        <IconButton onClick={handleCopy} color={copied ? "success" : "default"} style={style}>
             {copied ? <CheckIcon fontSize="small" /> : <ContentPaste fontSize="small" />}
         </IconButton>
     </Tooltip>

@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -9,7 +9,7 @@ import { useSnackbar } from "notistack";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
 import PromptReorderButton from "../prompt/PromptReorderButton";
-import { imageToPrompt } from "../Utils";
+import { clearFilter, imageToPrompt } from "../Utils";
 import { useEffect, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
@@ -74,7 +74,7 @@ export default function ImageModal(props: {
     const [editNote, setEditNote] = useState("")
 
     useEffect(() => {
-        if ((image?.basePrompt?.trim()?.length ?? 0) === 0) setPromptMode(0)
+        if ((image?.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt) setPromptMode(0)
         setNotesOpen(false)
     }, [image])
 
@@ -98,6 +98,12 @@ export default function ImageModal(props: {
         } catch (error) {
             console.error('Error downloading the image:', error);
         }
+    }
+
+    const onMoreLikeThisPrompt = () => {
+        if (!setFilter || !filter) return;
+        setFilter({ ...clearFilter(filter), sample: image?.id, sampleMode: promptMode === 1 ? "BASE_HASH" : "HASH" })
+        setOpen(false)
     }
 
     return <Dialog open={open && !!image} onClose={() => setOpen(false)} fullScreen
@@ -213,12 +219,15 @@ export default function ImageModal(props: {
 
                         {/* Prompt */}
                         <Card elevation={5}>
-                            <div style={{ display: 'flex' }}>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <Tabs value={promptMode} onChange={(_, val) => setPromptMode(val)} style={{ flex: "1" }}>
                                     <Tab sx={{ textTransform: 'none' }} label="Prompt" />
                                     {(image?.basePrompt?.trim().length ?? 0) !== 0 && image?.basePrompt !== image?.prompt && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
                                 </Tabs>
-                                <CopyToClipboardButton text={promptMode === 0 ? image?.prompt : image?.basePrompt} style={{ paddingRight: "16px" }} />
+                                <div style={{ display: 'flex', gap: '10px', marginRight: "10px" }}>
+                                    {filter && setFilter && <Tooltip title={`More like this${promptMode === 1 ? " base" : ""} prompt`}><IconButton onClick={onMoreLikeThisPrompt}><ImageSearch /></IconButton></Tooltip>}
+                                    <CopyToClipboardButton text={promptMode === 0 ? image?.prompt : image?.basePrompt} />
+                                </div>
                             </div>
                             <HighlightedPromptDiv
                                 prompt={promptMode === 0 ? image?.prompt : image?.basePrompt}
