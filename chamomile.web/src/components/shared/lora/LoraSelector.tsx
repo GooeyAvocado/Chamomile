@@ -76,7 +76,7 @@ export default function LoraSelector(props: {
                                     <GridView />
                                 </IconButton>
                             </InputAdornment>),
-                            disableUnderline: true
+
                         }
                     }} />}
 

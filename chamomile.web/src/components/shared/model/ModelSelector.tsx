@@ -79,7 +79,7 @@ export default function ModelSelector(props: {
                                     <GridView />
                                 </IconButton>
                             </InputAdornment>),
-                            disableUnderline: true
+
                         }
                     }} />}
 
