@@ -32,12 +32,13 @@ export interface ChamomileDefaults {
 /**
  * Indicates which fields in the promptbox are considered "global", and should be used instead of the original prompt's values when using or re-brewing a prompt
  */
-export interface ChamomileGlobalFlags {
-    width: boolean,
-    height: boolean,
-    steps: boolean,
-    cfg: boolean,
-    sampler: boolean
+export class ChamomileGlobalFlags {
+    width = false
+    height = false
+    steps = false
+    cfg = false
+    sampler = false
+    negativePrompt = false
 }
 
 export const SettingsContext = createContext<SettingsContextType | undefined>(undefined);

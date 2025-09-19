@@ -75,7 +75,8 @@ export default function PromptReorderButton(props: {
                     sampler: settings.globals.sampler ? promptboxPrompt.sampler : p.sampler,
                     steps: settings.globals.steps ? promptboxPrompt.steps : p.steps,
                     width: settings.globals.width ? promptboxPrompt.width : p.width,
-                    height: settings.globals.height ? promptboxPrompt.height : p.height
+                    height: settings.globals.height ? promptboxPrompt.height : p.height,
+                    negativePrompt: settings.globals.negativePrompt ? promptboxPrompt.negativePrompt : p.negativePrompt
 
                 }, orderData: {
                     sample: sample ?? -1,

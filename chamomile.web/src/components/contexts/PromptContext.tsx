@@ -47,7 +47,8 @@ export default function PromptProvider(props: { children: any }) {
                     sampler: settings.globals.sampler ? prompt.sampler : val.sampler,
                     steps: settings.globals.steps ? prompt.steps : val.steps,
                     width: settings.globals.width ? prompt.width : val.width,
-                    height: settings.globals.height ? prompt.height : val.height
+                    height: settings.globals.height ? prompt.height : val.height,
+                    negativePrompt: settings.globals.negativePrompt ? prompt.negativePrompt : val.negativePrompt
 
                 }
             })

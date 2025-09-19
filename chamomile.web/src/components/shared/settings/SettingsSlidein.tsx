@@ -5,6 +5,7 @@ import { Coffee, DirectionsRun, Height, ThumbDown, Tune, VolumeUp } from "@mui/i
 import SamplerSelector from "../prompt/SamplerSelector";
 import { useState } from "react";
 import SizePresetSelector from "../prompt/SizePresetSelector";
+import { ChamomileGlobalFlags } from "../../contexts/SettingsContext";
 
 export default function SettingsSlidein({ open, setOpen }: {
     open: boolean,
@@ -167,16 +168,18 @@ export default function SettingsSlidein({ open, setOpen }: {
                     Values marked as global will not be overridden when requesting to re-brew or re-use the prompt of an image.
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'row', rowGap: "10px", columnGap: "0px", flexWrap: "wrap" }}>
-                    {Object.keys(settings.globals).map(a => <>
-                        <div style={{ display: 'flex', gap: "16px", alignItems: 'center', width: "50%" }}>
+                    {(Object.keys(new ChamomileGlobalFlags())).map((key) => (
+                        <div key={key} style={{ display: 'flex', gap: "16px", alignItems: 'center', width: "50%" }}>
                             <Switch
-                                checked={(settings.globals as any)[a]}
-                                onChange={(_, checked) => setSettings({ ...settings, globals: { ...settings.globals, [a]: checked } })}
+                                checked={(settings.globals as any)[key]}
+                                onChange={(_, checked) => setSettings({ ...settings, globals: { ...settings.globals, [key]: checked } })}
                                 size="small"
                             />
-                            <div style={{ fontSize: ".8em" }}>{a === "cfg" ? <>CFG</> : <>{a[0].toUpperCase()}{a.substring(1)}</>}</div>
+                            <div style={{ fontSize: ".8em" }}>
+                                {key === "cfg" ? <>CFG</> : key === "negativePrompt" ? <>Negative Prompt</> : <>{key[0].toUpperCase()}{key.substring(1)}</>}
+                            </div>
                         </div>
-                    </>)}
+                    ))}
                 </div>
             </>
 

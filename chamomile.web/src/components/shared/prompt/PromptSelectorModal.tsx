@@ -69,7 +69,8 @@ export default function PromptSelectorModal(props: {
                         sampler: settings.globals.sampler ? prompt.sampler : p.sampler,
                         steps: settings.globals.steps ? prompt.steps : p.steps,
                         width: settings.globals.width ? prompt.width : p.width,
-                        height: settings.globals.height ? prompt.height : p.height
+                        height: settings.globals.height ? prompt.height : p.height,
+                        negativePrompt: settings.globals.negativePrompt ? prompt.negativePrompt : p.negativePrompt
 
                     }, orderData: {
                         sample: p.sampleImage ?? -1,
