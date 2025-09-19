@@ -170,16 +170,16 @@ export default function PromptModelSelectorModal(props: {
                 <div><b>Loras</b></div>
                 <Tooltip title={addOpen ? 'Cancel' : 'Add a LoRA'}><IconButton onClick={() => setAddOpen(!addOpen)}><Add sx={{ rotate: addOpen ? '45deg' : '' }} /></IconButton></Tooltip>
             </div>
+            <hr style={{ width: "100%" }} />
 
             {addOpen && <>
                 <LoraSelector lora="" setLora={(e) => {
                     addLora(e.alias)
                     setAddOpen(false)
-                }} />
+                }} style={{ marginTop: "10px", marginBottom: '10px' }} />
             </>}
-            <hr style={{ width: "100%" }} />
 
-            <div style={{ flex: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ flex: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: "5px" }}>
                 {usedLoras().map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <IconButton onClick={() => { removeLora(a) }}><Close /></IconButton>
                     <div style={{ flex: "1" }}><LoraCard loraAlias={a} /></div>
