@@ -123,9 +123,9 @@ export default function QueueProvider(props: { children: any }) {
     });
 
     useSignalR("JobCancelled", (jobId: number, prompt: Prompt, queue: Prompt[], message: string) => {
-        console.error(`Job ${jobId} has been cancelled`)
-        console.error(prompt)
-        console.error(message)
+        console.log(`Job ${jobId} has been cancelled`)
+        console.log(prompt)
+        console.log(message)
 
         enqueueSnackbar("Job cancelled!", { variant: 'warning' })
 
