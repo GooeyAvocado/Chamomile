@@ -244,7 +244,7 @@ export default function ImageModal(props: {
                         </>}
 
                         {/* Model */}
-                        <div style={{ marginTop: "20px" }}><b>Model</b></div>
+                        <div style={{ marginTop: "20px" }}><b>Checkpoint</b></div>
                         <ModelCard
                             filter={filter} setFilter={setFilter}
                             modelTitle={image?.model ?? ""} currentImage={image} elevation={5}

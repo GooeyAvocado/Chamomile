@@ -27,7 +27,7 @@ export default function ModelBrowserModal(props: {
     const [availability, setAvailability] = useState<0 | 1 | -1>(0);
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='xl'>
-        <DialogTitle>Select a Model</DialogTitle>
+        <DialogTitle>Select a Checkpoint</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: "75vh" }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 <IconButton onClick={() => { refresh(true) }} disabled={loading}>{

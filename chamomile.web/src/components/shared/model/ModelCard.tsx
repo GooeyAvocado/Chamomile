@@ -142,7 +142,7 @@ export default function ModelCard(props: {
             <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
                 <MenuItem onClick={openEditor} disabled={modelUnavailable()}>
                     <ListItemIcon><Edit /></ListItemIcon>
-                    Edit Model
+                    Edit checkpoint
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={viewImage} disabled={!model.bannerImage || model.bannerImage === currentImage?.id} >
@@ -164,7 +164,7 @@ export default function ModelCard(props: {
                 </>}
             </Menu>
             <AreYouSureModal open={updateAys} setOpen={setUpdateAys} onYes={realUpdateImage} title="Set this image as sample?">
-                Are you sure you want to set this image as the sample for this model?
+                Are you sure you want to set this image as the sample for this checkpoint?
             </AreYouSureModal>
             <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={model.bannerImage} />
         </>}

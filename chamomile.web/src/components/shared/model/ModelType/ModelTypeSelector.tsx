@@ -12,10 +12,10 @@ export default function ModelTypeSelector(props: {
     } = props
 
     return <FormControl fullWidth>
-        <InputLabel>Base Model Type</InputLabel>
+        <InputLabel>Model type</InputLabel>
         <Select
             value={modelType ?? ""}
-            label="Base Model Type"
+            label="Model type"
             onChange={(e) => setModelType(e.target.value)}
         >
             {allowAny && <MenuItem value={""}>Any</MenuItem>}

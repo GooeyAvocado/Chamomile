@@ -66,7 +66,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
 
 
     return <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Model Sequence</DialogTitle>
+        <DialogTitle>Checkpoint Sequence</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "75vh" }}>
 
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -100,7 +100,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                                 setValidation([])
                             }} style={{ flex: "1" }} disabled={s.modelTitle === currentModel || loading} />
 
-                        <Tooltip title="This is the chance that the model will be used for the next image. Setting this too low may cause thrashing between models.">
+                        <Tooltip title="This is the chance that the checkpoint will be used for the next image. Setting this too low may cause thrashing between models.">
                             <TextField
                                 type="number"
                                 value={s.chanceStay} disabled={loading}
@@ -122,7 +122,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                             />
                         </Tooltip>
 
-                        <Tooltip title="This is the weight of the model in the sequence, higher means more likely to be used.">
+                        <Tooltip title="This is the weight of the checkpoint in the sequence, higher means more likely to be used.">
                             <TextField
                                 error={!!validation?.[index]?.loadWeight}
                                 helperText={validation?.[index]?.loadWeight}
@@ -158,7 +158,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                         setValidation([])
                     }}
                     value={internalSequence}
-                    type="model sequence"
+                    type="Checkpoint sequence"
                     nonPlural
                 />
                 <Button
@@ -174,7 +174,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                             } as ModelSequence
                         ]);
                     }}
-                >Add another model</Button>
+                >Add another checkpoint</Button>
 
             </div>
 

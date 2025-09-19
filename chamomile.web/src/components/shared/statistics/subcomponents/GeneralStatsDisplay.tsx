@@ -40,7 +40,7 @@ export default function GeneralStatsDisplay({
                 <PreviewTile
                     setImage={setImage} setViewerOpen={setViewerOpen}
                     id={mostUsedModel?.bannerImage === 0 ? modelData?.[0]?.sample : mostUsedModel?.bannerImage ?? modelData?.[0]?.sample}
-                    label="Most used model" value={mostUsedModel?.name ?? modelData?.[0]?.keyword}
+                    label="Most used checkpoint" value={mostUsedModel?.name ?? modelData?.[0]?.keyword}
                 />
 
                 <PreviewTile

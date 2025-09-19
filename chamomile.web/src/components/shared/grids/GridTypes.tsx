@@ -37,7 +37,7 @@ export const GridTypes: GridType[] = [
     },
     {
         code: "MOD",
-        name: "Model",
+        name: "Checkpoint",
         type: "model",
         prefix: <ModelTraining fontSize="inherit" />,
         suffix: "",

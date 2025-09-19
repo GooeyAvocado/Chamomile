@@ -59,20 +59,20 @@ export default function PromptModelSelectorModal(props: {
 
     const onChangeModel = (val: Model) => {
         changeModelApi.fetch(() => {
-            enqueueSnackbar("Model changed!", { variant: 'success' })
+            enqueueSnackbar("Checkpoint changed!", { variant: 'success' })
             currentModelApi.fetch()
             if ((currentSequenceApi.data?.length ?? 0) > 0 && !currentSequenceApi.data?.find(a => a.modelTitle === val.title)) {
                 //We have a sequence and we've just changed the model to one that is not in the sequence, so we should clear the sequence
                 changeModelSequenceApi.fetch(() => {
-                    enqueueSnackbar("Model sequence cleared!", { variant: 'success' })
+                    enqueueSnackbar("Checkpoint sequence cleared!", { variant: 'success' })
                     currentSequenceApi.fetch();
                 }, () => {
-                    enqueueSnackbar("Model sequence could not be cleared", { variant: 'error' })
+                    enqueueSnackbar("Checkpoint sequence could not be cleared", { variant: 'error' })
                 }, [])
                 setOpen(false);
             }
         }, () => {
-            enqueueSnackbar("Model could not be changed", { variant: 'error' })
+            enqueueSnackbar("Checkpoint could not be changed", { variant: 'error' })
         }, { model: val.title } as ModelRequest)
     }
 
@@ -106,7 +106,7 @@ export default function PromptModelSelectorModal(props: {
                             disabled={changeModelApi.loading} loading={changeModelApi.loading}
                             style={{ marginTop: '5px', marginBottom: '10px', flex: '1' }}
                         />
-                        <Tooltip title="Change the model sequence" style={{ marginTop: "-5px" }}><IconButton
+                        <Tooltip title="Change the checkpoint sequence" style={{ marginTop: "-5px" }}><IconButton
                             disabled={currentModelApi.loading || currentSequenceApi.loading} onClick={() => {
                                 setSequenceEditorOpen(true);
                             }}><Schedule /></IconButton></Tooltip>
@@ -120,10 +120,10 @@ export default function PromptModelSelectorModal(props: {
                         onOk={(val) => {
                             changeModelSequenceApi.fetch(() => {
                                 setSequenceEditorOpen(false);
-                                enqueueSnackbar("Model sequence changed!", { variant: 'success' })
+                                enqueueSnackbar("Checkpoint sequence changed!", { variant: 'success' })
                                 currentSequenceApi.fetch();
                             }, () => {
-                                enqueueSnackbar("Model sequence could not be changed", { variant: 'error' })
+                                enqueueSnackbar("Checkpoint sequence could not be changed", { variant: 'error' })
                             }, val)
                         }}
 
@@ -134,7 +134,7 @@ export default function PromptModelSelectorModal(props: {
                 </>
                 : !pong?.SD ? <Alert severity="warning">
                     <AlertTitle>Stable diffusion is unavailable</AlertTitle>
-                    You cannot change the current model because there is no current model. However, you can still set LoRAs for this prompt that you're building
+                    You cannot change the current checkpoint. However, you can still set LoRAs for this prompt that you're building
 
                 </Alert> : <></>
             }

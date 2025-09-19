@@ -109,7 +109,7 @@ export default function PromptReorderButton(props: {
                 Brew {orderAmount} {textSuffix}
             </MenuItem>
                 : <Tooltip title={<>
-                    <div>Reorder this prompt with the current model</div>
+                    <div>Reorder this prompt</div>
                     <div>This will place {orderAmount} order(s)</div>
                     {textSuffix && <div>{textSuffix}</div>}
                 </>}>

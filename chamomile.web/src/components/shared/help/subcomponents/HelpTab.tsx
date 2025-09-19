@@ -115,7 +115,7 @@ export default function HelpTab(props: {
             <p>
                 If you've previously generated images with your WebUI, you can import them to Chamomile by dragging and dropping one or
                 more files or folders. We'll take care of extracting the metadata already embedded on each image to populate
-                Prompt, Model, LoRAs, Sampler, Seed, and other information.
+                Prompt, checkpoint, LoRAs, Sampler, Seed, and other information.
             </p>
         </HelpSection>
 
@@ -187,21 +187,21 @@ export default function HelpTab(props: {
 
         </HelpSection>
 
-        <HelpSection title="Using Different Models and LoRAs" >
+        <HelpSection title="Using Different Checkpoints and LoRAs" >
             <img src="/screenshots/models.png" style={{ width: "70%" }} />
             <p>
-                One of the basic ways to generate different images beyond prompting differently is to use different models and low-rank
-                adaptations (LoRAs) on top of said models. Chamomile makes it easy to select your model and add or remove LoRAs to your
+                One of the basic ways to generate different images beyond prompting differently is to use different checkpoints and low-rank
+                adaptations (LoRAs) on top of said checkpoints. Chamomile makes it easy to select your checkpoint and add or remove LoRAs to your
                 prompt. Click on the <LabeledIcon label="Models"><ModelTraining /></LabeledIcon> button on the prompt box.
             </p>
             <Alert severity="warning" style={{ fontSize: ".8em" }}>
-                <AlertTitle style={{ fontSize: "1.2em" }}>New models and LoRAs may not automatically be visible</AlertTitle>
-                Open the Model or Lora Browsers using the <LabeledIcon label="Browser"> <GridView /></LabeledIcon> button and click
+                <AlertTitle style={{ fontSize: "1.2em" }}>New checkpoints and LoRAs may not automatically be visible</AlertTitle>
+                Open the checkpoint or LoRA Browsers using the <LabeledIcon label="Browser"> <GridView /></LabeledIcon> button and click
                 the <LabeledIcon label="Refresh"><Refresh /></LabeledIcon> button on the upper left corner.
             </Alert>
             <p>
-                Models can only be set globally, and will affect pending generations. If you change your model while there's still
-                prompts pending, they will be generated using the new model. Models are pulled from your WebUI and should be downloaded
+                Checkpoints can only be set globally, and will affect pending generations. If you change your checkpoint while there's still
+                prompts pending, they will be generated using the new checkpoint. Checkpoints are pulled from your WebUI and should be downloaded
                 to the following directory: <div style={codeStyle}>/(your webUI root)/models/stable-diffusion</div>
             </p>
             <p>
@@ -217,42 +217,42 @@ export default function HelpTab(props: {
             <p>You can download additional models from several sources, but we recommend <Link href="https://civitai.com/">CivitAI</Link></p>
         </HelpSection>
 
-        <HelpSection title="Model Sequencing" >
+        <HelpSection title="Checkpoint Sequencing" >
             <img src="/screenshots/modelsequence.png" style={{ width: "70%" }} />
             <p>
                 If you have a large batch of images on queue, and want to introduce further variety in your
-                outputs, you can consider setting up a model sequence. You can do this by clicking the
-                <LabeledIcon label="Sequence"> <Schedule /></LabeledIcon> button next to the model selector.
-                Based on the sequence, Chamomile will dynamically switch models after generation of an image.
+                outputs, you can consider setting up a checkpoint sequence. You can do this by clicking the
+                <LabeledIcon label="Sequence"> <Schedule /></LabeledIcon> button next to the checkpoint selector.
+                Based on the sequence, Chamomile will dynamically switch checkpointss after generation of an image.
             </p>
             <p>
-                Each model has two properties:
+                Each checkpoint has two properties:
             </p>
             <ul>
                 <li>
                     <b>Chance to stay</b>:
-                    Percentage chance that Chamomile will stay on this model rather than switch to
-                    another model in the sequence. Setting this value too low may cause Chamomile to
-                    thrash between models.<br /><br />
+                    Percentage chance that Chamomile will stay on this checkpoint rather than switch to
+                    another checkpoint in the sequence. Setting this value too low may cause Chamomile to
+                    thrash between checkpoints.<br /><br />
                 </li>
                 <li>
                     <b>Load weight</b>:
-                    How likely this model is to be chosen when switching models. A higher load weight
-                    means this model will be picked more often compared to others in the sequence.
-                    Chamomile will not pick the same model it just switched from.
+                    How likely this checkpoint is to be chosen when switching checkpoints. A higher load weight
+                    means this checkpoint will be picked more often compared to others in the sequence.
+                    Chamomile will not pick the same checkpoint it just switched from.
                 </li>
             </ul>
         </HelpSection>
 
-        <HelpSection title="Model and LoRA Management" >
+        <HelpSection title="Model Management" >
             <img src="/screenshots/modelEdit.png" width={"50%"} />
             <p>
-                As part of adding models to Chamomile, you should also take the time to set your model type a sample image, and some notes.
+                As part of adding models to Chamomile, you should also take the time to set your model type, a sample image, and some notes.
                 Your LoRA can also store activation tags, though these are purely for notes (for now).
             </p>
             <p>
                 You can also set a sample image from the image viewer. Simply click the <LabeledIcon label="Menu button"><MoreVert /></LabeledIcon>
-                {" "}on the LoRA or Model card, and select <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Set this as sample image</Card>
+                {" "}on the LoRA or Checkpoint card, and select <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Set this as sample image</Card>
             </p>
         </HelpSection>
 
@@ -373,13 +373,13 @@ export default function HelpTab(props: {
 
         <HelpSection title="Advanced Prompting Techniques" >
             <img src="/screenshots/expandedPromptBar.png" width={"100%"} />
-            Chamomile allows you to fine tune your results with more than just a prompt, models, and LoRAs.
+            Chamomile allows you to fine tune your results with more than just a prompt and models.
             Clicking the <LabeledIcon label="More Options"> <ExpandMore /></LabeledIcon> button on the prompt bar reveals
             additional settings for your prompts including
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
                 <div>
-                    <b><LabeledIcon label="Negative Prompt"><ThumbDown /></LabeledIcon></b>: What the diffusion model should avoid
+                    <b><LabeledIcon label="Negative Prompt"><ThumbDown /></LabeledIcon></b>: What the diffusion checkpoint should avoid
                 </div>
 
                 <div>
@@ -788,7 +788,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
         <HelpSection title="More Like This">
             <img src="/screenshots/morelikethis.png" width={"80%"} />
             <p>
-                Based on your prompt source, model, and used LoRAs, you'll be able to search for more images similar to it.
+                Based on your  prompt source, checkpoint, and used LoRAs, you'll be able to search for more images similar to it.
                 Clicking an option here will clear the filter and replace it to search by the selected criteria of similarity
             </p>
             <p>
@@ -796,7 +796,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             </p>
             <p>
                 <LabeledIcon label="More like this"><ImageSearch /></LabeledIcon> is also available on the image modal under
-                source, the model card, or LoRA cards, as well as on Prompts (as "Images like this").
+                source,, the checkpoint card, or LoRA cards, as well as on Prompts (as "Images like this").
             </p>
         </HelpSection>
 
@@ -830,8 +830,8 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 You can view five different statistics:
             </p>
             <ul>
-                <li><b>General:</b> A small dashboard including image counts, your most common model, LoRA, and keyword, and the date range of image generation</li>
-                <li><b>Models:</b> SD Models used in generation</li>
+                <li><b>General:</b> A small dashboard including image counts, your most common checkpoint, LoRA, and keyword, and the date range of image generation</li>
+                <li><b>Checkpoint:</b> SD Checkpoints used in generation</li>
                 <li><b>LoRAs:</b> LoRAs used in generation, including a statistic for no LoRAs used</li>
                 <li><b>Keywords:</b> Usage statistics on keywords* in your prompts</li>
                 <li><b>Source:</b> A table showing where the prompts you've sent in are sourced form. See Prompt Source for more info</li>
@@ -855,7 +855,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <p>
                 This is a small feature that brings up a random image on Chamomile. The original intent
                 was to prompt that random image immediately, but we decided against that since LoRA combinations
-                and prompting can change with different active models.
+                and prompting can change with different active checkpoints.
             </p>
             <p>
                 When an image is open, on the top left of the screen, you'll see a card with a button to roll
@@ -891,7 +891,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 </div>
 
                 <div>
-                    <b><LabeledIcon label="Models and LoRAs"><ModelTraining /></LabeledIcon></b>: Only show images that use either this model or LoRA
+                    <b><LabeledIcon label="Checkpoints and LoRAs"><ModelTraining /></LabeledIcon></b>: Only show images that use either this checkpoint or LoRA
                 </div>
             </div>
 

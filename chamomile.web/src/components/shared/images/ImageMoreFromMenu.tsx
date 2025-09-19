@@ -55,7 +55,7 @@ export default function ImageMoreFromMenu({
                 </Card>
             }</ListItemIcon>
             <div>
-                <div style={{ fontSize: '.8em' }}>Model</div>
+                <div style={{ fontSize: '.8em' }}>Checkpoint</div>
                 <div style={{ fontSize: ".7em", opacity: ".7" }}>{imageModel?.name}</div>
             </div>
         </MenuItem>

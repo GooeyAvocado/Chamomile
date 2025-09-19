@@ -110,13 +110,13 @@ export default function StatisticsModal(props: {
 
             </StatsPanel> : ""}
         </TabbedModalTabContent>
-        <TabbedModalTabContent label="Models">
-            {open ? (modelLoading || !modelData) ? <LoadingSpinner text="Loading model usage information" /> : <StatsPanel
+        <TabbedModalTabContent label="Checkpoints">
+            {open ? (modelLoading || !modelData) ? <LoadingSpinner text="Loading checkpoint usage information" /> : <StatsPanel
                 datedUsageApi={getModelUsageDated} minAutoCompleteLength={0}
                 usage={availability === 0 ? modelData : availability === 1
                     ? modelData?.filter(a => modelAvailable(a.keyword))
                     : modelData?.filter(a => !modelAvailable(a.keyword))}
-                filter={filter} keywordColumnOverride="Model" limit={limit}
+                filter={filter} keywordColumnOverride="Checkpoint" limit={limit}
                 getSampleImageId={(u) => models?.find(a => a.title === u.keyword)?.bannerImage}
                 renderKeywordRow={(u) => {
                     const m = models?.find(a => a.title === u.keyword) ?? {

@@ -23,10 +23,10 @@ Chamomile lets you save prompts as "Recipes" to make it easy to generate more of
 Chamomile lets you annotate your prompts with comments (#, //, or /**/), as well as look over and specify wildcards to make it easier to quickly edit your prompts.
 You can then view and search by either the full prompt that was generated, or the base prompt with all wildcards un-replaced, and comments still intact.
 
-### Model Usage Statistics
+### Statistics
 <img src="./chamomile.web/public/screenshots/stats.png" width="500px">
 Chamomile lets you dig into your usage patterns, by giving you statistics on all your images, or those that match your search query. You can also limit by latest
-images or by model/LoRA availability.
+images or by Checkpoint/LoRA availability.
 
 ### And a bit more!
 You can find more on how to use and get started with Chamomile in the included in the help and about documentation 

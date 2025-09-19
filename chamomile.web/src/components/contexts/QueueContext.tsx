@@ -135,13 +135,13 @@ export default function QueueProvider(props: { children: any }) {
     });
 
     useSignalR("ModelRerollStarted", (nextModel: string) => {
-        console.log("Changing model " + nextModel)
+        console.log("Changing Checkpoint " + nextModel)
         setModelSequenceChangeBusy(nextModel)
     });
 
     useSignalR("ModelRerollComplete", (nextModel: string) => {
         console.log("Model Reroll complete " + nextModel)
-        enqueueSnackbar("Model changed!", { variant: 'success' })
+        enqueueSnackbar("Checkpoint changed!", { variant: 'success' })
         setModelSequenceChangeBusy(undefined)
     });
 

@@ -65,7 +65,7 @@ export default function ModelSelector(props: {
             renderInput={(params: any) =>
                 <TextField {...params}
                     placeholder={model ?? ""} variant="outlined"
-                    label='Model' error={error}
+                    label='Checkpoint' error={error}
                     slotProps={{
                         input: {
                             ...params.InputProps,
