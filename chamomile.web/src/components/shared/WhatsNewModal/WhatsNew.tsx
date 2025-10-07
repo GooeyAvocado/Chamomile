@@ -4,77 +4,30 @@ import Markdown from "react-markdown"
 import { useEffect } from "react"
 import { useSettings } from "../../hooks/useSettings"
 
+export const CHAMOMILE_MAJOR_VERSION = 3.1
+
 export default function WhatsNew({ open, setOpen }: {
     open: boolean,
     setOpen: (val: boolean) => void
 }) {
 
-    const frontendBuild = import.meta.env.VITE_BACKEND_BUILD ?? "v3-local"
+    const frontendBuild = import.meta.env.VITE_BACKEND_BUILD ?? "local"
     const buildTime = import.meta.env.VITE_BUILD_TIMESTAMP ? new Date(import.meta.env.VITE_BUILD_TIMESTAMP) : new Date();
 
-    const majorVersion = 3.0
-    const whatsnew = `We added a lot with this one, including this dialog!
+
+    const whatsnew = `Minor fixes and a few additional things :3
 
 ### What's new?
-- **Promptbox autocomplete:** You can now get suggestions for LoRAs (<), Wildcards (__), and DynPrompts variables ($\{var}) on the prompt box.
-- **Collections:** It's now a lot easier to organize your images. You can set up collections to automatically add images based on a search, or generate images directly to an album.
-- **Grids:** You can now render several images to test out small tweaks to a variety of different parameters across rows and columns.
-- **Images are now selectable:** A major QOL improvement if you need to delete or add several images to a collection.
-- **More like this:** It's now easier to search for images either from the viewer or the context menu.
-- **Keyword statistics:** A new statistics category added so you can see what makes up your prompts.
-- **General statistics:** Another new statistics category added so you can see general information and image counts based on your filters.
-- **Image source statistics:** We now log where the prompt for an image came from, including existing images (base or full prompts), saved recipes, the prompt box, or from a grid. This is also visible in one final new statistics category.
-- **Image notes:** You can now write some small fully searchable text notes on images.
-- **Checkpoint sequencing:** Chamomile can now sequence checkpoints and switch between them when conducting large numbers of brews.
-- **Pause brewing:** Need to take a break? Don't want to lose your queue? Simply pause generation on the top right of the screen. You can close SD and bring it back up later.
-- **Generation time measured:** See how long SD actually took to generate from when Chamomile sent the request, to when it got an image back.
-- **Settings:** You can now configure sound, defaults, and which values from the prompt box are fixed between orders.
-- **Download button:** Directly download with your mouse, skipping a right click. You'll also be warned if you've already downloaded an image to keep your folders clean.
-- **Interrupt brewing:** Don't like what's cooking? You can now interrupt and cancel the brew.
-- **Single brew:** The brew button now has an option to brew a single image.
-- **Feeling lucky?:** New "I'm Feeling Lucky" button to bring up a single random image with an option to reroll.
-- **Copy prompts to clipboard:** Requires HTTPS or localhost!
-- CTRL+D override to favorite images when viewing an image.
+- Refresh button to refresh both Checkpoints and LoRAs on the prompt selector
+- Average generation time statistic
+
 
 ### What's changed?
-- **UI overhaul:** Chamomile is now a little wider, and leaves a bit more vertical space for images.
-- **Better sampler dropdown:** Now with search, sorted, and some common samplers on top with user friendly text.
-- **Better statistics:** Statistics have been bolstered with usages over time, making it easier to see insights into your usage patterns.
-- **Recipe folders:** Recipes can now be stored in different folders to make it easier to find them.
-- **Order previews:** Lost what you ordered? Now if you re-order prompts, or order a saved recipe, a sample image will show on your queued order.
-- **Additional search options:** You can now search for images you've upscaled, and images you've downloaded
-- **Accordions:** There's a lot of information for each image. We've collapsed some bits of information so you can focus on exactly what you're looking for.
-- **Override import/export:** A little pair of buttons to import export overrides for later.
-- **Variables further deprecated:** Variables will only be available if you add a variable to the prompt (%myVar%).
-- **Unavailable LoRA warning:** When re-ordering images with unavailable LoRAs, Chamomile now warns you and can remove them automatically before re-ordering.
-- **Order icon changed:** Ordering now uses ReceiptLong instead of Terminal.
-- "Models" are now called "Checkpoints" on the application to match the technical term.
-- Checkpoints and LoRAs that are unavailable and have no images generated will automatically delete themselves.
-- Checkpoints and LoRAs can now be refreshed from Chamomile from the model browser modals.
-- Improved prompt models selector.
-- You can now re-check SD status from the app rather than refreshing the page.
-- Base prompts are now unavailable for images that have base prompts that match actual prompts.
-- Advanced Prompt options have been re-ordered to wrap in a more sensible way.
-- Welcome pane has been improved to direct users on how to brew their first image, upload their collection, or get to the help section.
-- Expand is now smooth on search and prompt box.
-- Checkpoint and LoRA browsers now a bit wider
-- Search on Enter QOL improvement.
-
+- Grid Editor can now only be closed by the cancel button like the preview dialog
+- Prompt sample cleared if the prompt box is emptied
 
 ### Fixed bugs
-- Fixed bug that would make certain image selectors not show the selected image.
-- Fixed bug that would make the full page dropzone react to anything, not just images.
-- Fixed bug that would make Chamomile not display an active job if the page loaded while there was an active job.
-- Fixed bug that would make "unknown" model types show all checkpoints instead.
-- Fixed bug that would make it impossible to upload images with an unavailable checkpoint.
-- Fixed bug that would make cancelling a group of orders fail to completely appear cancelled on the frontend.
-- Fixed bug that would make statistics for empty results crash the app.
-- Fixed bug where grouped prompts modal would report steps as 10x what they actually were.
-- Fixed bug where LoRA usage statistics were unavailable if searching for a specific LoRA.
-- Fixed bug where left or right navigation on an image immediately after editing a Model or LoRA would cause the app to crash.
-- Fixed bug where Checkpoints and LoRAs would flash unavailable when saving changes.
-- Fixed some typos.
-- Improved system stability.
+- None
 `
 
     const { settings } = useSettings();
@@ -86,7 +39,7 @@ export default function WhatsNew({ open, setOpen }: {
     }, [open])
 
     return <Dialog open={open} onClose={() => setOpen(false)} maxWidth="lg" fullWidth>
-        <DialogTitle><ChamomileLogo wordsOverride={`Welcome to Chamomile ${majorVersion.toFixed(1)}`} /></DialogTitle>
+        <DialogTitle><ChamomileLogo wordsOverride={`Welcome to Chamomile ${CHAMOMILE_MAJOR_VERSION.toFixed(1)}`} /></DialogTitle>
         <DialogContent>
             <Markdown>{whatsnew}</Markdown>
         </DialogContent>

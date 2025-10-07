@@ -2,6 +2,7 @@ import { GitHub } from "@mui/icons-material";
 import ChamomileLogo from "../../ChamomileLogo";
 import { Button, Link, Tooltip } from "@mui/material";
 import { useSettings } from "../../../hooks/useSettings";
+import { CHAMOMILE_MAJOR_VERSION } from "../../WhatsNewModal/WhatsNew";
 
 export default function AboutTab() {
 
@@ -14,7 +15,7 @@ export default function AboutTab() {
     return <>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', width: "50%", minWidth: '300px' }}>
             <ChamomileLogo />
-            <div>V3.0</div>
+            <div>V{CHAMOMILE_MAJOR_VERSION}</div>
         </div>
         <hr style={{ width: "50%", minWidth: '300px' }} />
         <img src="/images/googgos.png" style={{ width: "50%", minWidth: "300px" }} />
