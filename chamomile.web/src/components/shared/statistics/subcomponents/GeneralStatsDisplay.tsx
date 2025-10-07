@@ -7,7 +7,7 @@ import { useModels } from "../../../hooks/useModels"
 import ImageModalFromId from "../../images/ImageModalFromId"
 import StatsNumber from "./StatsNumber"
 import { Card, CardActionArea } from "@mui/material"
-import { Download, Gradient, Star } from "@mui/icons-material"
+import { Download, Gradient, Schedule, Star } from "@mui/icons-material"
 
 export default function GeneralStatsDisplay({
     data, loraData, modelData, keywordData, limit
@@ -77,6 +77,12 @@ export default function GeneralStatsDisplay({
                     label="Images downloaded"
                 />
 
+                <IconTile
+                    icon={<Schedule fontSize="inherit" />}
+                    value={(data?.avgGenTime / 1000).toFixed(2) + "s"}
+                    label="Avg generation time"
+                />
+
             </div>
 
             <div style={{ display: "flex", gap: "12px", margin: "auto", opacity: ".8", fontFamily: "merriweather" }}>
@@ -132,7 +138,7 @@ function IconTile({
     value, label
 }: {
     icon: ReactNode
-    value: number
+    value: number | string
     label: string
 }) {
     return <div style={{ width: "20%", textAlign: 'center' }}>
@@ -149,7 +155,7 @@ function IconTile({
             maxWidth: "100%",
             display: "block"
         }}>
-            {value > 1000 ? Math.round(value / 1000) + "k" : value}
+            {typeof value === "string" ? value : value > 1000 ? Math.round(value / 1000) + "k" : value}
         </div>
         <div style={{ fontSize: '.7em' }}>{label}</div>
     </div>

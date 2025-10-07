@@ -6,5 +6,6 @@ export default interface GeneralStatistics {
     downloadCount: number
     totalDownloads: number
     totalCount: number
+    avgGenTime: number
     countBySource: Record<string, number>
 }
