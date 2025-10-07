@@ -27,7 +27,7 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
         setGrid({ ...grid, xValMode: grid.yValMode, xVals: grid.yVals, yValMode: grid.xValMode, yVals: grid.xVals })
     }
 
-    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+    return <Dialog open={open} maxWidth="md" fullWidth>
         <DialogTitle>{duplicate ? "Duplicating existing grid" : editing ? "Editing Grid" : "Create a new Grid"}</DialogTitle>
         <DialogContent style={{ display: "flex", flexDirection: 'column', gap: "10px", overflowY: "unset" }}>
             <TextField
