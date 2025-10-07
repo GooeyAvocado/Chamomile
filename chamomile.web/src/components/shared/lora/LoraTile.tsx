@@ -4,6 +4,7 @@ import { Lora } from "../../../model/Lora";
 import ModelTypePill from "../model/ModelType/ModelTypePill";
 import ContextMenu from "../ContextMenu";
 import { DoNotDisturbAlt, Edit, Image } from "@mui/icons-material";
+import { NO_LORA_ALIAS } from "../Utils";
 
 export default function LoraTile(props: {
     lora: Lora
@@ -24,8 +25,8 @@ export default function LoraTile(props: {
                 <div style={{ alignItems: 'center', position: 'relative' }}>
                     <div style={{ maxWidth: "100%", aspectRatio: 1 / 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <img
-                            src={"/outline.png"}
-                            style={{ width: "50%" }}
+                            src={lora.alias === NO_LORA_ALIAS ? "/outlinepadded-no.png" : "/outlinepadded.png"}
+                            style={{ width: "70%" }}
                         />
                     </div>
                     {lora.bannerImage && <img loading="lazy"

@@ -2,6 +2,9 @@ import { FilterOptions } from "../../model/FilterOptions";
 import { GeneratedImage } from "../../model/GeneratedImage";
 import { Prompt } from "../../model/Prompt";
 
+export const NO_LORA_ALIAS = "NoUsedLoRAs"
+export const ALL_LORA_ALIAS = "";
+export const SPECIAL_LORA_ALIASES = [NO_LORA_ALIAS, ALL_LORA_ALIAS]
 
 export function stringToColor(string: string) {
     let hash = 0;

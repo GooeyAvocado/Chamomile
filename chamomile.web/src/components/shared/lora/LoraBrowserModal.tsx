@@ -11,15 +11,21 @@ import useApi from "../../hooks/useApi";
 import { useSnackbar } from "notistack";
 import ModelTypeSelector from "../model/ModelType/ModelTypeSelector";
 import AvailabilitySelector from "../model/availabilitySelector/AvailabilitySelector";
+import { ALL_LORA_ALIAS, NO_LORA_ALIAS } from "../Utils";
 
 export default function LoraBrowserModal(props: {
     open: boolean,
     setOpen: (val: boolean) => void,
     onOk: (val: Lora) => void,
+
+    /**Show an option for Any LoRA */
+    showAny?: boolean
+
+    /**Show an option for no LoRAs */
     showNone?: boolean
 }) {
 
-    const { onOk, open, setOpen, showNone } = props;
+    const { onOk, open, setOpen, showAny: showNone } = props;
     const { loras, refresh, loading } = useLoras();
 
     const [query, setQuery] = useState("")
@@ -93,12 +99,18 @@ function GridViewMode(props: { data: Lora[], query: string, onOk: (val: Lora) =>
         {(showNone
             ? [
                 {
-                    alias: '',
+                    alias: ALL_LORA_ALIAS,
                     bannerImage: undefined,
                     name: 'Any',
                     type: '',
                     description: '',
                     samplePrompt: '',
+                    isAvailable: true
+                } as Lora, {
+                    alias: NO_LORA_ALIAS,
+                    bannerImage: undefined,
+                    name: 'None',
+                    isAvailable: true
                 } as Lora,
                 ...(data ?? []).filter(a => {
                     switch (availability) {

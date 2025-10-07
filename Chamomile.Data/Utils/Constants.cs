@@ -1,6 +1,8 @@
 ﻿namespace Chamomile.Data.Utils {
     public static class Constants {
 
+        public static readonly string NO_LORA_ALIAS = "NoUsedLoRAs";
+
         public static readonly string SCHEMA = "chamomile";
 
         public static readonly string MODELS_TABLE = $"{SCHEMA}.models";

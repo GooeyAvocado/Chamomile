@@ -169,7 +169,7 @@ export default function FilterBuilder(props: {
                     </div>
 
                     <div style={{ display: 'flex', gap: "10px", flex: '1', flexWrap: width < 605 ? "wrap" : undefined }}>
-                        <LoraSelector lora={filter.lora ?? ""} setLora={(e) => setFilter({ ...filter, lora: e.alias })} style={{ flex: "1", minWidth: "200px" }} showNone />
+                        <LoraSelector lora={filter.lora ?? ""} setLora={(e) => setFilter({ ...filter, lora: e.alias })} style={{ flex: "1", minWidth: "200px" }} showAll />
                         <ModelSelector model={filter.model ?? ""} setModel={(e) => setFilter({ ...filter, model: e.title })} style={{ flex: "1", minWidth: "200px" }} showNone />
                     </div>
 

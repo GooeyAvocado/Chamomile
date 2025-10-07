@@ -19,6 +19,7 @@ export default function WhatsNew({ open, setOpen }: {
 
 ### What's new?
 - Refresh button to refresh both Checkpoints and LoRAs on the prompt selector
+- Search by no LoRAs
 - Average generation time statistic
 
 

@@ -310,9 +310,14 @@ namespace Chamomile.Data {
             }
 
             if (!string.IsNullOrEmpty(filter.Lora)) {
-                conditions.Add(new(
-                    "img." + IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
-                ));
+                if (filter.Lora == NO_LORA_ALIAS) {
+                    conditions.Add(new(IMAGES_PROMPT, WhereConditionOperator.NOT_ILIKE, "'%<lora:%'"));
+                }
+                else {
+                    conditions.Add(new(
+                        "img." + IMAGES_ID, WhereConditionOperator.IN, "(" + SelectSql([IMAGES_ID], IMAGES_LORA_MAP, new WhereConditionGroup([new(LORA_ALIAS)])) + ")"
+                    ));
+                }
             }
 
             if (filter.Album != null && filter.Album >= 0) {
