@@ -23,6 +23,11 @@ namespace Chamomile.API.Controllers {
             return Ok(await dao.GetAll());
         }
 
+        [HttpGet("tags")]
+        public async Task<IActionResult> GetTags() {
+            return Ok(await dao.GetAllTags());
+        }
+
         [HttpGet("usage")]
         public async Task<IActionResult> GetUsage([FromQuery] FilterOptions options) {
             return Ok(await dao.GetUsage(options,options.LastImage ?? -1));

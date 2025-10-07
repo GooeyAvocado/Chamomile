@@ -1,6 +1,6 @@
 ﻿using Chamomile.Common;
-using static Chamomile.Data.Utils.SqlBuilder;
 using static Chamomile.Data.Utils.Constants;
+using static Chamomile.Data.Utils.SqlBuilder;
 
 namespace Chamomile.Data {
     public class LoraDAO(string connectionString) : BaseDAO(connectionString) {
@@ -12,7 +12,7 @@ namespace Chamomile.Data {
         public async Task<List<Lora>> GetAll() {
             return await adoTemplate.Query(
                 SelectSql([
-                    LORA_NAME, LORA_ALIAS, LORA_AVAIL_IN,LORA_DESC, LORA_SAMPLE_PROMPT,IMAGES_ID, LORA_TYPE_CD],
+                    LORA_NAME, LORA_ALIAS, LORA_AVAIL_IN,LORA_DESC, LORA_SAMPLE_PROMPT,IMAGES_ID, LORA_TYPE_CD,LORA_TAG],
                     LORA_TABLE,
                     new([]),
                     [new OrderBy(LORA_NAME)]
@@ -24,11 +24,21 @@ namespace Chamomile.Data {
                     IsAvailable = reader.GetBoolean(LORA_AVAIL_IN),
                     SamplePrompt = reader.GetString(LORA_SAMPLE_PROMPT),
                     BannerImage = reader.GetOptionalInt(IMAGES_ID),
-                    Type = reader.GetOptionalString(LORA_TYPE_CD)
+                    Type = reader.GetOptionalString(LORA_TYPE_CD),
+                    Tags = [.. (reader.GetValue(LORA_TAG) as string[] ?? [])],
                 }
             );
         
         }
+        public async Task<List<string>> GetAllTags() {
+            var tags = "TAGS";
+            return await adoTemplate.Query(
+                SelectSql([$"unnest({LORA_TAG}) as {tags}"], LORA_TAG, true),
+                (cmd) => { },
+                (reader) => reader.GetString(tags)
+            );
+        }
+
 
         public async Task<List<KeywordUsage>> GetUsage(FilterOptions filter, int limit) {
             return await adoTemplate.Query(SelectSql(
@@ -102,7 +112,7 @@ namespace Chamomile.Data {
         public async Task Update(Lora lora) {
             await adoTemplate.Execute(
                 UpdateSql(
-                    [LORA_DESC, LORA_SAMPLE_PROMPT, IMAGES_ID, LORA_TYPE_CD],
+                    [LORA_DESC, LORA_SAMPLE_PROMPT, IMAGES_ID, LORA_TYPE_CD, LORA_TAG],
                     LORA_TABLE,
                     new([new(LORA_ALIAS)])
                 ), (cmd) => {
@@ -111,6 +121,7 @@ namespace Chamomile.Data {
                     cmd.SetInt(IMAGES_ID, lora.BannerImage);
                     cmd.SetString(LORA_ALIAS, lora.Alias);
                     cmd.SetString(LORA_TYPE_CD, lora.Type);
+                    cmd.SetValue(LORA_TAG, NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text, lora.Tags?.ToArray() ?? []);
                 });
         }
 

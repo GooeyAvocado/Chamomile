@@ -10,7 +10,7 @@ namespace Chamomile.Data {
         public async Task<List<Model>> GetAll() {
             return await adoTemplate.Query(
                 SelectSql([
-                    MODEL_NAME, MODEL_TITLE, MODEL_AVAIL_IN,MODEL_DESC,IMAGES_ID,MODEL_TYPE_CD],
+                    MODEL_NAME, MODEL_TITLE, MODEL_AVAIL_IN,MODEL_DESC,IMAGES_ID,MODEL_TYPE_CD, MODEL_TAG],
                     MODELS_TABLE,
                     new([]),
                     [new OrderBy(MODEL_NAME)]
@@ -21,10 +21,20 @@ namespace Chamomile.Data {
                     Type = reader.GetOptionalString(MODEL_TYPE_CD),
                     Description = reader.GetString(MODEL_DESC),
                     IsAvailable = reader.GetBoolean(MODEL_AVAIL_IN),
-                    BannerImage = reader.GetOptionalInt(IMAGES_ID)
+                    BannerImage = reader.GetOptionalInt(IMAGES_ID),
+                    Tags= [.. (reader.GetValue(MODEL_TAG) as string[] ?? [])],
                 }
             );
         
+        }
+
+        public async Task<List<string>> GetAllTags() {
+            var tags = "TAGS";
+            return await adoTemplate.Query(
+                SelectSql([$"unnest({MODEL_TAG}) as {tags}"], MODELS_TABLE, true),
+                (cmd) => { },
+                (reader) => reader.GetString(tags)
+            );
         }
 
         public async Task<List<KeywordUsage>> GetUsage(FilterOptions filter, int limit) {
@@ -95,7 +105,7 @@ namespace Chamomile.Data {
         public async Task Update(Model model) {
             await adoTemplate.Execute(
                 UpdateSql(
-                    [MODEL_DESC, IMAGES_ID, MODEL_TYPE_CD],
+                    [MODEL_DESC, IMAGES_ID, MODEL_TYPE_CD, MODEL_TAG],
                     MODELS_TABLE,
                     new([new(MODEL_TITLE)])
                 ), (cmd) => {
@@ -103,6 +113,7 @@ namespace Chamomile.Data {
                     cmd.SetInt(IMAGES_ID, model.BannerImage);
                     cmd.SetString(MODEL_TYPE_CD, model.Type);
                     cmd.SetString(MODEL_TITLE, model.Title);
+                    cmd.SetValue(MODEL_TAG, NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text, model.Tags?.ToArray() ?? []);
                 });
         }
 

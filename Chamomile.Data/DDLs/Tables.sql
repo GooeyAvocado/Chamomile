@@ -237,3 +237,6 @@ ADD COLUMN image_base_prompt_hash text GENERATED ALWAYS AS (
 ) STORED;
 
 CREATE INDEX idx_images_base_prompts_hash ON images(image_base_prompt_hash);
+
+alter table models add column model_tag_tx varchar(50) default '';
+alter table lora add column lora_tag_tx varchar(50) default '';

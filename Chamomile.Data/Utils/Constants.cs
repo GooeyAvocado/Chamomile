@@ -10,6 +10,7 @@
         public static readonly string MODEL_DESC         = "model_desc_tx";
         public static readonly string MODEL_AVAIL_IN     = "model_avail_in";
         public static readonly string MODEL_TYPE_CD      = "model_type_cd";
+        public static readonly string MODEL_TAG          = "model_tag_tx";
 
         public static readonly string LORA_TABLE         = $"{SCHEMA}.lora";
         public static readonly string LORA_NAME          = "lora_nm";
@@ -18,6 +19,7 @@
         public static readonly string LORA_SAMPLE_PROMPT = "lora_sample_prompt_tx";
         public static readonly string LORA_AVAIL_IN      = "lora_avail_in";
         public static readonly string LORA_TYPE_CD       = "lora_type_cd";
+        public static readonly string LORA_TAG           = "lora_tag_tx";
 
         public static readonly string IMAGES_TABLE       = $"{SCHEMA}.images img";
         public static readonly string IMAGES_ID          = "image_id";

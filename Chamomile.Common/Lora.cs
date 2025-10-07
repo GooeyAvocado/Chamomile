@@ -23,5 +23,8 @@
 
         /// <summary>Sample image for this LoRA</summary>
         public int? BannerImage { get; set; }
+
+        /// <summary>Tags for this LoRA</summary>
+        public List<string> Tags { get; set; } = [];
     }
 }

@@ -24,5 +24,8 @@
 
         /// <summary>Sample image for this model</summary>
         public int? BannerImage { get; set; }
+
+        /// <summary>Tags for this Model</summary>
+        public List<string> Tags { get; set; } = [];
     }
 }
