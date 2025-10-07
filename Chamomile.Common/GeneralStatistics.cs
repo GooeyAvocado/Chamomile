@@ -7,6 +7,8 @@
         public int DownloadCount { get; set; }
         public int? TotalDownloads { get; set; }
         public int TotalCount { get; set; }
+        public double AvgGenTime { get; set; }
+
         public Dictionary<string,int> CountBySource { get; set; }
 
     }
