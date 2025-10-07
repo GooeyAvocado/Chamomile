@@ -5,7 +5,7 @@ import useApi from "../../hooks/useApi";
 import { currentModel, setModel } from "../../../api/Model";
 import { Model } from "../../../model/Model";
 import { useEffect, useState } from "react";
-import { Add, Close, Edit, Schedule } from "@mui/icons-material";
+import { Add, Close, Edit, Refresh, Schedule } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import ModelCard from "../model/ModelCard";
 import LoraSelector from "../lora/LoraSelector";
@@ -15,6 +15,8 @@ import { Prompt } from "../../../model/Prompt";
 import { usePingPong } from "../../hooks/usePingPong";
 import { getModelSequence, setModelSequence } from "../../../api/Images";
 import ModelSequenceEditor from "../model/ModelSequenceEditor";
+import { useModels } from "../../hooks/useModels";
+import { useLoras } from "../../hooks/useLoras";
 
 export default function PromptModelSelectorModal(props: {
     open: boolean,
@@ -23,6 +25,16 @@ export default function PromptModelSelectorModal(props: {
     prompt?: Prompt,
     setPrompt?: (val: Prompt) => void
 }) {
+
+    const { refresh: refreshCheckpoints, loading: checkpointsLoading } = useModels();
+    const { refresh: refreshLoRAs, loading: lorasLoading } = useLoras();
+
+    const refresh = () => {
+        refreshCheckpoints(true);
+        refreshLoRAs(true);
+    }
+
+    const loading = checkpointsLoading || lorasLoading
 
     const { open, setOpen, noBrew, prompt: promptOverride, setPrompt: setPromptOverride } = props
 
@@ -92,7 +104,14 @@ export default function PromptModelSelectorModal(props: {
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
 
-        <DialogTitle>Models</DialogTitle>
+        <DialogTitle><div style={{ display: "flex", justifyContent: 'space-between', alignItems: 'end' }}>
+            <div>Models</div>
+            {pong?.SD && <Tooltip title="Refresh Checkpoints and LoRAs">
+                <IconButton onClick={refresh} disabled={loading} size="small" >{
+                    loading ? <CircularProgress size={24} /> : <Refresh />
+                }</IconButton>
+            </Tooltip>}
+        </div></DialogTitle>
 
         <DialogContent style={{ display: 'flex', flexDirection: 'column', height: '75vh' }}>
             {!noBrew && pong?.SD
