@@ -84,7 +84,7 @@ export default function GridViewer({
                 if (imageApi.count === 1) {
                     setSelectedImage(undefined)
                 } else {
-                    onRight();
+                    onRight?.() ?? onLeft?.() ?? setSelectedImage(undefined);
                 }
             }
             imageApi.removeImage(override ?? selectedImage ?? {} as GeneratedImage)
@@ -238,6 +238,30 @@ export default function GridViewer({
         // if (currentCol === grid.xVals.length - 1) setSelectedImage(imageMap[currentRow + 1][0]);
         setSelectedImage(imageMap[currentRow][currentCol + 1] ?? selectedImage);
     } : undefined
+
+    const onHome = () => {
+        const row = imageMap[currentRow] ?? [];
+        const firstIndex = row.findIndex(i => i !== undefined);
+        if (firstIndex !== -1) {
+            setSelectedImage(row[firstIndex]);
+            return;
+        }
+    }
+
+    const onEnd = () => {
+        const row = imageMap[currentRow] ?? [];
+        let lastIndex = -1;
+        for (let i = row.length - 1; i >= 0; i--) {
+            if (row[i] !== undefined) {
+                lastIndex = i;
+                break;
+            }
+        }
+        if (lastIndex !== -1) {
+            setSelectedImage(row[lastIndex]);
+            return;
+        }
+    }
 
     const onUp = () => {
         if (currentRow === 0) return;
@@ -546,7 +570,7 @@ export default function GridViewer({
         <ImageModal
             open={viewerOpen} setOpen={setViewerOpen} image={selectedImage} onAddAlbum={onAddAlbum} onDelete={() => { setDeleteAys(true) }}
             onDeleteForce={onDeleteImage} onDownload={onDownload} onLeft={onLeft} onRight={onRight} onFavorite={onFavorite} onRemoveAlbum={onRemoveAlbum}
-            onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum} onUp={onUp} onDown={onDown}
+            onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum} onUp={onUp} onDown={onDown} onHome={onHome} onEnd={onEnd}
             imageChildren={() => <GridImageHUD
                 xPos={selectedImage?.additionalInfo?.xPos ?? 0} yPos={selectedImage?.additionalInfo?.yPos ?? 0}
                 xVal={selectedImage?.additionalInfo?.xVal ?? ""} yVal={selectedImage?.additionalInfo?.yVal ?? ""}
