@@ -4,7 +4,7 @@ import { Close, ReceiptLong } from "@mui/icons-material"
 import { Prompt } from "../../../model/Prompt"
 import { useSettings } from "../../hooks/useSettings"
 
-export default function PromptBuilderClearButton({ prompt, setPrompt }: {
+export default function PromptBuilderClearButton({ setPrompt }: {
     prompt?: Prompt
     setPrompt: (prompt: Prompt) => void
 }) {

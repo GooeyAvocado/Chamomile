@@ -1,4 +1,4 @@
-import { Close, Coffee, DataObject, DirectionsRun, ExpandMore, ModelTraining, OpenWith, ReceiptLong, ThumbDown, Tune, Yard } from "@mui/icons-material";
+import { Close, Coffee, DataObject, DirectionsRun, ExpandMore, ModelTraining, OpenWith, ThumbDown, Tune, Yard } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import PromptButton from "./PromptButton";
