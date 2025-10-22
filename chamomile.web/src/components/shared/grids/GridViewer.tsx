@@ -220,41 +220,31 @@ export default function GridViewer({
     }, [filteredQueue])
 
     const activeJobIsGrid = activeJob?.orderData?.gridId === grid.id
+    const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
+    const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
+    const canGoLeft = currentCol !== 0 && imageMap[currentRow][currentCol - 1]
+    const canGoRight = currentCol !== grid.xVals.length - 1 && imageMap[currentRow][currentCol + 1]
 
-
-    const onLeft = () => {
-        const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
-        const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
+    const onLeft = canGoLeft ? () => {
 
         //Disable wrap tbh
         // if (currentRow === 0 && currentCol === 0) return;
         // if (currentCol === 0) setSelectedImage(imageMap[currentRow - 1][grid.xVals.length - 1]);
-        if (currentCol === 0) return;
-        else setSelectedImage(imageMap[currentRow][currentCol - 1] ?? selectedImage);
-    }
+        setSelectedImage(imageMap[currentRow][currentCol - 1] ?? selectedImage);
+    } : undefined
 
-    const onRight = () => {
-        const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
-        const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
-
+    const onRight = canGoRight ? () => {
         // if (currentRow === grid.yVals.length - 1 && currentCol === grid.xVals.length - 1) return;
         // if (currentCol === grid.xVals.length - 1) setSelectedImage(imageMap[currentRow + 1][0]);
-        if (currentCol === grid.xVals.length - 1) return;
-        else setSelectedImage(imageMap[currentRow][currentCol + 1] ?? selectedImage);
-    }
+        setSelectedImage(imageMap[currentRow][currentCol + 1] ?? selectedImage);
+    } : undefined
 
     const onUp = () => {
-        const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
-        const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
-
         if (currentRow === 0) return;
         else setSelectedImage(imageMap[currentRow - 1][currentCol] ?? selectedImage)
     }
 
     const onDown = () => {
-        const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
-        const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
-
         if (currentRow === grid.yVals.length - 1) return;
         else setSelectedImage(imageMap[currentRow + 1][currentCol] ?? selectedImage);
     }

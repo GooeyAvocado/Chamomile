@@ -41,6 +41,8 @@ export default function ImageModal(props: {
     onDeleteForce?: () => void,
     onLeft?: () => void,
     onRight?: () => void,
+    onHome?: () => void,
+    onEnd?: () => void,
     onUp?: () => void,
     onDown?: () => void,
     onUpscale?: (val: GeneratedImage) => void
@@ -57,7 +59,7 @@ export default function ImageModal(props: {
         onLeft, onRight, onDeleteForce, onUpscale,
         collapseDefault, onAddAlbum, onRemoveAlbum,
         onViewAlbum, onDownload, onUpdateNotes,
-        onUp, onDown, filter, setFilter
+        onUp, onDown, filter, setFilter, onHome, onEnd
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -131,6 +133,12 @@ export default function ImageModal(props: {
                 case "ArrowDown":
                     onDown?.();
                     break;
+                case "Home":
+                    onHome?.();
+                    break;
+                case "End":
+                    onEnd?.();
+                    break;
                 case "s":
                     if (e.ctrlKey) {
                         e.preventDefault();
@@ -169,7 +177,7 @@ export default function ImageModal(props: {
                     <ImageHotbar
                         image={image} onUsePrompt={onUsePrompt}
                         onLeft={onLeft} onRight={onRight} onDownload={saveImage}
-                        onDelete={onDeleteForce} onFavorite={() => { onFavorite?.() }}
+                        onDelete={onDeleteForce} onFavorite={onFavorite}
                     />
                 </div>
 

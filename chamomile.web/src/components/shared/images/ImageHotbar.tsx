@@ -29,20 +29,20 @@ export default function ImageHotbar(props: {
     const [brewAnchor, setBrewAnchor] = useState(null as any)
     const [promptAnchor, setPromptAnchor] = useState(null as any)
 
-    if (isMobile || !onRight) return <></>
+    if (isMobile) return <></>
 
     return <>
         <Card style={{ marginBottom: '5px', transition: 'opacity 0.2s ease-in-out' }} className="hover-hotbar">
             <div style={{ display: 'flex', gap: '10px', padding: "5px" }}>
                 <Tooltip title="Previous" enterDelay={250}>
-                    <IconButton onClick={onLeft}><ArrowBack /></IconButton>
+                    <IconButton onClick={onLeft} disabled={!onLeft}><ArrowBack /></IconButton>
                 </Tooltip>
                 <hr />
                 <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
-                    <IconButton onClick={onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutline />}</IconButton>
+                    <IconButton onClick={onFavorite} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutline />}</IconButton>
                 </Tooltip>
                 <Tooltip title="Delete" enterDelay={250}>
-                    <IconButton onClick={(e) => {
+                    <IconButton disabled={!onDelete} onClick={(e) => {
                         setDeletePopperAnchor(e.currentTarget)
                     }}>
                         <Delete />
@@ -50,7 +50,7 @@ export default function ImageHotbar(props: {
                 </Tooltip>
                 <hr />
                 <Tooltip title="Download" enterDelay={250}>
-                    <IconButton onClick={(e) => {
+                    <IconButton disabled={!onDownload} onClick={(e) => {
                         (image?.downloadCount ?? 0) > 0 ? setDownloadAgainPopperAnchor(e.currentTarget) : onDownload?.()
                     }}>
                         <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : "action"} />
@@ -63,13 +63,13 @@ export default function ImageHotbar(props: {
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Use this Prompt" enterDelay={250}>
-                    <IconButton onClick={(e) => setPromptAnchor(e.currentTarget)}>
+                    <IconButton disabled={!onUsePrompt} onClick={(e) => setPromptAnchor(e.currentTarget)}>
                         <ReceiptLong />
                     </IconButton>
                 </Tooltip>
                 <hr />
                 <Tooltip title="Next" enterDelay={250}>
-                    <IconButton onClick={onRight}><ArrowForward /></IconButton>
+                    <IconButton onClick={onRight} disabled={!onRight}><ArrowForward /></IconButton>
                 </Tooltip>
             </div>
 
