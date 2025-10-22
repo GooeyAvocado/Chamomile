@@ -24,6 +24,7 @@ import AutocompleteTextfield, { AutoCompletes } from "../autocompleteTextField/A
 import { Lora } from "../../../model/Lora";
 import PromptboxImageSample from "./preview/PromptboxImageSample";
 import { FilterOptions } from "../../../model/FilterOptions";
+import PromptBuilderClearButton from "./PromptBuilderClearButton";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -237,7 +238,8 @@ export default function PromptBuilder(props: {
                                 <div style={{ display: "flex", alignSelf: "center", alignItems: 'center' }}>
                                     {(((prompt.sampleImage ?? -1) > 0 || prompt.id) && !noBrew) //if we have an ID (from a saved prompt) or Sample Image (from an existing image)
                                         ? <PromptboxImageSample prompt={prompt} clearSample={() => { setPrompt({ ...prompt, sampleImage: undefined, id: undefined, name: "" }) }} />
-                                        : <ReceiptLong />}
+                                        : <PromptBuilderClearButton prompt={prompt} setPrompt={setPrompt} />
+                                    }
                                 </div>
                             </InputAdornment>
                         ),

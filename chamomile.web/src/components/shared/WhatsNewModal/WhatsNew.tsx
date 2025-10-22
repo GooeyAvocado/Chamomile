@@ -21,14 +21,14 @@ export default function WhatsNew({ open, setOpen }: {
 - Refresh button to refresh both Checkpoints and LoRAs on the prompt selector
 - Search by no LoRAs
 - Average generation time statistic
-
+- Clear prompt button
 
 ### What's changed?
 - Grid Editor can now only be closed by the cancel button like the preview dialog
-- Prompt sample cleared if the prompt box is emptied
+- [HOME] and [END] keys now go to the first and last image on a row in a Grid respectively
 
 ### Fixed bugs
-- None
+- Fixed bug where re-ordering (not from base) from an image tile did not set the prompt origin
 `
 
     const { settings } = useSettings();
