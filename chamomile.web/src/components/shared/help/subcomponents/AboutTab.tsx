@@ -21,7 +21,7 @@ export default function AboutTab() {
         <img src="/images/googgos.png" style={{ width: "50%", minWidth: "300px" }} />
         <hr style={{ width: "50%", minWidth: '300px' }} />
         <div style={{ marginBottom: '20px' }}>
-            <Link color="info" href="https://civitai.green/posts/23564983"> See more of the <Tooltip title="Goo Doggos">
+            <Link color="info" href="https://civitai.green/posts/17173953"> See more of the <Tooltip title="Goo Doggos">
                 <u style={{ textDecorationStyle: "dashed" }}>
                     Googgos
                 </u></Tooltip> on CivitAI</Link>

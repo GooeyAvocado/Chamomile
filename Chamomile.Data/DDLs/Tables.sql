@@ -11,18 +11,14 @@ CREATE TABLE chamomile.images (
 	image_wdth_num int4 NULL,
 	image_fav_in bool DEFAULT false NULL,
 	image_bytes_tx bytea NOT NULL,
-	model_title_tx text NULL,
 	cre_ts timestamp(4) DEFAULT now() NULL,
 	image_hires_bytes_tx bytea NULL,
 	image_hires_in bool GENERATED ALWAYS AS (image_hires_bytes_tx IS NOT NULL AND length(image_hires_bytes_tx) > 0) STORED NULL,
 	image_base_prompt_tx text NULL,
-
-	-- I don't think anyone prompts in other languages but if so change the tsvector
 	image_base_prompt_fts tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, image_base_prompt_tx)) STORED NULL,
 	image_prompt_fts tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, image_prompt_tx)) STORED NULL,
-
-	CONSTRAINT pk_image PRIMARY KEY (image_id),
-	CONSTRAINT images_models_fk FOREIGN KEY (model_title_tx) REFERENCES chamomile.models(model_title_tx)
+	CONSTRAINT pk_image PRIMARY KEY (image_id)
+	--CONSTRAINT images_models_fk FOREIGN KEY (model_title_tx) REFERENCES chamomile.models(model_title_tx)
 );
 
 CREATE TABLE chamomile.models (
@@ -104,7 +100,8 @@ CREATE INDEX idx_image_prompt_fts
 
 
 ALTER TABLE chamomile.images ADD image_gen_ms_nb int4 NULL;
-alter table images add image_notes_tx DEFAULT '';
+
+ALTER table chamomile.images add image_notes_tx text DEFAULT '';
 
 alter table images add image_notes_fts tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, image_notes_tx)) STORED null;
 
