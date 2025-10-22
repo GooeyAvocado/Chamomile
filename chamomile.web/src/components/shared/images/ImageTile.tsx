@@ -52,8 +52,7 @@ export default function ImageTile(props: {
             {
                 type: "custom", customContent: (onClose) => <PromptReorderButton
                     prompt={imageToPrompt(image)} source="IMAGE"
-                    // sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id}
-                    sample={image?.additionalInfo?.sample}
+                    sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id}
                     menuButonMode onClick={onClose} disabled={selectMode}
                 />
             },
