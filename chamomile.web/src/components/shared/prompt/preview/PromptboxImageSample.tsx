@@ -24,7 +24,7 @@ export default function PromptboxImageSample({ prompt, filter, clearSample }: {
                     <div>Currently tied to a saved prompt </div>
                     <div>"{prompt.name}"</div>
                 </>
-                : filter ? <>
+                : !filter ? <>
                     Currently tied to sample
                 </> : <>
                     Currently searching for images based on an existing image.
