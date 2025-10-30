@@ -39,7 +39,7 @@ export default function ImageHotbar(props: {
                 </Tooltip>
                 <hr />
                 <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
-                    <IconButton onClick={onFavorite} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutline />}</IconButton>
+                    <IconButton onClick={() => onFavorite?.()} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutline />}</IconButton>
                 </Tooltip>
                 <Tooltip title="Delete" enterDelay={250}>
                     <IconButton disabled={!onDelete} onClick={(e) => {
