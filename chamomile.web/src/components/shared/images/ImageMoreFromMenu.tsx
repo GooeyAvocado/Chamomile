@@ -3,7 +3,7 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useLoras } from "../../hooks/useLoras";
 import { useModels } from "../../hooks/useModels";
 import { MenuItemWithSubMenu } from "../mui/MenuItemWithSubmenu";
-import { ImageSearch, ReceiptLong, ReceiptLongTwoTone } from "@mui/icons-material";
+import { CalendarMonth, ImageSearch, ReceiptLong, ReceiptLongTwoTone } from "@mui/icons-material";
 import { Card, Divider, ListItemIcon, MenuItem } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { imageUrl } from "../../../api/Images";
@@ -95,6 +95,21 @@ export default function ImageMoreFromMenu({
                 <div style={{ fontSize: '.8em' }}>Base prompt</div>
             </div>
         </MenuItem>}
+        <Divider />
+        <MenuItem onClick={() => {
+            setFilter({
+                ...clearFilter(filter),
+                fromDate: image.created?.split("T")?.[0],
+                toDate: image.created?.split("T")?.[0]
+            })
+        }}>
+            <ListItemIcon>
+                <CalendarMonth />
+            </ListItemIcon>
+            <div>
+                <div style={{ fontSize: '.8em' }}>Images on this date</div>
+            </div>
+        </MenuItem>
         <Divider />
         <MenuItem
             onClick={() => {

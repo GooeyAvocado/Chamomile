@@ -18,7 +18,7 @@ export class GeneratedImage {
     albums: number[] = []
     model: string = "";
     favorite: boolean = false;
-    created: Date = new Date();
+    created: string = "";
     hiResAvailable: boolean = false;
     generationDurationMs?: number = 0;
     downloadCount?: number = 0;
