@@ -100,7 +100,11 @@ export default function ImageTile(props: {
             onDelete(image)
             setDeleteAys(false);
         }}>
-            <div style={{ textAlign: 'center' }}><img src={imageUrl(image.id)} style={{ height: "256px" }} /></div>
+            <div style={{ textAlign: 'center' }}><img src={imageUrl(image.id)} style={{
+                height: "256px",
+                width: "384px",
+                objectFit: "contain"
+            }} /></div>
         </AreYouSureModal>}
     </>
 
