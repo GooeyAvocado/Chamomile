@@ -55,7 +55,7 @@ export default function LoraSelector(props: {
                         {...optionProps}
                         style={{ display: "flex", gap: '20px' }}
                     >
-                        <img src={option.alias === NO_LORA_ALIAS ? "/outlinepadded-no.png" : option.bannerImage ? imageUrl(option.bannerImage) : "/outlinepadded.png"} style={{ width: "32px", height: "32px", objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px' }} />
+                        <img loading="lazy" src={option.alias === NO_LORA_ALIAS ? "/outlinepadded-no.png" : option.bannerImage ? imageUrl(option.bannerImage) : "/outlinepadded.png"} style={{ width: "32px", height: "32px", objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px' }} />
                         <div style={{ color: option.isAvailable ? "white" : "#777" }}>
                             <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                 {option?.type?.length > 0 && <ModelTypePill type={option?.type} />}
