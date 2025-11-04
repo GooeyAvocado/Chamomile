@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useImages } from "../../hooks/useImages";
 import ImageTile from "./ImageTile";
@@ -111,7 +111,7 @@ export default function ImageViewer(props: {
                 if (imageApi.count === 1) {
                     setSelectedImage(undefined)
                     if (navToSelectedImage) nav("/")
-                } else if (selectedIndex() >= imageApi.count - 1) {
+                } else if (selectedIndex >= imageApi.count - 1) {
                     onLeft()
                 } else {
                     onRight();
@@ -193,7 +193,7 @@ export default function ImageViewer(props: {
                     //If the count is 1, then we've deleted the last image
                     if (imageApi.count === 1) {
                         setSelectedImage(undefined)
-                    } else if (selectedIndex() >= imageApi.count - 1) {
+                    } else if (selectedIndex >= imageApi.count - 1) {
                         onLeft()
                     } else {
                         onRight();
@@ -227,23 +227,22 @@ export default function ImageViewer(props: {
         interruptApi.fetch(undefined, undefined, activeJob.id)
     }
 
-    const selectedIndex = () => {
-        return imageApi.images.map(a => a.id).indexOf(selectedImage?.id ?? 0);
-    }
+    const selectedIndex = useMemo(() =>
+        imageApi.images.map(a => a.id).indexOf(selectedImage?.id ?? 0)
+        , [selectedImage, imageApi.images])
 
     const onLeft = () => {
-        const index = selectedIndex();
+        const index = selectedIndex;
         if (index === 0) return;
         setSelectedImage(imageApi.images[index - 1]);
     }
 
     const onRight = () => {
-        const index = selectedIndex();
-        if (index === imageApi.images.length - 1) return; //If this is the last image do nothing
-        if (index === imageApi.images.length - 2) { //If is the second to last image
+        if (selectedIndex === imageApi.images.length - 1) return; //If this is the last image do nothing
+        if (selectedIndex === imageApi.images.length - 2) { //If is the second to last image
             if (imageApi.hasMore) imageApi.showMore();
         };
-        setSelectedImage(imageApi.images[index + 1]);
+        setSelectedImage(imageApi.images[selectedIndex + 1]);
     }
 
     const filterIsEmpty = () => {
@@ -365,6 +364,12 @@ export default function ImageViewer(props: {
                         onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
                         onFavorite={onFavorite} onDownload={onDownload} onLeft={onLeft} onRight={onRight}
                         onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
+                        imageChildren={() => <div style={{
+                            position: "absolute", bottom: "10px", right: "10px", zIndex: 1,
+                            fontSize: ".6em", opacity: '.5', color: '#888'
+                        }}>
+                            {(selectedIndex + 1).toLocaleString()} of {imageApi?.count?.toLocaleString()}
+                        </div>}
                     />
                     <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
                         Are you sure you want to delete this image?
