@@ -15,7 +15,7 @@ namespace Chamomile.Data.Utils {
             public void SetString(string key, string? value) => Set(key, NpgsqlDbType.Varchar, value);
             public void SetGuid(string key, Guid? value) => Set(key, NpgsqlDbType.Uuid, value);
             public void SetBytea(string key, byte[]? value) => Set(key, NpgsqlDbType.Bytea, value);
-            public void SetTimestamp(string key, DateTime? value) => Set(key, NpgsqlDbType.TimestampTz, value);
+            public void SetTimestamp(string key, DateTime? value) => Set(key, NpgsqlDbType.Timestamp, value);
             public void SetDate(string key, DateTime? value) => Set(key, NpgsqlDbType.Date, value);
 
             public void SetValue(string key, NpgsqlDbType type, object? value) => Set(key, type, value);

@@ -332,11 +332,11 @@ namespace Chamomile.Data {
             }
 
             if (!string.IsNullOrEmpty(filter.FromDate)) {
-                conditions.Add(new(CRE_TS, WhereConditionOperator.GREATER_THAN, "@FROM_DATE"));
+                conditions.Add(new(CRE_TS, WhereConditionOperator.GREATER_OR_EQUAL, "@FROM_DATE"));
             }
 
             if (!string.IsNullOrEmpty(filter.ToDate)) {
-                conditions.Add(new(CRE_TS, WhereConditionOperator.LESS_THAN, "@TO_DATE"));
+                conditions.Add(new(CRE_TS, WhereConditionOperator.LESS_OR_EQUAL, "@TO_DATE"));
             }
 
             if (lastImage != null && lastImage > 0) {
@@ -393,11 +393,11 @@ namespace Chamomile.Data {
 
 
             if (!string.IsNullOrEmpty(filter.FromDate)) {
-                cmd.SetDate("FROM_DATE", DateTime.Parse(filter.FromDate));
+                cmd.SetTimestamp("FROM_DATE", DateTime.Parse(filter.FromDate));
             }
 
             if (!string.IsNullOrEmpty(filter.ToDate)) {
-                cmd.SetDate("TO_DATE", DateTime.Parse(filter.ToDate));
+                cmd.SetTimestamp("TO_DATE", DateTime.Parse(filter.ToDate).AddDays(1).AddTicks(-1));
             }
         }
 
