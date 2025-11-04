@@ -32,6 +32,7 @@ export default function WhatsNew({ open, setOpen }: {
     - There's a little switch to change back
 - **Date search improvements:** Date search is now from and to inclusive 
     - IE: from is greater or equal to midnight, and to is less than or equal to 23:59:59
+- LoRA and Checkpoint editor image selectors now have default filters to show images by default matching the checkpoint or LoRA being edited
 - Grid Editor can now only be closed by the cancel button like the preview dialog
 - [HOME] and [END] keys now go to the first and last image on a row in a Grid respectively
 
@@ -41,6 +42,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug where favorite-ing from the hotbar didn't work.
 - Fixed bug where some image selectors did not center the image
 - Fixed bug where "Images Upscaled" was incorrectly labeled "Images Downloaded" on the general statistics pane
+- Fixed bug where the filter builder may say it's not empty, even though it is
 `
 
     const { settings } = useSettings();
