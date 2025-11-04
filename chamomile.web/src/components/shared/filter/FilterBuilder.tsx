@@ -38,15 +38,19 @@ export default function FilterBuilder(props: {
         setToDate(filter.toDate ?? "")
     }, [filter])
 
-    const filterEmpty = filter.favorite === false
-        && filter.upscaled === false
-        && filter.downloaded === false
-        && filter.fromDate === ''
-        && filter.toDate === ''
-        && filter.lora === ''
-        && filter.model === ''
-        && filter.query?.trim() === ''
-        && (filter.sample ?? 0) < 1
+    const filterEmpty = !filter ||
+        Object.keys(filter).length === 0 ||
+        (
+            (filter.favorite ?? false) === false
+            && (filter.upscaled ?? false) === false
+            && (filter.downloaded ?? false) === false
+            && (filter.fromDate ?? "") === ''
+            && (filter.toDate ?? "") === ''
+            && (filter.lora ?? "") === ''
+            && (filter.model ?? "") === ''
+            && (filter.query?.trim() ?? "") === ''
+            && (filter.sample ?? 0) < 1
+        )
 
     const onBlur = () => {
         if (filter.query?.trim() !== query.trim()) { setFilter({ ...filter, query: query.trim() }) }
