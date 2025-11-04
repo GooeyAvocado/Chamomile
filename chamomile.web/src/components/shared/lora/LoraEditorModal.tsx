@@ -68,6 +68,8 @@ export default function LoraEditorModal(props: {
         <ImageBrowserModal open={imageBrowserOpen} setOpen={setImageBrowserOpen} onOk={(a) => {
             setInternalLora({ ...internalLora, bannerImage: a.id })
             setImageBrowserOpen(false)
+        }} initialFilter={{
+            lora: lora.alias
         }} />
     </Dialog>
 
