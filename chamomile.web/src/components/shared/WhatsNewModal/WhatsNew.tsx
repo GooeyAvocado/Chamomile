@@ -18,17 +18,29 @@ export default function WhatsNew({ open, setOpen }: {
     const whatsnew = `Minor fixes and a few additional things :3
 
 ### What's new?
+- **Image tile sizes are now configurable**: You can select from extra small to extra large
+- **More like this by date**: Easily see what images you generated around the same time as any given image
+- **Infinite scroll**: We now load more as soon as you hit the bottom of the scroll
 - Refresh button to refresh both Checkpoints and LoRAs on the prompt selector
-- Search by no LoRAs
+- Current image index and total image count is now displayed on the lower right of displayed images
 - Average generation time statistic
+- Search by no LoRAs
 - Clear prompt button
 
 ### What's changed?
+- **Cumulative usage graphs:** Graphs are now cumulative instead of just showing daily counts.
+    - There's a little switch to change back
+- **Date search improvements:** Date search is now from and to inclusive 
+    - IE: from is greater or equal to midnight, and to is less than or equal to 23:59:59
 - Grid Editor can now only be closed by the cancel button like the preview dialog
 - [HOME] and [END] keys now go to the first and last image on a row in a Grid respectively
 
+
 ### Fixed bugs
 - Fixed bug where re-ordering (not from base) from an image tile did not set the prompt origin
+- Fixed bug where favorite-ing from the hotbar didn't work.
+- Fixed bug where some image selectors did not center the image
+- Fixed bug where "Images Upscaled" was incorrectly labeled "Images Downloaded" on the general statistics pane
 `
 
     const { settings } = useSettings();
