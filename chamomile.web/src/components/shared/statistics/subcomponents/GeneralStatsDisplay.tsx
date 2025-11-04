@@ -74,7 +74,7 @@ export default function GeneralStatsDisplay({
                 <IconTile
                     icon={<Gradient fontSize="inherit" color="info" />}
                     value={data?.upscaledCount}
-                    label="Images downloaded"
+                    label="Images upscaled"
                 />
 
                 <IconTile
