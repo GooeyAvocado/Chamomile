@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import KeywordUsage from "../../../../model/KeywordUsage";
-import { Chip, CircularProgress, IconButton, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Chip, CircularProgress, IconButton, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
 import ImageTileFromID from "../../images/ImageTileFromID";
-import { ChevronLeft, ChevronRight, FirstPage, LastPage, TableView, Timeline } from "@mui/icons-material";
+import { BarChart, ChevronLeft, ChevronRight, FirstPage, LastPage, SignalCellularAlt, TableView, Timeline } from "@mui/icons-material";
 import ImageModalFromId from "../../images/ImageModalFromId";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
@@ -74,6 +74,8 @@ export function StatsPanel({
     const [page, setPage] = useState(0);
     const [imageView, setImageView] = useState<number | undefined>()
     const [mode, setMode] = useState<"table" | "graph">("table")
+    const [graphMode, setGraphMode] = useState<"CUMULATIVE" | "DAILY">("CUMULATIVE")
+
 
     const displayData = usage.slice(pageSize * page, pageSize * (page + 1))
     const nextPage = () => setPage(Math.min(page + 1, pages - 1))
@@ -145,11 +147,13 @@ export function StatsPanel({
                     <CircularProgress />
                     <div>Fetching usage data</div>
                 </div> : <DatedUsageGraph
+                    graphMode={graphMode}
                     data={data} setImageView={setImageView}
                     renderKeywordRow={renderKeywordRow}
                 />}
         </div>
         {(!hideGraph || !hidePagination) && <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: "10px" }}>
+
             <div style={{ display: "flex", gap: "10px", marginLeft: "10px", alignItems: 'center', flex: "1" }}>
                 {!hideGraph && <IconButton disabled={usage?.length === 0} onClick={() => {
                     if (mode === "table") {
@@ -163,35 +167,59 @@ export function StatsPanel({
                     renderCount ? renderCount(usage.length) :
                         <div style={{ opacity: ".7", fontSize: ".9em" }}> {usage.length} {keywordColumnOverride ?? "Keyword"}s</div>
                 )}
-                {mode === "graph" && (usage?.length > 1 ? <Autocomplete
-                    multiple fullWidth style={{ flex: "1" }}
-                    options={keywordOptions} noOptionsText={keywordQuery.length >= minAutoCompleteLength ? 'No options' : `Type at least ${minAutoCompleteLength} characters`}
-                    value={selectedKeywords}
-                    onChange={(_, value) => setSelectedKeywords(value)}
-                    inputValue={keywordQuery}
-                    onInputChange={(_, value) => setKeywordQuery(value)}
-                    filterOptions={x => x} // disables built-in filtering
-                    renderInput={params => (
-                        <TextField
-                            {...params}
-                            label={`Filter ${keywordColumnOverride?.toLowerCase() ?? "keyword"}s`}
-                            placeholder={selectedKeywords.length > 0 ? "" : "Search"}
-                            size="small"
-                        />
-                    )}
-                    renderTags={(value, getTagProps) =>
-                        value.map((option, index) => (
-                            <Chip
-                                variant="filled"
-                                style={{ backgroundColor: GRAPH_DARK_COLORS[index % GRAPH_COLORS.length], color: 'white' }}
-                                label={`${option}`}
-                                {...getTagProps({ index })}
+                {mode === "graph" && <>
+
+                    {(usage?.length > 1 ? <Autocomplete
+                        multiple fullWidth style={{ flex: "1" }}
+                        options={keywordOptions} noOptionsText={keywordQuery.length >= minAutoCompleteLength ? 'No options' : `Type at least ${minAutoCompleteLength} characters`}
+                        value={selectedKeywords}
+                        onChange={(_, value) => setSelectedKeywords(value)}
+                        inputValue={keywordQuery}
+                        onInputChange={(_, value) => setKeywordQuery(value)}
+                        filterOptions={x => x} // disables built-in filtering
+                        renderInput={params => (
+                            <TextField
+                                {...params}
+                                label={`Filter ${keywordColumnOverride?.toLowerCase() ?? "keyword"}s`}
+                                placeholder={selectedKeywords.length > 0 ? "" : "Search"}
+                                size="small"
                             />
-                        ))
-                    }
-                    disabled={usage.length === 0}
-                /> : usage.length === 1 ? usage[0].keyword : "")}
+                        )}
+                        renderTags={(value, getTagProps) =>
+                            value.map((option, index) => (
+                                <Chip
+                                    variant="filled"
+                                    style={{ backgroundColor: GRAPH_DARK_COLORS[index % GRAPH_COLORS.length], color: 'white' }}
+                                    label={`${option}`}
+                                    {...getTagProps({ index })}
+                                />
+                            ))
+                        }
+                        disabled={usage.length === 0}
+                    /> : usage.length === 1 ? <div style={{ flex: 1 }}>{usage[0].keyword}</div> : <div style={{ flex: 1 }} />)}
+
+                    <ToggleButtonGroup
+                        value={mode}
+                        exclusive
+                        onChange={(_, val) => { setGraphMode(val) }}
+                        aria-label="text alignment"
+                        size="small"
+                    >
+                        <Tooltip title="Cumulative">
+                            <ToggleButton value="CUMULATIVE" selected={graphMode === "CUMULATIVE"}>
+                                <SignalCellularAlt />
+                            </ToggleButton>
+                        </Tooltip>
+                        <Tooltip title="Daily counts">
+                            <ToggleButton value="DAILY" >
+                                <BarChart />
+                            </ToggleButton>
+                        </Tooltip>
+                    </ToggleButtonGroup>
+
+                </>}
             </div>
+
             {mode === "table" && !hidePagination && <div style={{ display: 'flex', gap: "5px", alignItems: 'center' }}>
                 <IconButton onClick={() => setPage(0)} disabled={page === 0}><FirstPage /></IconButton>
                 <IconButton onClick={() => prevPage()} disabled={page === 0}><ChevronLeft /></IconButton>

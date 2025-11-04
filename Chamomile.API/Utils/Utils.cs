@@ -20,6 +20,7 @@ namespace Chamomile.API.Utils {
                     var min = usage[0].Date;
                     var max = usage[^1].Date;
                     var maxUsage = usage.Max(a => a.Count);
+                    var maxCumulativeUsage = usage.Last().CumulativeCount;
 
                     result.MinTs = result.MinTs == null
                         ? min : result.MinTs > min ? min : result.MinTs;
@@ -28,6 +29,7 @@ namespace Chamomile.API.Utils {
                         ? max : result.MaxTs < max ? max : result.MaxTs;
 
                     result.MaxUsage = Math.Max(result.MaxUsage ?? 0, maxUsage);
+                    result.MaxCumulativeUsage = Math.Max(result.MaxCumulativeUsage ?? 0, maxCumulativeUsage);
 
                     result.Usage.Add(k, usage);
                 }

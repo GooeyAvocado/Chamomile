@@ -645,7 +645,8 @@ namespace Chamomile.Data {
             return await adoTemplate.Query(SelectSql(
                 [
                     $"date({CRE_TS}) as {KEYWORD_USAGE_DATE}",
-                    $"count(*) as {MODEL_USAGE_COUNT}",
+                    $"count(*) as {USAGE_COUNT}",
+                    $"SUM(count(*)) OVER (ORDER BY date({CRE_TS}) ASC) AS {CUMULATIVE_USAGE_COUNT}",
                     $"min({IMAGES_ID}) as {IMAGES_ID}" ,
                 ],
                 "(" + InnerStatsImageSql(filter, limit) + ")")
@@ -657,7 +658,8 @@ namespace Chamomile.Data {
                 }, (reader) =>
                 new KeywordUsageDated() {
                     Keyword = "Generated Images",
-                    Count = reader.GetInt(MODEL_USAGE_COUNT),
+                    Count = reader.GetInt(USAGE_COUNT),
+                    CumulativeCount = reader.GetInt(CUMULATIVE_USAGE_COUNT),
                     Date = reader.GetDateTime(KEYWORD_USAGE_DATE),
                     Sample = reader.GetInt(IMAGES_ID)
                 }
@@ -698,6 +700,7 @@ namespace Chamomile.Data {
                 select 
                     DATE(cre_ts) as {KEYWORD_USAGE_DATE}, 
                     count(*) as {KEYWORD_USAGE}, 
+                    SUM(count(*)) OVER (ORDER BY date({CRE_TS}) ASC) AS {CUMULATIVE_USAGE_COUNT},
                     min(image_id) as {KEYWORD_SAMPLE}
                 from (
                     SELECT
@@ -720,6 +723,7 @@ namespace Chamomile.Data {
             }, reader => new KeywordUsageDated() {
                 Keyword = keyword,
                 Count = reader.GetInt(KEYWORD_USAGE),
+                CumulativeCount = reader.GetInt(CUMULATIVE_USAGE_COUNT),
                 Sample = reader.GetInt(KEYWORD_SAMPLE),
                 Date = reader.GetDateTime(KEYWORD_USAGE_DATE),
             });

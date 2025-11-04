@@ -69,8 +69,8 @@
         public static readonly string PROMPT_HEIGHT      = "prompt_hght_num";
         public static readonly string PROMPT_WIDTH       = "prompt_wdth_num";
 
-        public static readonly string MODEL_USAGE_COUNT = "model_usage_count";
-        public static readonly string LORA_USAGE_COUNT = "lora_usage_count";
+        public static readonly string USAGE_COUNT = "usage_count";
+        public static readonly string CUMULATIVE_USAGE_COUNT = "cumulative_usage_count";
 
         public static readonly string ALBUM_TABLE = $"{SCHEMA}.albums";
         public static readonly string ALBUM_META_VIEW = $"{SCHEMA}.album_meta";

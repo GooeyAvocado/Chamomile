@@ -9,9 +9,10 @@ export const GRAPH_COLORS = ["#e57373", "#64b5f6", "#81c784", "#ffd54f", "#ba68c
 export const GRAPH_DARK_COLORS = ["#683535ff", "#325a7aff", "#3f6141ff", "#756325ff", "#5a3361ff", "#265a55ff", "#6d2b41ff", "#483863ff"];
 
 export default function DatedUsageGraph({
-    data, setImageView, renderKeywordRow
+    data, setImageView, renderKeywordRow, graphMode
 }: {
     data: KeywordUsageDatedResult
+    graphMode?: "DAILY" | "CUMULATIVE"
     setImageView: (val: number) => void
     renderKeywordRow?: (usage: KeywordUsage) => React.ReactNode
 }) {
@@ -57,7 +58,7 @@ export default function DatedUsageGraph({
 
                         // Vertical ticks (usage)
                         const vTicks = 8;
-                        const maxUsage = (data.maxUsage ?? 100) * 1.1;
+                        const maxUsage = graphMode === "CUMULATIVE" ? (data.maxCumulativeUsage ?? 100) * 1.1 : (data.maxUsage ?? 100) * 1.1;
                         const usageStep = maxUsage / vTicks;
 
                         // Horizontal ticks (time)
@@ -137,7 +138,7 @@ export default function DatedUsageGraph({
                                         const x = onlyOneDate
                                             ? paddingLeft + (.5 * innerWidth)
                                             : paddingLeft + ((date.getTime() - minTs.getTime()) / (maxTs.getTime() - minTs.getTime())) * innerWidth;
-                                        const y = graphHeight - paddingBottom - (pt.count / maxUsage) * innerHeight;
+                                        const y = graphHeight - paddingBottom - ((graphMode === "CUMULATIVE" ? pt.cumulativeCount : pt.count) / maxUsage) * innerHeight;
                                         return `${x},${y}`;
                                     }).join(" ");
 
@@ -155,7 +156,7 @@ export default function DatedUsageGraph({
                                                 const x = onlyOneDate
                                                     ? paddingLeft + (.5 * innerWidth)
                                                     : paddingLeft + ((date.getTime() - minTs.getTime()) / (maxTs.getTime() - minTs.getTime())) * innerWidth;
-                                                const y = graphHeight - paddingBottom - (pt.count / maxUsage) * innerHeight;
+                                                const y = graphHeight - paddingBottom - ((graphMode === "CUMULATIVE" ? pt.cumulativeCount : pt.count) / maxUsage) * innerHeight;
                                                 return (
                                                     <Tooltip title={<Card >
                                                         <CardActionArea onClick={() => { setImageView(pt.sample) }}
@@ -165,13 +166,13 @@ export default function DatedUsageGraph({
                                                             <ImageTileFromID image={pt.sample} style={{ width: "48px" }} />
                                                             <div>
                                                                 <div>{renderKeywordRow ? renderKeywordRow({
-                                                                    count: pt.count,
+                                                                    count: (graphMode === "CUMULATIVE" ? pt.cumulativeCount : pt.count),
                                                                     keyword: pt.keyword,
                                                                     maxTs: pt.date,
                                                                     minTs: pt.date,
                                                                     sample: pt.sample
                                                                 }) : <>{pt.keyword[0].toUpperCase()}{pt.keyword.slice(1)}</>}</div>
-                                                                <div>{date.toLocaleDateString()}: {pt.count.toLocaleString()} usages</div>
+                                                                <div>{date.toLocaleDateString()}: {(graphMode === "CUMULATIVE" ? pt.cumulativeCount : pt.count).toLocaleString()} usages</div>
                                                             </div>
                                                         </CardActionArea>
                                                     </Card>}>

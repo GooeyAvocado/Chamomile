@@ -44,17 +44,17 @@ namespace Chamomile.Data {
             return await adoTemplate.Query(SelectSql(
                 [
                     LORA_ALIAS, 
-                    $"count(*) as {LORA_USAGE_COUNT}",
+                    $"count(*) as {USAGE_COUNT}",
                     $"min({CRE_TS}) as {MIN_TS}" ,
                     $"max({CRE_TS}) as {MAX_TS}"
                 ],
                    "(" + InnerImageSql(filter,limit) + ")") 
-                + $" GROUP BY {LORA_ALIAS} ORDER BY {LORA_USAGE_COUNT} DESC", (cmd) => {
+                + $" GROUP BY {LORA_ALIAS} ORDER BY {USAGE_COUNT} DESC", (cmd) => {
                     ImagesDAO.SetterFromFilter(cmd, filter);
                 }, (reader) =>
                 new KeywordUsage() {
                     Keyword = reader.GetOptionalString(LORA_ALIAS) ?? "None",
-                    Count = reader.GetInt(LORA_USAGE_COUNT),
+                    Count = reader.GetInt(USAGE_COUNT),
                     MinTs = reader.GetDateTime(MIN_TS),
                     MaxTs = reader.GetDateTime(MAX_TS),
                 }
@@ -66,7 +66,8 @@ namespace Chamomile.Data {
                 [
                     //LORA_ALIAS,
                     $"date({CRE_TS}) as {KEYWORD_USAGE_DATE}",
-                    $"count(*) as {LORA_USAGE_COUNT}",
+                    $"count(*) as {USAGE_COUNT}",
+                    $"SUM(count(*)) OVER (ORDER BY date({CRE_TS}) ASC) AS {CUMULATIVE_USAGE_COUNT}",
                     $"min({IMAGES_ID}) as {IMAGES_ID}" ,
                 ],
                    "(" + InnerImageSql(filter, limit) + ")")
@@ -80,7 +81,8 @@ namespace Chamomile.Data {
                 }, (reader) =>
                 new KeywordUsageDated() {
                     Keyword = lora,
-                    Count = reader.GetInt(LORA_USAGE_COUNT),
+                    Count = reader.GetInt(USAGE_COUNT),
+                    CumulativeCount = reader.GetInt(CUMULATIVE_USAGE_COUNT),
                     Date = reader.GetDateTime(KEYWORD_USAGE_DATE),
                     Sample = reader.GetInt(IMAGES_ID),
                 }
