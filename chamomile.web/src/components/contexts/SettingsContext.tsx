@@ -2,6 +2,8 @@ import { createContext, useEffect, useState } from "react";
 import { useCookie } from "../hooks/useCookie";
 import WhatsNew from "../shared/WhatsNewModal/WhatsNew";
 
+export type ChamomileTileSizes = "XS" | "SM" | "MD" | "LG" | "XL"
+
 export interface SettingsContextType {
     settings: ChamomileSettings
     setSettings: (val: ChamomileSettings) => void
@@ -11,6 +13,7 @@ export interface SettingsContextType {
 export interface ChamomileSettings {
     lastUsedVersion: string,
     enableSound: boolean,
+    tileSize?: ChamomileTileSizes
     defaults: ChamomileDefaults
     globals: ChamomileGlobalFlags
 }
@@ -41,6 +44,30 @@ export class ChamomileGlobalFlags {
     negativePrompt = false
 }
 
+export const TileSizeToPixels = (size?: ChamomileTileSizes, isMobile?: boolean) => {
+
+    const sizes = {
+        XS: 80,
+        SM: 128,
+        MD: 176,
+        LG: 248,
+        XL: 296,
+    } as Record<ChamomileTileSizes, number>
+
+    const mobileSizes = {
+        XS: 80,
+        SM: 104,
+        MD: 128,
+        LG: 152,
+        XL: 176,
+    } as Record<ChamomileTileSizes, number>
+
+    return isMobile
+        ? mobileSizes[size ?? "MD"] ?? 128
+        : sizes[size ?? "MD"] ?? 176
+
+}
+
 export const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider = (props: { children: any }) => {
@@ -51,6 +78,7 @@ export const SettingsProvider = (props: { children: any }) => {
     const [settings, saveSettings] = useCookie("chamomile_settings", {
         lastUsedVersion: "",
         enableSound: true,
+        tileSize: "MD",
         defaults: {
             amount: 3,
             width: 1024,

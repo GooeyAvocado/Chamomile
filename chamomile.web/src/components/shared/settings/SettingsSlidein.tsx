@@ -1,4 +1,4 @@
-import { Drawer, IconButton, InputAdornment, Switch, TextField } from "@mui/material"
+import { Drawer, IconButton, InputAdornment, Switch, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material"
 import { useSettings } from "../../hooks/useSettings"
 import { Coffee, DirectionsRun, Height, ThumbDown, Tune, VolumeUp } from "@mui/icons-material";
 // import SchedulerSelector from "../prompt/SchedulerSelector";
@@ -44,8 +44,6 @@ export default function SettingsSlidein({ open, setOpen }: {
                     </div>)}
                 </div>
             </>
-
-
 
             {/* Defaults */}
             <>
@@ -159,6 +157,36 @@ export default function SettingsSlidein({ open, setOpen }: {
                 </div>
             </>
 
+            {/* Tile Sizes */}
+            <>
+                <b>Tile Sizes</b>
+                <hr style={{ width: "100%" }} />
+                <div style={{ marginBottom: "10px", fontSize: ".8em" }}>
+                    What size should we display image tiles at?
+                </div>
+                <div style={{ marginBottom: "20px" }}>
+                    <ToggleButtonGroup
+                        value={settings?.tileSize} exclusive onChange={(_, val) => setSettings({ ...settings, tileSize: val })}
+                        fullWidth
+                    >
+                        <ToggleButton value="XS" selected={settings?.tileSize === "XS"} >
+                            XS
+                        </ToggleButton>
+                        <ToggleButton value="SM" selected={settings?.tileSize === "SM"} >
+                            SM
+                        </ToggleButton>
+                        <ToggleButton value="MD" selected={!settings.tileSize || settings?.tileSize === "MD"}>
+                            MD
+                        </ToggleButton>
+                        <ToggleButton value="LG" selected={settings?.tileSize === "LG"} >
+                            LG
+                        </ToggleButton>
+                        <ToggleButton value="XL" selected={settings?.tileSize === "XL"} >
+                            XL
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </div>
+            </>
 
             {/* Globals */}
             <>

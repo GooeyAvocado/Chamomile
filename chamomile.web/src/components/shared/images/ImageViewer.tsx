@@ -29,6 +29,8 @@ import SelectedImageActions from "../selectedImageActions/SelectedImageActions";
 import { useLocation, useNavigate } from "react-router-dom";
 import ContextMenu from "../ContextMenu";
 import { Cancel } from "@mui/icons-material";
+import { useSettings } from "../../hooks/useSettings";
+import { TileSizeToPixels } from "../../contexts/SettingsContext";
 
 export default function ImageViewer(props: {
     filter: FilterOptions,
@@ -61,6 +63,7 @@ export default function ImageViewer(props: {
     const interruptApi = useApi(interruptGeneration)
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
     const nav = useNavigate();
+    const { settings } = useSettings();
 
     const [viewerOpen, setViewerOpen] = useState(false)
     const [deleteAys, setDeleteAys] = useState(false)
@@ -315,7 +318,7 @@ export default function ImageViewer(props: {
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '128' : 128 + 32 + 16}px, 1fr))`,
+                gridTemplateColumns: `repeat(auto-fill, minmax(${TileSizeToPixels(settings?.tileSize)}px, 1fr))`,
                 gap: '20px'
             }}>
                 {showBrewing && groupedQueue.map(p =>
