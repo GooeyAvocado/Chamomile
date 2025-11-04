@@ -44,7 +44,7 @@ export default function PromptGroupModal(props: {
                         <img
                             key={orderData?.sample}
                             src={imageUrl(orderData.sample)}
-                            style={{ width: '100%', height: '128px', objectFit: 'contain', objectPosition: 'center top' }}
+                            style={{ width: '128px', height: '128px', objectFit: 'cover', objectPosition: 'center top' }}
                         />
                     </CardActionArea></Card>
                     Based on {basedOn()}.

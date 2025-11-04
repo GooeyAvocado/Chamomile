@@ -39,8 +39,8 @@ export default function LoraEditorModal(props: {
                     key={internalLora.bannerImage}
                     src={internalLora?.bannerImage ? imageUrl(internalLora.bannerImage) : '/outline.png'}
                     style={{
-                        width: '100%', height: '150px',
-                        objectFit: 'contain', objectPosition: 'center top'
+                        width: '150px', height: '150px',
+                        objectFit: 'cover', objectPosition: 'center top'
                     }}
                 />
             </CardActionArea></Card>

@@ -36,7 +36,7 @@ export default function PromptEditorModal(props: {
         <DialogContent>
             {progress && <>
                 <Card style={{ width: "256px", height: '256px', margin: "0px auto 20px auto" }}>
-                    <img src={progress.current_image ? "data:image/png;base64," + progress?.current_image : '/outline.png'} style={{ width: '100%', height: '256px', objectFit: 'contain', objectPosition: 'center top' }} />
+                    <img src={progress.current_image ? "data:image/png;base64," + progress?.current_image : '/outline.png'} style={{ width: '100%', height: '256px', objectFit: 'cover', objectPosition: 'center top' }} />
                 </Card>
             </>}
             {!progress && prompt?.orderData && prompt?.orderData?.sample > 0 && preview && <Card style={{ width: "150px", height: '150px', margin: "0px auto 20px auto" }}>
@@ -44,7 +44,7 @@ export default function PromptEditorModal(props: {
                     <img
                         key={prompt?.orderData?.sample}
                         src={imageUrl(prompt.orderData.sample)}
-                        style={{ width: '100%', height: '150px', objectFit: 'contain', objectPosition: 'center top' }}
+                        style={{ width: '150px', height: '150px', objectFit: 'cover', objectPosition: 'center top' }}
                     />
                 </CardActionArea></Card>
             }
@@ -53,7 +53,7 @@ export default function PromptEditorModal(props: {
                     <img
                         key={internalPrompt.sampleImage}
                         src={internalPrompt.sampleImage ? imageUrl(internalPrompt.sampleImage) : '/outline.png'}
-                        style={{ width: '100%', height: '150px', objectFit: 'contain', objectPosition: 'center top' }}
+                        style={{ width: '150px', height: '150px', objectFit: 'cover', objectPosition: 'center top' }}
                     />
                 </CardActionArea></Card>
                 <div style={{ display: 'flex', marginBottom: '10px' }}>

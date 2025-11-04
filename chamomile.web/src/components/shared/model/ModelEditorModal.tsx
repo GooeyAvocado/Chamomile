@@ -39,8 +39,8 @@ export default function ModelEditorModal(props: {
                     key={internalModel.bannerImage}
                     src={internalModel?.bannerImage ? imageUrl(internalModel.bannerImage) : '/outline.png'}
                     style={{
-                        width: '100%', height: '150px',
-                        objectFit: 'contain', objectPosition: 'center top'
+                        width: '150px', height: '150px',
+                        objectFit: 'cover', objectPosition: 'center top'
                     }}
                 />
             </CardActionArea></Card>
