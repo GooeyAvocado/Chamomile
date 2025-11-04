@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useImages } from "../../hooks/useImages";
 import ImageTile from "./ImageTile";
@@ -84,6 +84,8 @@ export default function ImageViewer(props: {
         }
     })
 
+    const sentinelRef = useRef(null);
+
     useEffect(() => {
         imageApi.refresh()
     }, [filter])
@@ -104,6 +106,27 @@ export default function ImageViewer(props: {
         if (uploadBrewBlob) URL.revokeObjectURL(uploadBrewBlob)
         if (currentUpload) setUploadBrewBlob(URL.createObjectURL(currentUpload))
     }, [currentUpload])
+
+    useEffect(() => {
+        const sentinel = sentinelRef.current;
+        if (!sentinel) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    if (!imageApi.loading) imageApi.showMore()
+                }
+            },
+            {
+                threshold: 0.0,
+                rootMargin: "200px"
+            } // Trigger when fully visible
+        );
+
+
+        observer.observe(sentinel);
+        return () => { observer.disconnect() };
+    }, [sentinelRef.current, imageApi]);
 
     const onDelete = (override?: GeneratedImage) => {
         setDeleteAys(false)
@@ -318,7 +341,7 @@ export default function ImageViewer(props: {
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: `repeat(auto-fill, minmax(${TileSizeToPixels(settings?.tileSize)}px, 1fr))`,
+                gridTemplateColumns: `repeat(auto-fill, minmax(${TileSizeToPixels(settings?.tileSize, isMobile)}px, 1fr))`,
                 gap: '20px'
             }}>
                 {showBrewing && groupedQueue.map(p =>
@@ -396,7 +419,12 @@ export default function ImageViewer(props: {
             </>}
             {imageApi.hasMore && (imageApi.images?.length ?? 0) > 0 && <>
                 <div style={{ textAlign: 'center', marginTop: "20px" }}>
-                    <Button size="small" onClick={() => imageApi.showMore()} disabled={imageApi.loading}> {imageApi.loading ? <CircularProgress size={24} /> : "Show More"}</Button>
+                    <Button
+                        size="small" onClick={() => imageApi.showMore()}
+                        disabled={imageApi.loading} ref={sentinelRef}
+                    >
+                        {imageApi.loading ? <CircularProgress size={24} /> : "Show More"}
+                    </Button>
                     <div style={{ fontSize: ".7em" }}>Showing {imageApi.images.length.toLocaleString()} of {imageApi.count.toLocaleString()} images</div>
                 </div>
             </>}
