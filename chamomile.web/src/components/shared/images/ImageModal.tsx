@@ -159,21 +159,53 @@ export default function ImageModal(props: {
         <div key={image?.id} style={vertical ? { display: 'flex', flexDirection: 'column', height: "100vh", overflowY: 'hidden' } : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
 
             {/* Image side */}
-            <div style={{ textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined, position: 'relative', backgroundColor: collapse ? 'black' : '#333', transition: 'background-color 0.5s ease' }}>
-                <img src={imageUrl(image?.id ?? 0, image?.hiResAvailable)} style={{ maxWidth: "100%", height: "100%", objectFit: 'contain', zIndex: 5 }} />
+            <div style={{
+                textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined,
+                position: 'relative',
+                backgroundColor: collapse ? 'black' : '#333',
+                transition: 'background-color 0.5s ease'
+            }}
+            >
 
-                <div style={{ position: 'absolute', right: '20px', top: '20px', zIndex: 1, opacity: collapse ? 1 : 0, transition: 'opacity 0.5s ease' }}>
-                    <IconButton onClick={() => setCollapse(false)}><Menu /></IconButton>
-                </div>
+                <img
+                    src={imageUrl(image?.id ?? 0)}
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        filter: `blur(20px) brightness(${collapse ? 0.5 : 0.7})`,
+                        transform: collapse ? 'scale(1.00)' : 'scale(1.01)', // avoids visible edges when blurring
+                        zIndex: 0,
+                        transition: 'filter 0.5s ease, transform 0.5s ease'
+                    }}
+                />
 
-                {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
+                <img
+                    src={imageUrl(image?.id ?? 0, image?.hiResAvailable)}
+                    style={{
+                        maxWidth: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        zIndex: 1,
+                        position: 'relative'
+                    }}
+                />
+
+
+                <IconButton onClick={() => setCollapse(false)} style={{ position: 'absolute', right: '20px', top: '20px', zIndex: 3, opacity: collapse ? 1 : 0, transition: 'opacity 0.5s ease' }}>
+                    <Menu />
+                </IconButton>
+
+                {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center', zIndex: 2 }}>
                     <IconButton onClick={onLeft}><ArrowBack /></IconButton>
                 </div>}
-                {onRight && <div style={{ position: 'absolute', right: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center' }}>
+                {onRight && <div style={{ position: 'absolute', right: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center', zIndex: 2 }}>
                     <IconButton onClick={onRight}><ArrowForward /></IconButton>
                 </div>}
 
-                <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center' }}>
+                <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center', zIndex: 2 }}>
                     <ImageHotbar
                         image={image} onUsePrompt={onUsePrompt}
                         onLeft={onLeft} onRight={onRight} onDownload={saveImage}
@@ -182,9 +214,9 @@ export default function ImageModal(props: {
                 </div>
 
                 <div style={{
-                    position: "absolute", left: '10px', bottom: '10px', zIndex: 1,
+                    position: "absolute", left: '10px', bottom: '10px', zIndex: 2,
                     display: 'flex', flexDirection: 'column', alignItems: 'start',
-                    fontSize: ".6em", opacity: '.5', color: '#888'
+                    fontSize: ".6em", opacity: '1', color: 'white', mixBlendMode: 'color-dodge'
                 }}>
                     <div>{image?.id}.png ({((image?.size ?? 0) / (1024.0 * 1024.0)).toFixed(2)}mb)</div>
                     <div>{image?.width}px x {image?.height}px</div>
@@ -194,7 +226,7 @@ export default function ImageModal(props: {
             </div>
 
             {/* info Panel */}
-            <Card style={vertical ? { width: '100%' } : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease" }}>
+            <Card style={vertical ? { width: '100%' } : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease", zIndex: '2' }}>
                 <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
 
                     {/* Buttons */}

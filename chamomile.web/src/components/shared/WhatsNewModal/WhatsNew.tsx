@@ -21,6 +21,7 @@ export default function WhatsNew({ open, setOpen }: {
 - **Image tile sizes are now configurable**: You can select from extra small to extra large
 - **More like this by date**: Easily see what images you generated around the same time as any given image
 - **Infinite scroll**: We now load more as soon as you hit the bottom of the scroll
+- Blurred image background for the image viewer
 - Refresh button to refresh both Checkpoints and LoRAs on the prompt selector
 - Current image index and total image count is now displayed on the lower right of displayed images
 - Average generation time statistic

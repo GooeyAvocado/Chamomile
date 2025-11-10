@@ -639,7 +639,7 @@ function GridImageHUD({
     const eEdge = xPos === xSize - 1 && !neCorner && !seCorner
     const somewhereElse = xPos > 0 && yPos > 0 && xPos < xSize - 1 && yPos < ySize - 1
 
-    return <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '1' }}>
+    return <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '2' }}>
         <Card style={{ padding: "10px", opacity: hovered ? "1" : "0.2", transition: "opacity 0.2s ease" }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
             <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
 

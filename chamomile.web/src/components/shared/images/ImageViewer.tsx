@@ -391,8 +391,8 @@ export default function ImageViewer(props: {
                         onFavorite={onFavorite} onDownload={onDownload} onLeft={onLeft} onRight={onRight}
                         onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
                         imageChildren={() => <div style={{
-                            position: "absolute", bottom: "10px", right: "10px", zIndex: 1,
-                            fontSize: ".6em", opacity: '.5', color: '#888'
+                            position: "absolute", bottom: "10px", right: "10px", zIndex: 2,
+                            fontSize: ".6em", opacity: '.5', color: 'white', mixBlendMode: 'color-dodge'
                         }}>
                             {(selectedIndex + 1).toLocaleString()} of {imageApi?.count?.toLocaleString()}
                         </div>}

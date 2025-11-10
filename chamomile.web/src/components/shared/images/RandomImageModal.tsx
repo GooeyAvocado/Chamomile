@@ -161,7 +161,7 @@ function RandomHUD({
 
     const [hovered, setHovered] = useState(false)
 
-    return <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '1' }}>
+    return <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '2' }}>
         <Card style={{ padding: "10px", opacity: hovered ? "1" : "0.2", transition: "opacity 0.2s ease" }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
             <Button variant="contained" onClick={onImFeelingLucky} startIcon={<Casino />}>Roll again!</Button>
         </Card>
