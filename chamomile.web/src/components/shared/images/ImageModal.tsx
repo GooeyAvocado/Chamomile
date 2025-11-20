@@ -156,14 +156,17 @@ export default function ImageModal(props: {
                     break;
             }
         }}>
-        <div key={image?.id} style={vertical ? { display: 'flex', flexDirection: 'column', height: "100vh", overflowY: 'hidden' } : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
+        <div key={image?.id} style={vertical
+            ? { display: 'flex', flexDirection: 'column', height: "100vh", overflowY: 'hidden' }
+            : { display: "flex", height: "100vh", overflowY: 'hidden' }}>
 
             {/* Image side */}
             <div style={{
-                textAlign: 'center', flex: "1", maxHeight: vertical ? '50vh' : undefined,
+                textAlign: 'center', flex: "1", maxHeight: vertical
+                    ? collapse ? '100vh' : '50vh' : undefined,
                 position: 'relative',
                 backgroundColor: collapse ? 'black' : '#333',
-                transition: 'background-color 0.5s ease'
+                transition: 'background-color 0.5s ease, max-height 0.5s ease',
             }}
             >
 
@@ -176,7 +179,7 @@ export default function ImageModal(props: {
                         height: '100%',
                         objectFit: 'cover',
                         filter: `blur(20px) brightness(${collapse ? 0.5 : 0.7})`,
-                        transform: collapse ? 'scale(1.00)' : 'scale(1.01)', // avoids visible edges when blurring
+                        transform: collapse || vertical ? 'scale(1.00)' : 'scale(1.01)', // avoids visible edges when blurring
                         zIndex: 0,
                         transition: 'filter 0.5s ease, transform 0.5s ease'
                     }}
@@ -226,7 +229,9 @@ export default function ImageModal(props: {
             </div>
 
             {/* info Panel */}
-            <Card style={vertical ? { width: '100%' } : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease", zIndex: '2' }}>
+            <Card style={vertical
+                ? { width: '100%', zIndex: 2, maxHeight: collapse ? 0 : "50vh", transition: "max-height 0.5s ease" }
+                : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease", zIndex: '2' }}>
                 <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
 
                     {/* Buttons */}
