@@ -27,11 +27,11 @@ export default function ImageBrowserModal(props: {
 
     return <Dialog open={open} onClose={() => setOpen(false)} maxWidth='lg' fullWidth>
         <DialogTitle>Select an Image</DialogTitle>
-        <DialogContent style={{ height: "75vh", display: 'flex', flexDirection: 'column', gap: "10px" }}>
-            <FilterBuilder filter={filter} setFilter={setFilter} />
+        <DialogContent style={{ height: "90vh", display: 'flex', flexDirection: 'column', gap: "10px" }}>
+            <FilterBuilder filter={filter} setFilter={setFilter} alwaysExpanded />
             <hr style={{ width: "100%" }} />
             <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px" }}>
-                <ImageViewer filter={filter} showBrewing showWelcome onClick={onOk} />
+                <ImageViewer filter={filter} onClick={onOk} />
             </div>
         </DialogContent>
     </Dialog>

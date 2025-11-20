@@ -16,9 +16,10 @@ export default function FilterBuilder(props: {
     filter: FilterOptions
     setFilter: (val: FilterOptions) => void
     setAlbum?: (val: Album) => void
+    alwaysExpanded?: boolean
 }) {
 
-    const { filter, setFilter, setAlbum } = props
+    const { filter, setFilter, setAlbum, alwaysExpanded } = props
 
     const [query, setQuery] = useState("")
     const [fromDate, setFromDate] = useState("")
@@ -28,7 +29,7 @@ export default function FilterBuilder(props: {
 
     const expandRef = useRef<HTMLDivElement>(null);
     const [expandedHeight, setExpandedHeight] = useState("0px")
-    const [expanded, setExpanded] = useState(false)
+    const [expanded, setExpanded] = useState(alwaysExpanded)
     const [advSearchOpen, setAdvSearchOpen] = useState(false)
     const [createAlbumOpen, setCreateAlbumOpen] = useState(false)
 
@@ -98,7 +99,7 @@ export default function FilterBuilder(props: {
                                         <Close />
                                     </IconButton>
                                 </Tooltip>}
-                                <Tooltip title="More Options">
+                                {!alwaysExpanded && <Tooltip title="More Options">
                                     <IconButton onClick={() => { setExpanded?.(!expanded) }}>
                                         <ExpandMore
                                             style={{
@@ -107,7 +108,7 @@ export default function FilterBuilder(props: {
                                             }}
                                         />
                                     </IconButton>
-                                </Tooltip>
+                                </Tooltip>}
                             </div>
                         </InputAdornment>
                     }
