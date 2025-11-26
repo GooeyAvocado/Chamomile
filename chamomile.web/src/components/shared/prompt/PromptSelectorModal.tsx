@@ -16,6 +16,7 @@ import { enqueuePrompts } from "../../../api/Images";
 import { clearFilter, hydratePrompt } from "../Utils";
 import { useSettings } from "../../hooks/useSettings";
 import { FilterOptions } from "../../../model/FilterOptions";
+import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
 
 export default function PromptSelectorModal(props: {
     open: boolean,
@@ -206,7 +207,8 @@ function GridViewMode(props: {
                     { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
                     filter && setFilter && (a.sampleImage ?? 0) > 0 ? { icon: <ImageSearch />, text: "Images like this", onClick: () => setFilter({ ...clearFilter(filter), sample: a.sampleImage }) } : undefined,
-                    filter && setFilter && (a.sampleImage ?? 0) ? { type: 'divider' } : undefined,
+                    { type: "custom", customContent: () => <CopyToClipboardButton text={a.positivePrompt} menuButonMode /> },
+                    { type: 'divider' },
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
                 ]}>
@@ -259,7 +261,8 @@ function GridViewMode(props: {
                     { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
                     filter && setFilter && (a.sampleImage ?? 0) > 0 ? { icon: <ImageSearch />, text: "Images like this", onClick: () => setFilter({ ...clearFilter(filter), sample: a.sampleImage }) } : undefined,
-                    filter && setFilter && (a.sampleImage ?? 0) ? { type: 'divider' } : undefined,
+                    { type: "custom", customContent: () => <CopyToClipboardButton text={a.positivePrompt} menuButonMode /> },
+                    { type: 'divider' },
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
                 ]}>
