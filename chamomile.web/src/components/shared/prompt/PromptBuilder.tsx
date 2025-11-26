@@ -1,4 +1,4 @@
-import { Close, Coffee, DataObject, DirectionsRun, ExpandMore, ModelTraining, OpenWith, ThumbDown, Tune, Yard } from "@mui/icons-material";
+import { Assignment, AutoFixHigh, Close, Coffee, DirectionsRun, ExpandMore, ModelTraining, OpenWith, ThumbDown, Tune, Yard } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import PromptButton from "./PromptButton";
@@ -25,6 +25,8 @@ import { Lora } from "../../../model/Lora";
 import PromptboxImageSample from "./preview/PromptboxImageSample";
 import { FilterOptions } from "../../../model/FilterOptions";
 import PromptBuilderClearButton from "./PromptBuilderClearButton";
+import Template from "../../../model/Template";
+import { getTemplates } from "../../../api/Template";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -50,7 +52,8 @@ export default function PromptBuilder(props: {
     const expandRef = useRef<HTMLDivElement>(null);
 
     const { loras } = useLoras();
-    const { data: wildcards } = useApi(getWildcards, true)
+    const { data: wildcards, fetch: fetchWildcards } = useApi(getWildcards, true)
+    const templatesApi = useApi(getTemplates, true)
 
     const createPromptApi = useApi(createPrompt)
     const updatePromptApi = useApi(updatePrompt)
@@ -197,6 +200,34 @@ export default function PromptBuilder(props: {
 
                     } as AutoCompletes<Lora>,
                     {
+                        name: "Templates",
+                        data: templatesApi.data ?? [],
+                        prefix: "[",
+                        suffix: "]",
+                        value: (val) => `[${val.name}:]`,
+                        matcher: (val, query) => {
+                            const q = query.toLowerCase().split(":")
+                            return q.length > 1
+                                ? val.name.toLowerCase() === q[0]
+                                : val.name.toLowerCase().includes(q[0])
+                        },
+                        renderer: (val) => <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+                            {val.sampleImage ? <img
+                                src={imageUrl(val.sampleImage)}
+                                style={{ width: "36px", objectFit: 'cover', height: '36px', borderRadius: '2px' }}
+                            /> : <div style={{
+                                width: '36px', height: '36px', borderRadius: '2px', backgroundColor: "#2F2F2F",
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                                <Assignment fontSize="small" />
+                            </div>}
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: '600' }}>{val.name}</div>
+                                <div style={{ fontSize: ".8em", fontFamily: 'monospace', opacity: '.7' }}>{val.params.map(a => a.name).join(" ~ ")}</div>
+                            </div>
+                        </div>
+                    } as AutoCompletes<Template>,
+                    {
                         name: "Wildcards",
                         data: Object.keys(wildcards ?? {}) ?? [],
                         prefix: "__",
@@ -246,8 +277,8 @@ export default function PromptBuilder(props: {
                         endAdornment: (
                             <InputAdornment position="end">
                                 <div style={{ display: 'flex', flexDirection: vertical ? 'column' : undefined }}>
-                                    {!noBrew && <Tooltip title="Wildcards and Overrides">
-                                        <IconButton onClick={() => { setVarsOpen(true) }}><DataObject /></IconButton>
+                                    {!noBrew && <Tooltip title="Dynamics">
+                                        <IconButton onClick={() => { setVarsOpen(true) }}><AutoFixHigh /></IconButton>
                                     </Tooltip>}
                                     {!preview && <Tooltip title="Models">
                                         <IconButton onClick={() => { setModelsOpen(true) }}><ModelTraining /></IconButton>
@@ -461,7 +492,13 @@ export default function PromptBuilder(props: {
         </div>}
 
         {/* Modals */}
-        <VariableEditor open={varsOpen} setOpen={setVarsOpen} />
+        <VariableEditor open={varsOpen} setOpen={(val) => {
+            if (!val) {
+                templatesApi.fetch();
+                fetchWildcards();
+            }
+            setVarsOpen(val)
+        }} />
         <PromptModelSelectorModal open={modelsOpen} setOpen={setModelsOpen} noBrew={noBrew} prompt={promptOverride} setPrompt={setPromptOverride} />
         <SizePresetSelector
             open={sizePresetOpen} setOpen={setSizePresetOpen}

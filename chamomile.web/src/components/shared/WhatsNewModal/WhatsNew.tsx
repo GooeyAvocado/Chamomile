@@ -4,7 +4,7 @@ import Markdown from "react-markdown"
 import { useEffect } from "react"
 import { useSettings } from "../../hooks/useSettings"
 
-export const CHAMOMILE_MAJOR_VERSION = 3.1
+export const CHAMOMILE_MAJOR_VERSION = 3.2
 
 export default function WhatsNew({ open, setOpen }: {
     open: boolean,
@@ -33,10 +33,14 @@ export default function WhatsNew({ open, setOpen }: {
     - There's a little switch to change back
 - **Date search improvements:** Date search is now from and to inclusive 
     - IE: from is greater or equal to midnight, and to is less than or equal to 23:59:59
-- LoRA and Checkpoint editor image selectors now have default filters to show images by default matching the checkpoint or LoRA being edited
+- Improved brewing image tile to better highlight the brewing image
+- Image selector improvements:
+    - LoRA and Checkpoint editor image selectors now have default filters to show images by default matching the checkpoint or LoRA being edited
+    - Image selector has filter expanded by default
+    - Image selector no longer shows brewing images
 - Grid Editor can now only be closed by the cancel button like the preview dialog
 - [HOME] and [END] keys now go to the first and last image on a row in a Grid respectively
-
+- Order of operations changed: Comments are removed before applying overrides
 
 ### Fixed bugs
 - Fixed bug where re-ordering (not from base) from an image tile did not set the prompt origin
@@ -54,7 +58,7 @@ export default function WhatsNew({ open, setOpen }: {
         }
     }, [open])
 
-    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth="lg" fullWidth>
+    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle><ChamomileLogo wordsOverride={`Welcome to Chamomile ${CHAMOMILE_MAJOR_VERSION.toFixed(1)}`} /></DialogTitle>
         <DialogContent>
             <Markdown>{whatsnew}</Markdown>

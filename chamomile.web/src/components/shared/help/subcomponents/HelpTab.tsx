@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DataObject, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Refresh, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
+import { AutoFixHigh, BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Refresh, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -279,7 +279,7 @@ export default function HelpTab(props: {
             <p>
                 With the Wildcard Browser extension, Chamomile will be able to look into those wildcards to allow you
                 to add, and pre-select values in your prompt. This is accessible from
-                the <LabeledIcon label="Wildcards and Overrides"> <DataObject /></LabeledIcon> button on the prompt box.
+                the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> button on the prompt box.
             </p>
             <p>
                 Overrides, wildcard presets, and variables run until no instances of them exist in the prompt to generate,
@@ -305,7 +305,7 @@ export default function HelpTab(props: {
             <img src="/screenshots/overrides.png" style={{ width: "100%" }} />
             <p>
                 Along with wildcards, Chamomile supports two other ways to alter a prompt at generation time. This is
-                accessible from the <LabeledIcon label="Wildcards and Overrides"> <DataObject /></LabeledIcon> button
+                accessible from the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> button
                 on the prompt box.
             </p>
             <h2 style={{ fontFamily: 'Merriweather' }}>Overrides</h2>
