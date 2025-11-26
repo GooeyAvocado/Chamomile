@@ -237,3 +237,12 @@ CREATE INDEX idx_images_base_prompts_hash ON images(image_base_prompt_hash);
 
 alter table models add column model_tag_tx varchar(50) default '';
 alter table lora add column lora_tag_tx varchar(50) default '';
+
+create table templates (
+	templ_nm text not null,
+	templ_desc_tx text, 
+	templ_params_mv JSONB,
+	templ_tx text,
+	image_id int4,
+	CONSTRAINT pk_templates PRIMARY KEY (templ_nm)
+)

@@ -113,5 +113,11 @@
         public static readonly string KEYWORD_USAGE_DATE = "usage_dt";
         public static readonly string KEYWORD_SAMPLE = "sample_id";
 
+        public static readonly string TEMPLATE_TABLE = $"{SCHEMA}.templates";
+        public static readonly string TEMPLATE_NAME = "templ_nm";
+        public static readonly string TEMPLATE_DESC = "templ_desc_tx";
+        public static readonly string TEMPLATE_PARAMS = "templ_params_mv";
+        public static readonly string TEMPLATE_TEXT = "templ_tx";
+
     }
 }
