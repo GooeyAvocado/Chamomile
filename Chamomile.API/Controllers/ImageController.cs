@@ -109,14 +109,11 @@ namespace Chamomile.API.Controllers
         }
 
         [HttpPost("generateMany")]
-        public IActionResult GenerateMany([FromBody] List<Prompt> prompts)
-        {
+        public IActionResult GenerateMany([FromBody] List<Prompt> prompts) {
             List<long> jobIds = [];
 
-            foreach (var prompt in prompts)
-            {
-                try
-                {
+            foreach (var prompt in prompts) {
+                try {
                     jobIds.Add(worker.EnqueuePrompt(prompt));
                 }
                 catch { }

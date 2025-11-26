@@ -8,10 +8,12 @@ using Chamomile.API.Hubs;
 using System.Text.RegularExpressions;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using Automatic1111.Common;
 
 namespace Chamomile.API.Workers {
     public partial class ImageGeneratorWorker {
         private readonly ImagesDAO dao;
+        private readonly TemplateDAO templateDAO;
         private readonly A111Api api;
 
         private readonly ConcurrentDictionary<long, Prompt> _queue = new();
@@ -46,6 +48,7 @@ namespace Chamomile.API.Workers {
         public ImageGeneratorWorker(IHubContext<ImageGenerateHub> hubContext) {
             _hubContext = hubContext;
             dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
+            templateDAO = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
             api = new(new EnvironmentKey("SD_URL", () => throw new InvalidOperationException("")).ToString());
             _workerTask = Task.Run(ProcessQueueAsync);
         }
@@ -143,13 +146,11 @@ namespace Chamomile.API.Workers {
                                 _ = _hubContext.Clients.All.SendAsync("ModelRerollComplete", prompt.OrderData.Model);
                             }
 
-                            stopwatch.Restart();
-                            
-                            var img = await api.GenerateImage(new() {
+                            var p = new Parameters() {
                                 batch_size = 1,
                                 cfg_scale = prompt.CFGScale ?? 7.0,
-                                prompt = ProcessPromptText(prompt.PositivePrompt,prompt.Variables),
-                                negative_prompt = ProcessPromptText(prompt.NegativePrompt ?? "",prompt.Variables),
+                                prompt = await ProcessPromptText(prompt.PositivePrompt, prompt.Variables),
+                                negative_prompt = await ProcessPromptText(prompt.NegativePrompt ?? "", prompt.Variables),
                                 width = prompt.Width ?? 1024,
                                 height = prompt.Height ?? 1024,
                                 n_iter = 1,
@@ -159,7 +160,11 @@ namespace Chamomile.API.Workers {
                                 steps = prompt.Steps ?? 30,
                                 save_images = false,
                                 send_images = true,
-                            }) ?? throw new InvalidOperationException("Image failed to return");
+                            };
+
+                            stopwatch.Restart();
+
+                            var img = await api.GenerateImage(p) ?? throw new InvalidOperationException("Image failed to return");
 
                             stopwatch.Stop();
 
@@ -288,33 +293,93 @@ namespace Chamomile.API.Workers {
             return null;
         }
 
-        private static string ProcessPromptText(string prompt, Dictionary<string, string>? variables) {
+        private async Task<string> ProcessPromptText(string initPrompt, Dictionary<string, string>? variables) {
 
-            if (variables != null && variables.Count > 0) {
-                const int RECURSION_LIMIT = 10;
-                var recursionCount = 0;
+            //remove comments first
+            var prompt = CommentsPattern().Replace(initPrompt, "").Trim();
 
-                while (variables.Any(a => prompt.Contains(a.Key) && !string.IsNullOrWhiteSpace(a.Value))) {
-
-                    //We need to do this so that its caluclated before we enter the loop
-                    //Maybe funky things could happen if not
-                    var replacementList = variables.Where(a => prompt.Contains(a.Key) && !string.IsNullOrWhiteSpace(a.Value)).ToList();
-
-                    foreach (var replacement in replacementList) {
-                        prompt = prompt.Replace(replacement.Key, replacement.Value);
-                    }
-
-                    //Limit just in case
-                    recursionCount++;
-                    if (recursionCount > RECURSION_LIMIT) break;
-                }
+            //Then apply templates
+            try {
+                prompt = await ApplyTemplates(prompt);
+            }
+            catch (Exception e) {
+                Console.WriteLine("Templates failed");
+                Console.WriteLine(e);
+                throw;
             }
 
-            return CommentsPattern().Replace(prompt, "").Trim();
+            //Then apply variables (overrides)
+            if (variables != null) {
+
+                var overrides = variables
+                    .Where(kvp => !kvp.Key.StartsWith("__") && !kvp.Key.EndsWith("__"))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                var wildcards = variables
+                    .Where(kvp => (kvp.Key.StartsWith("__") && kvp.Key.EndsWith("__")))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                prompt = ApplyVariables(ApplyVariables(prompt,overrides), wildcards);
+            }
+
+            return prompt;
 
         }
 
-        
+        private string ApplyVariables(string initPrompt, Dictionary<string, string> variables) {
+            const int RECURSION_LIMIT = 10;
+            var recursionCount = 0;
+            var prompt = initPrompt;
+            if (variables.Count == 0) return initPrompt;
+
+            while (variables.Any(a => prompt.Contains(a.Key) && !string.IsNullOrWhiteSpace(a.Value))) {
+
+                //We need to do this so that its caluclated before we enter the loop
+                //Maybe funky things could happen if not
+                var replacementList = variables.Where(a => prompt.Contains(a.Key) && !string.IsNullOrWhiteSpace(a.Value)).ToList();
+
+                foreach (var replacement in replacementList) {
+                    prompt = prompt.Replace(replacement.Key, replacement.Value);
+                }
+
+                //Limit just in case
+                recursionCount++;
+                if (recursionCount > RECURSION_LIMIT) break;
+            }
+
+            return prompt;
+
+
+        }
+
+        private async Task<string> ApplyTemplates(string prompt) {
+
+            // Evaluate all matches FIRST so we don't mess up indices
+            var matches = TemplatesPattern().Matches(prompt).Cast<Match>().ToList();
+
+            if (matches.Count == 0)
+                return prompt; // return nada if there's no templates
+
+            var result = prompt;
+
+            foreach (var match in matches) {
+                var funcName = match.Groups[1].Value;
+                var argsRaw = match.Groups[2].Value;
+
+                // Split args by "~"
+                var argList = argsRaw.Split('~').ToList();
+
+                // Run your function logic
+                var expanded = await templateDAO.GetAndApply(funcName, argList);
+
+                // Replace this instance in the string
+                result = result.Replace(match.Value, expanded);
+            }
+
+            return result;
+        }
+
+
         /// <summary>
         /// Stops the queue processor.
         /// </summary>
@@ -325,5 +390,8 @@ namespace Chamomile.API.Workers {
 
         [GeneratedRegex(@"(?<=^|\s)#.*|\/\/.*|\/\*[\s\S]*?\*\/")]
         public static partial Regex CommentsPattern();
+        
+        [GeneratedRegex(@"\[([^:\]]+):([^\]]*)\]", RegexOptions.Compiled)]
+        public static partial Regex TemplatesPattern();
     }
 }
