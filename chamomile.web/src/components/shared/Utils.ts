@@ -1,6 +1,7 @@
 import { FilterOptions } from "../../model/FilterOptions";
 import { GeneratedImage } from "../../model/GeneratedImage";
 import { Prompt } from "../../model/Prompt";
+import Template from "../../model/Template";
 
 export const NO_LORA_ALIAS = "NoUsedLoRAs"
 export const ALL_LORA_ALIAS = "";
@@ -108,11 +109,68 @@ export const hydratePrompt = (prompt: Prompt, variables: any, index?: number) =>
     return { ...prompt, variables: hydrated } as Prompt;
 }
 
-export const promptPreview = (prompt: Prompt, variables: any) => {
+export const promptPreview = (prompt: Prompt, variables: any, templates: Template[]) => {
 
+    //Get only the entries that start and end with __
+    const wildcards = Object.fromEntries(Object.entries(variables).filter(([key, _]) =>
+        key.startsWith("__") && key.endsWith("__")
+    ))
+
+    const overrides = Object.fromEntries(Object.entries(variables).filter(([key, _]) =>
+        !key.startsWith("__") && !key.endsWith("__")
+    ))
+
+    return promptPreviewWithVars(
+        promptPreviewWithVars(
+            applyTemplatesToPrompt(
+                prompt.positivePrompt, templates
+            ), overrides
+        ), wildcards
+    )
+
+
+}
+
+export const TEMPLATE_CALL_REGEX = /\[([^:\]]+):([^\]]*)\]/g
+
+const applyTemplatesToPrompt = (
+    promptString: string,
+    templates: Template[]
+): string => {
+
+    return promptString.replace(TEMPLATE_CALL_REGEX, (_, name, paramBlob) => {
+        const template = templates.find(t => t.name.toUpperCase() === name.toUpperCase());
+        if (!template) return ""; // or leave as-is
+
+        const params = paramBlob.length > 0
+            ? paramBlob.split("~")
+            : [];
+
+        return applyTemplate(template, params);
+    });
+};
+
+const applyTemplate = (template: Template, paramList: string[]): string => {
+    if (!template) return "";
+
+    let applied = template.templateString;
+
+    template.params.forEach((p, i) => {
+        const replacement =
+            i < paramList.length && paramList[i].trim() !== ""
+                ? paramList[i]
+                : p.default;
+
+        applied = applied.replaceAll(`~${i + 1}`, replacement);
+    });
+
+    return applied;
+};
+
+const promptPreviewWithVars = (prompt: string, variables: any) => {
     const RECURSION_LIMIT = 10;
     let recursionCount = 0;
-    let hydrated = prompt.positivePrompt;
+    let hydrated = prompt;
 
     while (Object.keys(variables).filter(a => hydrated.includes(a) && (variables[a] as string).trim().length !== 0)) {
         //We need to do this so that its caluclated before we enter the loop
@@ -130,7 +188,6 @@ export const promptPreview = (prompt: Prompt, variables: any) => {
 
 
     return hydrated
-
 }
 
 
