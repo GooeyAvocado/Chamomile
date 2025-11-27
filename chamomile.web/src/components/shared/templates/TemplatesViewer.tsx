@@ -12,6 +12,7 @@ export default function TemplatesViewer({ open, onClose }: {
     onClose: (dirty: boolean) => void
 }) {
 
+    const [filter, setFilter] = useState("")
     const [dirty, setDirty] = useState(false)
     const [editTempalte, setEditTemplate] = useState<Template>()
     const [templateEditorMode, setTemplateEditorMode] = useState<"create" | "edit">("create")
@@ -39,6 +40,8 @@ export default function TemplatesViewer({ open, onClose }: {
                         }}
                         placeholder="Search templates..."
                         fullWidth
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
                     />
                     <hr style={{ width: "100%" }} />
                     {templatesApi.loading ?
@@ -47,7 +50,13 @@ export default function TemplatesViewer({ open, onClose }: {
                             <div>Loading templates...</div>
                         </div>
                         : <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: "5px" }}>
-                            {templatesApi.data?.map(a => <TemplateCard
+                            {templatesApi.data?.filter(
+                                filter.trim().length === 0 ? (_) => true :
+                                    t =>
+                                        t.name.toLowerCase().includes(filter.toLowerCase()) ||
+                                        t.description?.toLowerCase().includes(filter.toLowerCase()) ||
+                                        t.templateString.toLowerCase().includes(filter.toLowerCase())
+                            ).map(a => <TemplateCard
                                 key={a.name}
                                 template={a}
                                 onClick={() => {
