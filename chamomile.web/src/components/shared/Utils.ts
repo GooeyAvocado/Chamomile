@@ -90,20 +90,22 @@ export const hydratePrompt = (prompt: Prompt, variables: any, index?: number) =>
 
     let hydrated = {}
 
-    Object.keys(variables).filter(a => a.includes("%")).forEach(key => {
-        const val = variables[key].split('|')
-        let replaceVal = val[0]
-        if (val.length > 0 && index) {
-            replaceVal = val[index % val.length]
+    Object.keys(variables).forEach(key => {
+        const raw = variables[key] as string;
+        if (!raw) return;
+
+        if (key.includes("%")) {
+            const parts = raw.split("|").map(p => p.trim()).filter(p => p.length > 0);
+            if (parts.length === 0) return;
+
+            const chosen = (typeof index === "number" && parts.length > 1)
+                ? parts[index % parts.length]?.trim()
+                : parts[0].trim();
+
+            hydrated = { ...hydrated, [key]: chosen };
+        } else {
+            hydrated = { ...hydrated, [key]: raw };
         }
-
-        replaceVal = (replaceVal as string).trim();
-        if (replaceVal.length > 0) hydrated = { ...hydrated, [key]: replaceVal }
-    });
-
-    Object.keys(variables).filter(a => !a.includes("%")).forEach(key => {
-        const replaceVal = (variables[key] as string).trim()
-        if (replaceVal.length > 0) hydrated = { ...hydrated, [key]: replaceVal }
     });
 
     return { ...prompt, variables: hydrated } as Prompt;
