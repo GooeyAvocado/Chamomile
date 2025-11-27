@@ -386,7 +386,11 @@ export function TemplateCallEditor({ call, setCall, deleteSelf }: {
         //IF: this is the last index and we're clearing it
         if (index === call.paramList.length - 1 && value.trim().length === 0) {
             //Then remove it from the list
-            newParamList = [...call.paramList].slice(0, -1)
+            newParamList = [...call.paramList].slice(0, -1);
+            // Remove any trailing empty params
+            while (newParamList.length > 0 && (newParamList[newParamList.length - 1] ?? "").trim().length === 0) {
+                newParamList.pop();
+            }
 
         } else if (index >= call.paramList.length) {
 
