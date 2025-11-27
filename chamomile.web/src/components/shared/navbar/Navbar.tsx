@@ -24,7 +24,9 @@ export default function Navbar() {
         setSettingsOpen(true)
     }
 
-    const onClose = () => { setMenuOpen(false) }
+    const onClose = () => {
+        setMenuOpen(false)
+    }
 
     const onDisplay = () => {
         window.open('/#/display', '_blank');
@@ -86,7 +88,7 @@ export default function Navbar() {
                         </ListItemButton>
                     </ListItem>
                     <ListItem disablePadding>
-                        <ListItemButton onClick={() => { onClose(); onDisplay(); }} >
+                        <ListItemButton disableRipple onClick={() => { onClose(); onDisplay(); }} >
                             <ListItemIcon><Monitor /></ListItemIcon>
                             <div style={{ padding: "5px 0px", display: 'flex', alignItems: 'center' }}>
                                 Display
@@ -99,13 +101,13 @@ export default function Navbar() {
                 <Divider />
                 <List>
                     <ListItem disablePadding >
-                        <ListItemButton onClick={() => { onHelp(); }}>
+                        <ListItemButton disableRipple onClick={() => { onHelp(); }}>
                             <ListItemIcon><HelpOutline /></ListItemIcon>
                             <div style={{ padding: "5px 0px" }}>Help and About</div>
                         </ListItemButton>
                     </ListItem>
                     <ListItem disablePadding >
-                        <ListItemButton onClick={() => { onSettings(); }}>
+                        <ListItemButton disableRipple onClick={() => { onSettings(); }}>
                             <ListItemIcon><Settings /></ListItemIcon>
                             <div style={{ padding: "5px 0px" }}>Settings</div>
                         </ListItemButton>
