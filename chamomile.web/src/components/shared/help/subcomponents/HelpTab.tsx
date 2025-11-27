@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { AutoFixHigh, BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Refresh, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
+import { ArrowForward, AutoFixHigh, BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, HomeRepairService, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Refresh, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -257,6 +257,51 @@ export default function HelpTab(props: {
             </p>
         </HelpSection>
 
+        <HelpSection title="Dynamics">
+            <img src="/screenshots/wildcards.png" width={"100%"} />
+            <p>
+                Dynamics encompass ways to make your prompt more flexible and reusable without altering your base
+                prompt. These can all be specified and managed from
+                the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> button on the prompt box.
+                These include three main systems: Wildcards, Overrides, and Templates.
+            </p>
+            <ul>
+                <li>
+                    <b>Wildcards</b>: Wildcards allow you to specify a placeholder in your prompt that will be replaced at
+                    generation time by Dynamic Prompts. The Dynamics dialog allows you to select a specific value for that
+                    wildcard instead.<br /><br />
+                </li>
+                <li>
+                    <b>Overrides</b>: Overrides allow you to specify search and replace rules that will be applied.<br /><br />
+                </li>
+                <li>
+                    <b>Templates</b>: Templates allow you to create reusable, parametrized chunks of prompts.
+                </li>
+            </ul>
+            <p>
+                Dynamics are applied in the following order at generation time:
+            </p>
+            <img src="/screenshots/orderOfOperationsCondensed.png" width={"100%"} />
+            <hr />
+            <p>
+                Wildcards and template parameter values are saved on your prompt. Pre-selected wildcard values and
+                overrides are global and will be applied to any prompt you generate (written or saved) on the
+                Chamomile tab they're set on. These can also be exported and imported.
+            </p>
+            <p>
+                Overrides, and wildcard presets run until no instances of them exist in the prompt to generate,
+                or until there's been 10 iterations of replacing for each, whichever comes first. This means you can add
+                overrides on top of overrides, or wildcard presets for wildcards called on another selected wildcard preset
+            </p>
+            <p>
+                Chamomile will save both the actual prompt used by your web UI to generate the image, named the "Prompt",
+                and the prompt with templates, wildcards, and overrides un-replaced, and comments un-removed, named the
+                "Base Prompt", so you can re-use a base prompt from any generated image.
+            </p>
+
+
+        </HelpSection>
+
         <HelpSection title="Using Wildcards" >
             <img src="/screenshots/wildcards.png" width={"100%"} />
             <p>
@@ -280,20 +325,6 @@ export default function HelpTab(props: {
                 With the Wildcard Browser extension, Chamomile will be able to look into those wildcards to allow you
                 to add, and pre-select values in your prompt. This is accessible from
                 the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> button on the prompt box.
-            </p>
-            <p>
-                Overrides, wildcard presets, and variables run until no instances of them exist in the prompt to generate,
-                or until there's been 5 iterations of replacing, whichever comes first. This means you can add
-                overrides on top of overrides, or wildcard presets for wildcards called on another selected wildcard preset
-            </p>
-            <p>
-                Chamomile will save both the actual prompt used by your web UI to generate the image, named the "Prompt",
-                and the prompt with the wildcards, variables, and overrides un-replaced, named the "Base Prompt",
-                so you can re-use a template from any generated image.
-            </p>
-            <p>
-                All variables, wildcard presets, and overrides persist during your time on a Chamomile tab, and when loading
-                or brewing existing images or recipes.
             </p>
             <p>
                 Dynamic Prompts have a very rich syntax and feature set that you can learn more about in
@@ -325,21 +356,102 @@ export default function HelpTab(props: {
             <p>
                 This system is now deprecated, because Dynamic Prompts has an existing and more robust variable system.
             </p>
-            <hr />
+        </HelpSection>
+
+        <HelpSection title="Templates" >
+            <img src="/screenshots/templates.png" style={{ width: "100%" }} />
             <p>
-                Overrides, wildcard presets, and variables run until no instances of them exist in the prompt to generate,
-                or until there's been 5 iterations of replacing, whichever comes first. This means you can add
-                overrides on top of overrides, or wildcard presets for wildcards called on another selected wildcard preset
+                Templates are a new way to create reusable, parametrized chunks of prompts. These can be centrally managed
+                and easily inserted into any saved or written prompt.
             </p>
             <p>
-                Chamomile will save both the actual prompt used by your web UI to generate the image, named the "Prompt",
-                and the prompt with the wildcards, variables, and overrides un-replaced, named the "Base Prompt",
-                so you can re-use a template from any generated image.
+                Templates can be called later like a function in any prompt:
+            </p>
+            <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                    <div style={codeStyle}>
+                        [googgo:<b style={{ backgroundColor: "#3F0000", padding: "2px 10px" }}>red</b>]
+                    </div>
+                </div>
+                <div>
+                    <ArrowForward />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <div style={{ ...codeStyle, fontSize: ".8em" }}>
+                        man made of <b style={{ backgroundColor: "#3F0000", padding: "2px 10px" }}>red</b> slime,
+                        slime man, slime, melting, liquid hair, ((furry)), dog, canine, anthro, twink,
+                        chubby, <b style={{ backgroundColor: "#3F0000", padding: "2px 10px" }}>red</b> skin,
+                        transparent skin, translucent skin, polo, sweatpants, __facial_expresions__, waving
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                Parameters are separated by tildes (~), are optional, and can have default values set in
+                the template definition:
+            </p>
+
+            <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                    <div style={{ ...codeStyle, fontSize: ".9em" }}>
+                        [googgo:<b style={{ backgroundColor: "#3F0000", padding: "2px 10px" }}>
+                            red
+                        </b>~~~<b style={{ backgroundColor: "#00003F", padding: "2px 10px" }}>
+                            hoodie, jeans
+                        </b>]
+                    </div>
+                </div>
+                <div>
+                    <ArrowForward />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <div style={{ ...codeStyle, fontSize: ".8em" }}>
+                        man made of <b style={{ backgroundColor: "#3F0000", padding: "2px 10px" }}>red</b> slime,
+                        slime man, slime, melting, liquid hair, ((furry)), dog, canine, anthro, twink,
+                        chubby, <b style={{ backgroundColor: "#3F0000", padding: "2px 10px" }}>red</b> skin,
+                        transparent skin, translucent skin, <b style={{ backgroundColor: "#00003F", padding: "2px 10px" }}>
+                            hoodie, jeans
+                        </b>, __facial_expresions__, waving
+                    </div>
+                </div>
+            </div>
+            <p>
+                You can access the template call builder and manager from
+                the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> button
+                on the prompt box.
+            </p>
+        </HelpSection>
+
+        <HelpSection title="Defining a Template" >
+            <img src="/screenshots/templateEditor.png" width={"60%"} />
+            <p>
+                Templates can be defined from the Template Manager, accessible from
+                the <LabeledIcon label="Manage templates"> <HomeRepairService /></LabeledIcon> button on
+                the templates section of the Dynamics modal accessible through
+                the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> button
+                on the prompt box.
             </p>
             <p>
-                All variables, wildcard presets, and overrides persist during your time on a Chamomile tab, and when loading
-                or brewing existing images or recipes.
+                Templates have several properties:
             </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <div>
+                    <b>Name:</b> A unique name for this template. This is what you'll use to call it later
+                </div>
+                <div>
+                    <b>Description:</b> a short description on this template that will be shown on the template manager
+                </div>
+                <div>
+                    <b>Parameters:</b> A list of parameter names and a default value. Each parameter is numbered,
+                    which is how Chamomile identifies where to replace them in the template string.
+                </div>
+                <div>
+                    <b>Template String:</b> The actual prompt chunk that will be inserted when calling this template.
+                    Use a tilde and a number to indicate where each parameter should be placed. IE: ~1 for your
+                    first parameter.
+                </div>
+            </div>
+
         </HelpSection>
 
         <HelpSection title="Comments on Prompts">
@@ -576,8 +688,8 @@ export default function HelpTab(props: {
             </p>
             <p>
                 Chamomile will save both the actual prompt used by your web UI to generate the image, named the "Prompt",
-                and the prompt with the wildcards, comments, and overrides un-replaced, named the "Base Prompt",
-                so you can re-use a template from any generated image.
+                and the prompt with templates, wildcards, comments, and overrides un-replaced, named the "Base Prompt",
+                so you can re-use a base prompt from any generated image.
             </p>
             <div style={{ display: 'flex', flexWrap: "wrap", gap: "20px" }}>
                 <Card style={{ minWidth: width < 400 ? "0px" : "400px", flex: "1" }}>
@@ -1009,6 +1121,6 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             </Table>
         </HelpSection>
 
-    </HelpDisplay>
+    </HelpDisplay >
 
 }

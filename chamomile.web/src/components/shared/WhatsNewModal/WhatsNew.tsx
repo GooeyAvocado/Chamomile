@@ -18,6 +18,7 @@ export default function WhatsNew({ open, setOpen }: {
     const whatsnew = `Minor fixes and a few additional things :3
 
 ### What's new?
+- **Templates:** Parametrized prompt templates for reusable chunks of prompts. See more in the new help section.
 - **Image tile sizes are now configurable**: You can select from extra small to extra large
 - **More like this by date**: Easily see what images you generated around the same time as any given image
 - **Infinite scroll**: We now load more as soon as you hit the bottom of the scroll
@@ -29,6 +30,8 @@ export default function WhatsNew({ open, setOpen }: {
 - Clear prompt button
 
 ### What's changed?
+- **Wildcards and Overrides changed to "Dynamics":** A more general term to include Templates and Template Management
+- **Order of operations changed for dynamics:** Templates are applied first, then overrides, then wildcards
 - **Cumulative usage graphs:** Graphs are now cumulative instead of just showing daily counts.
     - There's a little switch to change back
 - **Date search improvements:** Date search is now from and to inclusive 
@@ -40,7 +43,6 @@ export default function WhatsNew({ open, setOpen }: {
     - Image selector no longer shows brewing images
 - Grid Editor can now only be closed by the cancel button like the preview dialog
 - [HOME] and [END] keys now go to the first and last image on a row in a Grid respectively
-- Order of operations changed: Comments are removed before applying overrides
 
 ### Fixed bugs
 - Fixed bug where re-ordering (not from base) from an image tile did not set the prompt origin
