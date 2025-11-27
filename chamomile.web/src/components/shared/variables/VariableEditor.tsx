@@ -324,7 +324,7 @@ export default function VariableEditor(props: {
                                     <Button onClick={() => {
                                         addCall(newTemplate)
                                         setNewTemplate("")
-                                    }}>
+                                    }} disabled={newTemplate.trim().length === 0}>
                                         Add Template
                                     </Button>
                                 </Card>
@@ -386,9 +386,7 @@ export function TemplateCallEditor({ call, setCall, deleteSelf }: {
         //IF: this is the last index and we're clearing it
         if (index === call.paramList.length - 1 && value.trim().length === 0) {
             //Then remove it from the list
-            newParamList = [...call.paramList].map((a, i) =>
-                i === index ? undefined : a
-            ).filter(a => !!a) as string[]
+            newParamList = [...call.paramList].slice(0, -1)
 
         } else if (index >= call.paramList.length) {
 
