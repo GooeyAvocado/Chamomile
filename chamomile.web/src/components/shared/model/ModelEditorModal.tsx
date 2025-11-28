@@ -106,8 +106,10 @@ export default function ModelEditorModal(props: {
         <ImageBrowserModal open={imageBrowserOpen} setOpen={setImageBrowserOpen} onOk={(a) => {
             setInternalModel({ ...internalModel, bannerImage: a.id })
             setImageBrowserOpen(false)
-        }} initialFilter={{
+        }} initialFilter={modelType === "Checkpoint" ? {
             model: model.id
+        } : {
+            lora: model.id
         }} />
     </Dialog>
 
