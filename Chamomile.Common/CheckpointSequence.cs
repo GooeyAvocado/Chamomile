@@ -1,10 +1,10 @@
 ﻿namespace Chamomile.Common {
     
     /// <summary>Element on a list of models for a sequence to dynamically switch on</summary>
-    public class ModelSequence {
+    public class CheckpointSequence {
 
-        /// <summary>Title of the model</summary>
-        public string ModelTitle { get; set; } = "";
+        /// <summary>Title of the checkpoint</summary>
+        public string Title { get; set; } = "";
 
         /// <summary>Percent Chance (0-100) to stay on a model</summary>
         public int ChanceStay { get; set; } = 0;

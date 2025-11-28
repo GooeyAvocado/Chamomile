@@ -16,7 +16,7 @@ namespace Chamomile.Data {
         private static readonly List<string> ImageColumns = [IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP, IMAGES_CFG_SCL, IMAGES_DOWNLOAD_CT, IMAGES_NOTES,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN, IMAGE_SIZE,
-                MODEL_TITLE, CRE_TS, IMAGE_GEN_MS, IMAGE_HIDDEN,IMAGE_ADDTL_INFO];
+                CHECKPOINT_TITLE, CRE_TS, IMAGE_GEN_MS, IMAGE_HIDDEN,IMAGE_ADDTL_INFO];
 
         private async Task<GeneratedImage> ImageRM(Getter reader) {
             return new() {
@@ -34,7 +34,7 @@ namespace Chamomile.Data {
                 Width = reader.GetInt(IMAGES_WIDTH),
                 Favorite = reader.GetBoolean(IMAGES_FAV_IN),
                 Created = reader.GetDateTime(CRE_TS),
-                Model = reader.GetString(MODEL_TITLE),
+                Model = reader.GetString(CHECKPOINT_TITLE),
                 HiResAvailable = reader.GetBoolean(IMAGES_HIRES_IN),
                 GenerationDurationMs = reader.GetOptionalInt(IMAGE_GEN_MS),
                 DownloadCount = reader.GetOptionalInt(IMAGES_DOWNLOAD_CT),
@@ -112,30 +112,30 @@ namespace Chamomile.Data {
 
             image.Loras = [.. LoraRegex().Matches(image.Prompt)
                     .Select(a => a.Groups[1].Value)
-                    .Where(a => loras.Any(b => b.Alias == a))];
+                    .Where(a => loras.Any(b => b.ID == a))];
 
-            var model = await adoTemplate.QuerySingle(SelectSql([MODEL_TITLE], MODELS_TABLE,
-                new WhereConditionGroup([new(MODEL_NAME, WhereConditionOperator.ILIKE)])),
-                (cmd) => cmd.SetString(MODEL_NAME, "%" + image.Model + "%"),
-                (reader) => reader.GetOptionalString(MODEL_TITLE)
+            var model = await adoTemplate.QuerySingle(SelectSql([CHECKPOINT_TITLE], MODELS_TABLE,
+                new WhereConditionGroup([new(CHECKPOINT_NAME, WhereConditionOperator.ILIKE)])),
+                (cmd) => cmd.SetString(CHECKPOINT_NAME, "%" + image.Model + "%"),
+                (reader) => reader.GetOptionalString(CHECKPOINT_TITLE)
             ) ?? "";
 
             if(model == "") {
                 //We didn't find the model but we can actually probably add it
                 var newModel = new Model() {
-                    Title = image.Model + ".safetensors",
+                    ID = image.Model + ".safetensors",
                     Description = "Model added from image upload",
                     IsAvailable = false,
                     Name = image.Model
                 };
-                await adoTemplate.Execute(InsertSql([MODEL_TITLE, MODEL_DESC, MODEL_AVAIL_IN, MODEL_NAME], MODELS_TABLE), (cmd) => {
-                    cmd.SetString(MODEL_TITLE, newModel.Title);
-                    cmd.SetString(MODEL_DESC, newModel.Description);
-                    cmd.SetBoolean(MODEL_AVAIL_IN, newModel.IsAvailable);
-                    cmd.SetString(MODEL_NAME, newModel.Name);
+                await adoTemplate.Execute(InsertSql([CHECKPOINT_TITLE, CHECKPOINT_DESC, CHECKPOINT_AVAIL_IN, CHECKPOINT_NAME], MODELS_TABLE), (cmd) => {
+                    cmd.SetString(CHECKPOINT_TITLE, newModel.ID);
+                    cmd.SetString(CHECKPOINT_DESC, newModel.Description);
+                    cmd.SetBoolean(CHECKPOINT_AVAIL_IN, newModel.IsAvailable);
+                    cmd.SetString(CHECKPOINT_NAME, newModel.Name);
                 });
 
-                model = newModel.Title;
+                model = newModel.ID;
 
             }
 
@@ -160,7 +160,7 @@ namespace Chamomile.Data {
             var img = await adoTemplate.QuerySingle(InsertSql([
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,IMAGE_ADDTL_INFO, IMAGE_HIDDEN,
-                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,MODEL_TITLE, IMAGE_GEN_MS
+                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_BYTES,CHECKPOINT_TITLE, IMAGE_GEN_MS
             ], IMAGES_TABLE.Split(" ")[0], string.Join(", ", ImageColumns)), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
                 cmd.SetString(IMAGES_BASE_PROMPT, prompt?.PositivePrompt ?? "");
@@ -173,7 +173,7 @@ namespace Chamomile.Data {
                 cmd.SetInt(IMAGES_HEIGHT, image.Height);
                 cmd.SetInt(IMAGES_WIDTH, image.Width);
                 cmd.SetBytea(IMAGES_BYTES, imageBytes);
-                cmd.SetString(MODEL_TITLE, image.Model);
+                cmd.SetString(CHECKPOINT_TITLE, image.Model);
                 cmd.SetInt(IMAGE_GEN_MS, generationDuration);
                 cmd.SetBoolean(IMAGE_HIDDEN, hidden);
                 if(additionalInfo!=null) cmd.SetValue(IMAGE_ADDTL_INFO, NpgsqlTypes.NpgsqlDbType.Jsonb , JsonSerializer.Serialize(additionalInfo,SerializationOptions));
@@ -271,7 +271,7 @@ namespace Chamomile.Data {
             }
 
             if (!string.IsNullOrEmpty(filter.Model)) {
-                conditions.Add(new(MODEL_TITLE));
+                conditions.Add(new(CHECKPOINT_TITLE));
             }
 
             if (filter.Favorite == true) {
@@ -385,7 +385,7 @@ namespace Chamomile.Data {
 
             }
 
-            if (!string.IsNullOrEmpty(filter.Model)) { cmd.SetString(MODEL_TITLE, filter.Model); }
+            if (!string.IsNullOrEmpty(filter.Model)) { cmd.SetString(CHECKPOINT_TITLE, filter.Model); }
             if (!string.IsNullOrEmpty(filter.Lora)) { cmd.SetString(LORA_ALIAS, filter.Lora); }
             if (filter.Album != null && filter.Album >= 0) { cmd.SetInt(ALBUM_ID, filter.Album); }
             if (filter.Grid != null && filter.Grid >= 0) {cmd.SetInt(GRID_ID,filter.Grid);}

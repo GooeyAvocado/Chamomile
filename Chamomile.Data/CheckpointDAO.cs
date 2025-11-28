@@ -3,26 +3,26 @@ using static Chamomile.Data.Utils.SqlBuilder;
 using static Chamomile.Data.Utils.Constants;
 
 namespace Chamomile.Data {
-    public class ModelDAO(string connectionString) : BaseDAO(connectionString) {
+    public class CheckpointDAO(string connectionString) : BaseDAO(connectionString) {
 
         #region READ
 
         public async Task<List<Model>> GetAll() {
             return await adoTemplate.Query(
                 SelectSql([
-                    MODEL_NAME, MODEL_TITLE, MODEL_AVAIL_IN,MODEL_DESC,IMAGES_ID,MODEL_TYPE_CD, MODEL_TAG],
+                    CHECKPOINT_NAME, CHECKPOINT_TITLE, CHECKPOINT_AVAIL_IN,CHECKPOINT_DESC,IMAGES_ID,CHECKPOINT_TYPE_CD, CHECKPOINT_TAG],
                     MODELS_TABLE,
                     new([]),
-                    [new OrderBy(MODEL_NAME)]
+                    [new OrderBy(CHECKPOINT_NAME)]
                 ),
                 (_) => { }, (reader) => new Model() {
-                    Title = reader.GetString(MODEL_TITLE),
-                    Name = reader.GetString(MODEL_NAME),
-                    Type = reader.GetOptionalString(MODEL_TYPE_CD),
-                    Description = reader.GetString(MODEL_DESC),
-                    IsAvailable = reader.GetBoolean(MODEL_AVAIL_IN),
+                    ID = reader.GetString(CHECKPOINT_TITLE),
+                    Name = reader.GetString(CHECKPOINT_NAME),
+                    Type = reader.GetOptionalString(CHECKPOINT_TYPE_CD),
+                    Description = reader.GetString(CHECKPOINT_DESC),
+                    IsAvailable = reader.GetBoolean(CHECKPOINT_AVAIL_IN),
                     BannerImage = reader.GetOptionalInt(IMAGES_ID),
-                    Tags= [.. (reader.GetValue(MODEL_TAG) as string[] ?? [])],
+                    Tags= [.. (reader.GetValue(CHECKPOINT_TAG) as string[] ?? [])],
                 }
             );
         
@@ -31,7 +31,7 @@ namespace Chamomile.Data {
         public async Task<List<string>> GetAllTags() {
             var tags = "TAGS";
             return await adoTemplate.Query(
-                SelectSql([$"unnest({MODEL_TAG}) as {tags}"], MODELS_TABLE, true),
+                SelectSql([$"unnest({CHECKPOINT_TAG}) as {tags}"], MODELS_TABLE, true),
                 (cmd) => { },
                 (reader) => reader.GetString(tags)
             );
@@ -40,17 +40,17 @@ namespace Chamomile.Data {
         public async Task<List<KeywordUsage>> GetUsage(FilterOptions filter, int limit) {
             return await adoTemplate.Query(SelectSql(
                 [
-                    MODEL_TITLE, 
+                    CHECKPOINT_TITLE, 
                     $"count(*) as {USAGE_COUNT}", 
                     $"min({CRE_TS}) as {MIN_TS}" ,
                     $"max({CRE_TS}) as {MAX_TS}"
                 ], 
                 "(" + InnerImageSql(filter,limit) + ")" ) 
-                + $" GROUP BY {MODEL_TITLE} ORDER BY {USAGE_COUNT} DESC, {MODEL_TITLE}", (cmd) =>{
+                + $" GROUP BY {CHECKPOINT_TITLE} ORDER BY {USAGE_COUNT} DESC, {CHECKPOINT_TITLE}", (cmd) =>{
                     ImagesDAO.SetterFromFilter(cmd, filter);
                 }, (reader) => 
                 new KeywordUsage() { 
-                    Keyword = reader.GetString(MODEL_TITLE),
+                    Keyword = reader.GetString(CHECKPOINT_TITLE),
                     Count= reader.GetInt(USAGE_COUNT),
                     MinTs = reader.GetDateTime(MIN_TS),
                     MaxTs= reader.GetDateTime(MAX_TS),
@@ -69,12 +69,12 @@ namespace Chamomile.Data {
                 ],
                 "(" + InnerImageSql(filter, limit) + ")")
                 + $@" 
-                    WHERE {MODEL_TITLE} = @{MODEL_TITLE}
+                    WHERE {CHECKPOINT_TITLE} = @{CHECKPOINT_TITLE}
                     GROUP BY {KEYWORD_USAGE_DATE} 
                     ORDER BY {KEYWORD_USAGE_DATE} ASC
                 ", (cmd) => {
                     ImagesDAO.SetterFromFilter(cmd, filter);
-                    cmd.SetString(MODEL_TITLE, model);
+                    cmd.SetString(CHECKPOINT_TITLE, model);
                 }, (reader) =>
                 new KeywordUsageDated() {
                     Keyword = model,
@@ -88,15 +88,15 @@ namespace Chamomile.Data {
 
         private async Task<List<string>> GetUnusedModels() {
             return await adoTemplate.Query($@"
-                select m.{MODEL_TITLE}
-                from {MODELS_TABLE} m left join {IMAGES_TABLE} on m.{MODEL_TITLE} = img.{MODEL_TITLE} 
-                where {MODEL_AVAIL_IN}  = false
-                group by  m.{MODEL_TITLE}
-                HAVING COUNT(img.{MODEL_TITLE}) = 0", (cmd) => { }, (reader) => reader.GetString(MODEL_TITLE));
+                select m.{CHECKPOINT_TITLE}
+                from {MODELS_TABLE} m left join {IMAGES_TABLE} on m.{CHECKPOINT_TITLE} = img.{CHECKPOINT_TITLE} 
+                where {CHECKPOINT_AVAIL_IN}  = false
+                group by  m.{CHECKPOINT_TITLE}
+                HAVING COUNT(img.{CHECKPOINT_TITLE}) = 0", (cmd) => { }, (reader) => reader.GetString(CHECKPOINT_TITLE));
         }
 
         private static string InnerImageSql(FilterOptions filter, int limit) {
-            return SelectSql([MODEL_TITLE, CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
+            return SelectSql([CHECKPOINT_TITLE, CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
 
@@ -104,22 +104,22 @@ namespace Chamomile.Data {
 
         #region UPDATE
 
-        public async Task Update(Model model) {
+        public async Task Update(Model checkpoint) {
             await adoTemplate.Execute(
                 UpdateSql(
-                    [MODEL_DESC, IMAGES_ID, MODEL_TYPE_CD, MODEL_TAG],
+                    [CHECKPOINT_DESC, IMAGES_ID, CHECKPOINT_TYPE_CD, CHECKPOINT_TAG],
                     MODELS_TABLE,
-                    new([new(MODEL_TITLE)])
+                    new([new(CHECKPOINT_TITLE)])
                 ), (cmd) => {
-                    cmd.SetString(MODEL_DESC, model.Description);
-                    cmd.SetInt(IMAGES_ID, model.BannerImage);
-                    cmd.SetString(MODEL_TYPE_CD, model.Type);
-                    cmd.SetString(MODEL_TITLE, model.Title);
-                    cmd.SetValue(MODEL_TAG, NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text, model.Tags?.ToArray() ?? []);
+                    cmd.SetString(CHECKPOINT_DESC, checkpoint.Description);
+                    cmd.SetInt(IMAGES_ID, checkpoint.BannerImage);
+                    cmd.SetString(CHECKPOINT_TYPE_CD, checkpoint.Type);
+                    cmd.SetString(CHECKPOINT_TITLE, checkpoint.ID);
+                    cmd.SetValue(CHECKPOINT_TAG, NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text, checkpoint.Tags?.ToArray() ?? []);
                 });
         }
 
-        public async Task UpdateAll(List<Automatic1111.Common.Model> models) {
+        public async Task UpdateAll(List<Automatic1111.Common.Checkpoint> models) {
             var existingModels = await GetAll();
 
             models = models.Select(a => {
@@ -127,7 +127,7 @@ namespace Chamomile.Data {
                 return a;
             }).ToList();
 
-            var existingTitles = existingModels.Select(a=>a.Title).ToList();
+            var existingTitles = existingModels.Select(a=>a.ID).ToList();
             var availableTitles = models.Select(a => a.title).ToList();
 
             var newTitles = availableTitles.Except(existingTitles).ToList();
@@ -136,15 +136,15 @@ namespace Chamomile.Data {
             var newModels = models.Where(a => newTitles.Contains(a.title)).ToList();
             
             // Mark every model available 
-            await adoTemplate.Execute(UpdateSql([MODEL_AVAIL_IN], new() {
-                { MODEL_AVAIL_IN, "TRUE"}
+            await adoTemplate.Execute(UpdateSql([CHECKPOINT_AVAIL_IN], new() {
+                { CHECKPOINT_AVAIL_IN, "TRUE"}
             }, MODELS_TABLE, new([])));
 
             //Mark unavailable models unavailable
             if (unavailableTitles.Count > 0) {
-                await adoTemplate.Execute(UpdateSql([MODEL_AVAIL_IN], new() {
-                    { MODEL_AVAIL_IN, "FALSE"}
-                }, MODELS_TABLE, new([new(MODEL_TITLE, unavailableTitles)])));
+                await adoTemplate.Execute(UpdateSql([CHECKPOINT_AVAIL_IN], new() {
+                    { CHECKPOINT_AVAIL_IN, "FALSE"}
+                }, MODELS_TABLE, new([new(CHECKPOINT_TITLE, unavailableTitles)])));
             }
 
             //Check for unavailable models that have zero images and delete them
@@ -152,18 +152,18 @@ namespace Chamomile.Data {
             if (unusedModels.Count > 0) {
                 Console.WriteLine($"{unusedModels.Count} model(s) unused and deleted");
                 unusedModels.ForEach(m => Console.WriteLine($"    - {m}"));
-                await adoTemplate.Execute(DeleteSql(MODELS_TABLE, new([new(MODEL_TITLE, unusedModels)])));
+                await adoTemplate.Execute(DeleteSql(MODELS_TABLE, new([new(CHECKPOINT_TITLE, unusedModels)])));
             }
 
             //Create the new models
             await adoTemplate.ExecuteBatch(InsertSql(
-                [MODEL_NAME, MODEL_TITLE, MODEL_AVAIL_IN,MODEL_DESC],
+                [CHECKPOINT_NAME, CHECKPOINT_TITLE, CHECKPOINT_AVAIL_IN,CHECKPOINT_DESC],
                 MODELS_TABLE
             ), (cmd,m) => {
-                cmd.SetString(MODEL_NAME, m.model_name);
-                cmd.SetString(MODEL_TITLE,m.title);
-                cmd.SetBoolean(MODEL_AVAIL_IN, true);
-                cmd.SetString(MODEL_DESC, "");
+                cmd.SetString(CHECKPOINT_NAME, m.model_name);
+                cmd.SetString(CHECKPOINT_TITLE,m.title);
+                cmd.SetBoolean(CHECKPOINT_AVAIL_IN, true);
+                cmd.SetString(CHECKPOINT_DESC, "");
             },newModels);
 
             

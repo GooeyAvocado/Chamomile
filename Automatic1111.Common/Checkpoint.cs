@@ -1,7 +1,7 @@
 ﻿namespace Automatic1111.Common {
 
     /// <summary>A Stable Diff Model</summary>
-    public class Model {
+    public class Checkpoint {
 
         /// <summary>System name of the model</summary>
         /// <example>ponywave_03.safetensors [5583f8492a]</example>

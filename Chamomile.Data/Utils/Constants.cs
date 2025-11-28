@@ -7,12 +7,12 @@
 
         public static readonly string MODELS_TABLE = $"{SCHEMA}.models";
 
-        public static readonly string MODEL_TITLE        = "model_title_tx";
-        public static readonly string MODEL_NAME         = "model_nm";
-        public static readonly string MODEL_DESC         = "model_desc_tx";
-        public static readonly string MODEL_AVAIL_IN     = "model_avail_in";
-        public static readonly string MODEL_TYPE_CD      = "model_type_cd";
-        public static readonly string MODEL_TAG          = "model_tag_tx";
+        public static readonly string CHECKPOINT_TITLE        = "model_title_tx";
+        public static readonly string CHECKPOINT_NAME         = "model_nm";
+        public static readonly string CHECKPOINT_DESC         = "model_desc_tx";
+        public static readonly string CHECKPOINT_AVAIL_IN     = "model_avail_in";
+        public static readonly string CHECKPOINT_TYPE_CD      = "model_type_cd";
+        public static readonly string CHECKPOINT_TAG          = "model_tag_tx";
 
         public static readonly string LORA_TABLE         = $"{SCHEMA}.lora";
         public static readonly string LORA_NAME          = "lora_nm";

@@ -7,13 +7,13 @@ using Chamomile.Common;
 namespace Chamomile.API.Controllers {
 
     [ApiController]
-    [Route("api/models")]
-    public class ModelController : ControllerBase {
+    [Route("api/checkpoints")]
+    public class CheckpointController : ControllerBase {
 
-        readonly ModelDAO dao;
+        readonly CheckpointDAO dao;
         readonly A111Api api;
 
-        public ModelController() {
+        public CheckpointController() {
             dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
             api = new(new EnvironmentKey("SD_URL", () => throw new InvalidOperationException("")).ToString());
         }
@@ -48,23 +48,23 @@ namespace Chamomile.API.Controllers {
 
         [HttpGet("current")]
         public async Task<IActionResult> GetCurrent() {
-            var model = await api.GetCurrentModel();
+            var model = await api.GetCurrentCheckpoint();
             return Ok(new Dictionary<string, object>() {
-                { "model", model }
+                { "checkpoint", model }
             });
         }
 
         [HttpPost("current")]
-        public async Task<IActionResult> ChangeModel([FromBody]Dictionary<string,object> options) {
-            await api.ChangeModel(options["model"].ToString() ?? "");
+        public async Task<IActionResult> ChangeCheckpoint([FromBody]Dictionary<string,object> options) {
+            await api.ChangeCheckpoint(options["checkpoint"].ToString() ?? "");
             return Ok();
         }
 
         [HttpGet("refresh")]
         public async Task<IActionResult> Refresh() {
             try {
-                await api.RefreshModels();
-                var availableModels = await api.GetModels();
+                await api.RefreshCheckpoints();
+                var availableModels = await api.GetCheckpoints();
                 await dao.UpdateAll(availableModels);
             }
             catch (Exception e) {
@@ -75,8 +75,8 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] Model model) {
-            await dao.Update(model);
+        public async Task<IActionResult> Update([FromBody] Model checkpoint) {
+            await dao.Update(checkpoint);
             return Ok();
         }
     }

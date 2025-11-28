@@ -53,7 +53,7 @@ namespace Chamomile.API.Controllers {
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] Lora lora) {
+        public async Task<IActionResult> Update([FromBody] Model lora) {
             await dao.Update(lora);
             return Ok();
         }

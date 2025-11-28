@@ -34,16 +34,16 @@ namespace Automatic1111.API {
             }
         }
 
-        public async Task RefreshModels() {
+        public async Task RefreshCheckpoints() {
             var client = new HttpClient();
             await client.PostAsync(api + "/sdapi/v1/refresh-checkpoints", null);
         }
 
-        public async Task<List<Model>> GetModels() {
+        public async Task<List<Checkpoint>> GetCheckpoints() {
             var client = new HttpClient();
             var response = await client.GetStringAsync(api + "/sdapi/v1/sd-models");
 
-            return JsonSerializer.Deserialize<List<Model>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No models found");
+            return JsonSerializer.Deserialize<List<Checkpoint>>(response, DESERIALIZER_OPTIONS) ?? throw new InvalidOperationException("No checkpoints found");
         }
 
         public async Task RefreshLoras() {
@@ -119,7 +119,7 @@ namespace Automatic1111.API {
             await client.PostAsync(api + "/sdapi/v1/interrupt", null );
         }
 
-        public async Task<string> GetCurrentModel() {
+        public async Task<string> GetCurrentCheckpoint() {
             string apiUrl = api + "/sdapi/v1/options";
             using var client = new HttpClient();
 
@@ -132,7 +132,7 @@ namespace Automatic1111.API {
                 : value.ToString() ?? "";
         }
 
-        public async Task ChangeModel(string model) {
+        public async Task ChangeCheckpoint(string checkpoint) {
             string apiUrl = api + "/sdapi/v1/options";
             using var client = new HttpClient() {
                 Timeout = TimeSpan.FromMinutes(10)
@@ -147,14 +147,14 @@ namespace Automatic1111.API {
             }
 
             // Step 2: Modify the model name (replace with your desired model)
-            options[SD_MODEL_CHECKPOINT] = model;
+            options[SD_MODEL_CHECKPOINT] = checkpoint;
 
             // Step 3: Serialize and send the updated options
             var jsonContent = new StringContent(JsonSerializer.Serialize(options), Encoding.UTF8, "application/json");
             var postResponse = await client.PostAsync(apiUrl, jsonContent);
 
             if (!postResponse.IsSuccessStatusCode) {
-                throw new InvalidOperationException($"Failed to change model. Status: {postResponse.StatusCode}");
+                throw new InvalidOperationException($"Failed to change checkpoint. Status: {postResponse.StatusCode}");
             }
         }
 

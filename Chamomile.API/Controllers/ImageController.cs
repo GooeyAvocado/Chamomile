@@ -301,7 +301,7 @@ namespace Chamomile.API.Controllers
         }
 
         [HttpPost("modelSequence")]
-        public IActionResult ChangeModelSequence([FromBody] List<ModelSequence> sequence)
+        public IActionResult ChangeModelSequence([FromBody] List<CheckpointSequence> sequence)
         {
             worker.Sequence = [.. sequence];
             return Ok(sequence);

@@ -9,7 +9,7 @@ namespace Chamomile.Data {
 
         #region READ
 
-        public async Task<List<Lora>> GetAll() {
+        public async Task<List<Model>> GetAll() {
             return await adoTemplate.Query(
                 SelectSql([
                     LORA_NAME, LORA_ALIAS, LORA_AVAIL_IN,LORA_DESC, LORA_SAMPLE_PROMPT,IMAGES_ID, LORA_TYPE_CD,LORA_TAG],
@@ -17,8 +17,8 @@ namespace Chamomile.Data {
                     new([]),
                     [new OrderBy(LORA_NAME)]
                 ),
-                (_) => { }, (reader) => new Lora() {
-                    Alias = reader.GetString(LORA_ALIAS),
+                (_) => { }, (reader) => new Model() {
+                    ID = reader.GetString(LORA_ALIAS),
                     Name = reader.GetString(LORA_NAME),
                     Description = reader.GetString(LORA_DESC),
                     IsAvailable = reader.GetBoolean(LORA_AVAIL_IN),
@@ -111,7 +111,7 @@ namespace Chamomile.Data {
 
         #region UPDATE
 
-        public async Task Update(Lora lora) {
+        public async Task Update(Model lora) {
             await adoTemplate.Execute(
                 UpdateSql(
                     [LORA_DESC, LORA_SAMPLE_PROMPT, IMAGES_ID, LORA_TYPE_CD, LORA_TAG],
@@ -121,15 +121,19 @@ namespace Chamomile.Data {
                     cmd.SetString(LORA_DESC, lora.Description);
                     cmd.SetString(LORA_SAMPLE_PROMPT, lora.SamplePrompt);
                     cmd.SetInt(IMAGES_ID, lora.BannerImage);
-                    cmd.SetString(LORA_ALIAS, lora.Alias);
+                    cmd.SetString(LORA_ALIAS, lora.ID);
                     cmd.SetString(LORA_TYPE_CD, lora.Type);
                     cmd.SetValue(LORA_TAG, NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text, lora.Tags?.ToArray() ?? []);
                 });
         }
 
+
+        //TODO: Handle the collision of LoRAs with the same name
+        //Probably just ignore them and warn the user that duplciate LoRAs were found
+        //Also warn the user if a LoRA with "none" was found as an alias
         public async Task UpdateAll(List<Automatic1111.Common.Lora> loras) {
             var existingLoras = await GetAll();
-            var existingAliases = existingLoras.Select(a=>a.Alias).ToList();
+            var existingAliases = existingLoras.Select(a=>a.ID).ToList();
             var availableAliases = loras.Select(a => a.alias).ToList();
 
             var newAliases = availableAliases.Except(existingAliases).ToList();

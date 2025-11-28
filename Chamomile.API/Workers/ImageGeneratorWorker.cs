@@ -38,7 +38,7 @@ namespace Chamomile.API.Workers {
             _ = _hubContext.Clients.All.SendAsync("GenResume"); //Let the user know
         } 
 
-        public ImmutableList<ModelSequence> Sequence { get; set; } = [];
+        public ImmutableList<CheckpointSequence> Sequence { get; set; } = [];
 
         private volatile Prompt? _currentPrompt;
         private volatile int _lastInterruptedJobId = -1;
@@ -137,12 +137,12 @@ namespace Chamomile.API.Workers {
                         var stopwatch = new Stopwatch();
 
                         try {
-                            var model = await api.GetCurrentModel();
+                            var model = await api.GetCurrentCheckpoint();
 
                             if (!string.IsNullOrWhiteSpace(prompt?.OrderData?.Model) && model!=prompt.OrderData.Model) {
                                 
                                 _ = _hubContext.Clients.All.SendAsync("ModelRerollStarted", prompt.OrderData.Model);
-                                await api.ChangeModel(prompt.OrderData.Model);
+                                await api.ChangeCheckpoint(prompt.OrderData.Model);
                                 _ = _hubContext.Clients.All.SendAsync("ModelRerollComplete", prompt.OrderData.Model);
                             }
 
@@ -255,7 +255,7 @@ namespace Chamomile.API.Workers {
             if (Sequence.Count < 2) return; //Don't do this if we don't have a sequence
 
             //Find the current model 
-            var currentModelChances = Sequence.Find(a => a.ModelTitle == currentModel);
+            var currentModelChances = Sequence.Find(a => a.Title == currentModel);
             if (currentModelChances == null) {
                 //it's likely we've been bumped out of the sequence externally and we haven't realized it yet
                 Sequence = []; //reset this to an empty one
@@ -268,14 +268,14 @@ namespace Chamomile.API.Workers {
 
             var nextModel = GetNextModel(currentModel);
             if (nextModel != null) {
-                _ = _hubContext.Clients.All.SendAsync("ModelRerollStarted", nextModel.ModelTitle);
-                await api.ChangeModel(nextModel.ModelTitle);
-                _ = _hubContext.Clients.All.SendAsync("ModelRerollComplete", nextModel.ModelTitle);
+                _ = _hubContext.Clients.All.SendAsync("ModelRerollStarted", nextModel.Title);
+                await api.ChangeCheckpoint(nextModel.Title);
+                _ = _hubContext.Clients.All.SendAsync("ModelRerollComplete", nextModel.Title);
             }
         }
 
-        private ModelSequence? GetNextModel(string currentModel) {
-            var candidates = Sequence.Where(a => a.ModelTitle != currentModel && a.LoadWeight > 0);
+        private CheckpointSequence? GetNextModel(string currentModel) {
+            var candidates = Sequence.Where(a => a.Title != currentModel && a.LoadWeight > 0);
             int totalWeight = candidates.Sum(m => m.LoadWeight);
             int roll = _random.Next(0, totalWeight); // pick a number from 0 to totalWeight-1
 
