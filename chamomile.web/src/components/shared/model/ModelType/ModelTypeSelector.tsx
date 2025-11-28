@@ -1,5 +1,4 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import ModelTypePill from "./ModelTypePill";
 
 export default function ModelTypeSelector(props: {
     modelType?: string

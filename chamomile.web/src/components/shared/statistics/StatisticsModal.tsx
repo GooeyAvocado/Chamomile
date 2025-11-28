@@ -15,9 +15,9 @@ import { useCheckpoints } from "../../hooks/useCheckpoints"
 import { useLoras } from "../../hooks/useLoras"
 import { getGenStats, getGenStatsDated, getKeywordUsage, getKeywordUsageDated } from "../../../api/Images"
 import { StatsPanel } from "./subcomponents/StatsPanel"
-import ModelTypePill from "../model/ModelType/ModelTypePill"
 import GeneralStatsDisplay from "./subcomponents/GeneralStatsDisplay"
 import SourceStats from "./subcomponents/SourceStats"
+import ModelStatsPanel from "./subcomponents/ModelStatsPanel"
 
 export default function StatisticsModal(props: {
     open: boolean,
@@ -31,12 +31,12 @@ export default function StatisticsModal(props: {
     const [filterDirty, setFilterDirty] = useState(false)
 
     const { width, vertical } = useWindowDimensions();
-    const { checkpoints: models } = useCheckpoints();
+    const { checkpoints } = useCheckpoints();
     const { loras } = useLoras();
     const stacked = width < 450
 
-    const modelAvailable = (val: string) => models?.find(a => a.id === val)?.isAvailable
-    const loraAvailable = (val: string) => val === "None" || loras?.find(a => a.id === val)?.isAvailable
+    const checkpointAvailable = (val: string) => checkpoints?.find(a => a.id === val)?.isAvailable ?? false
+    const loraAvailable = (val: string) => val === "None" || (loras?.find(a => a.id === val)?.isAvailable ?? false)
 
     const { data: loraData, fetch: fetchLoraUsage, loading: loraLoading } = useApi(getLoraUsage)
     const { data: modelData, fetch: fetchModelUsage, loading: modelLoading } = useApi(getCheckpointUsage)
@@ -95,7 +95,7 @@ export default function StatisticsModal(props: {
             </FormControl>
         </TabbedModalConsistentContent>
         <TabbedModalTabContent label="General">
-            {open ? (keywordLoading || !keywordData) ? <LoadingSpinner text="Loading general statistics" /> : <StatsPanel
+            {open ? (generalLoading || !generalData) ? <LoadingSpinner text="Loading general statistics" /> : <StatsPanel
                 datedUsageApi={getGenStatsDated} usage={[{
                     keyword: "Generated Images", count: 0, minTs: "", maxTs: "", sample: 1
                 }]} filter={filter} limit={limit} hidePagination renderCount={() => <>Show usage graph</>}
@@ -111,51 +111,28 @@ export default function StatisticsModal(props: {
             </StatsPanel> : ""}
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Checkpoints">
-            {open ? (modelLoading || !modelData) ? <LoadingSpinner text="Loading checkpoint usage information" /> : <StatsPanel
-                datedUsageApi={getCheckpointUsageDated} minAutoCompleteLength={0}
-                usage={availability === 0 ? modelData : availability === 1
-                    ? modelData?.filter(a => modelAvailable(a.keyword))
-                    : modelData?.filter(a => !modelAvailable(a.keyword))}
-                filter={filter} keywordColumnOverride="Checkpoint" limit={limit}
-                getSampleImageId={(u) => models?.find(a => a.id === u.keyword)?.bannerImage}
-                renderKeywordRow={(u) => {
-                    const m = models?.find(a => a.id === u.keyword) ?? {
-                        name: u.keyword, id: u.keyword, isAvailable: false, type: ""
-                    }
-                    return <div style={{ color: m.isAvailable ? "white" : "#DDD", fontSize: ".8em" }}>
-                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                            {m?.type?.length > 0 && <ModelTypePill type={m?.type} style={{ flexShrink: "0" }} />}
-                            <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
-                                <b>{m.name}</b>
-                            </div>
-                        </div>
-                        <div style={{ fontSize: ".8em" }}>{`${m.id}${m.isAvailable ? "" : " (Unavailable)"}`}</div>
-                    </div>
-                }}
-            /> : ""}
+            {open ? (modelLoading || !modelData) ? <LoadingSpinner text="Loading checkpoint usage information" /> :
+                <ModelStatsPanel
+                    availability={availability}
+                    data={modelData}
+                    filter={filter}
+                    getDatedUsageApi={getCheckpointUsageDated}
+                    isAvailable={checkpointAvailable}
+                    limit={limit}
+                    modelType="Checkpoint"
+                    models={checkpoints}
+                /> : ""}
         </TabbedModalTabContent>
         <TabbedModalTabContent label="LoRAs">
-            {open ? (loraLoading || !loraData) ? <LoadingSpinner text="Loading LoRA usage information" /> : <StatsPanel
-                datedUsageApi={getLoraUsageDated} minAutoCompleteLength={0}
-                usage={availability === 0 ? loraData : availability === 1
-                    ? loraData?.filter(a => loraAvailable(a.keyword))
-                    : loraData?.filter(a => !loraAvailable(a.keyword))}
-                filter={filter} keywordColumnOverride="LoRA" limit={limit}
-                getSampleImageId={(u) => loras?.find(a => a.id === u.keyword)?.bannerImage}
-                renderKeywordRow={(u) => {
-                    const m = loras?.find(a => a.id === u.keyword) ?? {
-                        name: u.keyword, id: u.keyword, isAvailable: false, type: ""
-                    }
-                    return <div style={{ color: m.isAvailable ? "white" : "#DDD", fontSize: ".8em" }}>
-                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                            {m?.type?.length > 0 && <ModelTypePill type={m?.type} style={{ flexShrink: "0" }} />}
-                            <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
-                                <b>{m.name}</b>
-                            </div>
-                        </div>
-                        <div style={{ fontSize: ".8em" }}>{`${m.id}${m.isAvailable ? "" : " (Unavailable)"}`}</div>
-                    </div>
-                }}
+            {open ? (loraLoading || !loraData) ? <LoadingSpinner text="Loading LoRA usage information" /> : <ModelStatsPanel
+                availability={availability}
+                data={loraData}
+                filter={filter}
+                getDatedUsageApi={getLoraUsageDated}
+                isAvailable={loraAvailable}
+                limit={limit}
+                modelType="LoRA"
+                models={loras}
             /> : ""}
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Keywords">
