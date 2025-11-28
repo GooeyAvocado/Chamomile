@@ -252,6 +252,11 @@ export default function HelpTab(props: {
                 Your LoRA can also store activation tags, though these are purely for notes (for now).
             </p>
             <p>
+                Models can now also have tags associated to them to help organize them better. You can set an unlimited number of tags,
+                but the models will be grouped by their first tag when browsing (their primary tag), and have two additional tags shown
+                on their tile if present.
+            </p>
+            <p>
                 You can also set a sample image from the image viewer. Simply click the <LabeledIcon label="Menu button"><MoreVert /></LabeledIcon>
                 {" "}on the LoRA or Checkpoint card, and select <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Set this as sample image</Card>
             </p>

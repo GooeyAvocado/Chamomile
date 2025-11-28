@@ -19,6 +19,7 @@ export default function WhatsNew({ open, setOpen }: {
 
 ### What's new?
 - **Templates:** Parametrized prompt templates for reusable chunks of prompts. See more in the new help section.
+- **Model tags:** Checkpoints and LoRAs now have tags to help organize them better
 - **Image tile sizes are now configurable**: You can select from extra small to extra large
 - **More like this by date**: Easily see what images you generated around the same time as any given image
 - **Infinite scroll**: We now load more as soon as you hit the bottom of the scroll
@@ -43,6 +44,7 @@ export default function WhatsNew({ open, setOpen }: {
     - Image selector no longer shows brewing images
 - Grid Editor can now only be closed by the cancel button like the preview dialog
 - [HOME] and [END] keys now go to the first and last image on a row in a Grid respectively
+- Backend changes to unify components for Models (Checkpoints and LoRAs) to make future improvements easier
 
 ### Fixed bugs
 - Fixed bug where re-ordering (not from base) from an image tile did not set the prompt origin
