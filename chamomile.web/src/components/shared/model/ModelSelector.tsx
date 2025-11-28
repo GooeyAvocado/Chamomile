@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import ModelTypePill from "./ModelType/ModelTypePill";
 import { Model, ModelType } from "../../../model/Model";
 import ModelBrowserModal from "./ModelBrowserModal";
-import { NO_LORA_ALIAS, SPECIAL_LORA_ALIASES } from "../Utils";
+import { modelSorter, NO_LORA_ALIAS, SPECIAL_LORA_ALIASES } from "../Utils";
 
 export default function ModelSelector(props: {
     model: string,
@@ -36,6 +36,7 @@ export default function ModelSelector(props: {
         <Autocomplete disabled={disabled} key={model} disableClearable
             freeSolo loading={loading} loadingText={loading ? "Loading..." : "Type to begin"}
             getOptionLabel={(option) => (option as Model)?.name ?? ""}
+            groupBy={(option) => option?.tags?.[0] ?? ""}
             filterOptions={(options, state) => {
                 const query = state.inputValue.toLowerCase();
                 return options.filter(
@@ -48,14 +49,16 @@ export default function ModelSelector(props: {
                 id: '',
                 bannerImage: undefined,
                 name: 'All',
-                isAvailable: true
+                isAvailable: true,
+                tags: ['']
             } as Model : undefined,
             showNone ? {
                 id: NO_LORA_ALIAS,
                 bannerImage: undefined,
                 name: 'None',
-                isAvailable: true
-            } as Model : undefined, ...(models ?? [])].filter(a => !!a).filter(
+                isAvailable: true,
+                tags: ['']
+            } as Model : undefined, ...([...models ?? []]).sort(modelSorter)].filter(a => !!a).filter(
                 showAvailability ? _ => true : a => a.isAvailable
             )}
             style={style} value={models?.find(a => a.id === model)}
@@ -126,6 +129,7 @@ export default function ModelSelector(props: {
             onSelect(val)
             setBrowserOpen(false)
         }} open={browserOpen} setOpen={setBrowserOpen} showAny={showAll} showAvailability={showAvailability}
+            showNone={showNone}
             models={models} modelType={modelType} loading={loading} onRefresh={onRefresh}
         />
     </>

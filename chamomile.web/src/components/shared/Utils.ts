@@ -1,5 +1,6 @@
 import { FilterOptions } from "../../model/FilterOptions";
 import { GeneratedImage } from "../../model/GeneratedImage";
+import { Model } from "../../model/Model";
 import { Prompt } from "../../model/Prompt";
 import Template from "../../model/Template";
 
@@ -218,4 +219,13 @@ export const imageToPrompt = (image?: GeneratedImage, useBasePrompt?: boolean, r
         steps: image?.steps,
         sampleImage: (image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id,
     } as Prompt
+}
+
+export const modelSorter = (a: Model, b: Model) => {
+    const ta = a.tags?.[0]?.toLowerCase() ?? null;
+    const tb = b.tags?.[0]?.toLowerCase() ?? null;
+    if (ta === tb) return (a.name ?? '').localeCompare(b.name ?? '');
+    if (ta === null) return -1; // place items without a tag before tagged items
+    if (tb === null) return 1;
+    return ta.localeCompare(tb);
 }

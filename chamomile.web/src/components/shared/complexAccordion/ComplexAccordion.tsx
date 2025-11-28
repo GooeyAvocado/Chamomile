@@ -4,7 +4,7 @@ import ComplexAccordionBody from "./ComplexAccordionBody"
 import ComplexAccordionActions, { ComplexAccordionActionsProps } from "./ComplexAccordionActions"
 import { ExpandMore } from "@mui/icons-material"
 
-export default function ComplexAccordion({ title, iconOverride, noIconRotate, style, disabled, elevation, ...props }: {
+export default function ComplexAccordion({ title, iconOverride, noIconRotate, style, disabled, elevation, defaultExpanded, ...props }: {
     title?: React.ReactNode,
     iconOverride?: React.ReactNode
     noIconRotate?: boolean
@@ -12,11 +12,12 @@ export default function ComplexAccordion({ title, iconOverride, noIconRotate, st
     style?: React.CSSProperties
     disabled?: boolean
     elevation?: number
+    defaultExpanded?: boolean
 }) {
 
-    const [expanded, setExpanded] = useState(false)
+    const [expanded, setExpanded] = useState(defaultExpanded ?? false)
     const [init, setInit] = useState(false)
-    const [showActions, setShowActions] = useState<"collapsed" | "expanded">("collapsed")
+    const [showActions, setShowActions] = useState<"collapsed" | "expanded">(defaultExpanded ? "expanded" : "collapsed")
     const [actionsOpacity, setActionsOpacity] = useState(1)
     const contentRef = useRef<HTMLDivElement>(null);
     const children = Children.toArray(props.children)
