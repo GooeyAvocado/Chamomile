@@ -104,6 +104,7 @@ export default function ModelCard(props: {
         <div style={{ flex: '1', color: model.isAvailable ? "white" : "#777" }}>
             <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                 {model?.type?.length > 0 && <ModelTypePill type={model?.type} style={{ flexShrink: "0" }} />}
+                {(model?.tags?.[0]?.length ?? 0) > 0 && <ModelTypePill type={model?.tags?.[0] ?? ""} style={{ flexShrink: "0" }} bgColor={`rgba(255,255,255,0.1)`} />}
                 <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end' }}>
                     <b>{model.name}</b>
                 </div>
