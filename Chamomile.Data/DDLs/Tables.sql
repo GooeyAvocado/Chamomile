@@ -246,32 +246,3 @@ create table templates (
 	image_id int4,
 	CONSTRAINT pk_templates PRIMARY KEY (templ_nm)
 )
-
---I messed up the initial set up for this for some reason
-
-ALTER TABLE chamomile.models
-ALTER COLUMN model_tag_tx
-SET DEFAULT ARRAY[]::varchar(50)[];
-
-ALTER TABLE chamomile.models
-ALTER COLUMN model_tag_tx
-TYPE varchar(50)[]
-USING 
-    CASE
-        WHEN model_tag_tx IS NULL OR model_tag_tx = '' THEN ARRAY[]::varchar(50)[]
-        ELSE ARRAY[model_tag_tx]::varchar(50)[]
-    END;
-
-
-ALTER TABLE chamomile.lora
-ALTER COLUMN lora_tag_tx
-SET DEFAULT ARRAY[]::varchar(50)[];
-
-ALTER TABLE chamomile.lora
-ALTER COLUMN lora_tag_tx
-TYPE varchar(50)[]
-USING 
-    CASE
-        WHEN lora_tag_tx IS NULL OR lora_tag_tx = '' THEN ARRAY[]::varchar(50)[]
-        ELSE ARRAY[lora_tag_tx]::varchar(50)[]
-    END;
