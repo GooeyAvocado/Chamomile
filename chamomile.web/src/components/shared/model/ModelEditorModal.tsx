@@ -1,10 +1,13 @@
-import { Button, Card, CardActionArea, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Autocomplete, Button, Card, CardActionArea, Chip, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { imageUrl } from "../../../api/Images";
 import ImageBrowserModal from "../images/ImageBrowserModal";
 import ModelTypePill from "./ModelType/ModelTypePill";
 import ModelTypeSelector from "./ModelType/ModelTypeSelector";
 import { Model, ModelType } from "../../../model/Model";
+import useApi from "../../hooks/useApi";
+import { getLoraTags } from "../../../api/Loras";
+import { getCheckpointTags } from "../../../api/Checkpoint";
 
 export default function ModelEditorModal(props: {
     open: boolean,
@@ -17,16 +20,18 @@ export default function ModelEditorModal(props: {
 
     const [internalModel, setInternalModel] = useState(model as Model)
     const [imageBrowserOpen, setImageBrowserOpen] = useState(false)
+    const tagsApi = useApi(modelType === "LoRA" ? getLoraTags : getCheckpointTags);
 
     useEffect(() => {
         if (open) {
             setInternalModel(model as Model)
+            tagsApi.fetch();
         }
     }, [open, model])
 
     if (!model) { return <></> }
 
-    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth='xs' fullWidth>
+    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth='sm' fullWidth>
         <DialogTitle style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
             <div>
                 <div>{model.name}</div>
@@ -35,18 +40,48 @@ export default function ModelEditorModal(props: {
             {internalModel.type?.length > 0 && <ModelTypePill type={internalModel.type} />}
         </DialogTitle>
         <DialogContent>
-            <Card style={{ width: "150px", height: '150px', margin: "0px auto 20px auto" }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
+            <Card style={{ width: "256px", height: '256px', margin: "0px auto 30px auto" }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
                 <img
                     key={internalModel.bannerImage}
                     src={internalModel?.bannerImage ? imageUrl(internalModel.bannerImage) : '/outline.png'}
                     style={{
-                        width: '150px', height: '150px',
+                        width: '256px', height: '256px',
                         objectFit: 'cover', objectPosition: 'center top'
                     }}
                 />
             </CardActionArea></Card>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: "20px" }}>
+                <div style={{ flex: 1 }}>
+                    <ModelTypeSelector modelType={internalModel.type} setModelType={(e) => setInternalModel({ ...internalModel, type: e })} />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <Autocomplete
+                        multiple options={tagsApi.data ?? []}
+                        loading={tagsApi.loading} value={internalModel.tags}
+                        freeSolo onChange={(_, val) => {
+                            setInternalModel({ ...internalModel, tags: val })
+                        }} renderValue={(value: readonly string[], getItemProps) =>
+                            value.map((option: string, index: number) => {
+                                const { key, ...itemProps } = getItemProps({ index });
+                                return (
+                                    <Chip
+                                        variant="filled"
+                                        label={option} key={key} {...itemProps} />
+                                );
+                            })
+                        }
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Tags"
+                            />
+                        )}
+                    />
+                </div>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <ModelTypeSelector modelType={internalModel.type} setModelType={(e) => setInternalModel({ ...internalModel, type: e })} />
+
+
                 <TextField
                     label="Notes"
                     value={internalModel.description}
