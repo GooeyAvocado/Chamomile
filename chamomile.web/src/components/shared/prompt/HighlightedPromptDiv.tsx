@@ -3,6 +3,7 @@ import { HighlightedDiv, HighlightRule } from "../highlightedDiv/HighlightedDiv"
 import { Card } from "@mui/material";
 import { useLoras } from "../../hooks/useLoras";
 import { imageUrl } from "../../../api/Images";
+import { TEMPLATE_CALL_REGEX } from "../Utils";
 
 export default function HighlightedPromptDiv({ prompt, style }: {
     prompt?: string
@@ -89,6 +90,11 @@ export default function HighlightedPromptDiv({ prompt, style }: {
             //Wildcards
             { regex: /(?<!\=)__((?:(?!__).)+)__/, style: { backgroundColor: "#112255", borderRadius: "2px", padding: "2px 5px" } },
 
+            //Templates 
+            {
+                regex: TEMPLATE_CALL_REGEX,
+                style: { backgroundColor: "#551111ff", borderRadius: "2px", padding: "2px 5px" }
+            },
 
             //
         ]}
