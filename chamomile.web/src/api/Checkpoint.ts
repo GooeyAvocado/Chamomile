@@ -60,3 +60,9 @@ export const getCheckpointUsageDated = (
     onError: (value: any) => void,
     filter: KeywordFilterOptions
 ) => Get(setLoading, setItem, onError, ENDPOINT + "datedusage" + objectToQueryString(filter));
+
+export const getCheckpointTags = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: string[]) => void,
+    onError: (value: any) => void
+) => Get(setLoading, setItem, onError, ENDPOINT + "tags");

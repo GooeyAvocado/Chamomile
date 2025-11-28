@@ -6,6 +6,7 @@ export class Model {
     samplePrompt: string = "";
     isAvailable: boolean = true;
     bannerImage?: number;
+    tags?: string[];
 }
 
 export type ModelType = 'Checkpoint' | 'LoRA'

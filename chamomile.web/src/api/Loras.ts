@@ -40,3 +40,9 @@ export const getLoraUsageDated = (
     onError: (value: any) => void,
     filter: KeywordFilterOptions
 ) => Get(setLoading, setItem, onError, ENDPOINT + "datedusage" + objectToQueryString(filter));
+
+export const getLoraTags = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: string[]) => void,
+    onError: (value: any) => void
+) => Get(setLoading, setItem, onError, ENDPOINT + "tags");
