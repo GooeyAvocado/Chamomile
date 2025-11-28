@@ -33,7 +33,7 @@ namespace Chamomile.Data {
         public async Task<List<string>> GetAllTags() {
             var tags = "TAGS";
             return await adoTemplate.Query(
-                SelectSql([$"unnest({LORA_TAG}) as {tags}"], LORA_TAG, true),
+                SelectSql([$"unnest({LORA_TAG}) as {tags}"], LORA_TABLE, true),
                 (cmd) => { },
                 (reader) => reader.GetString(tags)
             );
