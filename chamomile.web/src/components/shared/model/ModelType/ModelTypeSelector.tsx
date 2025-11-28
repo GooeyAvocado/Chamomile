@@ -1,4 +1,5 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import ModelTypePill from "./ModelTypePill";
 
 export default function ModelTypeSelector(props: {
     modelType?: string
@@ -11,6 +12,14 @@ export default function ModelTypeSelector(props: {
         allowAny, allowUnknown
     } = props
 
+    const MODEL_TYPES: Record<string, string> = {
+        SD: "Stable Diffusion",
+        SDXL: "Stable Diffusion XL",
+        PONY: "PonyXL",
+        IL: "Illustrious",
+        NAI: "NoobAI",
+    };
+
     return <FormControl fullWidth>
         <InputLabel>Model type</InputLabel>
         <Select
@@ -20,11 +29,12 @@ export default function ModelTypeSelector(props: {
         >
             {allowAny && <MenuItem value={""}>Any</MenuItem>}
             {allowUnknown && <MenuItem value={"?"}>Unknown</MenuItem>}
-            <MenuItem value={"SD"}>Stable Diffusion</MenuItem>
-            <MenuItem value={"SDXL"}>Stable Diffusion XL</MenuItem>
-            <MenuItem value={"PONY"}>PonyXL</MenuItem>
-            <MenuItem value={"IL"}>Illustrious</MenuItem>
-            <MenuItem value={"NAI"}>NoobAI</MenuItem>
+            {Object.entries(MODEL_TYPES).map(([key, label]) => (
+                <MenuItem key={key} value={key}><div style={{ display: 'flex', gap: '10px' }}>
+                    {/* {!allowAny && !allowUnknown && <ModelTypePill type={key} style={{ width: "50px" }} /> } */}
+                    <div>{label}</div>
+                </div></MenuItem>
+            ))}
         </Select>
     </FormControl>
 

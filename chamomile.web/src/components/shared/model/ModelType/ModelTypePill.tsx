@@ -7,6 +7,8 @@ export default function ModelTypePill(props: { type: string, bgColor?: string, s
         padding: '0px 5px',
         fontSize: '.7em',
         color: 'white',
+        textAlign: 'center',
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
         ...props.style
     }}>{props.type}</div>
 }
