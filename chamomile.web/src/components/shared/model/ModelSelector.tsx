@@ -36,6 +36,14 @@ export default function ModelSelector(props: {
         <Autocomplete disabled={disabled} key={model} disableClearable
             freeSolo loading={loading} loadingText={loading ? "Loading..." : "Type to begin"}
             getOptionLabel={(option) => (option as Model)?.name ?? ""}
+            filterOptions={(options, state) => {
+                const query = state.inputValue.toLowerCase();
+                return options.filter(
+                    option => option.name?.toLowerCase().includes(query) ||
+                        option.description?.toLowerCase().includes(query) ||
+                        option.tags?.some(a => a.toLowerCase().includes(query))
+                );
+            }}
             options={[showAll ? {
                 id: '',
                 bannerImage: undefined,

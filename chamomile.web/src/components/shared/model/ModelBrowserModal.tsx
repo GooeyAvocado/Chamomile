@@ -120,7 +120,12 @@ function GridViewMode(props: {
                 )
             ]
             : (data ?? []).filter(a => a.isAvailable)
-        )?.filter(a => query.trim().length === 0 ? true : a.name?.toLowerCase().includes(query.toLowerCase()) || a.description?.toLowerCase().includes(query.toLowerCase()))
+        )?.filter(a => query.trim().length === 0
+            ? true :
+            a.name?.toLowerCase().includes(query.toLowerCase()) ||
+            a.description?.toLowerCase().includes(query.toLowerCase()) ||
+            a.tags?.some(t => t.toLowerCase().includes(query.toLowerCase())
+            ))
             .filter(a => type?.trim().length === 0 ? true : type === "?" ? (a?.type ?? "").trim().length === 0 : a.type?.toLowerCase().includes(type?.toLowerCase()))
             .map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ModelTile model={a} onClick={() => onOk(a)}

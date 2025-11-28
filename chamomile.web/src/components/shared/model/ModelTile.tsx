@@ -49,8 +49,14 @@ export default function ModelTile(props: {
                     <div style={{ top: '5px', left: '5px', position: 'absolute' }}>
                         {model.type?.length > 0 && <ModelTypePill type={model.type} bgColor="rgba(0,0,0,.7)" />}
                     </div>
-                    <div style={{ top: '5px', right: '5px', position: 'absolute' }}>
-                        {!model.isAvailable && <DoNotDisturbAlt />}
+                    <div style={{ top: '5px', right: '5px', position: 'absolute', display: 'flex', gap: '5px', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        {model.tags?.slice(0, 3).map((tag, i) =>
+                            <ModelTypePill
+                                key={tag} type={tag} bgColor="rgba(0,0,0,.7)"
+                                style={{ fontSize: [.7, .6, .6][i] + "em", opacity: [1, .7, .7][i] }}
+                            />)
+                        }
+                        {!model.isAvailable && <DoNotDisturbAlt color="error" style={{ backgroundColor: "rgba(0,0,0,.7", padding: "4px" }} />}
                     </div>
                 </div>
             </CardActionArea>
