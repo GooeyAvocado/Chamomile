@@ -2,7 +2,6 @@ import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useEffect, useRef, useState } from "react";
 import { CalendarMonth, Close, Download, ExpandMore, Gradient, LibraryAdd, Search, Star, StarBorder } from "@mui/icons-material";
-import ModelSelector from "../model/ModelSelector";
 import LoraSelector from "../lora/LoraSelector";
 import AdvSearchModal from "./AdvSearchModal";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
@@ -11,6 +10,7 @@ import { Album } from "../../../model/Album";
 import StatsButton from "../StatsButton/StatsButton";
 import PromptboxImageSample from "../prompt/preview/PromptboxImageSample";
 import { clearFilter } from "../Utils";
+import ModelSelector from "../checkpoint/CheckpointSelector";
 
 export default function FilterBuilder(props: {
     filter: FilterOptions
@@ -174,8 +174,8 @@ export default function FilterBuilder(props: {
                     </div>
 
                     <div style={{ display: 'flex', gap: "10px", flex: '1', flexWrap: width < 605 ? "wrap" : undefined }}>
-                        <LoraSelector lora={filter.lora ?? ""} setLora={(e) => setFilter({ ...filter, lora: e.alias })} style={{ flex: "1", minWidth: "200px" }} showAll />
-                        <ModelSelector model={filter.model ?? ""} setModel={(e) => setFilter({ ...filter, model: e.title })} style={{ flex: "1", minWidth: "200px" }} showNone />
+                        <LoraSelector lora={filter.lora ?? ""} setLora={(e) => setFilter({ ...filter, lora: e.id })} style={{ flex: "1", minWidth: "200px" }} showAll showNone showAvailability />
+                        <ModelSelector model={filter.model ?? ""} setModel={(e) => setFilter({ ...filter, model: e.id })} style={{ flex: "1", minWidth: "200px" }} showAll showAvailability />
                     </div>
 
                 </div>

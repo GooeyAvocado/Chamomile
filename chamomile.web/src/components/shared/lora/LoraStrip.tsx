@@ -1,18 +1,10 @@
-import { useMemo } from "react";
-import ImageStrip from "../images/ImageStrip";
 import { useLoras } from "../../hooks/useLoras";
+import ModelStrip from "../model/ModelStrip";
 
 export default function LoraStrip({ loras: aliases, maxLength }: {
     loras: string[]
     maxLength?: number
 }) {
-
     const { loras } = useLoras();
-
-    const images = useMemo(() =>
-        aliases.map(a => loras?.find(b => b.alias === a)?.bannerImage)
-        , [aliases, loras]);
-
-    return <ImageStrip images={images ?? []} maxLength={maxLength} />
-
+    return <ModelStrip models={aliases} modelData={loras} maxLength={maxLength} />
 }

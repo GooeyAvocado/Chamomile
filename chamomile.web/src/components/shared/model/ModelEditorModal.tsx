@@ -3,16 +3,17 @@ import { useEffect, useState } from "react";
 import { imageUrl } from "../../../api/Images";
 import ImageBrowserModal from "../images/ImageBrowserModal";
 import ModelTypePill from "./ModelType/ModelTypePill";
-import { Model } from "../../../model/Model";
 import ModelTypeSelector from "./ModelType/ModelTypeSelector";
+import { Model, ModelType } from "../../../model/Model";
 
 export default function ModelEditorModal(props: {
     open: boolean,
     setOpen: (val: boolean) => void
     onOk: (val: Model) => void,
     model?: Model
+    modelType?: ModelType
 }) {
-    const { model, onOk, open, setOpen } = props
+    const { model, onOk, open, setOpen, modelType } = props
 
     const [internalModel, setInternalModel] = useState(model as Model)
     const [imageBrowserOpen, setImageBrowserOpen] = useState(false)
@@ -29,7 +30,7 @@ export default function ModelEditorModal(props: {
         <DialogTitle style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
             <div>
                 <div>{model.name}</div>
-                <div style={{ fontSize: '12px', color: '#888' }}>{model.title}</div>
+                <div style={{ fontSize: '12px', color: '#888' }}>{model.id}</div>
             </div>
             {internalModel.type?.length > 0 && <ModelTypePill type={internalModel.type} />}
         </DialogTitle>
@@ -52,6 +53,14 @@ export default function ModelEditorModal(props: {
                     onChange={(e) => setInternalModel({ ...internalModel, description: e.target.value })}
                     fullWidth style={{ marginBottom: '0px' }} multiline rows={4} placeholder="What's this model for?"
                 />
+                {
+                    modelType === "LoRA" && <TextField
+                        label="Activation Tags"
+                        value={internalModel.samplePrompt}
+                        onChange={(e) => setInternalModel({ ...internalModel, samplePrompt: e.target.value })}
+                        fullWidth style={{ marginBottom: '0px' }} placeholder="Tags to help activate this LoRA"
+                    />
+                }
             </div>
         </DialogContent>
         <DialogActions>
@@ -63,7 +72,7 @@ export default function ModelEditorModal(props: {
             setInternalModel({ ...internalModel, bannerImage: a.id })
             setImageBrowserOpen(false)
         }} initialFilter={{
-            model: model.title
+            model: model.id
         }} />
     </Dialog>
 

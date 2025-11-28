@@ -62,7 +62,7 @@ export default function HighlightedPromptDiv({ prompt, style }: {
 
                     // parse out the LoRA title
                     const loraAlias = val.match(/<lora:([^>]+):[^>]+>/)?.[1]
-                    const lora = loras?.find(a => a.alias === loraAlias)
+                    const lora = loras?.find(a => a.id === loraAlias)
 
                     return <Card style={{ display: "inline-flex", padding: "2px 5px", alignItems: 'center', alignSelf: "center", gap: "5px", verticalAlign: 'middle' }} elevation={2}>
                         <img src={lora?.bannerImage ? imageUrl(lora?.bannerImage) : "/color.png"} width={16} />

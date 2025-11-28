@@ -3,7 +3,7 @@ import { imageUrl } from "../../../../api/Images"
 import GeneralStatistics from "../../../../model/GeneralStatistics"
 import KeywordUsage from "../../../../model/KeywordUsage"
 import { useLoras } from "../../../hooks/useLoras"
-import { useModels } from "../../../hooks/useModels"
+import { useCheckpoints } from "../../../hooks/useCheckpoints"
 import ImageModalFromId from "../../images/ImageModalFromId"
 import StatsNumber from "./StatsNumber"
 import { Card, CardActionArea } from "@mui/material"
@@ -19,14 +19,14 @@ export default function GeneralStatsDisplay({
     keywordData: KeywordUsage[]
 }) {
 
-    const { models } = useModels();
+    const { checkpoints: models } = useCheckpoints();
     const { loras } = useLoras();
 
     const [viewerOpen, setViewerOpen] = useState(false)
     const [image, setImage] = useState<number>()
 
-    const mostUsedModel = models?.find(a => a.title === modelData?.[0]?.keyword)
-    const mostUsedLora = loras?.find(a => a.alias === loraData?.[0]?.keyword) ?? loras?.find(a => a.alias === loraData?.[1]?.keyword)
+    const mostUsedModel = models?.find(a => a.id === modelData?.[0]?.keyword)
+    const mostUsedLora = loras?.find(a => a.id === loraData?.[0]?.keyword) ?? loras?.find(a => a.id === loraData?.[1]?.keyword)
 
     return <>
         <div style={{ flex: "1", overflowY: 'auto', display: "flex", gap: "10px", flexDirection: 'column', textAlign: 'center', marginTop: "32px" }}>

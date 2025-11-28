@@ -10,7 +10,7 @@ import { useSnackbar } from "notistack";
 import { useSettings } from "../../hooks/useSettings";
 import { useState } from "react";
 import { useLoras } from "../../hooks/useLoras";
-import { Lora } from "../../../model/Lora";
+import { Model } from "../../../model/Model";
 
 export default function PromptReorderButton(props: {
     prompt: Prompt,
@@ -36,7 +36,7 @@ export default function PromptReorderButton(props: {
     const [unavailLoraWarn, setUnavailLoraWarn] = useState(false)
     const [unavailLoras, setUnavailLoras] = useState<{
         text: string,
-        lora?: Lora
+        lora?: Model
     }[]>([])
 
     const onBrew = (override?: Prompt) => {
@@ -52,7 +52,7 @@ export default function PromptReorderButton(props: {
             const loraAlias = a.match(/<lora:([^>]+):[^>]+>/)?.[1]
             return {
                 text: a,
-                lora: loras?.find(a => a.alias === loraAlias)
+                lora: loras?.find(a => a.id === loraAlias)
             }
         }).filter(a => !a.lora || !a.lora.isAvailable)
 

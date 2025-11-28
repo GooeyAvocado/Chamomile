@@ -8,7 +8,7 @@ import ImageWorkerStatus from "../model/ImageWorkerStatus";
 import { KeywordFilterOptions } from "../model/KeywordFilterOptions";
 import KeywordUsage from "../model/KeywordUsage";
 import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
-import ModelSequence from "../model/ModelSequence";
+import CheckpointSequence from "../model/CheckpointSequence";
 import { Prompt } from "../model/Prompt";
 import { API_PREFIX, Delete, Get, Post, Put, Upload } from "./Common";
 
@@ -161,15 +161,15 @@ export const deleteMultiImage = (
 
 export const getModelSequence = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: ModelSequence[]) => void,
+    setItem: (value?: CheckpointSequence[]) => void,
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT + "modelSequence");
 
 export const setModelSequence = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: ModelSequence) => void,
+    setItem: (value?: CheckpointSequence) => void,
     onError: (value: any) => void,
-    sequence: ModelSequence[]
+    sequence: CheckpointSequence[]
 ) => Post(setLoading, setItem, onError, ENDPOINT + "modelSequence", sequence);
 
 export const getKeywordUsage = (

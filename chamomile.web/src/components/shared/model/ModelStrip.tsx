@@ -1,17 +1,16 @@
 import { useMemo } from "react";
 import ImageStrip from "../images/ImageStrip";
-import { useModels } from "../../hooks/useModels";
+import { Model } from "../../../model/Model";
 
-export default function ModelStrip({ models: titles, maxLength }: {
+export default function ModelStrip({ models: ids, maxLength, modelData }: {
     models: string[]
+    modelData?: Model[]
     maxLength?: number
 }) {
 
-    const { models } = useModels();
-
     const images = useMemo(() =>
-        titles.map(a => models.find(b => b.title === a)?.bannerImage)
-        , [titles, models]);
+        ids.map(a => modelData?.find(b => b.id === a)?.bannerImage)
+        , [ids, modelData]);
 
     return <ImageStrip images={images ?? []} maxLength={maxLength} />
 

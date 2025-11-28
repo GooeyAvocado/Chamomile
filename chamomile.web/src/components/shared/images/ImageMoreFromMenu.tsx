@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useLoras } from "../../hooks/useLoras";
-import { useModels } from "../../hooks/useModels";
+import { useCheckpoints } from "../../hooks/useCheckpoints";
 import { MenuItemWithSubMenu } from "../mui/MenuItemWithSubmenu";
 import { CalendarMonth, ImageSearch, ReceiptLong, ReceiptLongTwoTone } from "@mui/icons-material";
 import { Card, Divider, ListItemIcon, MenuItem } from "@mui/material";
@@ -26,15 +26,15 @@ export default function ImageMoreFromMenu({
     setFilter: (val: FilterOptions) => void
 }) {
 
-    const { models } = useModels();
+    const { checkpoints: models } = useCheckpoints();
     const { loras } = useLoras();
 
     const imageModel = useMemo(() =>
-        models?.find(a => a.title === image.model)
+        models?.find(a => a.id === image.model)
         , [image.model])
 
     const imageLoras = useMemo(() =>
-        loras?.filter(a => image.loras.includes(a.alias))
+        loras?.filter(a => image.loras.includes(a.id))
         , [image.loras])
 
     return <MenuItemWithSubMenu
@@ -60,8 +60,8 @@ export default function ImageMoreFromMenu({
             </div>
         </MenuItem>
         {imageLoras?.length > 0 && <Divider />}
-        {imageLoras?.map(l => <MenuItem key={image.id + "-showMore-" + l.alias}
-            onClick={() => { setFilter({ ...clearFilter(filter), lora: l.alias }) }}
+        {imageLoras?.map(l => <MenuItem key={image.id + "-showMore-" + l.id}
+            onClick={() => { setFilter({ ...clearFilter(filter), lora: l.id }) }}
         >
             <ListItemIcon >{
                 <Card style={{ width: "24px", aspectRatio: "1/1" }}>

@@ -7,11 +7,11 @@ import TabbedModalTabContent from "../modals/TabbedModal/TabbedModalTabContent"
 import { FilterOptions } from "../../../model/FilterOptions"
 import useApi from "../../hooks/useApi"
 import { getLoraUsage, getLoraUsageDated } from "../../../api/Loras"
-import { getModelUsage, getModelUsageDated } from "../../../api/Model"
+import { getCheckpointUsage, getCheckpointUsageDated } from "../../../api/Checkpoint"
 import TabbedModalConsistentContent from "../modals/TabbedModal/TabbedModalConsistentContent"
 import { useWindowDimensions } from "../../hooks/useWindowDimensions"
 import AvailabilitySelector from "../model/availabilitySelector/AvailabilitySelector"
-import { useModels } from "../../hooks/useModels"
+import { useCheckpoints } from "../../hooks/useCheckpoints"
 import { useLoras } from "../../hooks/useLoras"
 import { getGenStats, getGenStatsDated, getKeywordUsage, getKeywordUsageDated } from "../../../api/Images"
 import { StatsPanel } from "./subcomponents/StatsPanel"
@@ -31,15 +31,15 @@ export default function StatisticsModal(props: {
     const [filterDirty, setFilterDirty] = useState(false)
 
     const { width, vertical } = useWindowDimensions();
-    const { models } = useModels();
+    const { checkpoints: models } = useCheckpoints();
     const { loras } = useLoras();
     const stacked = width < 450
 
-    const modelAvailable = (val: string) => models?.find(a => a.title === val)?.isAvailable
-    const loraAvailable = (val: string) => val === "None" || loras?.find(a => a.alias === val)?.isAvailable
+    const modelAvailable = (val: string) => models?.find(a => a.id === val)?.isAvailable
+    const loraAvailable = (val: string) => val === "None" || loras?.find(a => a.id === val)?.isAvailable
 
     const { data: loraData, fetch: fetchLoraUsage, loading: loraLoading } = useApi(getLoraUsage)
-    const { data: modelData, fetch: fetchModelUsage, loading: modelLoading } = useApi(getModelUsage)
+    const { data: modelData, fetch: fetchModelUsage, loading: modelLoading } = useApi(getCheckpointUsage)
     const { data: keywordData, fetch: fetchKeywordUsage, loading: keywordLoading } = useApi(getKeywordUsage)
     const { data: generalData, fetch: fetchGeneralData, loading: generalLoading } = useApi(getGenStats)
 
@@ -112,15 +112,15 @@ export default function StatisticsModal(props: {
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Checkpoints">
             {open ? (modelLoading || !modelData) ? <LoadingSpinner text="Loading checkpoint usage information" /> : <StatsPanel
-                datedUsageApi={getModelUsageDated} minAutoCompleteLength={0}
+                datedUsageApi={getCheckpointUsageDated} minAutoCompleteLength={0}
                 usage={availability === 0 ? modelData : availability === 1
                     ? modelData?.filter(a => modelAvailable(a.keyword))
                     : modelData?.filter(a => !modelAvailable(a.keyword))}
                 filter={filter} keywordColumnOverride="Checkpoint" limit={limit}
-                getSampleImageId={(u) => models?.find(a => a.title === u.keyword)?.bannerImage}
+                getSampleImageId={(u) => models?.find(a => a.id === u.keyword)?.bannerImage}
                 renderKeywordRow={(u) => {
-                    const m = models?.find(a => a.title === u.keyword) ?? {
-                        name: u.keyword, title: u.keyword, isAvailable: false, type: ""
+                    const m = models?.find(a => a.id === u.keyword) ?? {
+                        name: u.keyword, id: u.keyword, isAvailable: false, type: ""
                     }
                     return <div style={{ color: m.isAvailable ? "white" : "#DDD", fontSize: ".8em" }}>
                         <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
@@ -129,7 +129,7 @@ export default function StatisticsModal(props: {
                                 <b>{m.name}</b>
                             </div>
                         </div>
-                        <div style={{ fontSize: ".8em" }}>{`${m.title}${m.isAvailable ? "" : " (Unavailable)"}`}</div>
+                        <div style={{ fontSize: ".8em" }}>{`${m.id}${m.isAvailable ? "" : " (Unavailable)"}`}</div>
                     </div>
                 }}
             /> : ""}
@@ -141,10 +141,10 @@ export default function StatisticsModal(props: {
                     ? loraData?.filter(a => loraAvailable(a.keyword))
                     : loraData?.filter(a => !loraAvailable(a.keyword))}
                 filter={filter} keywordColumnOverride="LoRA" limit={limit}
-                getSampleImageId={(u) => loras?.find(a => a.alias === u.keyword)?.bannerImage}
+                getSampleImageId={(u) => loras?.find(a => a.id === u.keyword)?.bannerImage}
                 renderKeywordRow={(u) => {
-                    const m = loras?.find(a => a.alias === u.keyword) ?? {
-                        name: u.keyword, alias: u.keyword, isAvailable: false, type: ""
+                    const m = loras?.find(a => a.id === u.keyword) ?? {
+                        name: u.keyword, id: u.keyword, isAvailable: false, type: ""
                     }
                     return <div style={{ color: m.isAvailable ? "white" : "#DDD", fontSize: ".8em" }}>
                         <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
@@ -153,7 +153,7 @@ export default function StatisticsModal(props: {
                                 <b>{m.name}</b>
                             </div>
                         </div>
-                        <div style={{ fontSize: ".8em" }}>{`${m.alias}${m.isAvailable ? "" : " (Unavailable)"}`}</div>
+                        <div style={{ fontSize: ".8em" }}>{`${m.id}${m.isAvailable ? "" : " (Unavailable)"}`}</div>
                     </div>
                 }}
             /> : ""}

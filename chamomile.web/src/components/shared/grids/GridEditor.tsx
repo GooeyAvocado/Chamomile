@@ -7,7 +7,7 @@ import { Add, Close, CompareArrows, OpenWith, Remove } from "@mui/icons-material
 import { GridTypes } from "./GridTypes";
 import SamplerSelector from "../prompt/SamplerSelector";
 import SchedulerSelector from "../prompt/SchedulerSelector";
-import ModelSelector from "../model/ModelSelector";
+import ModelSelector from "../checkpoint/CheckpointSelector";
 
 export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading, generated, duplicate }: {
     open: boolean,
@@ -133,7 +133,7 @@ function GridValsEditor({
                         onChange={(e) => setVals(updateInArray(vals, i, e.target.value))}
                     /> : type.type === "sampler" ? <SamplerSelector sampler={a} setSampler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} />
                         : type.type === "scheduler" ? <SchedulerSelector scheduler={a} setScheduler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} />
-                            : type.type === "model" ? <ModelSelector model={a} setModel={a => setVals(updateInArray(vals, i, a.title))} disabled={disabled} style={{ width: "100%" }} />
+                            : type.type === "model" ? <ModelSelector model={a} setModel={a => setVals(updateInArray(vals, i, a.id))} disabled={disabled} style={{ width: "100%" }} />
                                 : type.type === "dimensions" ?
                                     <div style={{
                                         flex: "1", alignItems: 'center', borderRadius: "4px",

@@ -1,22 +1,22 @@
 import { Alert, AlertTitle, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material"
 import { usePrompt } from "../../hooks/usePrompt"
-import ModelSelector from "../model/ModelSelector";
 import useApi from "../../hooks/useApi";
-import { currentModel, setModel } from "../../../api/Model";
-import { Model } from "../../../model/Model";
+import { currentCheckpoint, setCheckpoint } from "../../../api/Checkpoint";
 import { useEffect, useState } from "react";
 import { Add, Close, Edit, Refresh, Schedule } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
-import ModelCard from "../model/ModelCard";
 import LoraSelector from "../lora/LoraSelector";
 import { useSnackbar } from "notistack";
-import { ModelRequest } from "../../../model/ModelRequest";
+import { CheckpointRequest } from "../../../model/CheckpointRequest";
 import { Prompt } from "../../../model/Prompt";
 import { usePingPong } from "../../hooks/usePingPong";
 import { getModelSequence, setModelSequence } from "../../../api/Images";
-import ModelSequenceEditor from "../model/ModelSequenceEditor";
-import { useModels } from "../../hooks/useModels";
+import { useCheckpoints } from "../../hooks/useCheckpoints";
 import { useLoras } from "../../hooks/useLoras";
+import ModelSequenceEditor from "../checkpoint/CheckpointSequenceEditor";
+import ModelCard from "../checkpoint/CheckpointCard";
+import ModelSelector from "../checkpoint/CheckpointSelector";
+import { Model } from "../../../model/Model";
 
 export default function PromptModelSelectorModal(props: {
     open: boolean,
@@ -26,7 +26,7 @@ export default function PromptModelSelectorModal(props: {
     setPrompt?: (val: Prompt) => void
 }) {
 
-    const { refresh: refreshCheckpoints, loading: checkpointsLoading } = useModels();
+    const { refresh: refreshCheckpoints, loading: checkpointsLoading } = useCheckpoints();
     const { refresh: refreshLoRAs, loading: lorasLoading } = useLoras();
 
     const refresh = () => {
@@ -42,11 +42,11 @@ export default function PromptModelSelectorModal(props: {
     const [checkpointEditOpen, setCheckpointEditOpen] = useState(false)
 
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt } = usePrompt();
-    const currentModelApi = useApi(currentModel)
+    const currentModelApi = useApi(currentCheckpoint)
     const currentSequenceApi = useApi(getModelSequence)
     const changeModelSequenceApi = useApi(setModelSequence)
     const [sequenceEditorOpen, setSequenceEditorOpen] = useState(false);
-    const changeModelApi = useApi(setModel)
+    const changeModelApi = useApi(setCheckpoint)
     const { enqueueSnackbar } = useSnackbar();
     const { pong } = usePingPong();
 
@@ -70,14 +70,14 @@ export default function PromptModelSelectorModal(props: {
         return matches.map(match => match[1])
     }
 
-    const additionalModels = (currentSequenceApi.data ?? []).filter(m => m.modelTitle !== currentModelApi.data?.model);
+    const additionalModels = (currentSequenceApi.data ?? []).filter(m => m.title !== currentModelApi.data?.checkpoint);
     const hasSequence = (currentSequenceApi.data?.length ?? 0) > 0
 
     const onChangeModel = (val: Model) => {
         changeModelApi.fetch(() => {
             enqueueSnackbar("Checkpoint changed!", { variant: 'success' })
             currentModelApi.fetch()
-            if ((currentSequenceApi.data?.length ?? 0) > 0 && !currentSequenceApi.data?.find(a => a.modelTitle === val.title)) {
+            if ((currentSequenceApi.data?.length ?? 0) > 0 && !currentSequenceApi.data?.find(a => a.title === val.id)) {
                 //We have a sequence and we've just changed the model to one that is not in the sequence, so we should clear the sequence
                 changeModelSequenceApi.fetch(() => {
                     enqueueSnackbar("Checkpoint sequence cleared!", { variant: 'success' })
@@ -89,7 +89,7 @@ export default function PromptModelSelectorModal(props: {
             setCheckpointEditOpen(false)
         }, () => {
             enqueueSnackbar("Checkpoint could not be changed", { variant: 'error' })
-        }, { model: val.title } as ModelRequest)
+        }, { checkpoint: val.id } as CheckpointRequest)
     }
 
     const addLora = (alias: string) => {
@@ -143,7 +143,7 @@ export default function PromptModelSelectorModal(props: {
 
                         <div>
                             <ModelSelector
-                                model={currentModelApi.data?.model} setModel={onChangeModel}
+                                model={currentModelApi.data?.checkpoint} setModel={onChangeModel}
                                 disabled={changeModelApi.loading} loading={changeModelApi.loading}
                                 style={{ marginTop: '5px', marginBottom: '10px', flex: '1' }}
                             />
@@ -153,15 +153,15 @@ export default function PromptModelSelectorModal(props: {
                             <CircularProgress size={36} />
                         </div>
                     </> : <div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <ModelCard modelTitle={currentModelApi.data?.model} />
-                        {additionalModels.map(m => <ModelCard key={m.modelTitle} modelTitle={m.modelTitle} />)}
+                        <ModelCard checkpointTitle={currentModelApi.data?.checkpoint} />
+                        {additionalModels.map(m => <ModelCard key={m.title} checkpointTitle={m.title} />)}
                     </div>
                     }
 
                     <ModelSequenceEditor
                         open={sequenceEditorOpen}
                         setOpen={setSequenceEditorOpen}
-                        currentModel={currentModelApi.data?.model ?? ""}
+                        currentModel={currentModelApi.data?.checkpoint ?? ""}
                         sequence={currentSequenceApi.data}
                         onOk={(val) => {
                             changeModelSequenceApi.fetch(() => {
@@ -193,7 +193,7 @@ export default function PromptModelSelectorModal(props: {
 
             {addOpen && <>
                 <LoraSelector lora="" setLora={(e) => {
-                    addLora(e.alias)
+                    addLora(e.id)
                     setAddOpen(false)
                 }} style={{ marginTop: "10px", marginBottom: '10px' }} />
             </>}

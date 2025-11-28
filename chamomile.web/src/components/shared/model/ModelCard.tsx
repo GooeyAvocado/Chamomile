@@ -1,10 +1,8 @@
 import { Card, CardActionArea, Divider, IconButton, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@mui/material";
-import { Model } from "../../../model/Model";
-import { useModels } from "../../hooks/useModels";
 import { imageUrl } from "../../../api/Images";
 import { CSSProperties, useState } from "react";
 import useApi from "../../hooks/useApi";
-import { updateModel } from "../../../api/Model";
+import { updateCheckpoint } from "../../../api/Checkpoint";
 import { useSnackbar } from "notistack";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import AreYouSureModal from "../modals/AreYouSureModal";
@@ -14,9 +12,11 @@ import { AddPhotoAlternate, Edit, Image, ImageSearch, MoreVert } from "@mui/icon
 import ModelEditorModal from "./ModelEditorModal";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { clearFilter } from "../Utils";
+import { Model, ModelType } from "../../../model/Model";
+import { updateLora } from "../../../api/Loras";
 
 export default function ModelCard(props: {
-    modelTitle: string
+    modelId: string
     currentImage?: GeneratedImage
     onClick?: () => void
     tiny?: boolean
@@ -24,28 +24,29 @@ export default function ModelCard(props: {
     elevation?: number,
     filter?: FilterOptions,
     setFilter?: (val: FilterOptions) => void
+    models?: Model[]
+    modelType?: ModelType
+    refresh: () => void
 }) {
 
-    const { modelTitle, onClick, currentImage, tiny, elevation, filter, setFilter } = props;
-    const { models, refresh } = useModels();
-
+    const { modelId, onClick, currentImage, tiny, elevation, filter, setFilter, modelType, models, refresh } = props;
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [updateAys, setUpdateAys] = useState(false)
     const [imageOpen, setImageOpen] = useState(false)
     const [editorOpen, setEditorOpen] = useState(false)
 
-    const updateApi = useApi(updateModel)
+    const updateApi = useApi(modelType === "Checkpoint" ? updateCheckpoint : updateLora)
     const { enqueueSnackbar } = useSnackbar();
 
-    const getModel = () => models?.filter(a => a.title === modelTitle)[0] ?? {
-        name: modelTitle,
+    const getModel = () => models?.filter(a => a.id === modelId)[0] ?? {
+        name: modelId,
         description: 'Unknown Model',
         isAvailable: false,
-        title: modelTitle,
+        id: modelId,
         bannerImage: undefined
     } as Model
 
-    const modelUnavailable = () => !models?.filter(a => a.title === modelTitle)[0]
+    const modelUnavailable = () => !models?.filter(a => a.id === modelId)[0]
     const model = getModel();
 
     const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -107,7 +108,7 @@ export default function ModelCard(props: {
                     <b>{model.name}</b>
                 </div>
             </div>
-            <div style={{ fontSize: ".8em" }}>{`${model.title}${model.isAvailable ? "" : " (Unavailable)"}`}</div>
+            <div style={{ fontSize: ".8em" }}>{`${model.id}${model.isAvailable ? "" : " (Unavailable)"}`}</div>
         </div>
     </Typography>
 
@@ -136,7 +137,7 @@ export default function ModelCard(props: {
             {!tiny && !modelUnavailable() && <div style={{ flexShrink: '0' }}><IconButton onClick={openMenu}><MoreVert /></IconButton></div>}
         </Card>
 
-        {!modelUnavailable() && <ModelEditorModal open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk} model={model} />}
+        {!modelUnavailable() && <ModelEditorModal open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk} model={model} modelType={modelType} />}
 
         {!onClick && !modelUnavailable() && <>
             <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
@@ -156,7 +157,7 @@ export default function ModelCard(props: {
                 {filter && setFilter && <>
                     <Divider />
                     <MenuItem onClick={() => {
-                        setFilter({ ...clearFilter(filter), model: model.title })
+                        setFilter({ ...clearFilter(filter), model: model.id })
                     }}>
                         <ListItemIcon><ImageSearch /></ListItemIcon>
                         View images with this model
@@ -164,7 +165,7 @@ export default function ModelCard(props: {
                 </>}
             </Menu>
             <AreYouSureModal open={updateAys} setOpen={setUpdateAys} onYes={realUpdateImage} title="Set this image as sample?">
-                Are you sure you want to set this image as the sample for this checkpoint?
+                Are you sure you want to set this image as the sample for this {modelType?.toLowerCase()}?
             </AreYouSureModal>
             <ImageModalFromId open={imageOpen} setOpen={setImageOpen} image={model.bannerImage} />
         </>}

@@ -1,8 +1,8 @@
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
-import ModelSequence from "../../../model/ModelSequence";
-import ModelSelector from "./ModelSelector";
-import { useModels } from "../../hooks/useModels";
+import CheckpointSequence from "../../../model/CheckpointSequence";
+import ModelSelector from "./CheckpointSelector";
+import { useCheckpoints } from "../../hooks/useCheckpoints";
 import { imageUrl } from "../../../api/Images";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 import IECControls from "../IECControls/IECControls";
@@ -10,15 +10,15 @@ import IECControls from "../IECControls/IECControls";
 export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, currentModel, loading }: {
     open: boolean,
     setOpen: (value: boolean) => void,
-    onOk: (val: ModelSequence[]) => void
+    onOk: (val: CheckpointSequence[]) => void
     currentModel: string,
-    sequence?: ModelSequence[]
+    sequence?: CheckpointSequence[]
     loading?: boolean
 }) {
 
 
-    const [internalSequence, setInternalSequence] = useState<ModelSequence[]>([])
-    const { models } = useModels();
+    const [internalSequence, setInternalSequence] = useState<CheckpointSequence[]>([])
+    const { checkpoints: models } = useCheckpoints();
     const [validation, setValidation] = useState<{
         modelTitle?: string,
         chanceStay?: string,
@@ -29,17 +29,17 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
         if (open) { initializeInternalSequence(sequence ?? []); }
     }, [open]);
 
-    const initializeInternalSequence = (val: ModelSequence[]) => {
+    const initializeInternalSequence = (val: CheckpointSequence[]) => {
         //CHECK: Does the current sequence have the current model?
-        if (val?.find(a => a.modelTitle === currentModel)) {
+        if (val?.find(a => a.title === currentModel)) {
             setInternalSequence(val); //If so then we don't need to do anything 
         } else {
             //Otherwise this really shouldn't happen, but we'll add the current model to the sequence
             setInternalSequence([{
-                modelTitle: currentModel,
+                title: currentModel,
                 chanceStay: 90,
                 loadWeight: 1
-            } as ModelSequence, ...val ?? []]);
+            } as CheckpointSequence, ...val ?? []]);
         }
     }
 
@@ -47,7 +47,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
         const errors = internalSequence.map((s) => {
 
             const entryErrors = {} as any;
-            if (s.modelTitle.length === 0) {
+            if (s.title.length === 0) {
                 entryErrors.modelTitle = "Model title is required";
             }
 
@@ -73,7 +73,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                 {internalSequence.map((s, index) => (
                     <div key={index} style={{ display: 'flex', gap: '10px', alignItems: 'center', paddingTop: "10px" }}>
 
-                        <IconButton disabled={loading || s.modelTitle === currentModel} onClick={() => {
+                        <IconButton disabled={loading || s.title === currentModel} onClick={() => {
                             const newSequence = [...internalSequence];
                             newSequence.splice(index, 1);
                             setInternalSequence(newSequence);
@@ -83,8 +83,8 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                         </IconButton>
 
                         <img
-                            src={models?.find(a => a.title === s.modelTitle)?.bannerImage
-                                ? imageUrl(models?.find(a => a.title === s.modelTitle)?.bannerImage ?? 0)
+                            src={models?.find(a => a.id === s.title)?.bannerImage
+                                ? imageUrl(models?.find(a => a.id === s.title)?.bannerImage ?? 0)
                                 : "outline.png"}
 
                             style={{ width: "48px", height: "48px", objectFit: 'cover', objectPosition: 'center top', borderRadius: '5px' }}
@@ -93,12 +93,12 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                         <ModelSelector
                             error={!!validation?.[index]?.modelTitle}
                             helperText={validation?.[index]?.modelTitle}
-                            model={s.modelTitle} setModel={(m) => {
+                            model={s.title} setModel={(m) => {
                                 const newSequence = [...internalSequence];
-                                newSequence[index].modelTitle = m.title;
+                                newSequence[index].title = m.id;
                                 setInternalSequence(newSequence);
                                 setValidation([])
-                            }} style={{ flex: "1" }} disabled={s.modelTitle === currentModel || loading} />
+                            }} style={{ flex: "1" }} disabled={s.title === currentModel || loading} />
 
                         <Tooltip title="This is the chance that the checkpoint will be used for the next image. Setting this too low may cause thrashing between models.">
                             <TextField
@@ -154,7 +154,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                 <IECControls
                     setValue={(val) => {
                         if (Object.keys(val).length === 0) { initializeInternalSequence([]); }
-                        else { initializeInternalSequence(val as ModelSequence[]); }
+                        else { initializeInternalSequence(val as CheckpointSequence[]); }
                         setValidation([])
                     }}
                     value={internalSequence}
@@ -168,10 +168,10 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                         setInternalSequence([
                             ...internalSequence,
                             {
-                                modelTitle: "",
+                                title: "",
                                 chanceStay: 95,
                                 loadWeight: 1
-                            } as ModelSequence
+                            } as CheckpointSequence
                         ]);
                     }}
                 >Add another checkpoint</Button>

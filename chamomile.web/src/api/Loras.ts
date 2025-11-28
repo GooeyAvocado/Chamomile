@@ -3,20 +3,20 @@ import { FilterOptions } from "../model/FilterOptions";
 import { KeywordFilterOptions } from "../model/KeywordFilterOptions";
 import KeywordUsage from "../model/KeywordUsage";
 import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
-import { Lora } from "../model/Lora";
+import { Model } from "../model/Model";
 import { API_PREFIX, Get, Put } from "./Common";
 
 const ENDPOINT = API_PREFIX + "loras/"
 
 export const getLoras = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: Lora[]) => void,
+    setItem: (value?: Model[]) => void,
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT)
 
 export const refreshLoras = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: Lora[]) => void,
+    setItem: (value?: Model[]) => void,
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT + "refresh")
 
@@ -24,7 +24,7 @@ export const updateLora = (
     setLoading: (value: boolean) => void,
     onSuccess: () => void,
     onError: (value: any) => void,
-    val: Lora
+    val: Model
 ) => Put(setLoading, onSuccess, onError, ENDPOINT, val)
 
 export const getLoraUsage = (

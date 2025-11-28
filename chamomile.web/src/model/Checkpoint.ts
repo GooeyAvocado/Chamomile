@@ -1,11 +1,8 @@
-export class Model {
-    id: string = "";
+export class Checkpoint {
+    title: string = "";
     name: string = "";
     type: string = "";
     description: string = "";
-    samplePrompt: string = "";
     isAvailable: boolean = true;
     bannerImage?: number;
 }
-
-export type ModelType = 'Checkpoint' | 'LoRA'

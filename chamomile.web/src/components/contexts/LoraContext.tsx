@@ -1,12 +1,12 @@
 import { createContext, useEffect, useState } from "react";
 import useApi from "../hooks/useApi";
-import { Lora } from "../../model/Lora";
 import { getLoras, refreshLoras } from "../../api/Loras";
+import { Model } from "../../model/Model";
 
 export class LoraContextType {
     public constructor(
         public refresh: (hard?: boolean) => void,
-        public loras: Lora[],
+        public loras: Model[],
         public loading: boolean,
     ) { }
 }
@@ -17,7 +17,7 @@ export const LoraProvider = (props: { children: any }) => {
 
     const lorasApi = useApi(getLoras, true);
     const hardRefreshApi = useApi(refreshLoras);
-    const [loras, setLoras] = useState<Lora[]>([])
+    const [loras, setLoras] = useState<Model[]>([])
 
     const refresh = (hard?: boolean) => {
         if (hard) {
@@ -31,7 +31,7 @@ export const LoraProvider = (props: { children: any }) => {
         if (lorasApi.data) setLoras(lorasApi.data)
     }, [lorasApi.data])
 
-    return <LoraContext.Provider value={{ loading: lorasApi.loading || hardRefreshApi.loading, loras: loras, refresh: refresh }}>
+    return <LoraContext.Provider value={{ loading: lorasApi.loading || hardRefreshApi.loading, loras, refresh }}>
         {props.children}
     </LoraContext.Provider>
 

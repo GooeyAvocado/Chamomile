@@ -3,7 +3,6 @@ import { Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip 
 import { imageUrl } from "../../../api/Images";
 import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
-import ModelCard from "../model/ModelCard";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useSnackbar } from "notistack";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
@@ -27,6 +26,7 @@ import { usePingPong } from "../../hooks/usePingPong";
 import HighlightedPromptDiv from "../prompt/HighlightedPromptDiv";
 import AdditionalInfoRenderer from "./AdditionalInformationRenderer";
 import { FilterOptions } from "../../../model/FilterOptions";
+import ModelCard from "../checkpoint/CheckpointCard";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -292,7 +292,7 @@ export default function ImageModal(props: {
                         <div style={{ marginTop: "20px" }}><b>Checkpoint</b></div>
                         <ModelCard
                             filter={filter} setFilter={setFilter}
-                            modelTitle={image?.model ?? ""} currentImage={image} elevation={5}
+                            checkpointTitle={image?.model ?? ""} currentImage={image} elevation={5}
                         />
 
                         <Stack style={{ marginTop: "20px" }} gap={"10px"}>

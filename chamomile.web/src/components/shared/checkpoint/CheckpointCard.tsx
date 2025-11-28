@@ -1,26 +1,25 @@
-import { useLoras } from "../../hooks/useLoras";
+import { useCheckpoints } from "../../hooks/useCheckpoints";
 import { CSSProperties } from "react";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { FilterOptions } from "../../../model/FilterOptions";
 import ModelCard from "../model/ModelCard";
 
-export default function LoraCard(props: {
-    loraAlias: string
+export default function CheckpointCard(props: {
+    checkpointTitle: string
     currentImage?: GeneratedImage
     onClick?: () => void
     tiny?: boolean
     imageStyle?: CSSProperties
-    elevation?: number
+    elevation?: number,
     filter?: FilterOptions,
     setFilter?: (val: FilterOptions) => void
 }) {
 
-    const { loraAlias, onClick, currentImage, tiny, elevation, filter, setFilter, imageStyle } = props;
-    const { loras, refresh } = useLoras();
-
+    const { checkpointTitle, onClick, currentImage, tiny, elevation, filter, setFilter, imageStyle } = props;
+    const { checkpoints: models, refresh } = useCheckpoints();
 
     return <ModelCard
-        modelId={loraAlias}
+        modelId={checkpointTitle}
         currentImage={currentImage}
         onClick={onClick}
         tiny={tiny}
@@ -29,8 +28,9 @@ export default function LoraCard(props: {
         filter={filter}
         refresh={refresh}
         setFilter={setFilter}
-        models={loras}
-        modelType="LoRA"
+        models={models}
+        modelType="Checkpoint"
     />
+
 
 }

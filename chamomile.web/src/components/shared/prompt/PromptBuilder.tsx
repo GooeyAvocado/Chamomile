@@ -21,12 +21,12 @@ import PromptCard from "./PromptCard";
 import { usePingPong } from "../../hooks/usePingPong";
 import { useLoras } from "../../hooks/useLoras"
 import AutocompleteTextfield, { AutoCompletes } from "../autocompleteTextField/AutocompleteTextField";
-import { Lora } from "../../../model/Lora";
 import PromptboxImageSample from "./preview/PromptboxImageSample";
 import { FilterOptions } from "../../../model/FilterOptions";
 import PromptBuilderClearButton from "./PromptBuilderClearButton";
 import Template from "../../../model/Template";
 import { getTemplates } from "../../../api/Template";
+import { Model } from "../../../model/Model";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -185,20 +185,20 @@ export default function PromptBuilder(props: {
                         suffix: ">",
                         matcher: (val, query) => {
                             const q = query.toLowerCase().replace("lora:", "")
-                            return val.alias.toLowerCase().includes(q) ||
+                            return val.id.toLowerCase().includes(q) ||
                                 val.name.toLowerCase().includes(q)
                         },
-                        value: (val) => `<lora:${val.alias}:1>`,
+                        value: (val) => `<lora:${val.id}:1>`,
                         renderer: (val) => <div style={{ display: 'flex', alignItems: 'center', gap: "10px" }}>
                             <img src={val.bannerImage ? imageUrl(val.bannerImage) : "/color.png"} width={32} height={32} />
                             <div>
                                 <div style={{ fontSize: ".8em" }}>{val.name}</div>
-                                <div style={{ fontSize: ".7em" }}>{val.alias}</div>
+                                <div style={{ fontSize: ".7em" }}>{val.id}</div>
                             </div>
 
                         </div>
 
-                    } as AutoCompletes<Lora>,
+                    } as AutoCompletes<Model>,
                     {
                         name: "Templates",
                         data: templatesApi.data ?? [],

@@ -5,7 +5,6 @@ import ThemeWrapper from './ThemeWrapper.tsx'
 import Home from './components/pages/Home.tsx'
 import { PingPongProvider } from './components/contexts/PingPongContext.tsx'
 import DimensionsProvider from './components/contexts/DimensionsContext.tsx'
-import { ModelProvider } from './components/contexts/ModelsContext.tsx'
 import { LoraProvider } from './components/contexts/LoraContext.tsx'
 import PromptProvider from './components/contexts/PromptContext.tsx'
 import { ImageUploadProvider } from './components/contexts/ImageUploadContext.tsx'
@@ -18,6 +17,7 @@ import { AlbumsProvider } from './components/contexts/AlbumsContext.tsx'
 import QueueProvider from './components/contexts/QueueContext.tsx'
 import { SettingsProvider } from './components/contexts/SettingsContext.tsx'
 import GridsPage from './components/pages/GridsPage.tsx'
+import { CheckpointProvider } from './components/contexts/CheckpointsContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,7 +29,7 @@ createRoot(document.getElementById('root')!).render(
         <SettingsProvider>
           <PingPongProvider>
             <PromptProvider>
-              <ModelProvider>
+              <CheckpointProvider>
                 <LoraProvider>
                   <AlbumsProvider>
                     <UpscalersProvider>
@@ -61,7 +61,7 @@ createRoot(document.getElementById('root')!).render(
                     </UpscalersProvider>
                   </AlbumsProvider>
                 </LoraProvider>
-              </ModelProvider>
+              </CheckpointProvider>
             </PromptProvider>
           </PingPongProvider>
         </SettingsProvider>

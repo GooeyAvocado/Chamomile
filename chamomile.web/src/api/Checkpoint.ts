@@ -3,13 +3,13 @@ import { FilterOptions } from "../model/FilterOptions";
 import { KeywordFilterOptions } from "../model/KeywordFilterOptions";
 import KeywordUsage from "../model/KeywordUsage";
 import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
-import { Model } from "../model/Model";
-import { ModelRequest } from "../model/ModelRequest";
+import { CheckpointRequest } from "../model/CheckpointRequest";
 import { API_PREFIX, Get, Post, Put } from "./Common";
+import { Model } from "../model/Model";
 
-const ENDPOINT = API_PREFIX + "models/"
+const ENDPOINT = API_PREFIX + "checkpoints/"
 
-export const getModels = (
+export const getCheckpoints = (
     setLoading: (value: boolean) => void,
     setItem: (value?: Model[]) => void,
     onError: (value: any) => void,
@@ -21,40 +21,40 @@ export const getUpscalers = (
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT + "upscalers")
 
-export const refreshModels = (
+export const refreshCheckpoints = (
     setLoading: (value: boolean) => void,
     setItem: (value?: Model[]) => void,
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT + "refresh")
 
-export const currentModel = (
+export const currentCheckpoint = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: ModelRequest) => void,
+    setItem: (value?: CheckpointRequest) => void,
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT + "current")
 
-export const setModel = (
+export const setCheckpoint = (
     setLoading: (value: boolean) => void,
     onSuccess: () => void,
     onError: (value: any) => void,
     val: Model
 ) => Post(setLoading, onSuccess, onError, ENDPOINT + "current", val)
 
-export const updateModel = (
+export const updateCheckpoint = (
     setLoading: (value: boolean) => void,
     onSuccess: () => void,
     onError: (value: any) => void,
     val: Model
 ) => Put(setLoading, onSuccess, onError, ENDPOINT, val)
 
-export const getModelUsage = (
+export const getCheckpointUsage = (
     setLoading: (value: boolean) => void,
     setItem: (value?: KeywordUsage[]) => void,
     onError: (value: any) => void,
     filter: FilterOptions
 ) => Get(setLoading, setItem, onError, ENDPOINT + "usage" + objectToQueryString(filter));
 
-export const getModelUsageDated = (
+export const getCheckpointUsageDated = (
     setLoading: (value: boolean) => void,
     setItem: (value?: KeywordUsageDatedResult) => void,
     onError: (value: any) => void,
