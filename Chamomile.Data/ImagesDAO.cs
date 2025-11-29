@@ -616,7 +616,7 @@ namespace Chamomile.Data {
                 TotalDownloads = reader.GetOptionalInt(totalDownloads) ?? 0,
                 UpscaledCount = reader.GetInt(hiresCount),
                 TotalCount = reader.GetInt(count),
-                AvgGenTime = reader.GetDouble(avgGenTime),
+                AvgGenTime = reader.GetOptionalDouble(avgGenTime) ?? 0,
                 CountBySource = []
             });
 

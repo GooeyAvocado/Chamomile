@@ -6,7 +6,7 @@ import { useLoras } from "../../../hooks/useLoras"
 import { useCheckpoints } from "../../../hooks/useCheckpoints"
 import ImageModalFromId from "../../images/ImageModalFromId"
 import StatsNumber from "./StatsNumber"
-import { Card, CardActionArea } from "@mui/material"
+import { Card, CardActionArea, CircularProgress } from "@mui/material"
 import { Download, Gradient, Schedule, Star } from "@mui/icons-material"
 
 export default function GeneralStatsDisplay({
@@ -113,22 +113,29 @@ function PreviewTile({
                 setImage(id)
                 setViewerOpen(true)
             }}>
-                <img src={imageUrl(id)} style={{ width: "100%", height: "100%", aspectRatio: "1/1", objectFit: 'cover', objectPosition: 'center top' }} />
+                {value ?
+                    <img src={imageUrl(id)} style={{ width: "100%", height: "100%", aspectRatio: "1/1", objectFit: 'cover', objectPosition: 'center top' }} />
+                    : <div style={{ width: '100%', height: '100%', aspectRatio: '1/1', display: 'flex', flexDirection: 'column', alignItems: "center", justifyContent: 'center' }}>
+                        <CircularProgress />
+                    </div>}
+
             </CardActionArea>
         </Card>
-        <div style={{
-            fontFamily: "Merriweather",
-            marginTop: "10px",
-            wordBreak: "break-word",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            maxWidth: "100%",
-            display: "block"
-        }}>
-            {value}
-        </div>
-        <div style={{ fontSize: '.7em' }}>{label}</div>
+        {value && <>
+            <div style={{
+                fontFamily: "Merriweather",
+                marginTop: "10px",
+                wordBreak: "break-word",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: "100%",
+                display: "block"
+            }}>
+                {value}
+            </div>
+            <div style={{ fontSize: '.7em' }}>{label}</div>
+        </>}
     </div>
 }
 
