@@ -11,7 +11,7 @@ import ModelTypeSelector from "./ModelType/ModelTypeSelector";
 import AvailabilitySelector from "./availabilitySelector/AvailabilitySelector";
 import { Model, ModelType } from "../../../model/Model";
 import { updateLora } from "../../../api/Loras";
-import { modelSorter, NO_LORA_ALIAS } from "../Utils";
+import { NO_LORA_ALIAS } from "../Utils";
 import ComplexAccordion from "../complexAccordion/ComplexAccordion";
 import ComplexAccordionBody from "../complexAccordion/ComplexAccordionBody";
 import ComplexAccordionActions from "../complexAccordion/ComplexAccordionActions";
