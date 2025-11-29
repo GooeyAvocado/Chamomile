@@ -169,7 +169,7 @@ function GridViewMode(props: {
                     </div>)}
                 </div>
                     : <ComplexAccordion title={<div style={{ padding: "10px 20px" }}>
-                        {tag}</div>} style={{ width: '100%' }} elevation={3} defaultExpanded>
+                        {tag}</div>} style={{ width: '100%' }} elevation={3}>
                         <ComplexAccordionActions showOnState="collapsed" position="right" >
                             {modelType === "LoRA" ? <LoraStrip
                                 loras={groupedModels[tag].map(a => a.id)} maxLength={10}
