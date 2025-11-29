@@ -15,8 +15,7 @@ export default function WhatsNew({ open, setOpen }: {
     const buildTime = import.meta.env.VITE_BUILD_TIMESTAMP ? new Date(import.meta.env.VITE_BUILD_TIMESTAMP) : new Date();
 
 
-    const whatsnew = `Minor fixes and a few additional things :3
-
+    const whatsnew = `
 ### What's new?
 - **Templates:** Parametrized prompt templates for reusable chunks of prompts. See more in the new help section.
 - **Model tags:** Checkpoints and LoRAs now have tags to help organize them better
@@ -52,6 +51,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug where some image selectors did not center the image
 - Fixed bug where "Images Upscaled" was incorrectly labeled "Images Downloaded" on the general statistics pane
 - Fixed bug where the filter builder may say it's not empty, even though it is
+- Fixed bug where general statistics would fail to load if all images had no generation time
 `
 
     const { settings } = useSettings();
