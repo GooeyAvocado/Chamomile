@@ -56,7 +56,7 @@ export default function ModelEditorModal(props: {
                 </div>
                 <div style={{ flex: 1 }}>
                     <Autocomplete
-                        multiple options={tagsApi.data ?? []}
+                        multiple options={[...(tagsApi.data?.sort((a, b) => a.localeCompare(b)) ?? [])]}
                         loading={tagsApi.loading} value={internalModel.tags}
                         freeSolo onChange={(_, val) => {
                             setInternalModel({ ...internalModel, tags: val })
