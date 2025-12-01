@@ -221,7 +221,7 @@ export default function ImageModal(props: {
                     display: 'flex', flexDirection: 'column', alignItems: 'start',
                     fontSize: ".6em", opacity: '1', color: 'white', mixBlendMode: 'color-dodge'
                 }}>
-                    <div>{image?.id}.png ({((image?.size ?? 0) / (1024.0 * 1024.0)).toFixed(2)}mb)</div>
+                    <div>{image?.id}.png</div>
                     <div>{image?.width}px x {image?.height}px</div>
                 </div>
 
