@@ -23,7 +23,7 @@ export default function TemplateEditor({ open, onClose, mode, template, setTempl
     const [deleteAys, setDeleteAys] = useState(false)
     const { enqueueSnackbar } = useSnackbar();
 
-    const existingName = useMemo(() => mode === "create" && template && existingTemplates.some(a => a.name === template.name), [template?.name, mode])
+    const existingName = useMemo(() => mode === "create" && template && existingTemplates.some(a => a.name.toLowerCase() === template.name.toLowerCase()), [template?.name, mode])
 
     const templateApi = useApi(mode === "create" ? createTemplate : updateTemplate)
     const deleteApi = useApi(deleteTemplate)
@@ -35,12 +35,12 @@ export default function TemplateEditor({ open, onClose, mode, template, setTempl
         <DialogContent style={{ height: "90vh", display: 'flex', gap: '10px', flexDirection: 'column', overflowY: 'hidden' }}>
             <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                 <div>
-                    <Card style={{ width: "150px", height: '150px' }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
+                    <Card style={{ width: "175px", height: '175px' }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
                         <img
                             key={template.sampleImage}
                             src={template?.sampleImage ? imageUrl(template.sampleImage) : '/outline.png'}
                             style={{
-                                width: '150px', height: '150px',
+                                width: '175px', height: '175px',
                                 objectFit: 'cover', objectPosition: 'center top'
                             }}
                         />
@@ -50,8 +50,8 @@ export default function TemplateEditor({ open, onClose, mode, template, setTempl
                     <TextField
                         label="Name" value={template.name}
                         onChange={(e) => setTemplate({ ...template, name: e.target.value.replace(/[:\]~]/g, "") })}
-                        fullWidth style={{ marginTop: "5px" }}
-                        error={existingName} helperText={existingName ? "Template with this name already exists" : ""}
+                        fullWidth style={{ marginTop: "5px" }} disabled={mode === "edit"}
+                        error={existingName} helperText={existingName ? "Template with this name already exists" : "This name is permanent and is a unique identifier"}
                     />
                     <TextField
                         label="Description" value={template.description}
