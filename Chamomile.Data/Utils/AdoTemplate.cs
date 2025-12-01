@@ -6,6 +6,9 @@ namespace Chamomile.Data.Utils {
 
     public class AdoTemplate(string connectionString) {
 
+        private const int INV_WRITE = 0x20000; // lo_open write mode
+        private const int INV_READ = 0x40000; // lo_open read mode
+
         public class Setter(Action<string, NpgsqlDbType, object?> Set) {
 
             public void SetBoolean(string key, bool? value) => Set(key, NpgsqlDbType.Boolean, value);
@@ -17,6 +20,7 @@ namespace Chamomile.Data.Utils {
             public void SetBytea(string key, byte[]? value) => Set(key, NpgsqlDbType.Bytea, value);
             public void SetTimestamp(string key, DateTime? value) => Set(key, NpgsqlDbType.Timestamp, value);
             public void SetDate(string key, DateTime? value) => Set(key, NpgsqlDbType.Date, value);
+            public void SetOid(string key, uint? value) => Set(key, NpgsqlDbType.Oid, value);
 
             public void SetValue(string key, NpgsqlDbType type, object? value) => Set(key, type, value);
 
@@ -42,7 +46,8 @@ namespace Chamomile.Data.Utils {
             public DateTime GetDateTime(string key) => GetDateTime(reader.GetOrdinal(key));
             public Guid GetGuid(string key) => GetGuid(reader.GetOrdinal(key));
             public byte[] GetBytea(string key) => (byte[])reader[key];
-            
+            public uint GetOid(string key) => (uint)reader[key];
+
             public object GetValue(string key) => reader[key];
 
 
@@ -65,6 +70,7 @@ namespace Chamomile.Data.Utils {
             public DateTime? GetOptionalDateTime(string key) => GetOptionalDateTime(reader.GetOrdinal(key));
             public Guid? GetOptionalGuid(string key) => GetOptionalGuid(reader.GetOrdinal(key));
             public byte[]? GetOptionalBytea(string key) => reader.IsDBNull(reader.GetOrdinal(key)) ? null : (byte[])reader[key];
+            public uint? GetOptionalOid(string key) => reader.IsDBNull(reader.GetOrdinal(key)) ? null : (uint)reader[key];
 
             public object? GetOptionalValue(string key) => reader.IsDBNull(reader.GetOrdinal(key)) ? null : reader[key];
 
@@ -226,6 +232,88 @@ namespace Chamomile.Data.Utils {
                 throw;
             }
 
+        }
+
+        public async Task<byte[]> ReadLargeObject(uint oid) {
+
+            //Open the connection
+            await using var conn = new NpgsqlConnection(ConnectionString);
+            await conn.OpenAsync();
+
+            //Begin the transaction (required for LO)
+            await using var tx = await conn.BeginTransactionAsync();
+
+            //Open the LO (Like FileReader open)
+            await using var fdCmd = new NpgsqlCommand("SELECT lo_open(@oid, 262144)", conn, tx);
+            fdCmd.Parameters.AddWithValue("oid", (int)oid);
+#pragma warning disable CS8605 // Unboxing a possibly null value.
+            //This can never be null. If it is, we have bigger problems
+            int fd = (int)await fdCmd.ExecuteScalarAsync();
+#pragma warning restore CS8605 // Unboxing a possibly null value.
+
+
+            //r e a d
+            using var ms = new MemoryStream();
+            const int chunk = 8192;
+            while (true) {
+                //Read it all
+                await using var readCmd = new NpgsqlCommand("SELECT loread(@fd, @len)", conn, tx);
+                readCmd.Parameters.AddWithValue("fd", fd);
+                readCmd.Parameters.AddWithValue("len", chunk);
+                var data = (byte[]?)await readCmd.ExecuteScalarAsync();
+                if (data == null || data.Length == 0) break;
+                await ms.WriteAsync(data);
+            }
+
+            //Close the LO
+            await new NpgsqlCommand("SELECT lo_close(@fd)", conn, tx) { Parameters = { new("fd", fd) } }.ExecuteNonQueryAsync();
+            await tx.CommitAsync();
+            return ms.ToArray();
+        }
+
+        public async Task<uint> WriteLargeObject(byte[] data) {
+            await using var conn = new NpgsqlConnection(ConnectionString);
+            await conn.OpenAsync();
+            await using var tx = await conn.BeginTransactionAsync();
+
+#pragma warning disable CS8605 // Unboxing a possibly null value.
+            //If these are null we have bigger problems
+
+            //Create the LO
+            uint oid = (uint)await new NpgsqlCommand("SELECT lo_create(0)", conn, tx).ExecuteScalarAsync();
+
+            //Open the LO for writing
+            int fd = (int)await new NpgsqlCommand("SELECT lo_open(@oid, 131072)", conn, tx) { Parameters = { new("oid", (int)oid) } }.ExecuteScalarAsync();
+#pragma warning restore CS8605 // Unboxing a possibly null value.
+
+            const int chunk = 8192;
+
+            //Write it in chunks
+            for (int i = 0; i < data.Length; i += chunk) {
+                int len = Math.Min(chunk, data.Length - i);
+                await new NpgsqlCommand("SELECT lowrite(@fd, @data)", conn, tx) {
+                    Parameters =
+                    {
+                    new("fd", fd),
+                    new("data", data.AsSpan(i, len).ToArray())
+                }
+                }.ExecuteScalarAsync();
+            }
+
+            //Close, commit, and let's get outta here
+            await new NpgsqlCommand("SELECT lo_close(@fd)", conn, tx) { Parameters = { new("fd", fd) } }.ExecuteNonQueryAsync();
+            await tx.CommitAsync();
+            return oid;
+        }
+
+        public async Task DeleteLargeObject(uint oid) {
+            await using var conn = new NpgsqlConnection(ConnectionString);
+            await conn.OpenAsync();
+            await using var tx = await conn.BeginTransactionAsync();
+
+            //Unlink and adios
+            await new NpgsqlCommand("SELECT lo_unlink(@oid)", conn, tx) { Parameters = { new("oid", (int)oid) } }.ExecuteNonQueryAsync();
+            await tx.CommitAsync();
         }
     }
 }

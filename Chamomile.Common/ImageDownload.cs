@@ -31,10 +31,8 @@ namespace Chamomile.Common {
         /// <summary>Raw bytes of this image</summary>
         public byte[]? Data { get; set; } = [];
 
-        private string? _hash;
-
         /// <summary> Hash of this image</summary>
-        public string Hash => _hash ??= Convert.ToBase64String(SHA256.HashData(Data ?? []));
+        public string Hash => field ??= Convert.ToBase64String(SHA256.HashData(Data ?? []));
         //I LOVE COMPOUND ASSIGNMENT! GOD BLESS C#
 
     }
