@@ -17,6 +17,8 @@ export default function WhatsNew({ open, setOpen }: {
 
     const whatsnew = `
 ### What's new?
+- **Switch from ByteA to Postgress Large Object:** Please make sure you check out the [migration script](https://github.com/GooeyAvocado/Chamomile/blob/master/Chamomile.Data/DDLs/LargeObjectMigrationScript.sql)
+    - This was done for major performance improvements on Chamomile instances with over 20k images.
 - **Templates:** Parametrized prompt templates for reusable chunks of prompts. See more in the new help section.
 - **Model tags:** Checkpoints and LoRAs now have tags to help organize them better
 - **Image tile sizes are now configurable**: You can select from extra small to extra large

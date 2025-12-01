@@ -246,3 +246,5 @@ create table templates (
 	image_id int4,
 	CONSTRAINT pk_templates PRIMARY KEY (templ_nm)
 )
+
+--Please also run the large object migration script Migration script here
