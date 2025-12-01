@@ -138,9 +138,9 @@ export default function ImageViewer(props: {
                     setSelectedImage(undefined)
                     if (navToSelectedImage) nav("/")
                 } else if (selectedIndex >= imageApi.count - 1) {
-                    onLeft()
+                    onLeft?.()
                 } else {
-                    onRight();
+                    onRight?.();
                 }
             }
             imageApi.removeImage(override ?? selectedImage ?? {} as GeneratedImage)
@@ -220,9 +220,9 @@ export default function ImageViewer(props: {
                     if (imageApi.count === 1) {
                         setSelectedImage(undefined)
                     } else if (selectedIndex >= imageApi.count - 1) {
-                        onLeft()
+                        onLeft?.()
                     } else {
-                        onRight();
+                        onRight?.();
                     }
                 }
                 imageApi.removeImage(selectedImage ?? {} as GeneratedImage)
@@ -257,16 +257,16 @@ export default function ImageViewer(props: {
         imageApi.images.map(a => a.id).indexOf(selectedImage?.id ?? 0)
         , [selectedImage, imageApi.images])
 
-    const onLeft = () => {
+    const onLeft = selectedIndex === 0 ? undefined : () => {
         const index = selectedIndex;
         if (index === 0) return;
         setSelectedImage(imageApi.images[index - 1]);
     }
 
-    const onRight = () => {
-        if (selectedIndex === imageApi.images.length - 1) return; //If this is the last image do nothing
-        if (selectedIndex === imageApi.images.length - 2) { //If is the second to last image
-            if (imageApi.hasMore) imageApi.showMore();
+    //If this is the last image do nothing
+    const onRight = selectedIndex === imageApi.images.length - 1 && !imageApi.hasMore ? undefined : () => {
+        if (selectedIndex > imageApi.images.length - 4 && imageApi.hasMore && !imageApi.loading) { //If is the fourth to last image or later
+            imageApi.showMore();
         };
         setSelectedImage(imageApi.images[selectedIndex + 1]);
     }
@@ -386,9 +386,10 @@ export default function ImageViewer(props: {
                         }} image={selectedImage} filter={filter} setFilter={setFilter ? (val) => {
                             setFilter(val)
                             setViewerOpen(false)
-                        } : undefined}
+                        } : undefined} moreLoading={imageApi.loading}
                         onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
-                        onFavorite={onFavorite} onDownload={onDownload} onLeft={onLeft} onRight={onRight}
+                        onFavorite={onFavorite} onDownload={onDownload}
+                        onLeft={onLeft} onRight={onRight}
                         onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
                         imageChildren={() => <div style={{
                             position: "absolute", bottom: "10px", right: "10px", zIndex: 2,

@@ -1,5 +1,5 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Button, Card, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
+import { Button, Card, CircularProgress, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
@@ -53,6 +53,7 @@ export default function ImageModal(props: {
     collapseDefault?: boolean
     imageChildren?: (collapse: boolean) => JSX.Element
     infoChildren?: JSX.Element
+    moreLoading?: boolean
 }) {
 
     const {
@@ -60,7 +61,8 @@ export default function ImageModal(props: {
         onLeft, onRight, onDeleteForce, onUpscale,
         collapseDefault, onAddAlbum, onRemoveAlbum,
         onViewAlbum, onDownload, onUpdateNotes,
-        onUp, onDown, filter, setFilter, onHome, onEnd
+        onUp, onDown, filter, setFilter, onHome, onEnd,
+        moreLoading
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -211,8 +213,13 @@ export default function ImageModal(props: {
                 {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center', zIndex: 2 }}>
                     <IconButton onClick={onLeft}><ArrowBack /></IconButton>
                 </div>}
+
                 {onRight && <div style={{ position: 'absolute', right: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center', zIndex: 2 }}>
                     <IconButton onClick={onRight}><ArrowForward /></IconButton>
+                </div>}
+
+                {moreLoading && <div style={{ position: 'absolute', right: '26px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center', zIndex: 2 }}>
+                    <CircularProgress size={"28px"} />
                 </div>}
 
                 <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center', zIndex: 2 }}>
