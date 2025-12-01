@@ -30,7 +30,7 @@ RUN npm run build
 # ----------------------------------------------------------------------------------
 
 # Build the backend
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS backend-builder
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-builder
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Chamomile.API/Chamomile.API.csproj", "Chamomile.API/"]
@@ -42,7 +42,7 @@ RUN dotnet publish "Chamomile.API.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 # ----------------------------------------------------------------------------------
 
 # Final stage: Combine NGINX and ASP.NET backend
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 # Copy the backend publish output
