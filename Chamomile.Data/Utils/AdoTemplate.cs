@@ -254,7 +254,7 @@ namespace Chamomile.Data.Utils {
 
             //r e a d
             using var ms = new MemoryStream();
-            const int chunk = 8192;
+            const int chunk = 2*1024*1024;
             while (true) {
                 //Read it all
                 await using var readCmd = new NpgsqlCommand("SELECT loread(@fd, @len)", conn, tx);
@@ -286,7 +286,7 @@ namespace Chamomile.Data.Utils {
             int fd = (int)await new NpgsqlCommand("SELECT lo_open(@oid, 131072)", conn, tx) { Parameters = { new("oid", (int)oid) } }.ExecuteScalarAsync();
 #pragma warning restore CS8605 // Unboxing a possibly null value.
 
-            const int chunk = 8192;
+            const int chunk = 2*1024*1024;
 
             //Write it in chunks
             for (int i = 0; i < data.Length; i += chunk) {
