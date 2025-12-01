@@ -27,6 +27,7 @@ import HighlightedPromptDiv from "../prompt/HighlightedPromptDiv";
 import AdditionalInfoRenderer from "./AdditionalInformationRenderer";
 import { FilterOptions } from "../../../model/FilterOptions";
 import ModelCard from "../checkpoint/CheckpointCard";
+import { useThrottle } from "../../hooks/useThrottle";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -75,6 +76,12 @@ export default function ImageModal(props: {
     const [notesOpen, setNotesOpen] = useState(false)
     const [editNote, setEditNote] = useState("")
 
+    const THROTTLE_DELAY = 50
+    const throttledLeft = useThrottle(onLeft, THROTTLE_DELAY);
+    const throttledRight = useThrottle(onRight, THROTTLE_DELAY);
+    const throttledUp = useThrottle(onUp, THROTTLE_DELAY)
+    const throttledDown = useThrottle(onDown, THROTTLE_DELAY)
+
     useEffect(() => {
         if ((image?.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt) setPromptMode(0)
         setNotesOpen(false)
@@ -122,16 +129,16 @@ export default function ImageModal(props: {
         onKeyDown={(e) => {
             switch (e.key) {
                 case "ArrowLeft":
-                    onLeft?.()
+                    throttledLeft()
                     break;
                 case "ArrowRight":
-                    onRight?.();
+                    throttledRight();
                     break;
                 case "ArrowUp":
-                    onUp?.()
+                    throttledUp()
                     break;
                 case "ArrowDown":
-                    onDown?.();
+                    throttledDown();
                     break;
                 case "Home":
                     onHome?.();
