@@ -21,7 +21,7 @@ export default function Navbar() {
 
     const onSettings = () => {
         onClose();
-        setSettingsOpen(true)
+        setTimeout(() => setSettingsOpen(true), 0)
     }
 
     const onClose = () => {
@@ -29,13 +29,15 @@ export default function Navbar() {
     }
 
     const onDisplay = () => {
-        window.open('/#/display', '_blank');
+        setTimeout(() => window.open('/#/display', '_blank'), 0)
+        // window.open('/#/display', '_blank');
     };
 
     const onHelp = () => {
-        if (!helpEverOpened) setHelpEverOpened(true)
+        // if (!helpEverOpened) setHelpEverOpened(true)
         onClose();
-        setHelpOpen(true);
+        setTimeout(() => setHelpOpen(true), 0)
+        // setHelpOpen(true);
     }
 
     return <>
@@ -118,7 +120,8 @@ export default function Navbar() {
         </Drawer>
 
         <SettingsSlidein open={settingsOpen} setOpen={setSettingsOpen} />
-        {helpEverOpened && <HelpModal open={helpOpen} setOpen={setHelpOpen} />}
+        {/* {helpEverOpened && <HelpModal open={helpOpen} setOpen={setHelpOpen} />} */}
+        <HelpModal open={helpOpen} setOpen={setHelpOpen} />
 
     </>
 }
