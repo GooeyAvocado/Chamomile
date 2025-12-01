@@ -1,7 +1,5 @@
 using Chamomile.API.Hubs;
 using Chamomile.API.Workers;
-using Microsoft.OpenApi.Models;
-
 var builder = WebApplication.CreateBuilder(args);
 var CORS = "CORS";
 
@@ -14,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(o => {
-    o.SwaggerDoc("1", new OpenApiInfo {
+    o.SwaggerDoc("1", new Microsoft.OpenApi.OpenApiInfo {
         Version = "1",
         Title = "Chamomile",
         Description = "Chamomile wraps around A1111 and makes it easier to generate images",
