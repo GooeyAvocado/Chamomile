@@ -29,15 +29,19 @@ export default function ImageHotbar(props: {
     const [brewAnchor, setBrewAnchor] = useState(null as any)
     const [promptAnchor, setPromptAnchor] = useState(null as any)
 
+    const canNavigate = !!onLeft || !!onRight
+
     if (isMobile) return <></>
 
     return <>
         <Card style={{ marginBottom: '5px', transition: 'opacity 0.2s ease-in-out' }} className="hover-hotbar">
             <div style={{ display: 'flex', gap: '10px', padding: "5px" }}>
-                <Tooltip title="Previous" enterDelay={250}>
-                    <IconButton onClick={onLeft} disabled={!onLeft}><ArrowBack /></IconButton>
-                </Tooltip>
-                <hr />
+                {canNavigate && <>
+                    <Tooltip title="Previous" enterDelay={250}>
+                        <IconButton onClick={onLeft} disabled={!onLeft}><ArrowBack /></IconButton>
+                    </Tooltip>
+                    <hr />
+                </>}
                 <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
                     <IconButton onClick={() => onFavorite?.()} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutline />}</IconButton>
                 </Tooltip>
@@ -67,10 +71,12 @@ export default function ImageHotbar(props: {
                         <ReceiptLong />
                     </IconButton>
                 </Tooltip>
-                <hr />
-                <Tooltip title="Next" enterDelay={250}>
-                    <IconButton onClick={onRight} disabled={!onRight}><ArrowForward /></IconButton>
-                </Tooltip>
+                {canNavigate && <>
+                    <hr />
+                    <Tooltip title="Next" enterDelay={250}>
+                        <IconButton onClick={onRight} disabled={!onRight}><ArrowForward /></IconButton>
+                    </Tooltip>
+                </>}
             </div>
 
 
