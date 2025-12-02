@@ -19,8 +19,9 @@ namespace Chamomile.Data {
                 CHECKPOINT_TITLE, CRE_TS, IMAGE_GEN_MS, IMAGE_HIDDEN,IMAGE_ADDTL_INFO];
 
         private async Task<GeneratedImage> ImageRM(Getter reader) {
+            var imageId = reader.GetInt(IMAGES_ID);
             return new() {
-                Id = reader.GetInt(IMAGES_ID),
+                Id = imageId,
                 Prompt = reader.GetString(IMAGES_PROMPT),
                 BasePrompt = reader.GetOptionalString(IMAGES_BASE_PROMPT),
                 Notes = reader.GetOptionalString(IMAGES_NOTES),
@@ -157,12 +158,10 @@ namespace Chamomile.Data {
             ) {
             var image = await ParseImage(imageBytes);
 
-            var imageLoid = await adoTemplate.WriteLargeObject(imageBytes);
-
             var img = await adoTemplate.QuerySingle(InsertSql([
                 IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP,IMAGES_CFG_SCL,IMAGE_ADDTL_INFO, IMAGE_HIDDEN,
-                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_LO_ID,CHECKPOINT_TITLE, IMAGE_GEN_MS
+                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, CHECKPOINT_TITLE, IMAGE_GEN_MS
             ], IMAGES_TABLE.Split(" ")[0], string.Join(", ", ImageColumns)), (cmd) => {
                 cmd.SetString(IMAGES_PROMPT, image.Prompt);
                 cmd.SetString(IMAGES_BASE_PROMPT, prompt?.PositivePrompt ?? "");
@@ -174,12 +173,17 @@ namespace Chamomile.Data {
                 cmd.SetLong(IMAGES_SEED, image.Seed);
                 cmd.SetInt(IMAGES_HEIGHT, image.Height);
                 cmd.SetInt(IMAGES_WIDTH, image.Width);
-                cmd.SetOid(IMAGES_LO_ID, imageLoid);
                 cmd.SetString(CHECKPOINT_TITLE, image.Model);
                 cmd.SetInt(IMAGE_GEN_MS, generationDuration);
                 cmd.SetBoolean(IMAGE_HIDDEN, hidden);
                 if(additionalInfo!=null) cmd.SetValue(IMAGE_ADDTL_INFO, NpgsqlTypes.NpgsqlDbType.Jsonb , JsonSerializer.Serialize(additionalInfo,SerializationOptions));
             }, ImageRM) ?? throw new InvalidOperationException("This should never happen");
+
+            //Store the image
+            await adoTemplate.Execute(InsertSql([IMAGES_ID, IMAGE_BYTES], IMAGE_BINARY_TABLE), (cmd) => {
+                cmd.SetInt(IMAGES_ID, img.Id);
+                cmd.SetBytea(IMAGE_BYTES, imageBytes);
+            });
             
             await adoTemplate.ExecuteBatch(InsertSql([IMAGES_ID, LORA_ALIAS], IMAGES_LORA_MAP), (cmd, lora) => {
                 cmd.SetInt(IMAGES_ID, img.Id);
@@ -444,56 +448,40 @@ namespace Chamomile.Data {
             );
         }
 
-        public async Task<GeneratedImageLOIDs?> GetLoid(int id) {
-            return await adoTemplate.QuerySingle(
-                SelectSql([IMAGES_LO_ID,IMAGES_HIRES_LO_ID], IMAGES_TABLE, new WhereConditionGroup([new(IMAGES_ID)])),
-                (cmd) => cmd.SetInt(IMAGES_ID, id),
-                (reader) => new GeneratedImageLOIDs() {
-                    HiResImage = reader.GetOptionalOid(IMAGES_HIRES_LO_ID),
-                    SdImage = reader.GetOid(IMAGES_LO_ID)
+        public async Task<ImageDownload?> GetImage(int id, bool countDownload = false) {
+            if (countDownload) await IncrementDownloadCount(id);
+            return await adoTemplate.QuerySingle(SelectSql([IMAGE_BYTES], IMAGE_BINARY_TABLE, new WhereConditionGroup([new(IMAGES_ID)])),
+                (cmd) => cmd.SetInt(IMAGES_ID, id), (reader)=> new ImageDownload() {
+                    Filename = id + "",
+                    Mime = "image/png",
+                    Data = reader.GetBytea(IMAGE_BYTES),
                 }
             );
-
-        }
-
-        public async Task<ImageDownload?> GetImage(int id, bool countDownload = false) {
-
-            var loids = await GetLoid(id);
-            if(loids == null) return null;
-
-            if (countDownload) await IncrementDownloadCount(id);
-            return new() {
-                Filename = id + "",
-                Mime = "image/png",
-                Data = await adoTemplate.ReadLargeObject(loids.SdImage),
-            };
         }
 
         public async Task<ImageDownload?> GetHiResImage(int id, bool countDownload = false) {
-
-            var loids = await GetLoid(id);
-            if (loids == null || loids.HiResImage==null) return null;
-
             if (countDownload) await IncrementDownloadCount(id);
-            return new() {
-                Filename = id + "",
-                Mime = "image/png",
-                Data = await adoTemplate.ReadLargeObject(loids.HiResImage.Value),
-            };
+            return await adoTemplate.QuerySingle(SelectSql([IMAGE_BYTES], IMAGE_HIRES_BINARY_TABLE, new WhereConditionGroup([new(IMAGES_ID)])),
+                (cmd) => cmd.SetInt(IMAGES_ID, id), (reader) => new ImageDownload() {
+                    Filename = id + "",
+                    Mime = "image/png",
+                    Data = reader.GetBytea(IMAGE_BYTES),
+                }
+            );
+        }
+
+        public async Task<bool> ImageHiResAvailable(int id) {
+            return await adoTemplate.QuerySingle($"""
+                SELECT EXISTS (
+                    SELECT 1 FROM {IMAGE_HIRES_BINARY_TABLE} WHERE image_id = @{IMAGES_ID}
+                );
+            """, (cmd)=>cmd.SetInt(IMAGES_ID,id), (reader)=>reader.GetBoolean("EXISTS"));
         }
 
         public async Task<ImageDownload?> GetImageOptionalHires(int id, bool countDownload = false) {
-
-            var loids = await GetLoid(id);
-            if (loids == null) return null;
-
-            if (countDownload) await IncrementDownloadCount(id);
-            return new() {
-                Filename = id + "",
-                Mime = "image/png",
-                Data = await adoTemplate.ReadLargeObject(loids.HiResImage ?? loids.SdImage),
-            };
-
+            return await ImageHiResAvailable(id) 
+                ? await GetHiResImage(id, countDownload) 
+                : await GetImage(id, countDownload);
         }
 
         public async Task IncrementDownloadCount(int id) {
@@ -755,15 +743,16 @@ namespace Chamomile.Data {
 
         public async Task<GeneratedImage?> SaveHiResImage(int id, byte[] image, int scale) {
 
-            var hiResLoid = await adoTemplate.WriteLargeObject(image);
-
-            return await adoTemplate.QuerySingle(
-                UpdateSql([IMAGES_HIRES_LO_ID], IMAGES_TABLE, new([new(IMAGES_ID)])) +
-                " RETURNING " + string.Join(", ", ImageColumns)
-            , (cmd) => {
-                cmd.SetOid(IMAGES_HIRES_LO_ID, hiResLoid);
+            await adoTemplate.Execute(InsertSql([IMAGES_ID,IMAGE_BYTES],IMAGE_HIRES_BINARY_TABLE), (cmd) => {
                 cmd.SetInt(IMAGES_ID, id);
-            }, ImageRM);
+                cmd.SetBytea(IMAGE_BYTES, image);
+            });
+
+            await adoTemplate.Execute(UpdateSql([IMAGES_HIRES_IN], new(){ { IMAGES_HIRES_IN, "true" }  }, 
+                IMAGES_TABLE, new WhereConditionGroup([new(IMAGES_ID)])),
+                (cmd) => cmd.SetInt(IMAGES_ID, id));
+
+            return await Get(id);
         }
 
         public async Task<Album> UpdateAlbum(Album album) {
@@ -856,11 +845,6 @@ namespace Chamomile.Data {
         #region DELETE
 
         public async Task DeleteImage(int id) {
-
-            //Get the LOID (we'll need this later)
-            var loids = await GetLoid(id);
-            if(loids==null) return; //Image doesn't exist
-
             //Unassign the image from any model that uses it as a sample
             await adoTemplate.Execute(UpdateSql([IMAGES_ID], MODELS_TABLE, new([new(IMAGES_ID, WhereConditionOperator.EQUALS, "@ORIGINAL_ID")])), (cmd) => {
                 cmd.SetInt(IMAGES_ID, null);
@@ -908,12 +892,6 @@ where i.image_prompt_tx = n.image_prompt_tx
 
             //Delete the image
             await adoTemplate.Execute(DeleteSql(IMAGES_TABLE, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
-
-            //Finally, unlink the loid
-            await adoTemplate.DeleteLargeObject(loids.SdImage);
-            if (loids.HiResImage != null) {
-                await adoTemplate.DeleteLargeObject(loids.HiResImage.Value);
-            }
 
         }
 

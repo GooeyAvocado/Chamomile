@@ -234,86 +234,86 @@ namespace Chamomile.Data.Utils {
 
         }
 
-        public async Task<byte[]> ReadLargeObject(uint oid) {
+//        public async Task<byte[]> ReadLargeObject(uint oid) {
 
-            //Open the connection
-            await using var conn = new NpgsqlConnection(ConnectionString);
-            await conn.OpenAsync();
+//            //Open the connection
+//            await using var conn = new NpgsqlConnection(ConnectionString);
+//            await conn.OpenAsync();
 
-            //Begin the transaction (required for LO)
-            await using var tx = await conn.BeginTransactionAsync();
+//            //Begin the transaction (required for LO)
+//            await using var tx = await conn.BeginTransactionAsync();
 
-            //Open the LO (Like FileReader open)
-            await using var fdCmd = new NpgsqlCommand("SELECT lo_open(@oid, 262144)", conn, tx);
-            fdCmd.Parameters.AddWithValue("oid", (int)oid);
-#pragma warning disable CS8605 // Unboxing a possibly null value.
-            //This can never be null. If it is, we have bigger problems
-            int fd = (int)await fdCmd.ExecuteScalarAsync();
-#pragma warning restore CS8605 // Unboxing a possibly null value.
+//            //Open the LO (Like FileReader open)
+//            await using var fdCmd = new NpgsqlCommand("SELECT lo_open(@oid, 262144)", conn, tx);
+//            fdCmd.Parameters.AddWithValue("oid", (int)oid);
+//#pragma warning disable CS8605 // Unboxing a possibly null value.
+//            //This can never be null. If it is, we have bigger problems
+//            int fd = (int)await fdCmd.ExecuteScalarAsync();
+//#pragma warning restore CS8605 // Unboxing a possibly null value.
 
 
-            //r e a d
-            using var ms = new MemoryStream();
-            const int chunk = 2*1024*1024;
-            while (true) {
-                //Read it all
-                await using var readCmd = new NpgsqlCommand("SELECT loread(@fd, @len)", conn, tx);
-                readCmd.Parameters.AddWithValue("fd", fd);
-                readCmd.Parameters.AddWithValue("len", chunk);
-                var data = (byte[]?)await readCmd.ExecuteScalarAsync();
-                if (data == null || data.Length == 0) break;
-                await ms.WriteAsync(data);
-            }
+//            //r e a d
+//            using var ms = new MemoryStream();
+//            const int chunk = 2*1024*1024;
+//            while (true) {
+//                //Read it all
+//                await using var readCmd = new NpgsqlCommand("SELECT loread(@fd, @len)", conn, tx);
+//                readCmd.Parameters.AddWithValue("fd", fd);
+//                readCmd.Parameters.AddWithValue("len", chunk);
+//                var data = (byte[]?)await readCmd.ExecuteScalarAsync();
+//                if (data == null || data.Length == 0) break;
+//                await ms.WriteAsync(data);
+//            }
 
-            //Close the LO
-            await new NpgsqlCommand("SELECT lo_close(@fd)", conn, tx) { Parameters = { new("fd", fd) } }.ExecuteNonQueryAsync();
-            await tx.CommitAsync();
-            return ms.ToArray();
-        }
+//            //Close the LO
+//            await new NpgsqlCommand("SELECT lo_close(@fd)", conn, tx) { Parameters = { new("fd", fd) } }.ExecuteNonQueryAsync();
+//            await tx.CommitAsync();
+//            return ms.ToArray();
+//        }
 
-        public async Task<uint> WriteLargeObject(byte[] data) {
-            await using var conn = new NpgsqlConnection(ConnectionString);
-            await conn.OpenAsync();
-            await using var tx = await conn.BeginTransactionAsync();
+//        public async Task<uint> WriteLargeObject(byte[] data) {
+//            await using var conn = new NpgsqlConnection(ConnectionString);
+//            await conn.OpenAsync();
+//            await using var tx = await conn.BeginTransactionAsync();
 
-#pragma warning disable CS8605 // Unboxing a possibly null value.
-            //If these are null we have bigger problems
+//#pragma warning disable CS8605 // Unboxing a possibly null value.
+//            //If these are null we have bigger problems
 
-            //Create the LO
-            uint oid = (uint)await new NpgsqlCommand("SELECT lo_create(0)", conn, tx).ExecuteScalarAsync();
+//            //Create the LO
+//            uint oid = (uint)await new NpgsqlCommand("SELECT lo_create(0)", conn, tx).ExecuteScalarAsync();
 
-            //Open the LO for writing
-            int fd = (int)await new NpgsqlCommand("SELECT lo_open(@oid, 131072)", conn, tx) { Parameters = { new("oid", (int)oid) } }.ExecuteScalarAsync();
-#pragma warning restore CS8605 // Unboxing a possibly null value.
+//            //Open the LO for writing
+//            int fd = (int)await new NpgsqlCommand("SELECT lo_open(@oid, 131072)", conn, tx) { Parameters = { new("oid", (int)oid) } }.ExecuteScalarAsync();
+//#pragma warning restore CS8605 // Unboxing a possibly null value.
 
-            const int chunk = 2*1024*1024;
+//            const int chunk = 2*1024*1024;
 
-            //Write it in chunks
-            for (int i = 0; i < data.Length; i += chunk) {
-                int len = Math.Min(chunk, data.Length - i);
-                await new NpgsqlCommand("SELECT lowrite(@fd, @data)", conn, tx) {
-                    Parameters =
-                    {
-                    new("fd", fd),
-                    new("data", data.AsSpan(i, len).ToArray())
-                }
-                }.ExecuteScalarAsync();
-            }
+//            //Write it in chunks
+//            for (int i = 0; i < data.Length; i += chunk) {
+//                int len = Math.Min(chunk, data.Length - i);
+//                await new NpgsqlCommand("SELECT lowrite(@fd, @data)", conn, tx) {
+//                    Parameters =
+//                    {
+//                    new("fd", fd),
+//                    new("data", data.AsSpan(i, len).ToArray())
+//                }
+//                }.ExecuteScalarAsync();
+//            }
 
-            //Close, commit, and let's get outta here
-            await new NpgsqlCommand("SELECT lo_close(@fd)", conn, tx) { Parameters = { new("fd", fd) } }.ExecuteNonQueryAsync();
-            await tx.CommitAsync();
-            return oid;
-        }
+//            //Close, commit, and let's get outta here
+//            await new NpgsqlCommand("SELECT lo_close(@fd)", conn, tx) { Parameters = { new("fd", fd) } }.ExecuteNonQueryAsync();
+//            await tx.CommitAsync();
+//            return oid;
+//        }
 
-        public async Task DeleteLargeObject(uint oid) {
-            await using var conn = new NpgsqlConnection(ConnectionString);
-            await conn.OpenAsync();
-            await using var tx = await conn.BeginTransactionAsync();
+//        public async Task DeleteLargeObject(uint oid) {
+//            await using var conn = new NpgsqlConnection(ConnectionString);
+//            await conn.OpenAsync();
+//            await using var tx = await conn.BeginTransactionAsync();
 
-            //Unlink and adios
-            await new NpgsqlCommand("SELECT lo_unlink(@oid)", conn, tx) { Parameters = { new("oid", (int)oid) } }.ExecuteNonQueryAsync();
-            await tx.CommitAsync();
-        }
+//            //Unlink and adios
+//            await new NpgsqlCommand("SELECT lo_unlink(@oid)", conn, tx) { Parameters = { new("oid", (int)oid) } }.ExecuteNonQueryAsync();
+//            await tx.CommitAsync();
+//        }
     }
 }

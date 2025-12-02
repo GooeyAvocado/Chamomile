@@ -35,6 +35,16 @@ ON CONFLICT (image_id) DO NOTHING;
 ALTER TABLE images
     DROP COLUMN image_hires_in;
 
+alter table Images add column IMAGE_HIRES_IN bool default false;
+
+UPDATE Images i
+SET image_hires_in = TRUE
+WHERE EXISTS (
+    SELECT 1 
+    FROM ImageBinary_HD hr 
+    WHERE hr.image_id = i.image_id
+);
+
 ALTER TABLE images
     ALTER COLUMN image_bytes_tx DROP NOT NULL;
 
@@ -47,3 +57,5 @@ alter table images
 ALTER TABLE images
     drop COLUMN image_bytes_tx
     drop COLUMN image_hires_bytes_tx;
+
+

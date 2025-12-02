@@ -37,8 +37,6 @@
         public static readonly string IMAGES_HEIGHT      = "image_hght_num";
         public static readonly string IMAGES_WIDTH       = "image_wdth_num";
         public static readonly string IMAGES_FAV_IN      = "image_fav_in";
-        public static readonly string IMAGES_LO_ID       = "image_lo_oid";
-        public static readonly string IMAGES_HIRES_LO_ID = "image_hires_lo_oid";
         public static readonly string IMAGES_HIRES_IN    = "image_hires_in";
         public static readonly string IMAGES_PROMPT_FTS  = "image_prompt_fts";
         public static readonly string IMAGES_BASE_PROMPT_FTS = "image_base_prompt_fts";
@@ -50,6 +48,10 @@
         public static readonly string IMAGE_ADDTL_INFO   = "img_addtl_info_mv";
         public static readonly string IMAGE_PROMPTS_HASH = "image_prompts_hash";
         public static readonly string IMAGE_BASE_PROMPT_HASH = "image_base_prompt_hash";
+
+        public static readonly string IMAGE_BINARY_TABLE       = $"{SCHEMA}.ImageBinary_SD";
+        public static readonly string IMAGE_HIRES_BINARY_TABLE = $"{SCHEMA}.ImageBinary_HD";
+        public static readonly string IMAGE_BYTES = "image_bytes_tx";
 
 
         //This is a virtual column in a JSONB column but I don't care
