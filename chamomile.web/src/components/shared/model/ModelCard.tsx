@@ -155,15 +155,15 @@ export default function ModelCard(props: {
                     <ListItemIcon><AddPhotoAlternate /></ListItemIcon>
                     Set this as sample image
                 </MenuItem>
-                {filter && setFilter && <>
-                    <Divider />
+                {filter && setFilter && [
+                    <Divider />,
                     <MenuItem onClick={() => {
                         setFilter({ ...clearFilter(filter), model: model.id })
                     }}>
                         <ListItemIcon><ImageSearch /></ListItemIcon>
                         View images with this model
                     </MenuItem>
-                </>}
+                ]}
             </Menu>
             <AreYouSureModal open={updateAys} setOpen={setUpdateAys} onYes={realUpdateImage} title="Set this image as sample?">
                 Are you sure you want to set this image as the sample for this {modelType?.toLowerCase()}?

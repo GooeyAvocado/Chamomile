@@ -17,6 +17,7 @@ import ComplexAccordionBody from "../complexAccordion/ComplexAccordionBody";
 import ComplexAccordionActions from "../complexAccordion/ComplexAccordionActions";
 import LoraStrip from "../lora/LoraStrip";
 import CheckpointStrip from "../checkpoint/CheckpointStrip";
+import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 
 export default function ModelBrowserModal(props: {
     open: boolean,
@@ -88,6 +89,8 @@ function GridViewMode(props: {
 
     const { enqueueSnackbar } = useSnackbar();
     const updateApi = useApi(modelType === "Checkpoint" ? updateCheckpoint : updateLora)
+
+    const { vertical } = useWindowDimensions();
 
     const groupedModels = useMemo(() => {
         return [showAny ? {
@@ -172,10 +175,13 @@ function GridViewMode(props: {
                         {tag}</div>} style={{ width: '100%' }} elevation={3}>
                         <ComplexAccordionActions showOnState="collapsed" position="right" >
                             {modelType === "LoRA" ? <LoraStrip
-                                loras={groupedModels[tag].map(a => a.id)} maxLength={10}
+                                loras={groupedModels[tag].map(a => a.id)} maxLength={vertical ? 3 : 10}
                             /> : <CheckpointStrip
-                                checkpoints={groupedModels[tag].map(a => a.id)} maxLength={10}
+                                checkpoints={groupedModels[tag].map(a => a.id)} maxLength={vertical ? 3 : 10}
                             />}
+                        </ComplexAccordionActions>
+                        <ComplexAccordionActions showOnState="expanded" position="right" >
+                            {groupedModels[tag].length.toLocaleString()} {modelType}s
                         </ComplexAccordionActions>
                         <ComplexAccordionBody >
                             <div style={{

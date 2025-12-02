@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Button, Card, CircularProgress, Dialog, IconButton, Link, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
+import { Button, Card, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, Coffee, CoffeeOutlined, ContentPaste, Delete, Edit, Gradient, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useSnackbar } from "notistack";
@@ -9,7 +9,7 @@ import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { clearFilter, imageToPrompt } from "../Utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
 import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
@@ -78,7 +78,9 @@ export default function ImageModal(props: {
     const [notesOpen, setNotesOpen] = useState(false)
     const [editNote, setEditNote] = useState("")
 
-    const THROTTLE_DELAY = 50
+    const [hideSidebar, setHideSidebar] = useState(false)
+
+    const THROTTLE_DELAY = 100
     const throttledLeft = useThrottle(onLeft, THROTTLE_DELAY);
     const throttledRight = useThrottle(onRight, THROTTLE_DELAY);
     const throttledUp = useThrottle(onUp, THROTTLE_DELAY)
@@ -88,6 +90,41 @@ export default function ImageModal(props: {
         if ((image?.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt) setPromptMode(0)
         setNotesOpen(false)
     }, [image])
+
+    const movementRef = useRef(0);
+    const resetTimerRef = useRef<number | null>(null);
+    const showTimerRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (!image) return;
+
+        movementRef.current += 1;
+
+        // Reset movement counter after 150ms of inactivity
+        if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+        resetTimerRef.current = window.setTimeout(() => {
+            movementRef.current = 0;
+        }, 150);
+
+        // If this is only a single movement, don't hide sidebar
+        if (movementRef.current < 3) {
+            setHideSidebar(false);
+            return;
+        }
+
+        // Rapid movement → hide sidebar
+        setHideSidebar(true);
+
+        // Show sidebar after 100ms if user stops
+        if (showTimerRef.current) clearTimeout(showTimerRef.current);
+        showTimerRef.current = window.setTimeout(() => {
+            setHideSidebar(false);
+        }, 100);
+
+        return () => {
+            if (showTimerRef.current) clearTimeout(showTimerRef.current);
+        };
+    }, [image]);
 
     const onUsePrompt = (promptOverride?: Prompt) => {
         setOpen(false)
@@ -246,30 +283,19 @@ export default function ImageModal(props: {
             <Card style={vertical
                 ? { width: '100%', zIndex: 2, maxHeight: collapse ? 0 : "50vh", transition: "max-height 0.5s ease" }
                 : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease", zIndex: '2' }}>
-                <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
+                {hideSidebar ? <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
 
                     {/* Buttons */}
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom: '10px' }}>
                         <div style={{ display: "flex", gap: "10px" }} >
-                            <IconButton onClick={() => {
-                                if (collapseDefault) setCollapse(!collapse)
-                                else setOpen(false)
-                            }}><ArrowBack /></IconButton>
-                            {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={() => { onFavorite() }}>{image?.favorite ? <Star htmlColor="gold" /> : <StarBorder />}</IconButton></Tooltip>}
+                            <IconButton disabled><ArrowBack /></IconButton>
+                            {onFavorite && <IconButton disabled>{image?.favorite ? <Star htmlColor="gold" /> : <StarBorder />}</IconButton>}
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }} >
-                            <PromptReorderButton
-                                prompt={imageToPrompt(image, promptMode === 1)} source={promptMode === 1 ? "IMAGE_BASE" : "IMAGE"}
-                                sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id}
-                                iconOverride={promptMode === 1 ? <CoffeeOutlined /> : undefined}
-                            />
-                            <Tooltip title={promptMode === 1 ? 'Use this base prompt' : 'Use this prompt'}>
-                                <IconButton onClick={() => onUsePrompt()}>
-                                    {promptMode === 1 ? <ReceiptLongTwoTone /> : <ReceiptLong />}
-                                </IconButton>
-                            </Tooltip>
-                            {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}
+                            <IconButton disabled><Coffee /></IconButton>
+                            <IconButton disabled> <ReceiptLong /> </IconButton>
+                            {onDelete && <IconButton disabled><Delete /></IconButton>}
                         </div>
                     </div>
 
@@ -284,124 +310,47 @@ export default function ImageModal(props: {
                                     {(image?.basePrompt?.trim().length ?? 0) !== 0 && image?.basePrompt !== image?.prompt && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
                                 </Tabs>
                                 <div style={{ display: 'flex', gap: '10px', marginRight: "10px" }}>
-                                    {filter && setFilter && <Tooltip title={`More like this${promptMode === 1 ? " base" : ""} prompt`}><IconButton onClick={onMoreLikeThisPrompt}><ImageSearch /></IconButton></Tooltip>}
-                                    <CopyToClipboardButton text={promptMode === 0 ? image?.prompt : image?.basePrompt} />
+                                    {filter && setFilter && <IconButton disabled><ImageSearch /></IconButton>}
+                                    <IconButton disabled><ContentPaste fontSize="small" /></IconButton>
                                 </div>
                             </div>
-                            <HighlightedPromptDiv
-                                prompt={promptMode === 0 ? image?.prompt : image?.basePrompt}
-                            />
+                            <div style={{ padding: '10px 10px 10px 10px' }}>
+                                <Skeleton animation="wave" />
+                                <Skeleton animation="wave" />
+                                <Skeleton animation="wave" />
+                            </div>
                         </Card>
 
                         {/* Negative Prompt */}
-                        {(image?.negativePrompt?.trim().length ?? 0) !== 0 && <>
-                            <div style={{ marginTop: "20px", display: 'flex', alignItems: "center" }}>
-                                <b style={{ flex: "1" }}>Negative Prompt</b>
-                                <CopyToClipboardButton text={image?.negativePrompt} style={{ paddingRight: "16px" }} />
-                            </div>
-                            <div style={{ fontSize: ".6em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{image?.negativePrompt}</div>
-                        </>}
+
+                        <div style={{ marginTop: "20px", display: 'flex', alignItems: "center" }}>
+                            <b style={{ flex: "1" }}>Negative Prompt</b>
+                            <IconButton disabled><ContentPaste fontSize="small" /></IconButton>
+                        </div>
+                        <div style={{ padding: '5px 10px 0px 0px' }}>
+                            <Skeleton animation="wave" />
+                            <Skeleton animation="wave" />
+                            <Skeleton animation="wave" />
+                        </div>
+
 
                         {/* Model */}
                         <div style={{ marginTop: "20px" }}><b>Checkpoint</b></div>
-                        <ModelCard
-                            filter={filter} setFilter={setFilter}
-                            checkpointTitle={image?.model ?? ""} currentImage={image} elevation={5}
-                        />
+                        <Card style={{ padding: '10px' }} elevation={3}>
+                            <div style={{ height: "36px", display: 'flex', gap: '20px', alignItems: 'center' }}>
+                                <Skeleton variant="rectangular" width={32} height={32} style={{ borderRadius: '4px' }} />
+                                <Skeleton animation="wave" variant="text" width={"200px"} height={"50px"} />
+                            </div>
+                        </Card>
 
                         <Stack style={{ marginTop: "20px" }} gap={"10px"}>
-                            {/* LORAs */}
-                            {(image?.loras?.length ?? 0) !== 0 && <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>}>
-                                <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
-                                    {image && <LoraStrip loras={image?.loras} maxLength={6} />}
-                                </ComplexAccordionActions>
-                                <ComplexAccordionBody>
-                                    <Stack gap={"5px"}>
-                                        {image?.loras?.map(a => <LoraCard
-                                            filter={filter} setFilter={setFilter}
-                                            key={a} loraAlias={a} currentImage={image} elevation={5}
-                                        />)}
-                                    </Stack>
-                                </ComplexAccordionBody>
-                            </ComplexAccordion>}
-
-                            <ComplexAccordion elevation={2} title={<><PhotoLibrary /> <div>Collections</div></>}>
-                                <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
-                                    {image && <AlbumStrip albums={image?.albums} maxLength={6} />}
-                                </ComplexAccordionActions>
-                                {onAddAlbum && <ComplexAccordionActions position="right" showOnState="expanded">
-                                    <IconButton onClick={() => setAlbumsOpen(true)}><Add /></IconButton>
-                                </ComplexAccordionActions>}
-                                <ComplexAccordionBody>
-                                    <ImageModalAlbumsDisplay albums={image?.albums} onRemove={onRemoveAlbum} onView={onViewAlbum} elevation={5} />
-                                </ComplexAccordionBody>
-                            </ComplexAccordion>
-
-                            <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>}>
-                                <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
-                                    <span style={{
-                                        whiteSpace: "pre-line", overflow: "hidden",
-                                        textOverflow: "ellipsis", maxWidth: "300px",
-                                        fontFamily: 'monospace', fontSize: '.6em',
-                                        WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-                                        display: "-webkit-box"
-                                    }}>
-                                        {image?.notes}
-                                    </span>
-                                </ComplexAccordionActions>
-                                {onUpdateNotes && <ComplexAccordionActions position="right" showOnState="expanded">
-                                    <IconButton disabled={notesOpen} onClick={() => {
-                                        setNotesOpen(true)
-                                        setEditNote(image?.notes ?? "")
-                                    }}><Edit /></IconButton>
-                                </ComplexAccordionActions>}
-                                <ComplexAccordionBody>
-                                    <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>
-                                        {!notesOpen
-                                            ? (image?.notes?.length ?? 0) === 0 ? "Image has no notes" : image?.notes
-                                            : <>
-                                                <TextField
-                                                    value={editNote} onChange={(e) => setEditNote(e.target.value)}
-                                                    fullWidth multiline placeholder="Set a note" minRows={5} maxRows={5}
-                                                    slotProps={{ htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } } }}
-                                                />
-                                                <div style={{ display: 'flex', justifyContent: "end", gap: "10px", marginTop: "10px" }}>
-                                                    <Button onClick={() => {
-                                                        setNotesOpen(false)
-                                                        if (editNote.trim() !== (image?.notes ?? "").trim()) {
-                                                            onUpdateNotes?.(editNote)
-                                                        }
-                                                    }}>
-                                                        OK
-                                                    </Button>
-                                                </div>
-                                            </>
-                                        }
-                                    </div>
-                                </ComplexAccordionBody>
-                            </ComplexAccordion>
-
-                            {/* HiRes Options */}
+                            <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>} disabled />
+                            <ComplexAccordion elevation={2} title={<><PhotoLibrary /> <div>Collections</div></>} disabled />
+                            <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><Gradient color={
                                 image?.hiResAvailable ? "info" : "inherit"
-                            } /> <div>Upscale{image?.hiResAvailable && "d"}</div></>} disabled={!onUpscale || !pong?.SD}>
-
-                                <ComplexAccordionBody>
-                                    {!!onUpscale && pong?.SD && <HiResPanel image={image} updateImage={onUpscale} />}
-                                </ComplexAccordionBody>
-                            </ComplexAccordion>
-
-                            <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled={Object.keys(image?.additionalInfo ?? {}).length === 0}>
-                                <ComplexAccordionBody>
-                                    <AdditionalInfoRenderer
-                                        filter={filter} setFilter={setFilter} imageId={image?.id ?? 0}
-                                        additionalInformation={image?.additionalInfo}
-                                    />
-                                </ComplexAccordionBody>
-                            </ComplexAccordion>
-
-
-
+                            } /><div>Upscale</div></>} disabled />
+                            <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled />
                         </Stack>
 
 
@@ -409,24 +358,24 @@ export default function ImageModal(props: {
                         <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Seed</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.seed}</div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
                             </div>
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Steps</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.steps}</div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
                             </div>
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>CFG Scale</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.cfgScale.toFixed(2)}</div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
                             </div>
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Sampler</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.sampler}</div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
                             </div>
 
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Scheduler</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.scheduleType}</div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
                             </div>
 
                         </div>
@@ -436,33 +385,240 @@ export default function ImageModal(props: {
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Created</b></div>
                                 <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>
-                                    {setFilter ?
-                                        <Link onClick={() => {
-                                            setFilter?.({
-                                                ...clearFilter(filter ?? {}),
-                                                fromDate: image?.created?.split("T")?.[0],
-                                                toDate: image?.created?.split("T")?.[0]
-                                            })
-                                        }}>{new Date(image?.created ?? 0).toLocaleString()}</Link> :
-                                        new Date(image?.created ?? 0).toLocaleString()
-                                    }
-
+                                    -
                                 </div>
                             </div>
 
                             {/* Duration */}
                             {image?.generationDurationMs && <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Generation Duration</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{(image?.generationDurationMs / 1000.0)}s</div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
                             </div>}
 
 
                         </div>
                     </div>
 
-                    {props.infoChildren}
 
-                </div>
+                </div> :
+
+                    <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
+
+                        {/* Buttons */}
+                        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom: '10px' }}>
+                            <div style={{ display: "flex", gap: "10px" }} >
+                                <IconButton onClick={() => {
+                                    if (collapseDefault) setCollapse(!collapse)
+                                    else setOpen(false)
+                                }}><ArrowBack /></IconButton>
+                                {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={() => { onFavorite() }}>{image?.favorite ? <Star htmlColor="gold" /> : <StarBorder />}</IconButton></Tooltip>}
+                            </div>
+
+                            <div style={{ display: "flex", gap: "10px" }} >
+                                <PromptReorderButton
+                                    prompt={imageToPrompt(image, promptMode === 1)} source={promptMode === 1 ? "IMAGE_BASE" : "IMAGE"}
+                                    sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id}
+                                    iconOverride={promptMode === 1 ? <CoffeeOutlined /> : undefined}
+                                />
+                                <Tooltip title={promptMode === 1 ? 'Use this base prompt' : 'Use this prompt'}>
+                                    <IconButton onClick={() => onUsePrompt()}>
+                                        {promptMode === 1 ? <ReceiptLongTwoTone /> : <ReceiptLong />}
+                                    </IconButton>
+                                </Tooltip>
+                                {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}
+                            </div>
+                        </div>
+
+                        {/* Info */}
+                        <div style={{ flex: "1", overflowY: 'auto' }}>
+
+                            {/* Prompt */}
+                            <Card elevation={5}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <Tabs value={promptMode} onChange={(_, val) => setPromptMode(val)} style={{ flex: "1" }}>
+                                        <Tab sx={{ textTransform: 'none' }} label="Prompt" />
+                                        {(image?.basePrompt?.trim().length ?? 0) !== 0 && image?.basePrompt !== image?.prompt && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
+                                    </Tabs>
+                                    <div style={{ display: 'flex', gap: '10px', marginRight: "10px" }}>
+                                        {filter && setFilter && <Tooltip title={`More like this${promptMode === 1 ? " base" : ""} prompt`}><IconButton onClick={onMoreLikeThisPrompt}><ImageSearch /></IconButton></Tooltip>}
+                                        <CopyToClipboardButton text={promptMode === 0 ? image?.prompt : image?.basePrompt} />
+                                    </div>
+                                </div>
+                                <HighlightedPromptDiv
+                                    prompt={promptMode === 0 ? image?.prompt : image?.basePrompt}
+                                />
+                            </Card>
+
+                            {/* Negative Prompt */}
+                            {(image?.negativePrompt?.trim().length ?? 0) !== 0 && <>
+                                <div style={{ marginTop: "20px", display: 'flex', alignItems: "center" }}>
+                                    <b style={{ flex: "1" }}>Negative Prompt</b>
+                                    <CopyToClipboardButton text={image?.negativePrompt} style={{ paddingRight: "16px" }} />
+                                </div>
+                                <div style={{ fontSize: ".6em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{image?.negativePrompt}</div>
+                            </>}
+
+                            {/* Model */}
+                            <div style={{ marginTop: "20px" }}><b>Checkpoint</b></div>
+                            <ModelCard
+                                filter={filter} setFilter={setFilter}
+                                checkpointTitle={image?.model ?? ""} currentImage={image} elevation={5}
+                            />
+
+                            <Stack style={{ marginTop: "20px" }} gap={"10px"}>
+                                {/* LORAs */}
+                                {(image?.loras?.length ?? 0) !== 0 && <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>}>
+                                    <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
+                                        {image && <LoraStrip loras={image?.loras} maxLength={6} />}
+                                    </ComplexAccordionActions>
+                                    <ComplexAccordionBody>
+                                        <Stack gap={"5px"}>
+                                            {image?.loras?.map(a => <LoraCard
+                                                filter={filter} setFilter={setFilter}
+                                                key={a} loraAlias={a} currentImage={image} elevation={5}
+                                            />)}
+                                        </Stack>
+                                    </ComplexAccordionBody>
+                                </ComplexAccordion>}
+
+                                <ComplexAccordion elevation={2} title={<><PhotoLibrary /> <div>Collections</div></>}>
+                                    <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
+                                        {image && <AlbumStrip albums={image?.albums} maxLength={6} />}
+                                    </ComplexAccordionActions>
+                                    {onAddAlbum && <ComplexAccordionActions position="right" showOnState="expanded">
+                                        <IconButton onClick={() => setAlbumsOpen(true)}><Add /></IconButton>
+                                    </ComplexAccordionActions>}
+                                    <ComplexAccordionBody>
+                                        <ImageModalAlbumsDisplay albums={image?.albums} onRemove={onRemoveAlbum} onView={onViewAlbum} elevation={5} />
+                                    </ComplexAccordionBody>
+                                </ComplexAccordion>
+
+                                <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>}>
+                                    <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
+                                        <span style={{
+                                            whiteSpace: "pre-line", overflow: "hidden",
+                                            textOverflow: "ellipsis", maxWidth: "300px",
+                                            fontFamily: 'monospace', fontSize: '.6em',
+                                            WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                                            display: "-webkit-box"
+                                        }}>
+                                            {image?.notes}
+                                        </span>
+                                    </ComplexAccordionActions>
+                                    {onUpdateNotes && <ComplexAccordionActions position="right" showOnState="expanded">
+                                        <IconButton disabled={notesOpen} onClick={() => {
+                                            setNotesOpen(true)
+                                            setEditNote(image?.notes ?? "")
+                                        }}><Edit /></IconButton>
+                                    </ComplexAccordionActions>}
+                                    <ComplexAccordionBody>
+                                        <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>
+                                            {!notesOpen
+                                                ? (image?.notes?.length ?? 0) === 0 ? "Image has no notes" : image?.notes
+                                                : <>
+                                                    <TextField
+                                                        value={editNote} onChange={(e) => setEditNote(e.target.value)}
+                                                        fullWidth multiline placeholder="Set a note" minRows={5} maxRows={5}
+                                                        slotProps={{ htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } } }}
+                                                    />
+                                                    <div style={{ display: 'flex', justifyContent: "end", gap: "10px", marginTop: "10px" }}>
+                                                        <Button onClick={() => {
+                                                            setNotesOpen(false)
+                                                            if (editNote.trim() !== (image?.notes ?? "").trim()) {
+                                                                onUpdateNotes?.(editNote)
+                                                            }
+                                                        }}>
+                                                            OK
+                                                        </Button>
+                                                    </div>
+                                                </>
+                                            }
+                                        </div>
+                                    </ComplexAccordionBody>
+                                </ComplexAccordion>
+
+                                {/* HiRes Options */}
+                                <ComplexAccordion elevation={2} title={<><Gradient color={
+                                    image?.hiResAvailable ? "info" : "inherit"
+                                } /> <div>Upscale{image?.hiResAvailable && "d"}</div></>} disabled={!onUpscale || !pong?.SD}>
+
+                                    <ComplexAccordionBody>
+                                        {!!onUpscale && pong?.SD && <HiResPanel image={image} updateImage={onUpscale} />}
+                                    </ComplexAccordionBody>
+                                </ComplexAccordion>
+
+                                <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled={Object.keys(image?.additionalInfo ?? {}).length === 0}>
+                                    <ComplexAccordionBody>
+                                        <AdditionalInfoRenderer
+                                            filter={filter} setFilter={setFilter} imageId={image?.id ?? 0}
+                                            additionalInformation={image?.additionalInfo}
+                                        />
+                                    </ComplexAccordionBody>
+                                </ComplexAccordion>
+
+
+
+                            </Stack>
+
+
+                            {/* Metadata */}
+                            <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
+                                <div style={{ minWidth: "75px", flex: "1" }}>
+                                    <div style={{ marginTop: "20px" }}><b>Seed</b></div>
+                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.seed}</div>
+                                </div>
+                                <div style={{ minWidth: "75px", flex: "1" }}>
+                                    <div style={{ marginTop: "20px" }}><b>Steps</b></div>
+                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.steps}</div>
+                                </div>
+                                <div style={{ minWidth: "75px", flex: "1" }}>
+                                    <div style={{ marginTop: "20px" }}><b>CFG Scale</b></div>
+                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.cfgScale.toFixed(2)}</div>
+                                </div>
+                                <div style={{ minWidth: "75px", flex: "1" }}>
+                                    <div style={{ marginTop: "20px" }}><b>Sampler</b></div>
+                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.sampler}</div>
+                                </div>
+
+                                <div style={{ minWidth: "75px", flex: "1" }}>
+                                    <div style={{ marginTop: "20px" }}><b>Scheduler</b></div>
+                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.scheduleType}</div>
+                                </div>
+
+                            </div>
+
+                            <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
+                                {/* Creation Date */}
+                                <div style={{ minWidth: "75px", flex: "1" }}>
+                                    <div style={{ marginTop: "20px" }}><b>Created</b></div>
+                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>
+                                        {setFilter ?
+                                            <Link onClick={() => {
+                                                setFilter?.({
+                                                    ...clearFilter(filter ?? {}),
+                                                    fromDate: image?.created?.split("T")?.[0],
+                                                    toDate: image?.created?.split("T")?.[0]
+                                                })
+                                            }}>{new Date(image?.created ?? 0).toLocaleString()}</Link> :
+                                            new Date(image?.created ?? 0).toLocaleString()
+                                        }
+
+                                    </div>
+                                </div>
+
+                                {/* Duration */}
+                                {image?.generationDurationMs && <div style={{ minWidth: "75px", flex: "1" }}>
+                                    <div style={{ marginTop: "20px" }}><b>Generation Duration</b></div>
+                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{(image?.generationDurationMs / 1000.0)}s</div>
+                                </div>}
+
+
+                            </div>
+                        </div>
+
+                        {props.infoChildren}
+
+                    </div>}
             </Card>
         </div >
 
