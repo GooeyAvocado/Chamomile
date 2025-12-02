@@ -1,5 +1,5 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Button, Card, CircularProgress, Dialog, IconButton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
+import { Button, Card, CircularProgress, Dialog, IconButton, Link, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import { Add, ArrowBack, ArrowForward, CoffeeOutlined, Delete, Edit, Gradient, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
@@ -435,7 +435,19 @@ export default function ImageModal(props: {
                             {/* Creation Date */}
                             <div style={{ minWidth: "75px", flex: "1" }}>
                                 <div style={{ marginTop: "20px" }}><b>Created</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{new Date(image?.created ?? 0).toLocaleString()}</div>
+                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>
+                                    {setFilter ?
+                                        <Link onClick={() => {
+                                            setFilter?.({
+                                                ...clearFilter(filter ?? {}),
+                                                fromDate: image?.created?.split("T")?.[0],
+                                                toDate: image?.created?.split("T")?.[0]
+                                            })
+                                        }}>{new Date(image?.created ?? 0).toLocaleString()}</Link> :
+                                        new Date(image?.created ?? 0).toLocaleString()
+                                    }
+
+                                </div>
                             </div>
 
                             {/* Duration */}
