@@ -15,7 +15,7 @@ export default function Navbar() {
 
     const [settingsOpen, setSettingsOpen] = useState(false)
     const [helpOpen, setHelpOpen] = useState(false);
-    const [helpEverOpened, setHelpEverOpened] = useState(false);
+    //const [helpEverOpened, setHelpEverOpened] = useState(false);
 
     const nav = useNavigate();
 
