@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { ArrowForward, AutoFixHigh, BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, Folder, Gradient, GridView, HomeRepairService, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, ReceiptLong, Refresh, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
+import { AddPhotoAlternate, ArrowForward, AutoFixHigh, BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, FileOpen, Folder, Gradient, GridView, HomeRepairService, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, Preview, ReceiptLong, Refresh, Save, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -63,7 +63,7 @@ export default function HelpTab(props: {
                 Welcome to Chamomile! We hope that Chamomile helps you easily generate more images from Stable Diffusion,
                 as well as manage and browse your collection.
             </p>
-            <p>Click on a section on the left to learn more about Chamomile's features</p>
+            <p>Click on a section on the left to learn more about Chamomile's features.</p>
             <div style={{ marginTop: '50px' }}>
                 <p>Please report any bugs you find to our <GithubLink href="https://github.com/GooeyAvocado/Chamomile">Github!</GithubLink> </p>
             </div>
@@ -197,8 +197,9 @@ export default function HelpTab(props: {
             </p>
             <Alert severity="warning" style={{ fontSize: ".8em" }}>
                 <AlertTitle style={{ fontSize: "1.2em" }}>New checkpoints and LoRAs may not automatically be visible</AlertTitle>
-                Open the checkpoint or LoRA Browsers using the <LabeledIcon label="Browser"> <GridView /></LabeledIcon> button and click
-                the <LabeledIcon label="Refresh"><Refresh /></LabeledIcon> button on the upper left corner.
+                <p>Click the <LabeledIcon label="Refresh"><Refresh /></LabeledIcon> button on the upper right corner to have
+                    Chamomile fetch the latest list of checkpoints and LoRAs.</p>
+                <p>This will also clean up any models that are unavailable and unused.</p>
             </Alert>
             <p>
                 Checkpoints can only be set globally, and will affect pending generations. If you change your checkpoint while there's still
@@ -258,7 +259,7 @@ export default function HelpTab(props: {
             </p>
             <p>
                 You can also set a sample image from the image viewer. Simply click the <LabeledIcon label="Menu button"><MoreVert /></LabeledIcon>
-                {" "}on the LoRA or Checkpoint card, and select <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Set this as sample image</Card>
+                {" "}on the LoRA or Checkpoint card, and select <LabeledIcon label="Set this as sample image"><AddPhotoAlternate /></LabeledIcon>
             </p>
         </HelpSection>
 
@@ -277,7 +278,7 @@ export default function HelpTab(props: {
                     wildcard instead.<br /><br />
                 </li>
                 <li>
-                    <b>Overrides</b>: Overrides allow you to specify search and replace rules that will be applied.<br /><br />
+                    <b>Overrides</b>: Overrides allow you to specify values to replace at generation time manually.<br /><br />
                 </li>
                 <li>
                     <b>Templates</b>: Templates allow you to create reusable, parametrized chunks of prompts.
@@ -432,9 +433,7 @@ export default function HelpTab(props: {
             <p>
                 Templates can be defined from the Template Manager, accessible from
                 the <LabeledIcon label="Manage templates"> <HomeRepairService /></LabeledIcon> button on
-                the templates section of the Dynamics modal accessible through
-                the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> button
-                on the prompt box.
+                the templates section of the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> dialog.
             </p>
             <p>
                 Templates have several properties:
@@ -634,7 +633,7 @@ export default function HelpTab(props: {
 
                 <p><i>
                     If you wish to experiment further without saving each image,
-                    you can use the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Preview Recipe</Card> option in
+                    you can use the <LabeledIcon label="Preview Recipe"><Preview /></LabeledIcon> option in
                     the {BrewButton} button's menu
                 </i></p>
 
@@ -662,7 +661,7 @@ export default function HelpTab(props: {
             <p>
                 Sometimes you may want to experiment without necessarily saving a bunch of images to get there
                 on Chamomile. You can use
-                the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Preview Recipe</Card> option
+                the <LabeledIcon label="Preview Recipe"><Preview /></LabeledIcon> option
                 in the {BrewButton} button's menu to launch the preview dialog.
             </p>
             <p>
@@ -763,17 +762,17 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <p>
                 Just like an excellent tea recipe, sometimes we want to save a prompt to re-use it later. You can either favorite an image and
                 find it through search, or you can specifically save a recipe. To do this, look in the menu on the {BrewButton} button, and
-                click <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Save this recipe</Card> option.
+                click <LabeledIcon label="Save this Recipe"><Save /></LabeledIcon> option.
             </p>
             <p>
                 You can further organize your recipes into folders. Click
-                the  <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle", alignItems: 'center', gap: "5px" }}>
+                the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle", alignItems: 'center', gap: "5px" }}>
+                    {/* This one needs to be separate because we need to shrink the icon */}
                     <Folder fontSize="inherit" /> Root
                 </Card> button to select where to save your recipe, or specify a new folder by typing a path with slashes.
             </p>
             <p>
-                You can browse, edit, and load recipes using
-                the <Card style={{ display: "inline-flex", padding: "5px", verticalAlign: "middle" }}>Load a recipe</Card>.
+                You can browse, edit, and load recipes using the <LabeledIcon label="Load a Recipe"><FileOpen /></LabeledIcon>.
                 You can also make further alterations and overwrite or save your current recipe as another name.
             </p>
 
@@ -947,7 +946,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
         <HelpSection title="Upscaling Images" >
             <img src="/screenshots/upscaling.png" width={"70%"} />
             <p>
-                Images that have been added to Chamomile can be upscaled using your web UI. You can select which upscaler to use and
+                Images that have been added to or generated on Chamomile can be upscaled using your web UI. You can select which upscaler to use and
                 by how much to upscale the image. The upscaled image replaces the original image.
             </p>
             <p>
@@ -985,7 +984,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             </div>
             <p>
                 You can also view usage statistics over time for image generation, checkpoints, LoRAs, and keywords. Simply
-                click the <LabeledIcon label="Chart"><Timeline /></LabeledIcon> button on the bottom,
+                click the <LabeledIcon label="Chart"><Timeline /></LabeledIcon> button on the bottom left of the dialog,
                 and choose what elements to plot.
             </p>
 
@@ -996,7 +995,10 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
         <HelpSection title="I'm Feeling Lucky">
             <img src="screenshots/lucky.png" />
             <p>
-                This is a small feature that brings up a random image on Chamomile. The original intent
+                This is a small feature that brings up a random image on Chamomile.
+                It's accessible through the menu on the {BrewButton} button.
+            </p>
+            <p>The original intent
                 was to prompt that random image immediately, but we decided against that since LoRA combinations
                 and prompting can change with different active checkpoints.
             </p>

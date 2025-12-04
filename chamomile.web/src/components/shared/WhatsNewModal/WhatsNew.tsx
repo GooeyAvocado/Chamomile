@@ -46,6 +46,10 @@ export default function WhatsNew({ open, setOpen }: {
 - Grid Editor can now only be closed by the cancel button like the preview dialog
 - [HOME] and [END] keys now go to the first and last image on a row in a Grid respectively
 - Backend changes to unify components for Models (Checkpoints and LoRAs) to make future improvements easier
+- Improved image loading speeds
+- Increased stability by limiting image change speed
+- Hid the left and right arrows if we're at the beginning or end of the results respectively 
+- Bump backend to .NET 10 from .NET 8
 
 ### Fixed bugs
 - Fixed bug where re-ordering (not from base) from an image tile did not set the prompt origin
