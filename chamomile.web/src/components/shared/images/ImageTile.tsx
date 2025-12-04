@@ -23,12 +23,13 @@ export default function ImageTile(props: {
     onClick: () => void
     onFavorite: (val?: GeneratedImage) => void,
     onDelete: (val?: GeneratedImage) => void,
+    lazyLoad?: boolean
 }) {
 
     const {
         image, onClick, onDelete, onFavorite,
         onSelect, selectMode, selected, onUnselect,
-        filter, setFilter
+        filter, setFilter, lazyLoad
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -83,7 +84,7 @@ export default function ImageTile(props: {
                     else onClick()
                 }} style={{ height: "100%", width: "100%", aspectRatio: "1/1", position: "relative" }}>
                     <img src={'/outline.png'} style={{ width: "50%", height: "50%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0', margin: '25%' }} />
-                    <img loading="lazy" src={imageUrl(image.id)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
+                    <img loading={lazyLoad ? "lazy" : undefined} src={imageUrl(image.id)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
                     <div style={{ position: 'absolute', top: 7, left: 7, opacity: "0.3", display: 'flex', flexDirection: 'column', gap: '5px' }}>
                         {image.favorite && <Star htmlColor="black" />}
                         {image.hiResAvailable && <Gradient htmlColor="black" />}

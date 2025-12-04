@@ -31,7 +31,7 @@ import ContextMenu from "../ContextMenu";
 import { Cancel } from "@mui/icons-material";
 import { useSettings } from "../../hooks/useSettings";
 import { TileSizeToPixels } from "../../contexts/SettingsContext";
-import ImageStrip from "./ImageStrip";
+// import ImageStrip from "./ImageStrip";
 
 export default function ImageViewer(props: {
     filter: FilterOptions,
@@ -396,9 +396,9 @@ export default function ImageViewer(props: {
                             position: "absolute", bottom: "10px", right: "10px", zIndex: 2, textAlign: 'right',
                             opacity: '.5'
                         }}>
-                            <div style={{ mixBlendMode: 'color', marginBottom: '5px' }}>
+                            {/* <div style={{ mixBlendMode: 'color', marginBottom: '5px' }}>
                                 <ImageStrip images={imageApi.images.slice(selectedIndex, selectedIndex + 3).map(a => a.id)} maxLength={3} imageSize="16px" />
-                            </div>
+                            </div> */}
                             <div style={{ fontSize: ".6em", color: 'white', mixBlendMode: 'color-dodge' }}>
                                 {(selectedIndex + 1).toLocaleString()} of {imageApi?.count?.toLocaleString()}
                             </div>
