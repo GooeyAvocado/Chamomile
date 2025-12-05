@@ -4,6 +4,7 @@ import { KeywordFilterOptions } from "../model/KeywordFilterOptions";
 import KeywordUsage from "../model/KeywordUsage";
 import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
 import { Model } from "../model/Model";
+import ModelRefreshResponse from "../model/ModelRefreshResponse";
 import { API_PREFIX, Get, Put } from "./Common";
 
 const ENDPOINT = API_PREFIX + "loras/"
@@ -16,7 +17,7 @@ export const getLoras = (
 
 export const refreshLoras = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: Model[]) => void,
+    setItem: (value?: ModelRefreshResponse) => void,
     onError: (value: any) => void,
 ) => Get(setLoading, setItem, onError, ENDPOINT + "refresh")
 

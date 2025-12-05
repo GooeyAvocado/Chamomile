@@ -131,7 +131,7 @@ namespace Chamomile.Data {
         //TODO: Handle the collision of LoRAs with the same name
         //Probably just ignore them and warn the user that duplciate LoRAs were found
         //Also warn the user if a LoRA with "none" was found as an alias
-        public async Task UpdateAll(List<Automatic1111.Common.Lora> loras) {
+        public async Task<List<Model>> UpdateAll(List<Automatic1111.Common.Lora> loras) {
             var existingLoras = await GetAll();
             var existingAliases = existingLoras.Select(a=>a.ID).ToList();
             var availableAliases = loras.Select(a => a.alias).ToList();
@@ -139,8 +139,36 @@ namespace Chamomile.Data {
             var newAliases = availableAliases.Except(existingAliases).ToList();
             var unavailableAliases = existingAliases.Except(availableAliases).ToList();
 
-            var newLoras = loras.Where(a => newAliases.Contains(a.alias)).ToList();
-            
+            // Exclude any incoming Lora whose alias appears more than once in the incoming list.
+            // The requirement is to remove entries that have an alias that appears multiple times
+            // (i.e. remove all occurrences of that alias).
+            var duplicateAliases = loras
+                .GroupBy(a => a.alias)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToHashSet();
+
+            var newLoras = loras
+             .Where(a => newAliases.Contains(a.alias) && !duplicateAliases.Contains(a.alias))
+             .ToList();
+
+            var duplicateLoRas = loras
+                .Where(a => duplicateAliases.Contains(a.alias))
+                .Select(a => new Model() { 
+                    ID = a.alias,
+                    Name = a.name,
+                    BannerImage = null,
+                    Description = "Duplicate alias found. LoRA has been skipped",
+                    IsAvailable = true,
+                    SamplePrompt = "",
+                    Tags = [],
+                    Type = null
+                })
+                .Distinct()
+                .ToList();
+
+
+
             // Mark every model available 
             await adoTemplate.Execute(UpdateSql([LORA_AVAIL_IN], new() {
                 { LORA_AVAIL_IN, "TRUE"}
@@ -172,6 +200,8 @@ namespace Chamomile.Data {
                 cmd.SetString(LORA_DESC, "");
                 cmd.SetString(LORA_SAMPLE_PROMPT, "");
             },newLoras);
+
+            return duplicateLoRas;
 
         }
 

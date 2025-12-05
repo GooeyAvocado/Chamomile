@@ -40,16 +40,21 @@ namespace Chamomile.API.Controllers {
 
         [HttpGet("refresh")]
         public async Task<IActionResult> Refresh() {
+            var errorModels = new List<Model>();
             try {
                 await api.RefreshLoras();
                 var availableLoras = await api.GetLoras();
-                await dao.UpdateAll(availableLoras);
+                errorModels = await dao.UpdateAll(availableLoras);
             }
             catch (Exception E) {
                 Console.WriteLine(E);
                 Console.WriteLine("SD is offline, returning existing models"); 
             }
-            return Ok(await dao.GetAll());
+
+            return Ok(new ModelRefreshResponse() {
+                ErrorModels = errorModels,
+                Models = await dao.GetAll()
+            });
         }
 
         [HttpPut]
