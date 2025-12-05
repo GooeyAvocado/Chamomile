@@ -149,8 +149,11 @@ namespace Chamomile.Data {
                 .ToHashSet();
 
             var newLoras = loras
-             .Where(a => newAliases.Contains(a.alias) && !duplicateAliases.Contains(a.alias))
-             .ToList();
+             .Where(a =>
+                newAliases.Contains(a.alias) &&
+                !duplicateAliases.Contains(a.alias) &&
+                !a.alias.Equals("none", StringComparison.InvariantCultureIgnoreCase)
+            ).ToList();
 
             var duplicateLoRas = loras
                 .Where(a => duplicateAliases.Contains(a.alias))
@@ -159,6 +162,21 @@ namespace Chamomile.Data {
                     Name = a.name,
                     BannerImage = null,
                     Description = "Duplicate alias found. LoRA has been skipped",
+                    IsAvailable = true,
+                    SamplePrompt = "",
+                    Tags = [],
+                    Type = null
+                })
+                .Distinct()
+                .ToList();
+
+            var noneLoras = loras
+                .Where(a => a.alias.Equals("none", StringComparison.InvariantCultureIgnoreCase))
+                .Select(a => new Model() {
+                    ID = a.alias,
+                    Name = a.name,
+                    BannerImage = null,
+                    Description = "LoRA has alias 'None' which is reserved in Chamomile",
                     IsAvailable = true,
                     SamplePrompt = "",
                     Tags = [],
@@ -201,7 +219,7 @@ namespace Chamomile.Data {
                 cmd.SetString(LORA_SAMPLE_PROMPT, "");
             },newLoras);
 
-            return duplicateLoRas;
+            return [..duplicateLoRas, ..noneLoras];
 
         }
 
