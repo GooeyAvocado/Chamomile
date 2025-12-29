@@ -45,9 +45,6 @@ WHERE EXISTS (
     WHERE hr.image_id = i.image_id
 );
 
-ALTER TABLE images
-    ALTER COLUMN image_bytes_tx DROP NOT NULL;
-
 --VERIFY: That chamomile is able to CREATE, READ, UPSCALE, and DELETE images
 --MAKE SURE THIS WORKS. THIS IS THE POINT OF NO RETURN.
 
@@ -55,7 +52,8 @@ alter table images
 	drop column image_effective_size_nb;
 
 ALTER TABLE images
-    drop COLUMN image_bytes_tx
+    drop COLUMN image_bytes_tx,
     drop COLUMN image_hires_bytes_tx;
 
+vacuum full images;
 
