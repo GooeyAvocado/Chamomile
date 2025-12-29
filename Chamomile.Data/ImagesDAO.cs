@@ -743,15 +743,23 @@ namespace Chamomile.Data {
 
         public async Task<GeneratedImage?> SaveHiResImage(int id, byte[] image, int scale) {
 
+            //Delete any existing hi-res image
+            await adoTemplate.Execute(DeleteSql(IMAGE_HIRES_BINARY_TABLE, new WhereConditionGroup([new(IMAGES_ID)])), (cmd) => {
+                cmd.SetInt(IMAGES_ID, id);
+            });
+
+            //Save it
             await adoTemplate.Execute(InsertSql([IMAGES_ID,IMAGE_BYTES],IMAGE_HIRES_BINARY_TABLE), (cmd) => {
                 cmd.SetInt(IMAGES_ID, id);
                 cmd.SetBytea(IMAGE_BYTES, image);
             });
 
+            //Mark the image as having a hi-res
             await adoTemplate.Execute(UpdateSql([IMAGES_HIRES_IN], new(){ { IMAGES_HIRES_IN, "true" }  }, 
                 IMAGES_TABLE, new WhereConditionGroup([new(IMAGES_ID)])),
                 (cmd) => cmd.SetInt(IMAGES_ID, id));
 
+            //Get the image again
             return await Get(id);
         }
 
