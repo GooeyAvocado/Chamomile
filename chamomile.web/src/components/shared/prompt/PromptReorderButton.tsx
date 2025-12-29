@@ -23,7 +23,7 @@ export default function PromptReorderButton(props: {
 
     const { prompt, menuButonMode, onClick, iconOverride, textSuffix, disabled, sample, source } = props
 
-    const { prompt: promptboxPrompt, orderAmount, variables } = usePrompt()
+    const { orderAmount } = usePrompt()
     const { pong } = usePingPong()
 
     const {

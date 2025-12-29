@@ -17,6 +17,7 @@ import { clearFilter, hydratePrompt } from "../Utils";
 import { useSettings } from "../../hooks/useSettings";
 import { FilterOptions } from "../../../model/FilterOptions";
 import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
+import useWaiter from "../../hooks/useWaiter";
 
 export default function PromptSelectorModal(props: {
     open: boolean,
@@ -167,6 +168,8 @@ function GridViewMode(props: {
 
     const [currLocation, setCurrLocation] = useState("")
 
+    const { onBrew } = useWaiter();
+
 
     // Get prompts and folders that start with currLocation
     const matching = data?.filter(p => currLocation.length === 0 ? true : p.name.startsWith(currLocation + "/"));
@@ -212,7 +215,7 @@ function GridViewMode(props: {
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
                 ]}>
-                    <PromptTile prompt={a} onClick={() => onOk(a)} />
+                    <PromptTile prompt={a} onClick={() => onOk(a)} onMiddleClick={() => { onBrew(a, a.sampleImage, "SAVED_PROMPT") }} />
                 </ContextMenu>
             </div>)}
 
@@ -266,7 +269,7 @@ function GridViewMode(props: {
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
                 ]}>
-                    <PromptTile prompt={a} onClick={() => onOk(a)} />
+                    <PromptTile prompt={a} onClick={() => onOk(a)} onMiddleClick={() => { onBrew(a, a.sampleImage, "SAVED_PROMPT") }} />
                 </ContextMenu>
             </div>)}
 
