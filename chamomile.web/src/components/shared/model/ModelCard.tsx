@@ -158,7 +158,7 @@ export default function ModelCard(props: {
                 {filter && setFilter && [
                     <Divider />,
                     <MenuItem onClick={() => {
-                        setFilter({ ...clearFilter(filter), model: model.id })
+                        setFilter(modelType === "LoRA" ? { ...clearFilter(filter), lora: model.id } : { ...clearFilter(filter), model: model.id })
                     }}>
                         <ListItemIcon><ImageSearch /></ListItemIcon>
                         View images with this model
