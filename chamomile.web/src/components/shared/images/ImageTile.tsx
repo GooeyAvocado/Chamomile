@@ -11,6 +11,7 @@ import { useState } from "react";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { FilterOptions } from "../../../model/FilterOptions";
 import ImageMoreFromMenu from "./ImageMoreFromMenu";
+import { useUpscalers } from "../../hooks/useUpscalers";
 
 export default function ImageTile(props: {
     image: GeneratedImage
@@ -23,6 +24,7 @@ export default function ImageTile(props: {
     onClick: () => void
     onFavorite: (val?: GeneratedImage) => void,
     onDelete: (val?: GeneratedImage) => void,
+    onUpscale: (val: GeneratedImage) => void,
     onDownload?: () => void
     lazyLoad?: boolean
 }) {
@@ -30,17 +32,19 @@ export default function ImageTile(props: {
     const {
         image, onClick, onDelete, onFavorite,
         onSelect, selectMode, selected, onUnselect,
-        filter, setFilter, lazyLoad, onDownload
+        filter, setFilter, lazyLoad, onDownload, onUpscale
     } = props;
 
     const { setPrompt } = usePrompt();
     const canSelect = onSelect && onUnselect
 
+    const { onUpscale: upscaleImage, upscaleLoading } = useUpscalers();
     const [deleteAys, setDeleteAys] = useState(false)
 
     return <>
         <ContextMenu options={[
             canSelect ? { text: selected ? "Unselect" : "Select", icon: selected ? <CheckBox /> : <CheckBoxOutlineBlank />, onClick: selected ? onUnselect : onSelect } : undefined,
+            canSelect ? { type: "divider" } : undefined,
             { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) }, disabled: selectMode },
             {
                 text: (image?.downloadCount ?? 0) > 0 ? "Download again" : "Download",
@@ -48,6 +52,13 @@ export default function ImageTile(props: {
                 onClick: () => {
                     downloadImage(image)
                     onDownload?.()
+                }
+            },
+            {
+                text: image.hiResAvailable ? "Upscale again" : "Upscale",
+                icon: <Gradient color={image.hiResAvailable ? "info" : undefined} />,
+                onClick: () => {
+                    upscaleImage(image, onUpscale)
                 }
             },
             { type: "divider" },

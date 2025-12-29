@@ -74,7 +74,7 @@ export default function ImageModal(props: {
     const { width, height } = useWindowDimensions()
     const vertical = width < (500) / 0.45 || height / width > 1.45
     const { pong } = usePingPong();
-    const { onUpscale: upscaleImage } = useUpscalers()
+    const { onUpscale: upscaleImage, upscaleLoading } = useUpscalers()
 
     const [collapse, setCollapse] = useState(collapseDefault)
     const [promptMode, setPromptMode] = useState(0)
@@ -157,6 +157,12 @@ export default function ImageModal(props: {
         setOpen(false)
     }
 
+    const executeUpscale = () => {
+        if (!onUpscale || !image) return;
+        enqueueSnackbar("Upscaling...", { variant: "info" })
+        upscaleImage(image, onUpscale)
+    }
+
     return <Dialog open={open && !!image} onClose={() => setOpen(false)} fullScreen
         onKeyUp={(e) => {
             switch (e.key) {
@@ -219,9 +225,7 @@ export default function ImageModal(props: {
                 case "U":
                     if (e.ctrlKey) {
                         e.preventDefault();
-                        if (!onUpscale || !image) return;
-                        enqueueSnackbar("Upscaling...", { variant: "info" })
-                        upscaleImage(image, onUpscale)
+                        executeUpscale();
                     }
                     break;
                 default:
@@ -287,9 +291,9 @@ export default function ImageModal(props: {
 
                 <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center', zIndex: 2 }}>
                     <ImageHotbar
-                        image={image} onUsePrompt={onUsePrompt}
+                        image={image} onUsePrompt={onUsePrompt} onUpscale={executeUpscale}
                         onLeft={onLeft} onRight={onRight} onDownload={saveImage}
-                        onDelete={onDeleteForce} onFavorite={onFavorite}
+                        onDelete={onDeleteForce} onFavorite={onFavorite} upscaleLoading={upscaleLoading}
                     />
                 </div>
 

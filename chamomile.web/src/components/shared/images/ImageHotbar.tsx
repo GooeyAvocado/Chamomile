@@ -1,5 +1,5 @@
-import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
-import { Button, Card, ClickAwayListener, IconButton, ListItemIcon, Menu, MenuItem, Paper, Popper, Tooltip } from "@mui/material";
+import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
+import { Button, Card, CircularProgress, ClickAwayListener, IconButton, ListItemIcon, Menu, MenuItem, Paper, Popper, Tooltip } from "@mui/material";
 import useUserAgent from "../../hooks/useUserAgent";
 import "./ImageHotbar.css"
 import { GeneratedImage } from "../../../model/GeneratedImage";
@@ -11,21 +11,24 @@ import { imageToPrompt } from "../Utils";
 
 export default function ImageHotbar(props: {
     image?: GeneratedImage
+    upscaleLoading?: boolean
     onUsePrompt: (val: Prompt) => void,
     onLeft?: () => void
     onRight?: () => void
     onDelete?: () => void
     onDownload?: () => void
     onFavorite?: () => void
+    onUpscale?: () => void
 }) {
 
-    const { onUsePrompt, image, onDelete, onFavorite, onLeft, onRight, onDownload } = props;
+    const { onUsePrompt, image, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale, upscaleLoading } = props;
     const { isMobile } = useUserAgent()
     const { pong } = usePingPong();
     const sdAvailable = pong?.SD;
 
     const [deletePopperAnchor, setDeletePopperAnchor] = useState(null as any)
     const [downloadAgainPopperAnchor, setDownloadAgainPopperAnchor] = useState(null as any)
+    const [upscaleAgainPopperAnchor, setUpscaleAgainPopperAnchor] = useState(null as any)
     const [brewAnchor, setBrewAnchor] = useState(null as any)
     const [promptAnchor, setPromptAnchor] = useState(null as any)
 
@@ -60,6 +63,13 @@ export default function ImageHotbar(props: {
                         <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : "action"} />
                     </IconButton>
                 </Tooltip>
+                <Tooltip title="Upscale" enterDelay={250}>
+                    <IconButton disabled={!onUpscale || !sdAvailable || upscaleLoading} onClick={(e) => {
+                        image?.hiResAvailable ? setUpscaleAgainPopperAnchor(e.currentTarget) : onUpscale?.()
+                    }}>
+                        {upscaleLoading ? <CircularProgress size={24} color="info" /> : <Gradient color={image?.hiResAvailable ? "info" : "action"} />}
+                    </IconButton>
+                </Tooltip>
                 <hr />
                 <Tooltip title="Brew" enterDelay={250}>
                     <IconButton disabled={!sdAvailable} onClick={(e) => setBrewAnchor(e.currentTarget)}>
@@ -83,7 +93,7 @@ export default function ImageHotbar(props: {
 
         </Card>
 
-        {/* Delete Confirm Popper */}
+        {/* Download Again Popper  */}
         <Popper
             open={Boolean(downloadAgainPopperAnchor)} anchorEl={downloadAgainPopperAnchor}
             placement="top" disablePortal
@@ -103,7 +113,7 @@ export default function ImageHotbar(props: {
             </ClickAwayListener>
         </Popper>
 
-        {/* Download Again Popper  */}
+        {/* Delete Confirm Popper */}
         <Popper
             open={Boolean(deletePopperAnchor)} anchorEl={deletePopperAnchor}
             placement="top" disablePortal
@@ -122,6 +132,27 @@ export default function ImageHotbar(props: {
                 </Paper>
             </ClickAwayListener>
         </Popper>
+
+        {/* Upscale Again Popper  */}
+        <Popper
+            open={Boolean(upscaleAgainPopperAnchor)} anchorEl={upscaleAgainPopperAnchor}
+            placement="top" disablePortal
+        >
+            <ClickAwayListener onClickAway={() => setUpscaleAgainPopperAnchor(undefined)}>
+                <Paper elevation={3} style={{ padding: "10px", textAlign: "center", marginBottom: '10px' }}>
+                    <div style={{ padding: "10px", fontSize: '.8em' }}>
+                        <div style={{ marginBottom: '10px' }}>Upscale again?</div>
+                        <Button variant="text" size="small" onClick={() => {
+                            onUpscale?.()
+                            setUpscaleAgainPopperAnchor(null)
+                        }}>
+                            Upscale
+                        </Button>
+                    </div>
+                </Paper>
+            </ClickAwayListener>
+        </Popper>
+
 
         {/* Brew Menu */}
         <Menu
