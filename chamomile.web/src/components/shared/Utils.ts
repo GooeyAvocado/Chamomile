@@ -1,3 +1,4 @@
+import { imageUrl } from "../../api/Images";
 import { FilterOptions } from "../../model/FilterOptions";
 import { GeneratedImage } from "../../model/GeneratedImage";
 import { Model } from "../../model/Model";
@@ -228,4 +229,12 @@ export const modelSorter = (a: Model, b: Model) => {
     if (ta === null) return -1; // place items without a tag before tagged items
     if (tb === null) return 1;
     return ta.localeCompare(tb);
+}
+
+export const downloadImage = (image?: GeneratedImage) => {
+    const a = document.createElement('a');
+    a.href = imageUrl(image?.id ?? 0) + ".png?CountDownload=true";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }

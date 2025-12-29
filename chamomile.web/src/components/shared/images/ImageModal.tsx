@@ -8,7 +8,7 @@ import { useSnackbar } from "notistack";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
 import PromptReorderButton from "../prompt/PromptReorderButton";
-import { clearFilter, imageToPrompt } from "../Utils";
+import { clearFilter, downloadImage, imageToPrompt } from "../Utils";
 import { useEffect, useRef, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
@@ -142,11 +142,7 @@ export default function ImageModal(props: {
     const saveImage = async () => {
         setDownloadAys(false);
         try {
-            const a = document.createElement('a');
-            a.href = imageUrl(image?.id ?? 0) + ".png?CountDownload=true";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            downloadImage(image);
             onDownload?.();
         } catch (error) {
             console.error('Error downloading the image:', error);
