@@ -205,6 +205,13 @@ export default function ImageModal(props: {
                         onFavorite?.();
                     }
                     break;
+                case "D":
+                    if (e.shiftKey) {
+                        e.preventDefault();
+                        if ((image?.downloadCount ?? 0) > 0) { setDownloadAys(true); }
+                        else { saveImage(); }
+                    }
+                    break;
                 default:
                     break;
             }
