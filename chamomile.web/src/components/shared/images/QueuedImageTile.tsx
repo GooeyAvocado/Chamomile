@@ -1,11 +1,11 @@
 import { CardActionArea, Typography } from "@mui/material";
 import { Prompt } from "../../../model/Prompt";
 import { useState } from "react";
-import PromptEditorModal from "../prompt/PromptEditorModal";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
 import { Cancel } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
+import PromptOrderedModal from "../prompt/PromptOrderedModal";
 
 export default function QueuedImageTile(props: {
     prompt: Prompt
@@ -51,10 +51,18 @@ export default function QueuedImageTile(props: {
                     <div>{prompt.positivePrompt}</div>
                 </Typography>
             </CardActionArea>
-            <PromptEditorModal title={`Order ${prompt.id}`} open={previewOpen} onOk={() => {
-                onCancel();
-                setPreviewOpen(false);
-            }} prompt={prompt} setOpen={setPreviewOpen} preview cancelable onViewImage={onView} />
+
+            <PromptOrderedModal
+                jobId={prompt?.id ?? 0}
+                onCancel={() => {
+                    onCancel();
+                    setPreviewOpen(false);
+                }}
+                open={previewOpen}
+                setOpen={setPreviewOpen}
+                onViewImage={onView}
+                prompt={prompt}
+            />
         </BaseImageTile>
     </ContextMenu>
 

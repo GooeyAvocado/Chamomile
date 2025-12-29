@@ -114,6 +114,9 @@ export const hydratePrompt = (prompt: Prompt, variables: any, index?: number) =>
 }
 
 export const promptPreview = (prompt: Prompt, variables: any, templates: Template[]) => {
+    if (!prompt) return;
+    if (!variables) return prompt.positivePrompt;
+
 
     //Get only the entries that start and end with __
     const wildcards = Object.fromEntries(Object.entries(variables).filter(([key, _]) =>

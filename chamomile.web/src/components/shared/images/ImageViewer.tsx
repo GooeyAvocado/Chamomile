@@ -14,7 +14,6 @@ import { Alert, AlertTitle, Button, CircularProgress, Link, Stack } from "@mui/m
 import WelcomePane from "../welcome/WelcomePane";
 import { useQueue } from "../../hooks/useQueue";
 import QueuedImageTile from "./QueuedImageTile";
-import PromptEditorModal from "../prompt/PromptEditorModal";
 import useUserAgent from "../../hooks/useUserAgent";
 import QueuedGroupImageTile from "./QueuedGroupImageTile";
 import AdvSearchModal from "../filter/AdvSearchModal";
@@ -31,6 +30,7 @@ import ContextMenu from "../ContextMenu";
 import { Cancel } from "@mui/icons-material";
 import { useSettings } from "../../hooks/useSettings";
 import { TileSizeToPixels } from "../../contexts/SettingsContext";
+import PromptOrderedModal from "../prompt/PromptOrderedModal";
 // import ImageStrip from "./ImageStrip";
 
 export default function ImageViewer(props: {
@@ -406,7 +406,14 @@ export default function ImageViewer(props: {
                         />
                     </ContextMenu>
 
-                    <PromptEditorModal onOk={onInterrupt} open={interruptOpen} prompt={activeJob} setOpen={SetInterruptOpen} cancelable title="Brewing image" preview progress={progress} />
+                    <PromptOrderedModal
+                        jobId={activeJob?.id ?? 0}
+                        onCancel={onInterrupt}
+                        open={interruptOpen} prompt={activeJob}
+                        setOpen={SetInterruptOpen}
+                        progress={progress}
+                    />
+
 
                 </>}
 

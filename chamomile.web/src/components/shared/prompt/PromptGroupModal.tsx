@@ -2,9 +2,9 @@ import { useState } from "react"
 import { Prompt } from "../../../model/Prompt"
 import { Button, Card, CardActionArea, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
 import { Cancel, DirectionsRun, EditNote, Numbers, OpenWith, Tune } from "@mui/icons-material";
-import PromptEditorModal from "./PromptEditorModal";
 import { imageUrl } from "../../../api/Images";
 import HighlightedPromptDiv from "./HighlightedPromptDiv";
+import PromptOrderedModel from "./PromptOrderedModal";
 
 export default function PromptGroupModal(props: {
     open: boolean,
@@ -17,6 +17,7 @@ export default function PromptGroupModal(props: {
 
     const { open, setOpen, prompts, onCancel, onCancelAll, onViewImage } = props;
     const [internalPrompt, setInternalPrompt] = useState(undefined as Prompt | undefined)
+    const [internalPromptOpen, setInternalPromptOpen] = useState(false)
     const orderData = prompts.find(a => !!a.orderData)?.orderData;
 
     const basedOn = () => {
@@ -47,7 +48,7 @@ export default function PromptGroupModal(props: {
                             style={{ width: '128px', height: '128px', objectFit: 'cover', objectPosition: 'center top' }}
                         />
                     </CardActionArea></Card>
-                    Based on {basedOn()}.
+                    <div style={{ fontSize: ".7em", textAlign: "center" }}>Based on {basedOn()}</div>
                 </div>}
                 <HighlightedPromptDiv
                     prompt={prompts[0].positivePrompt}
@@ -89,7 +90,10 @@ export default function PromptGroupModal(props: {
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip title="View this order">
-                                    <IconButton onClick={() => setInternalPrompt(a)}>
+                                    <IconButton onClick={() => {
+                                        setInternalPrompt(a)
+                                        setInternalPromptOpen(true)
+                                    }}>
                                         <EditNote />
                                     </IconButton>
                                 </Tooltip>
@@ -104,10 +108,17 @@ export default function PromptGroupModal(props: {
             </div>
             <hr style={{ width: "100%" }} />
 
-            <PromptEditorModal title={`Order ${internalPrompt?.id}`} open={!!internalPrompt} onOk={() => {
-                onCancel(internalPrompt?.id ?? 0);
-                setInternalPrompt(undefined);
-            }} prompt={internalPrompt ?? {} as Prompt} setOpen={() => { setInternalPrompt(undefined) }} preview cancelable />
+            <PromptOrderedModel
+                jobId={internalPrompt?.id ?? 0}
+                onCancel={() => {
+                    onCancel(internalPrompt?.id ?? 0);
+                    setInternalPromptOpen(false)
+                }}
+                open={internalPromptOpen}
+                setOpen={setInternalPromptOpen}
+                onViewImage={onViewImage}
+                prompt={internalPrompt ?? {} as Prompt}
+            />
 
         </DialogContent>
 
