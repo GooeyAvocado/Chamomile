@@ -1,10 +1,6 @@
 import { Button, Card, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useUpscalers } from "../../hooks/useUpscalers";
-import useApi from "../../hooks/useApi";
-import { hiResImage } from "../../../api/Images";
-import { useSnackbar } from "notistack";
-import { HiResRequest } from "../../../model/HiResRequest";
 import { usePingPong } from "../../hooks/usePingPong";
 
 export default function HiResPanel(props: {
@@ -15,30 +11,17 @@ export default function HiResPanel(props: {
     const { pong } = usePingPong();
 
     const { image, updateImage } = props
-    const { selectedUpscaler, setSelectedUpscaler, setUpscaleScale, upscaleScale, upscalers } = useUpscalers()
-    const upscaleApi = useApi(hiResImage)
-    const { enqueueSnackbar } = useSnackbar();
-
-    const onUpscale = () => {
-
-        if (selectedUpscaler.length === 0) return;
-
-        upscaleApi.fetch(val => {
-            enqueueSnackbar("Image upscaled!", { variant: 'success' })
-            if (val) updateImage?.(val);
-        }, () => {
-            enqueueSnackbar("Image failed to be upscaled", { variant: 'error' })
-        }, {
-            imageID: image?.id,
-            resizeFactor: upscaleScale,
-            upscaler: selectedUpscaler
-        } as HiResRequest);
-    }
+    const {
+        selectedUpscaler, setSelectedUpscaler,
+        setUpscaleScale, upscaleScale,
+        upscaleLoading,
+        upscalers, onUpscale
+    } = useUpscalers()
 
 
     return <Card elevation={7}>
-        <div style={{ padding: '10px', height: "100px", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: upscaleApi.loading ? 'center' : '' }}>
-            {upscaleApi.loading ? <>
+        <div style={{ padding: '10px', height: "100px", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: upscaleLoading ? 'center' : '' }}>
+            {upscaleLoading ? <>
                 <CircularProgress />
             </> : <>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
@@ -60,7 +43,9 @@ export default function HiResPanel(props: {
                     />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'end', marginTop: '5px', alignItems: 'center' }}>
-                    <Button size="small" onClick={onUpscale} disabled={!updateImage || !pong?.SD}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
+                    <Button size="small" onClick={() => {
+                        onUpscale(image ?? {} as GeneratedImage, updateImage)
+                    }} disabled={!updateImage || !pong?.SD}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
                 </div>
             </>}
         </div>
