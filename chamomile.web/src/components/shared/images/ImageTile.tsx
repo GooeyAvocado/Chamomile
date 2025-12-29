@@ -3,9 +3,9 @@ import { CardActionArea } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
+import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
-import { imageToPrompt } from "../Utils";
+import { downloadImage, imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useState } from "react";
 import AreYouSureModal from "../modals/AreYouSureModal";
@@ -23,13 +23,14 @@ export default function ImageTile(props: {
     onClick: () => void
     onFavorite: (val?: GeneratedImage) => void,
     onDelete: (val?: GeneratedImage) => void,
+    onDownload?: () => void
     lazyLoad?: boolean
 }) {
 
     const {
         image, onClick, onDelete, onFavorite,
         onSelect, selectMode, selected, onUnselect,
-        filter, setFilter, lazyLoad
+        filter, setFilter, lazyLoad, onDownload
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -41,6 +42,14 @@ export default function ImageTile(props: {
         <ContextMenu options={[
             canSelect ? { text: selected ? "Unselect" : "Select", icon: selected ? <CheckBox /> : <CheckBoxOutlineBlank />, onClick: selected ? onUnselect : onSelect } : undefined,
             { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) }, disabled: selectMode },
+            {
+                text: (image?.downloadCount ?? 0) > 0 ? "Download again" : "Download",
+                icon: <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : undefined} />,
+                onClick: () => {
+                    downloadImage(image)
+                    onDownload?.()
+                }
+            },
             { type: "divider" },
             filter && setFilter ? {
                 type: "custom",

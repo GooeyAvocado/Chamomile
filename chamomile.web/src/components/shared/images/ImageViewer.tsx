@@ -416,7 +416,7 @@ export default function ImageViewer(props: {
 
                 {imageApi.images?.map(a => <ImageTile
                     key={`image-${a.id}`} image={a} onDelete={onDelete} filter={filter} setFilter={setFilter}
-                    onFavorite={onFavorite} selected={selectedImages?.includes(a.id)}
+                    onFavorite={onFavorite} selected={selectedImages?.includes(a.id)} onDownload={onDownload}
                     onSelect={selectImage ? () => selectImage(a.id) : undefined} onUnselect={unselectImage ? () => unselectImage(a.id) : undefined} selectMode={selectMode}
                     onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setViewerOpen(true); if (navToSelectedImage) nav(`/image`) }}
                 />)}

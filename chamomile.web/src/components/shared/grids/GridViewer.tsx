@@ -529,7 +529,7 @@ export default function GridViewer({
                             if (imageMap?.[y]?.[x]) {
                                 return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }} >
                                     <ImageTile
-                                        image={imageMap[y][x]} onDelete={onDeleteImage} onFavorite={onFavorite}
+                                        image={imageMap[y][x]} onDelete={onDeleteImage} onFavorite={onFavorite} onDownload={onDownload}
                                         onClick={() => {
                                             setSelectedImage(imageMap[y][x])
                                             setViewerOpen(true)
