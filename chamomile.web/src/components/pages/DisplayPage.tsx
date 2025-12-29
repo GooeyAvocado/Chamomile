@@ -96,7 +96,7 @@ export default function DisplayPage() {
             })
             return newImages
         })
-        setSelectedImage(val);
+        setSelectedImage((prev) => prev?.id === val.id ? val : prev);
     }
 
     return <>

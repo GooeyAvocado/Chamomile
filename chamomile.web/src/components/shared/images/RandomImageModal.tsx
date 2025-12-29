@@ -81,7 +81,7 @@ export default function RandomImageModal(props: {
     }
 
     const onUpscale = (val: GeneratedImage) => {
-        setRandomImage(val);
+        setRandomImage((prev) => prev?.id === val.id ? val : prev);
     }
 
     const onAddAlbum = (val: Album) => {

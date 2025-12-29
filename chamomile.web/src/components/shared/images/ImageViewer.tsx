@@ -181,7 +181,7 @@ export default function ImageViewer(props: {
 
     const onUpscale = (val: GeneratedImage) => {
         imageApi.updateImage(val ?? selectedImage)
-        setSelectedImage(val);
+        setSelectedImage((prev) => prev?.id === val.id ? val : prev);
     }
 
     const onAddAlbum = (val: Album) => {
