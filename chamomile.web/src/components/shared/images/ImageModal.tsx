@@ -44,6 +44,8 @@ export default function ImageModal(props: {
     onRight?: () => void,
     onHome?: () => void,
     onEnd?: () => void,
+    onPageUp?: () => void,
+    onPageDown?: () => void,
     onUp?: () => void,
     onDown?: () => void,
     onUpscale?: (val: GeneratedImage) => void
@@ -62,6 +64,7 @@ export default function ImageModal(props: {
         collapseDefault, onAddAlbum, onRemoveAlbum,
         onViewAlbum, onDownload, onUpdateNotes,
         onUp, onDown, filter, setFilter, onHome, onEnd,
+        onPageDown, onPageUp,
         moreLoading
     } = props;
 
@@ -85,6 +88,8 @@ export default function ImageModal(props: {
     const throttledRight = useThrottle(onRight, THROTTLE_DELAY);
     const throttledUp = useThrottle(onUp, THROTTLE_DELAY)
     const throttledDown = useThrottle(onDown, THROTTLE_DELAY)
+    const throttledPgUp = useThrottle(onPageUp, THROTTLE_DELAY)
+    const throttledPgDn = useThrottle(onPageDown, THROTTLE_DELAY)
 
     useEffect(() => {
         if ((image?.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt) setPromptMode(0)
@@ -172,6 +177,12 @@ export default function ImageModal(props: {
                     break;
                 case "ArrowRight":
                     throttledRight();
+                    break;
+                case "PageUp":
+                    throttledPgUp()
+                    break;
+                case "PageDown":
+                    throttledPgDn();
                     break;
                 case "ArrowUp":
                     throttledUp()

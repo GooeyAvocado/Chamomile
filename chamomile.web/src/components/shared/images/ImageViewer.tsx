@@ -259,9 +259,7 @@ export default function ImageViewer(props: {
         , [selectedImage, imageApi.images])
 
     const onLeft = selectedIndex === 0 ? undefined : () => {
-        const index = selectedIndex;
-        if (index === 0) return;
-        setSelectedImage(imageApi.images[index - 1]);
+        setSelectedImage(imageApi.images[selectedIndex - 1]);
     }
 
     //If this is the last image do nothing
@@ -270,6 +268,50 @@ export default function ImageViewer(props: {
             imageApi.showMore();
         };
         if (imageApi.images[selectedIndex + 1]) setSelectedImage(imageApi.images[selectedIndex + 1]);
+    }
+
+    const onHome = selectedIndex === 0 ? undefined : () => {
+        setSelectedImage(imageApi.images[0]);
+    }
+
+    //If this is the last image do nothing
+    const onEnd = selectedIndex === imageApi.images.length - 1 ? undefined : () => {
+        if (imageApi.hasMore) { imageApi.showMore() }
+        setSelectedImage(imageApi.images[imageApi.images.length - 1]);
+    }
+
+    const advanceBy = (count: number) => {
+
+        //Easy cases:
+        switch (count) {
+            case 0:
+                return;
+            case 1:
+                onRight?.();
+                return;
+            case -1:
+                onLeft?.();
+                return;
+        }
+
+        if (count < 0) {
+            //Move left
+            if (selectedIndex <= -count) { onHome?.(); }
+            else { setSelectedImage(imageApi.images[selectedIndex + count]) }
+            return;
+        }
+
+        //Move right
+        if ((selectedIndex + count) >= imageApi.images.length) { onEnd?.(); }
+        else {
+            //If the user hits this button again, and we're going to overrun, load more
+            //Assume the user is quickly browsing and want to get further
+            if ((selectedIndex + (count * 2)) > imageApi.images.length && imageApi.hasMore) { imageApi.showMore(); }
+            setSelectedImage(imageApi.images[selectedIndex + count])
+        }
+
+
+        return;
     }
 
     const filterIsEmpty = () => {
@@ -390,7 +432,9 @@ export default function ImageViewer(props: {
                         } : undefined} moreLoading={imageApi.loading}
                         onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
                         onFavorite={onFavorite} onDownload={onDownload}
-                        onLeft={onLeft} onRight={onRight}
+                        onLeft={onLeft} onRight={onRight} onHome={onHome} onEnd={onEnd}
+                        onUp={() => advanceBy(-5)} onDown={() => advanceBy(5)}
+                        onPageUp={() => advanceBy(-10)} onPageDown={() => advanceBy(10)}
                         onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
                         imageChildren={() => <div style={{
                             position: "absolute", bottom: "10px", right: "10px", zIndex: 2, textAlign: 'right',
