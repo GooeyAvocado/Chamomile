@@ -1,4 +1,4 @@
-import { Drawer, IconButton, InputAdornment, Switch, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material"
+import { Drawer, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Select, Switch, TextField, ToggleButton, ToggleButtonGroup } from "@mui/material"
 import { useSettings } from "../../hooks/useSettings"
 import { Coffee, DirectionsRun, Height, ThumbDown, Tune, VolumeUp } from "@mui/icons-material";
 // import SchedulerSelector from "../prompt/SchedulerSelector";
@@ -6,6 +6,7 @@ import SamplerSelector from "../prompt/SamplerSelector";
 import { useState } from "react";
 import SizePresetSelector from "../prompt/SizePresetSelector";
 import { ChamomileGlobalFlags } from "../../contexts/SettingsContext";
+import { useUpscalers } from "../../hooks/useUpscalers";
 
 export default function SettingsSlidein({ open, setOpen }: {
     open: boolean,
@@ -13,6 +14,7 @@ export default function SettingsSlidein({ open, setOpen }: {
 }) {
 
     const [sizePresetOpen, setSizePresetOpen] = useState(false)
+    const { upscalers } = useUpscalers();
     const { settings, setSettings } = useSettings();
 
     const sounds = [
@@ -185,6 +187,42 @@ export default function SettingsSlidein({ open, setOpen }: {
                             XL
                         </ToggleButton>
                     </ToggleButtonGroup>
+                </div>
+            </>
+
+            {/* Upscaler Settings */}
+            <>
+                <b>Upscaling</b>
+                <hr style={{ width: "100%" }} />
+                <div style={{ marginBottom: "20px", fontSize: ".8em" }}>
+                    Chose an upscaler and scale to upscale images by. You can also change these
+                    settings on the Upscaling accordion on the image viewer
+                </div>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+
+                    <FormControl fullWidth>
+                        <InputLabel>Upscaler</InputLabel>
+                        <Select
+                            value={settings.upscaleSettings?.upscaler} onChange={(e) =>
+                                setSettings({
+                                    ...settings,
+                                    upscaleSettings: { ...settings?.upscaleSettings, upscaler: e.target.value }
+                                })
+                            } label='Upscaler'
+                            slotProps={{ root: { style: { fontSize: '.8em' } } }}
+                        >
+                            {upscalers?.map((u) => <MenuItem key={u} value={u} style={{ fontSize: '.8em' }}>{u}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+
+                    <TextField
+                        variant="outlined" label='Scale' type="number"
+                        value={settings.upscaleSettings?.scale ?? 4} onChange={(e) => setSettings({
+                            ...settings,
+                            upscaleSettings: { ...settings?.upscaleSettings, scale: Number.parseFloat(e.target.value) }
+                        })}
+                        slotProps={{ htmlInput: { step: '.5', style: { fontSize: '.8em' } } }} style={{ width: "100px" }}
+                    />
                 </div>
             </>
 

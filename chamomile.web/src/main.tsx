@@ -32,9 +32,9 @@ createRoot(document.getElementById('root')!).render(
               <CheckpointProvider>
                 <LoraProvider>
                   <AlbumsProvider>
-                    <UpscalersProvider>
-                      <ImageUploadProvider>
-                        <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} autoHideDuration={1500} transitionDuration={250} >
+                    <ImageUploadProvider>
+                      <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} autoHideDuration={1500} transitionDuration={250} >
+                        <UpscalersProvider>
                           <QueueProvider>
                             <HashRouter>
                               <Routes>
@@ -56,9 +56,11 @@ createRoot(document.getElementById('root')!).render(
                               </Routes>
                             </HashRouter>
                           </QueueProvider>
-                        </SnackbarProvider>
-                      </ImageUploadProvider>
-                    </UpscalersProvider>
+
+
+                        </UpscalersProvider>
+                      </SnackbarProvider>
+                    </ImageUploadProvider>
                   </AlbumsProvider>
                 </LoraProvider>
               </CheckpointProvider>

@@ -5,6 +5,7 @@ import { hiResImage } from "../../api/Images";
 import { useSnackbar } from "notistack";
 import { HiResRequest } from "../../model/HiResRequest";
 import { GeneratedImage } from "../../model/GeneratedImage";
+import { useSettings } from "../hooks/useSettings";
 
 export class UpscalersContextType {
     public constructor(
@@ -24,18 +25,41 @@ export const UpscalersContext = createContext<UpscalersContextType | undefined>(
 
 export const UpscalersProvider = (props: { children: any }) => {
 
-    const upscalersApi = useApi(getUpscalers, true, (val) => { if (selectedUpscaler.length === 0) setSelectedUpscaler(val?.upscalers[0] ?? "") });
+    const upscalersApi = useApi(getUpscalers, true);
     const refresh = () => { upscalersApi.fetch() }
 
-    const [selectedUpscaler, setSelectedUpscaler] = useState("");
-    const [upscaleScale, setUpscaleScale] = useState(4);
+    const { settings, setSettings } = useSettings();
+
+    const selectedUpscaler = settings?.upscaleSettings?.upscaler ?? "None"
+    const upscaleScale = settings?.upscaleSettings?.scale ?? 4
+
+    const setSelectedUpscaler = (val: string) => {
+        setSettings({
+            ...settings, upscaleSettings: {
+                scale: upscaleScale,
+                upscaler: val
+            }
+        })
+    }
+
+    const setUpscaleScale = (val: number) => {
+        setSettings({
+            ...settings, upscaleSettings: {
+                scale: val,
+                upscaler: selectedUpscaler
+            }
+        })
+    }
 
     const upscaleApi = useApi(hiResImage)
     const { enqueueSnackbar } = useSnackbar();
 
     const onUpscale = (image: GeneratedImage, updateImage?: (val: GeneratedImage) => void) => {
 
-        if (selectedUpscaler.length === 0) return;
+        if ((selectedUpscaler?.length ?? 0) === 0 || selectedUpscaler?.toLowerCase() === "none") {
+            enqueueSnackbar("Select an upscaler first", { variant: 'warning' })
+            return;
+        };
 
         upscaleApi.fetch(val => {
             enqueueSnackbar("Image upscaled!", { variant: 'success' })
@@ -51,7 +75,7 @@ export const UpscalersProvider = (props: { children: any }) => {
 
     return <UpscalersContext.Provider value={{
         loading: upscalersApi.loading, upscalers: upscalersApi.data?.upscalers ?? [], refresh,
-        selectedUpscaler, setSelectedUpscaler,
+        selectedUpscaler: selectedUpscaler ?? "", setSelectedUpscaler,
         upscaleScale, setUpscaleScale,
         onUpscale, upscaleLoading: upscaleApi.loading
     }}>

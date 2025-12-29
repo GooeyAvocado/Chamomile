@@ -18,7 +18,6 @@ export default function HiResPanel(props: {
         upscalers, onUpscale
     } = useUpscalers()
 
-
     return <Card elevation={7}>
         <div style={{ padding: '10px', height: "100px", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: upscaleLoading ? 'center' : '' }}>
             {upscaleLoading ? <>
@@ -45,7 +44,7 @@ export default function HiResPanel(props: {
                 <div style={{ display: 'flex', justifyContent: 'end', marginTop: '5px', alignItems: 'center' }}>
                     <Button size="small" onClick={() => {
                         onUpscale(image ?? {} as GeneratedImage, updateImage)
-                    }} disabled={!updateImage || !pong?.SD}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
+                    }} disabled={!updateImage || !pong?.SD || selectedUpscaler === "None"}>Upscale {image?.hiResAvailable ? "Again" : ""}</Button>
                 </div>
             </>}
         </div>

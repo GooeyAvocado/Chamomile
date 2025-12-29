@@ -28,6 +28,7 @@ import AdditionalInfoRenderer from "./AdditionalInformationRenderer";
 import { FilterOptions } from "../../../model/FilterOptions";
 import ModelCard from "../checkpoint/CheckpointCard";
 import { useThrottle } from "../../hooks/useThrottle";
+import { useUpscalers } from "../../hooks/useUpscalers";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -73,6 +74,7 @@ export default function ImageModal(props: {
     const { width, height } = useWindowDimensions()
     const vertical = width < (500) / 0.45 || height / width > 1.45
     const { pong } = usePingPong();
+    const { onUpscale: upscaleImage } = useUpscalers()
 
     const [collapse, setCollapse] = useState(collapseDefault)
     const [promptMode, setPromptMode] = useState(0)
@@ -192,6 +194,7 @@ export default function ImageModal(props: {
                 case "End":
                     onEnd?.();
                     break;
+                case "S":
                 case "s":
                     if (e.ctrlKey) {
                         e.preventDefault();
@@ -210,6 +213,15 @@ export default function ImageModal(props: {
                         e.preventDefault();
                         if ((image?.downloadCount ?? 0) > 0) { setDownloadAys(true); }
                         else { saveImage(); }
+                    }
+                    break;
+                case "u":
+                case "U":
+                    if (e.ctrlKey) {
+                        e.preventDefault();
+                        if (!onUpscale || !image) return;
+                        enqueueSnackbar("Upscaling...", { variant: "info" })
+                        upscaleImage(image, onUpscale)
                     }
                     break;
                 default:

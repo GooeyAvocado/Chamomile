@@ -14,8 +14,14 @@ export interface ChamomileSettings {
     lastUsedVersion: string,
     enableSound: boolean,
     tileSize?: ChamomileTileSizes
+    upscaleSettings?: ChamomileUpscalerSettings
     defaults: ChamomileDefaults
     globals: ChamomileGlobalFlags
+}
+
+export interface ChamomileUpscalerSettings {
+    upscaler?: string,
+    scale?: number
 }
 
 /**
