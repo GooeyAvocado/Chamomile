@@ -59,6 +59,7 @@ export default function ImageModal(props: {
     moreLoading?: boolean
     /**Callback function only used to signal to the parent component that the user has asked to use this image's prompt */
     onUsePrompt?: () => void
+    disablePortal?: boolean
 }) {
 
     const {
@@ -67,7 +68,7 @@ export default function ImageModal(props: {
         collapseDefault, onAddAlbum, onRemoveAlbum,
         onViewAlbum, onDownload, onUpdateNotes,
         onUp, onDown, filter, setFilter, onHome, onEnd,
-        onPageDown, onPageUp,
+        onPageDown, onPageUp, disablePortal,
         moreLoading, onUsePrompt: signalOnUsePrompt
     } = props;
 
@@ -166,7 +167,7 @@ export default function ImageModal(props: {
         upscaleImage(image, onUpscale)
     }
 
-    return <Dialog open={open && !!image} onClose={() => setOpen(false)} fullScreen
+    return <Dialog disablePortal={disablePortal} open={open && !!image} onClose={() => setOpen(false)} fullScreen
         onKeyUp={(e) => {
             if (e.location === 3) {
                 switch (e.key) {

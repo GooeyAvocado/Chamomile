@@ -7,17 +7,14 @@ import useApi from "../hooks/useApi"
 import { deleteImage, favImage, interruptGeneration } from "../../api/Images"
 import AreYouSureModal from "../shared/modals/AreYouSureModal"
 import BrewingImageTile from "../shared/images/BrewingImageTile"
-import { Prompt } from "../../model/Prompt"
-import { Progress } from "../../model/Automatic1111/Progress"
-import { Accordion, AccordionDetails, AccordionSummary, Card, CircularProgress, IconButton, Tooltip } from "@mui/material"
-import { AutoFixHigh, Cancel, Close, ExpandMore, ModelTraining, PlaylistPlay, ReceiptLong } from "@mui/icons-material"
+import { Accordion, AccordionDetails, AccordionSummary, Card, CircularProgress, Drawer, IconButton, Tooltip } from "@mui/material"
+import { AutoFixHigh, Cancel, ExpandMore, ModelTraining, PlaylistPlay, ReceiptLong } from "@mui/icons-material"
 import StatusButton from "../shared/StatusButton/StatusButton"
 import VariableEditor from "../shared/variables/VariableEditor"
 import PromptModelSelectorModal from "../shared/prompt/PromptModelSelectorModal"
 import PromptBuilder from "../shared/prompt/PromptBuilder"
 import QueuedImageTile from "../shared/images/QueuedImageTile"
 import QueuedGroupImageTile from "../shared/images/QueuedGroupImageTile"
-import ModelChangeTile from "../shared/images/ModelChangeTile"
 import ContextMenu from "../shared/ContextMenu"
 import PromptOrderedModal from "../shared/prompt/PromptOrderedModal"
 
@@ -30,27 +27,11 @@ export default function DisplayPage() {
     const [deleteAys, setDeleteAys] = useState(false)
 
     const [promptboxOpen, setPromptboxOpen] = useState(false);
-    const [showPromptbox, setShowPromptbox] = useState(false)
+    const [queueOpen, setQueueOpen] = useState(false);
+    const [modelsOpen, setModelsOpen] = useState(false);
+    const [dynamicsOpen, setDynamicsOpen] = useState(false);
 
-    const openPromptBox = () => {
-        setShowPromptbox(true)
-        requestAnimationFrame(() => { setPromptboxOpen(true) })
-    }
-
-    const closePromptBox = () => {
-        setPromptboxOpen(false);
-        setTimeout(() => { setShowPromptbox(false) }, 300)
-    }
-
-    const togglePromptBox = () => {
-        if (!showPromptbox) {
-            openPromptBox()
-        } else {
-            closePromptBox();
-        }
-    }
-
-    const selectedIndex = useMemo(() => images.findIndex((val) => val.id === selectedImage?.id), [selectedImage])
+    const selectedIndex = useMemo(() => images.findIndex((val) => val.id === selectedImage?.id), [selectedImage, images])
 
 
     const delApi = useApi(deleteImage);
@@ -58,13 +39,29 @@ export default function DisplayPage() {
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const { progress, queue, groupedQueue, activeJob, nextModel } = useQueue((val) => {
-        setSelectedImage(val)
-        setImages((prev) => {
-            return [val, ...prev]
+    const { progress, activeJob, queue, groupedQueue, cancel } = useQueue((val) => {
+
+        setImages((images) => {
+            setSelectedImage((selectedImage) => {
+                if (images.length === 0 || !selectedImage || images[0].id === selectedImage.id) {
+                    return val;
+                }
+                return selectedImage;
+            })
+            return [val, ...images]
             //.slice(0, MAX_BUFFER_SIZE)
         })
     })
+
+    const [interruptOpen, setInterruptOpen] = useState(false)
+    const interruptApi = useApi(interruptGeneration)
+
+    const onInterrupt = () => {
+        if (!activeJob) return;
+        setInterruptOpen(false);
+        interruptApi.fetch(undefined, undefined, activeJob.id)
+    }
+
 
     const onLeft = selectedIndex === 0 ? undefined : () => {
         setSelectedImage(images[selectedIndex - 1]);
@@ -143,93 +140,35 @@ export default function DisplayPage() {
             {activeJob && <div style={{ width: '192px' }}><BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} progress={(progress?.progress ?? 0) * 100} /></div>}
             <div style={{ marginTop: '10px' }}><b>Display Mode</b></div>
             <hr style={{ width: "256px" }} />
-            <div style={{ fontSize: '.8em' }}>Start rendering images on another window and they will appear here</div>
+            <div style={{ fontSize: '.7em', marginBottom: '20px' }}>Start generating images and they'll appear here</div>
+            <BrewingImageHudActions
+                collapsed
+                toggleQueue={() => setQueueOpen(true)}
+                setDynamicsOpen={setDynamicsOpen}
+                setModelsOpen={setModelsOpen}
+                togglePromptbox={() => setPromptboxOpen(true)}
+            />
         </div>
         <ImageModal
             open={images.length > 0} setOpen={() => { }}
-            image={selectedImage}
+            image={selectedImage} disablePortal
             onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete}
             onLeft={onLeft} onRight={onRight} onHome={onHome} onEnd={onEnd}
             onFavorite={onFavorite} onUpscale={onUpscale} collapseDefault
-            onUsePrompt={() => {
-                if (!showPromptbox) { openPromptBox() }
-            }}
-            imageChildren={(collapse) => {
-                return <BrewingImageHUD
-                    progress={progress} queue={queue} activeJob={activeJob} collapsed={collapse}
-                    promptboxOpen={promptboxOpen} showPromptbox={showPromptbox} togglePromptbox={togglePromptBox}
-                    index={selectedIndex} bufferSize={images.length} groupedQueue={groupedQueue} nextModel={nextModel}
-                />
-            }}
-        />
+            onUsePrompt={() => { setPromptboxOpen(true) }}
+            imageChildren={(collapsed) => <BrewingImageHUD collapsed={collapsed}
+                togglePromptbox={() => setPromptboxOpen(true)} toggleQueue={() => setQueueOpen(true)}
+                index={selectedIndex} bufferSize={images.length} setDynamicsOpen={setDynamicsOpen} setModelsOpen={setModelsOpen}
+                onInterrupt={onInterrupt} setInterruptOpen={setInterruptOpen}
+            />}
+        >
+        </ImageModal>
         <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
             Are you sure you want to delete this image?
         </AreYouSureModal>
-    </>
-}
-
-function BrewingImageHUD(props: {
-    queue: Prompt[]
-    groupedQueue: Prompt[][]
-    progress: Progress | undefined
-    activeJob?: Prompt,
-    collapsed?: boolean
-    promptboxOpen: boolean
-    showPromptbox: boolean
-    togglePromptbox: () => void
-    index: number, bufferSize: number
-    nextModel: string
-}) {
-
-    const { collapsed, promptboxOpen, showPromptbox, togglePromptbox, index, bufferSize } = props
-    const [modelsOpen, setModelsOpen] = useState(false);
-    const [dynamicsOpen, setDynamicsOpen] = useState(false);
-
-    const { progress, queue, groupedQueue, activeJob, nextModel, cancel } = useQueue()
-
-    const [queueOpen, setQueueOpen] = useState(false);
-    const [showQueue, setShowQueue] = useState(false)
-
-    const [interruptOpen, setInterruptOpen] = useState(false)
-    const interruptApi = useApi(interruptGeneration)
-
-    const openQueue = () => {
-        setShowQueue(true)
-        requestAnimationFrame(() => { setQueueOpen(true) })
-    }
-
-    const closeQueue = () => {
-        setQueueOpen(false);
-        setTimeout(() => { setShowQueue(false) }, 300)
-    }
-
-    const onPromptboxClick = () => {
-        if (showQueue) { closeQueue() }
-        togglePromptbox();
-    }
-
-    const onQueueClick = () => {
-        if (!showQueue) {
-            //If we're showing the promptbox close the promptbox
-            if (showPromptbox) togglePromptbox();
-            openQueue()
-        }
-        else { closeQueue(); }
-    }
-
-    const onInterrupt = () => {
-        if (!activeJob) return;
-        setInterruptOpen(false);
-        interruptApi.fetch(undefined, undefined, activeJob.id)
-    }
-
-
-
-    return <>
 
         <VariableEditor open={dynamicsOpen} setOpen={setDynamicsOpen} hidePromptPreview />
         <PromptModelSelectorModal open={modelsOpen} setOpen={setModelsOpen} hideLoras />
-
         <PromptOrderedModal
             jobId={activeJob?.id ?? 0}
             onCancel={onInterrupt}
@@ -239,40 +178,82 @@ function BrewingImageHUD(props: {
         />
 
 
-        {showPromptbox && <div style={{ position: "absolute", left: "20px", top: "20px", right: "20px", zIndex: 2 }}>
-            <Card style={{
-                maxWidth: "900px", margin: "auto", padding: '20px',
-                opacity: promptboxOpen ? 0.95 : 0,
-                transform: promptboxOpen ? "scale(1)" : "scale(0.5)",
-                transition: "transform 0.2s ease, opacity 0.2s ease"
-            }}>
-                <PromptBuilder reducedBrewMenu />
-            </Card>
-        </div>}
+        <Drawer
+            anchor="top" open={promptboxOpen} style={{ zIndex: "1300" }}
+            onClose={() => setPromptboxOpen(false)}
+            ModalProps={{ keepMounted: true }}
+            slotProps={{
+                paper: {
+                    sx: {
+                        maxWidth: "900px", width: "100%",
+                        margin: 'auto', padding: "20px",
+                        borderBottomLeftRadius: 8,
+                        borderBottomRightRadius: 8,
+                    },
+                }
+            }}
+        >
+            <PromptBuilder reducedBrewMenu />
+        </Drawer>
 
-        {showQueue && <div style={{ position: "absolute", left: "20px", top: "20px", right: "20px", zIndex: 2 }}>
-            <Card style={{
-                maxWidth: "900px", margin: "auto", padding: '20px',
-                opacity: queueOpen ? 0.95 : 0,
-                transform: queueOpen ? "scale(1)" : "scale(0.5)",
-                transition: "transform 0.2s ease, opacity 0.2s ease"
-            }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: `repeat(auto-fill, minmax(80px, 1fr))`,
-                    gap: '20px', overflowX: 'clip', height: "25vh", minHeight: "200px",
-                    overflowY: "auto", textAlign: 'left'
-                }}>
-                    {groupedQueue.map(p =>
-                        p.length === 0 ? <></> :
-                            p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id ?? 0)} tiny /> :
-                                <QueuedGroupImageTile prompts={p} onCancel={cancel} tiny />
-                    )}
 
-                    {nextModel && <ModelChangeTile nextModel={nextModel} />}
-                </div>
-            </Card>
-        </div>}
+        <Drawer
+            anchor="top" open={queueOpen} style={{ zIndex: "1300" }}
+            onClose={() => setQueueOpen(false)}
+            ModalProps={{ keepMounted: true }}
+            slotProps={{
+                paper: {
+                    sx: {
+                        maxWidth: "900px", width: "100%",
+                        margin: 'auto', padding: "20px",
+                        borderBottomLeftRadius: 8,
+                        borderBottomRightRadius: 8,
+                    },
+                }
+            }}
+        >
+            <b>{queue.length} Image{queue.length > 1 ? "s" : ""} in queue</b>
+            <hr style={{ width: '100%' }} />
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(auto-fill, minmax(80px, 1fr))`,
+                gap: '20px', overflowX: 'clip', height: "25vh", minHeight: "200px",
+                overflowY: "auto", textAlign: 'left'
+            }}>
+                {groupedQueue.map(p =>
+                    p.length === 0 ? <></> :
+                        p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id ?? 0)} tiny /> :
+                            <QueuedGroupImageTile prompts={p} onCancel={cancel} tiny />
+                )}
+            </div>
+
+        </Drawer>
+
+
+    </>
+}
+
+function BrewingImageHUD(props: {
+    collapsed?: boolean
+    togglePromptbox: () => void
+    toggleQueue: () => void
+    index: number, bufferSize: number
+    setModelsOpen: (val: boolean) => void
+    setDynamicsOpen: (val: boolean) => void
+    onInterrupt: () => void
+    setInterruptOpen: (val: boolean) => void
+}) {
+
+    const {
+        index, bufferSize, collapsed,
+        togglePromptbox, toggleQueue,
+        setModelsOpen, setDynamicsOpen,
+        onInterrupt, setInterruptOpen
+    } = props
+
+    const { progress, queue, activeJob } = useQueue()
+
+    return <>
 
         <div style={{
             position: "absolute", bottom: "10px", right: "10px", zIndex: 2, textAlign: 'right',
@@ -287,27 +268,13 @@ function BrewingImageHUD(props: {
         </div>
 
         <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '2' }}>
-            <Card style={{ opacity: collapsed ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}>
-                <div style={{ width: "100%", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: "2px 7px", gap: '2px' }}>
-                    <StatusButton />
-                    <Tooltip title="Queue">
-                        <IconButton onClick={onQueueClick} >
-                            {showQueue ? <Close /> : <PlaylistPlay />}
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={`${showPromptbox ? "Close p" : "P"}romptbox`}>
-                        <IconButton onClick={onPromptboxClick}>{
-                            showPromptbox ? <Close /> : <ReceiptLong />
-                        }</IconButton>
-                    </Tooltip>
-                    <Tooltip title="Models">
-                        <IconButton onClick={() => setModelsOpen(true)} ><ModelTraining /></IconButton>
-                    </Tooltip>
-                    <Tooltip title="Dynamics">
-                        <IconButton onClick={() => setDynamicsOpen(true)}><AutoFixHigh /></IconButton>
-                    </Tooltip>
-                </div>
-            </Card>
+            <BrewingImageHudActions
+                collapsed={collapsed}
+                toggleQueue={toggleQueue}
+                setDynamicsOpen={setDynamicsOpen}
+                setModelsOpen={setModelsOpen}
+                togglePromptbox={togglePromptbox}
+            />
 
             <Accordion expanded={activeJob !== undefined} style={{ opacity: collapsed && activeJob ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}>
                 <AccordionSummary expandIcon={activeJob ? <ExpandMore /> : <></>}>
@@ -329,4 +296,39 @@ function BrewingImageHUD(props: {
             </Accordion>
         </div>
     </>
+}
+
+function BrewingImageHudActions({
+    collapsed,
+    setDynamicsOpen,
+    setModelsOpen,
+    togglePromptbox,
+    toggleQueue,
+}: {
+    collapsed: boolean | undefined,
+    toggleQueue: () => void, togglePromptbox: () => void,
+    setModelsOpen: (val: boolean) => void,
+    setDynamicsOpen: (val: boolean) => void
+}) {
+    return <Card style={{ opacity: collapsed ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}>
+        <div style={{ width: "100%", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: "2px 7px", gap: '2px' }}>
+            <StatusButton />
+            <Tooltip title="Open Queue">
+                <IconButton onClick={toggleQueue}>
+                    <PlaylistPlay />
+                </IconButton>
+            </Tooltip>
+            <Tooltip title={`Open PromptBox`}>
+                <IconButton onClick={togglePromptbox}>
+                    <ReceiptLong />
+                </IconButton>
+            </Tooltip>
+            <Tooltip title="Models">
+                <IconButton onClick={() => setModelsOpen(true)}><ModelTraining /></IconButton>
+            </Tooltip>
+            <Tooltip title="Dynamics">
+                <IconButton onClick={() => setDynamicsOpen(true)}><AutoFixHigh /></IconButton>
+            </Tooltip>
+        </div>
+    </Card>
 }
