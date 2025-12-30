@@ -17,7 +17,8 @@ export class UpscalersContextType {
         public setSelectedUpscaler: (val: string) => void,
         public upscaleScale: number,
         public setUpscaleScale: (val: number) => void,
-        public onUpscale: (image: GeneratedImage, updateImage?: (val: GeneratedImage) => void) => void
+        public onUpscale: (image: GeneratedImage, updateImage?: (val: GeneratedImage) => void) => void,
+        public imageUpscalingId?: number
     ) { }
 }
 
@@ -25,6 +26,7 @@ export const UpscalersContext = createContext<UpscalersContextType | undefined>(
 
 export const UpscalersProvider = (props: { children: any }) => {
 
+    const [imageUpscalingId, setImageUpscalingId] = useState<number | undefined>(undefined)
     const upscalersApi = useApi(getUpscalers, true);
     const refresh = () => { upscalersApi.fetch() }
 
@@ -61,6 +63,8 @@ export const UpscalersProvider = (props: { children: any }) => {
             return;
         };
 
+        setImageUpscalingId(image.id)
+
         upscaleApi.fetch(val => {
             enqueueSnackbar("Image upscaled!", { variant: 'success' })
             if (val) updateImage?.(val);
@@ -77,7 +81,7 @@ export const UpscalersProvider = (props: { children: any }) => {
         loading: upscalersApi.loading, upscalers: upscalersApi.data?.upscalers ?? [], refresh,
         selectedUpscaler: selectedUpscaler ?? "", setSelectedUpscaler,
         upscaleScale, setUpscaleScale,
-        onUpscale, upscaleLoading: upscaleApi.loading
+        onUpscale, upscaleLoading: upscaleApi.loading, imageUpscalingId: upscaleApi.loading ? imageUpscalingId : undefined
     }}>
         {props.children}
     </UpscalersContext.Provider>

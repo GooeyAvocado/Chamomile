@@ -8,10 +8,10 @@ import { useState } from "react";
 import { usePingPong } from "../../hooks/usePingPong";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
+import { useUpscalers } from "../../hooks/useUpscalers";
 
 export default function ImageHotbar(props: {
     image?: GeneratedImage
-    upscaleLoading?: boolean
     onUsePrompt: (val: Prompt) => void,
     onLeft?: () => void
     onRight?: () => void
@@ -21,10 +21,12 @@ export default function ImageHotbar(props: {
     onUpscale?: () => void
 }) {
 
-    const { onUsePrompt, image, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale, upscaleLoading } = props;
+    const { onUsePrompt, image, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale } = props;
     const { isMobile } = useUserAgent()
     const { pong } = usePingPong();
     const sdAvailable = pong?.SD;
+
+    const { upscaleLoading, imageUpscalingId } = useUpscalers();
 
     const [deletePopperAnchor, setDeletePopperAnchor] = useState(null as any)
     const [downloadAgainPopperAnchor, setDownloadAgainPopperAnchor] = useState(null as any)
@@ -67,7 +69,7 @@ export default function ImageHotbar(props: {
                     <IconButton disabled={!onUpscale || !sdAvailable || upscaleLoading} onClick={(e) => {
                         image?.hiResAvailable ? setUpscaleAgainPopperAnchor(e.currentTarget) : onUpscale?.()
                     }}>
-                        {upscaleLoading ? <CircularProgress size={24} color="info" /> : <Gradient color={image?.hiResAvailable ? "info" : "action"} />}
+                        {imageUpscalingId === image?.id ? <CircularProgress size={24} color="info" /> : <Gradient color={image?.hiResAvailable ? "info" : "action"} />}
                     </IconButton>
                 </Tooltip>
                 <hr />

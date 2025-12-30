@@ -1,5 +1,5 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { CardActionArea } from "@mui/material";
+import { CardActionArea, CircularProgress } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
@@ -38,7 +38,7 @@ export default function ImageTile(props: {
     const { setPrompt } = usePrompt();
     const canSelect = onSelect && onUnselect
 
-    const { onUpscale: upscaleImage, upscaleLoading } = useUpscalers();
+    const { onUpscale: upscaleImage, imageUpscalingId, upscaleLoading } = useUpscalers();
     const [deleteAys, setDeleteAys] = useState(false)
 
     return <>
@@ -55,8 +55,9 @@ export default function ImageTile(props: {
                 }
             },
             {
-                text: image.hiResAvailable ? "Upscale again" : "Upscale",
-                icon: <Gradient color={image.hiResAvailable ? "info" : undefined} />,
+                text: imageUpscalingId === image.id ? "Upscaling..." : image.hiResAvailable ? "Upscale again" : "Upscale",
+                icon: imageUpscalingId === image.id ? <CircularProgress size={24} color="info" /> : <Gradient color={image.hiResAvailable ? "info" : undefined} />,
+                disabled: upscaleLoading,
                 onClick: () => {
                     upscaleImage(image, onUpscale)
                 }
@@ -105,6 +106,16 @@ export default function ImageTile(props: {
                 }} style={{ height: "100%", width: "100%", aspectRatio: "1/1", position: "relative" }}>
                     <img src={'/outline.png'} style={{ width: "50%", height: "50%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0', margin: '25%' }} />
                     <img loading={lazyLoad ? "lazy" : undefined} src={imageUrl(image.id)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
+                    {imageUpscalingId === image.id && <div style={{
+                        width: "100%", height: "100%",
+                        objectFit: 'cover', objectPosition: 'center top',
+                        position: 'absolute', left: '0', top: '0',
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'center'
+                    }}>
+                        <CircularProgress size={36} color="info" />
+                    </div>}
                     <div style={{ position: 'absolute', top: 7, left: 7, opacity: "0.3", display: 'flex', flexDirection: 'column', gap: '5px' }}>
                         {image.favorite && <Star htmlColor="black" />}
                         {image.hiResAvailable && <Gradient htmlColor="black" />}
