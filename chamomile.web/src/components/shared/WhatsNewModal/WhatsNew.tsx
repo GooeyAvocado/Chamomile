@@ -25,6 +25,10 @@ export default function WhatsNew({ open, setOpen }: {
 - **More like this by date**: Easily see what images you generated around the same time as any given image
 - **Infinite scroll**: We now load more as soon as you hit the bottom of the scroll
 - **Conflict warning**: Chamomile will now warn if more than one LoRA has the same alias, instead of crashing and not updating the list of LoRAs
+- **More keyboard shortcuts**: This includes numpad mappings to allow for one handed operation of Chamomile
+- **More context menu options**: Right clicking on an image now allows you to upscale and download images
+- Upscale now available from image hotbar and through keyboard shortcut.
+- Middle click to re-order saved prompts
 - Blurred image background for the image viewer
 - Refresh button to refresh both Checkpoints and LoRAs on the prompt selector
 - Current image index and total image count is now displayed on the lower right of displayed images
@@ -39,13 +43,14 @@ export default function WhatsNew({ open, setOpen }: {
     - There's a little switch to change back
 - **Date search improvements:** Date search is now from and to inclusive 
     - IE: from is greater or equal to midnight, and to is less than or equal to 23:59:59
+- **Upscaler and Scale now saved to settings**: Your selected upscaler and scale are now saved to settings. You can 
 - Improved brewing image tile to better highlight the brewing image
+- Improved brewing/queued prompt modal
 - Image selector improvements:
     - LoRA and Checkpoint editor image selectors now have default filters to show images by default matching the checkpoint or LoRA being edited
     - Image selector has filter expanded by default
     - Image selector no longer shows brewing images
 - Grid Editor can now only be closed by the cancel button like the preview dialog
-- [HOME] and [END] keys now go to the first and last image on a row in a Grid respectively
 - Backend changes to unify components for Models (Checkpoints and LoRAs) to make future improvements easier
 - Improved image loading speeds
 - Increased stability by limiting image change speed
@@ -59,6 +64,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug where "Images Upscaled" was incorrectly labeled "Images Downloaded" on the general statistics pane
 - Fixed bug where the filter builder may say it's not empty, even though it is
 - Fixed bug where general statistics would fail to load if all images had no generation time
+- Fixed bug where upscaling an image and navigating away from that image would re-select the image when upscaling is complete
 `
 
     const { settings } = useSettings();
