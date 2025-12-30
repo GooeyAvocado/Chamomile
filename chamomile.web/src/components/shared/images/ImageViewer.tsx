@@ -385,7 +385,7 @@ export default function ImageViewer(props: {
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: `repeat(auto-fill, minmax(${TileSizeToPixels(settings?.tileSize, isMobile)}px, 1fr))`,
-                gap: '20px'
+                gap: '20px', overflowX: 'clip'
             }}>
                 {showBrewing && groupedQueue.map(p =>
                     p.length === 0 || !promptsAlbumFilter(p) ? <></> :

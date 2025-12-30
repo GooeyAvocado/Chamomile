@@ -111,10 +111,10 @@ export default function ImageTile(props: {
             <BaseImageTile style={{
                 transform: `scale(${selectMode
                     ? (selected ? 0.9 : 0.8)
-                    : highlighted && modalOpen ? 3 : 1})`,
+                    : highlighted && modalOpen ? 2 : 1})`,
                 opacity: selectMode ? selected ? 1 : .5 : 1,
                 padding: highlighted ? "2px" : "0", backgroundColor: highlighted ? primaryColor.main : undefined,
-                transition: `transform ${selectMode ? "0.1s" : ".5s"} ease, opacity 0.1s ease, padding 0.1s ease`,
+                transition: `transform ${selectMode ? "0.1s" : ".2s"} ease, opacity 0.1s ease, padding 0.1s ease`,
                 zIndex: highlighted ? 20 : 0
             }}>
                 <CardActionArea ref={ref} onClick={(e) => {
