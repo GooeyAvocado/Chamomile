@@ -31,9 +31,10 @@ export default function PromptButton(props: {
     setFilter?: (val: FilterOptions) => void
     saveAsEnabled?: boolean
     fullWidth?: boolean
+    reducedOptions?: boolean
 }) {
 
-    const { onBrew, onLoad, onSave, fullWidth, onSaveAs, saveAsEnabled, filter, setFilter } = props
+    const { onBrew, onLoad, onSave, fullWidth, onSaveAs, saveAsEnabled, filter, setFilter, reducedOptions } = props
     const { prompt, orderAmount } = usePrompt();
 
     const [open, setOpen] = useState(false);
@@ -126,13 +127,13 @@ export default function PromptButton(props: {
                                     <ListItemIcon><Coffee fontSize='small' /></ListItemIcon>
                                     Single brew
                                 </MenuItem>
-                                <MenuItem key={"PreviewPromptButton"} style={{ fontSize: ".8em" }} disabled={!pong?.SD} onClick={() => {
+                                {!reducedOptions && <MenuItem key={"PreviewPromptButton"} style={{ fontSize: ".8em" }} disabled={!pong?.SD} onClick={() => {
                                     handleClose();
                                     setPreviewOpen(true);
                                 }} >
                                     <ListItemIcon><Preview fontSize='small' /></ListItemIcon>
                                     Preview recipe
-                                </MenuItem>
+                                </MenuItem>}
                                 <Divider />
                                 <MenuItem key={"SavePromptButton"} style={{ fontSize: ".8em" }} onClick={() => {
                                     handleClose();
@@ -155,32 +156,34 @@ export default function PromptButton(props: {
                                     <ListItemIcon><FileOpen fontSize='small' /></ListItemIcon>
                                     Load a recipe
                                 </MenuItem>
-                                <Divider />
-                                <MenuItem key={"GridButton"} style={{ fontSize: ".8em" }} onClick={() => {
-                                    handleClose();
-                                    setGridEditorState({
-                                        ...prompt,
-                                        prompt: prompt.positivePrompt,
-                                        name: "New Grid",
-                                        xValMode: "NON",
-                                        xVals: [],
-                                        yValMode: "NON",
-                                        yVals: []
-                                    } as Grid)
-                                    setGridEditorOpen(true)
-                                }} >
-                                    <ListItemIcon><GridView fontSize='small' /></ListItemIcon>
-                                    Use for grid
-                                </MenuItem>
-                                <Divider />
-                                <MenuItem key={"I'mFeelingLucky"} style={{ fontSize: ".8em" }} onClick={() => {
-                                    handleClose();
-                                    setLuckyEverOpen(true);
-                                    setLuckyOpen(true)
-                                }} >
-                                    <ListItemIcon><Casino fontSize='small' /></ListItemIcon>
-                                    I'm Feeling Lucky
-                                </MenuItem>
+                                {!reducedOptions && <>
+                                    <Divider />
+                                    <MenuItem key={"GridButton"} style={{ fontSize: ".8em" }} onClick={() => {
+                                        handleClose();
+                                        setGridEditorState({
+                                            ...prompt,
+                                            prompt: prompt.positivePrompt,
+                                            name: "New Grid",
+                                            xValMode: "NON",
+                                            xVals: [],
+                                            yValMode: "NON",
+                                            yVals: []
+                                        } as Grid)
+                                        setGridEditorOpen(true)
+                                    }} >
+                                        <ListItemIcon><GridView fontSize='small' /></ListItemIcon>
+                                        Use for grid
+                                    </MenuItem>
+                                    <Divider />
+                                    <MenuItem key={"I'mFeelingLucky"} style={{ fontSize: ".8em" }} onClick={() => {
+                                        handleClose();
+                                        setLuckyEverOpen(true);
+                                        setLuckyOpen(true)
+                                    }} >
+                                        <ListItemIcon><Casino fontSize='small' /></ListItemIcon>
+                                        I'm Feeling Lucky
+                                    </MenuItem>
+                                </>}
                             </MenuList>
                         </ClickAwayListener>
                     </Paper>

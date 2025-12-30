@@ -39,11 +39,13 @@ export default function WhatsNew({ open, setOpen }: {
 ### What's changed?
 - **Wildcards and Overrides changed to "Dynamics":** A more general term to include Templates and Template Management
 - **Order of operations changed for dynamics:** Templates are applied first, then overrides, then wildcards
+- **Improved Display page**: Display page now has quick options to modify dynamics, models, or prompt new images
 - **Cumulative usage graphs:** Graphs are now cumulative instead of just showing daily counts.
     - There's a little switch to change back
 - **Date search improvements:** Date search is now from and to inclusive 
     - IE: from is greater or equal to midnight, and to is less than or equal to 23:59:59
 - **Upscaler and Scale now saved to settings**: Your selected upscaler and scale are now saved to settings. You can 
+- Image viewer now focuses the last selected image, scrolling to it if necessary.
 - Improved brewing image tile to better highlight the brewing image
 - Improved brewing/queued prompt modal
 - Image selector improvements:

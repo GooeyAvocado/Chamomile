@@ -37,9 +37,10 @@ export default function PromptBuilder(props: {
     preview?: boolean
     filter?: FilterOptions
     setFilter?: (val: FilterOptions) => void
+    reducedBrewMenu?: boolean
 }) {
 
-    const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight, filter, setFilter } = props
+    const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight, filter, setFilter, reducedBrewMenu } = props
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount, variables } = usePrompt()
     const [expanded, setExpanded] = useState(false)
     const [expandedHeight, setExpandedHeight] = useState("0px")
@@ -309,6 +310,7 @@ export default function PromptBuilder(props: {
                         saveAsEnabled={existingPrompt}
                         setFilter={setFilter}
                         filter={filter}
+                        reducedOptions={reducedBrewMenu}
                     />
                 </div>}
         </div>

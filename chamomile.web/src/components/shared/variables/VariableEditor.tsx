@@ -21,9 +21,10 @@ import { imageUrl } from "../../../api/Images"
 export default function VariableEditor(props: {
     open: boolean,
     setOpen: (val: boolean) => void
+    hidePromptPreview?: boolean
 }) {
 
-    const { open, setOpen } = props
+    const { open, setOpen, hidePromptPreview } = props
     const { variables, setVairables: setVariables, prompt, setPrompt } = usePrompt()
 
     const [newCustName, setNewCustName] = useState("")
@@ -152,7 +153,7 @@ export default function VariableEditor(props: {
         >
             <TabbedModalTitle>Dynamics</TabbedModalTitle>
 
-            <TabbedModalConsistentContent position="top">
+            {!hidePromptPreview && <TabbedModalConsistentContent position="top">
                 <div style={{ padding: "10px", background: '#222', fontSize: '.9em', fontFamily: 'monospace' }}>
                     <TextField
                         value={promptPreview(prompt, variables, templatesApi.data ?? [])} disabled multiline maxRows={7}
@@ -167,7 +168,7 @@ export default function VariableEditor(props: {
                     />
                 </div>
                 <hr style={{ width: "100%", marginBottom: '20px' }} />
-            </TabbedModalConsistentContent>
+            </TabbedModalConsistentContent>}
 
             <TabbedModalTabContent label="Wildcards" >
                 {wildNames.map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -273,7 +274,7 @@ export default function VariableEditor(props: {
 
             <TabbedModalTabContent label="Templates">
                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <div style={{ flex: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {!hidePromptPreview && <div style={{ flex: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {templatesApi.loading ?
                             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: "20px" }}>
                                 <CircularProgress />
@@ -330,9 +331,9 @@ export default function VariableEditor(props: {
                                 </Card>
                             </>}
 
-                    </div>
-                    <hr style={{ width: '100%' }} />
-                    <div style={{ textAlign: 'right' }}>
+                    </div>}
+                    {!hidePromptPreview && <hr style={{ width: '100%' }} />}
+                    <div style={{ textAlign: hidePromptPreview ? 'center' : 'right' }}>
                         <Button startIcon={<HomeRepairService />} size="small" onClick={() => {
                             setOpen(false)
                             setTemplateOpen(true)

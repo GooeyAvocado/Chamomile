@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { GeneratedImage } from "../../model/GeneratedImage"
 import { useQueue } from "../hooks/useQueue"
 import ImageModal from "../shared/images/ImageModal"
@@ -9,8 +9,12 @@ import AreYouSureModal from "../shared/modals/AreYouSureModal"
 import BrewingImageTile from "../shared/images/BrewingImageTile"
 import { Prompt } from "../../model/Prompt"
 import { Progress } from "../../model/Automatic1111/Progress"
-import { Accordion, AccordionDetails, AccordionSummary, CircularProgress } from "@mui/material"
-import { ExpandMore } from "@mui/icons-material"
+import { Accordion, AccordionDetails, AccordionSummary, Card, CircularProgress, IconButton, Tooltip } from "@mui/material"
+import { AutoFixHigh, Close, ExpandMore, ModelTraining, ReceiptLong } from "@mui/icons-material"
+import StatusButton from "../shared/StatusButton/StatusButton"
+import VariableEditor from "../shared/variables/VariableEditor"
+import PromptModelSelectorModal from "../shared/prompt/PromptModelSelectorModal"
+import PromptBuilder from "../shared/prompt/PromptBuilder"
 
 export default function DisplayPage() {
 
@@ -19,7 +23,29 @@ export default function DisplayPage() {
     const [selectedImage, setSelectedImage] = useState(undefined as GeneratedImage | undefined)
     const [images, setImages] = useState([] as GeneratedImage[])
     const [deleteAys, setDeleteAys] = useState(false)
-    const selectedIndex = () => images.findIndex((val) => val.id === selectedImage?.id)
+
+    const [promptboxOpen, setPromptboxOpen] = useState(false);
+    const [showPromptbox, setShowPromptbox] = useState(false)
+
+    const openPromptBox = () => {
+        setShowPromptbox(true)
+        requestAnimationFrame(() => { setPromptboxOpen(true) })
+    }
+
+    const closePromptBox = () => {
+        setPromptboxOpen(false);
+        setTimeout(() => { setShowPromptbox(false) }, 300)
+    }
+
+    const togglePromptBox = () => {
+        if (!showPromptbox) {
+            openPromptBox()
+        } else {
+            closePromptBox();
+        }
+    }
+
+    const selectedIndex = useMemo(() => images.findIndex((val) => val.id === selectedImage?.id), [selectedImage])
 
 
     const delApi = useApi(deleteImage);
@@ -34,16 +60,12 @@ export default function DisplayPage() {
         })
     })
 
-    const onLeft = () => {
-        const index = selectedIndex();
-        if (index === 0) return;
-        setSelectedImage(images[index - 1]);
+    const onLeft = selectedIndex === 0 ? undefined : () => {
+        setSelectedImage(images[selectedIndex - 1]);
     }
 
-    const onRight = () => {
-        const index = selectedIndex();
-        if (index === images.length - 1) return; //If this is the last image do nothing
-        setSelectedImage(images[index + 1]);
+    const onRight = selectedIndex === images.length - 1 ? undefined : () => {
+        setSelectedImage(images[selectedIndex + 1]);
     }
 
     const onDelete = () => {
@@ -53,10 +75,10 @@ export default function DisplayPage() {
             if (selectedImage) {
                 if (images.length <= 1) { //If there's one or less images then we need to close
                     setSelectedImage(undefined)
-                } else if (selectedIndex() >= images.length - 1) {
-                    onLeft()
+                } else if (selectedIndex >= images.length - 1) {
+                    onLeft?.()
                 } else {
-                    onRight();
+                    onRight?.();
                 }
             }
             setImages((prev) => {
@@ -113,7 +135,15 @@ export default function DisplayPage() {
             onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete}
             onLeft={onLeft} onRight={onRight}
             onFavorite={onFavorite} onUpscale={onUpscale} collapseDefault
-            imageChildren={(collapse) => { return <BrewingImageHUD progress={progress} queue={queue} activeJob={activeJob} collapsed={collapse} /> }}
+            onUsePrompt={() => {
+                if (!showPromptbox) { openPromptBox() }
+            }}
+            imageChildren={(collapse) => {
+                return <BrewingImageHUD
+                    progress={progress} queue={queue} activeJob={activeJob} collapsed={collapse}
+                    promptboxOpen={promptboxOpen} showPromptbox={showPromptbox} togglePromptbox={togglePromptBox}
+                />
+            }}
         />
         <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
             Are you sure you want to delete this image?
@@ -126,23 +156,65 @@ function BrewingImageHUD(props: {
     progress: Progress | undefined
     activeJob?: Prompt,
     collapsed?: boolean
+    promptboxOpen?: boolean
+    showPromptbox?: boolean
+    togglePromptbox?: () => void
 }) {
 
-    const { progress, queue, activeJob, collapsed } = props
+    const { progress, queue, activeJob, collapsed, promptboxOpen, showPromptbox, togglePromptbox } = props
+    const [modelsOpen, setModelsOpen] = useState(false);
+    const [dynamicsOpen, setDynamicsOpen] = useState(false);
 
-    return <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '2', opacity: collapsed && activeJob ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}>
-        <Accordion expanded={activeJob !== undefined} >
-            <AccordionSummary expandIcon={activeJob ? <ExpandMore /> : <></>}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {activeJob && <CircularProgress size={16} variant={progress ? "determinate" : "indeterminate"} value={(progress?.progress ?? 0) * 100} />}
-                    <div>{queue.length > 0 ? `Brewing ${queue.length + 1} images` : activeJob ? 'Brewing an image' : ''}</div>
+
+
+    return <>
+
+        <VariableEditor open={dynamicsOpen} setOpen={setDynamicsOpen} hidePromptPreview />
+        <PromptModelSelectorModal open={modelsOpen} setOpen={setModelsOpen} hideLoras />
+
+        {showPromptbox && <div style={{ position: "absolute", left: "20px", top: "20px", right: "20px", zIndex: 2 }}>
+            <Card style={{
+                maxWidth: "900px", margin: "auto", padding: '20px',
+                opacity: promptboxOpen ? 0.95 : 0,
+                transform: promptboxOpen ? "scale(1)" : "scale(0.5)",
+                transition: "transform 0.2s ease, opacity 0.2s ease"
+            }}>
+                <PromptBuilder reducedBrewMenu />
+            </Card>
+        </div>}
+
+        <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '2' }}>
+            <Card style={{ opacity: collapsed ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}>
+                <div style={{ width: "100%", display: 'flex', alignItems: 'center', padding: "2px 7px", gap: '2px' }}>
+                    <StatusButton />
+                    <Tooltip title="Models">
+                        <IconButton onClick={() => setModelsOpen(true)} ><ModelTraining /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="Dynamics">
+                        <IconButton onClick={() => setDynamicsOpen(true)}><AutoFixHigh /></IconButton>
+                    </Tooltip>
+                    <div style={{ flex: 1 }} />
+                    <Tooltip title={`${showPromptbox ? "Close p" : "P"}romptbox`}>
+                        <IconButton onClick={togglePromptbox}>{
+                            showPromptbox ? <Close /> : <ReceiptLong />
+                        }</IconButton>
+                    </Tooltip>
                 </div>
-            </AccordionSummary>
-            <AccordionDetails>
-                <div style={{ width: '192px', marginTop: "-10px" }}>
-                    <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} progress={(progress?.progress ?? 0) * 100} />
-                </div>
-            </AccordionDetails>
-        </Accordion>
-    </div>
+            </Card>
+
+            <Accordion expanded={activeJob !== undefined} style={{ opacity: collapsed && activeJob ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}>
+                <AccordionSummary expandIcon={activeJob ? <ExpandMore /> : <></>}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {activeJob && <CircularProgress size={16} variant={progress ? "determinate" : "indeterminate"} value={(progress?.progress ?? 0) * 100} />}
+                        <div>{queue.length > 0 ? `Brewing ${queue.length + 1} images` : activeJob ? 'Brewing an image' : ''}</div>
+                    </div>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <div style={{ width: '192px', marginTop: "-10px" }}>
+                        <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} progress={(progress?.progress ?? 0) * 100} />
+                    </div>
+                </AccordionDetails>
+            </Accordion>
+        </div>
+    </>
 }

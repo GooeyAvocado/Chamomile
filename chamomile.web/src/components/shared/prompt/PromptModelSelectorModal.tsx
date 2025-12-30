@@ -24,6 +24,7 @@ export default function PromptModelSelectorModal(props: {
     noBrew?: boolean
     prompt?: Prompt,
     setPrompt?: (val: Prompt) => void
+    hideLoras?: boolean
 }) {
 
     const { refresh: refreshCheckpoints, loading: checkpointsLoading } = useCheckpoints();
@@ -36,7 +37,7 @@ export default function PromptModelSelectorModal(props: {
 
     const loading = checkpointsLoading || lorasLoading
 
-    const { open, setOpen, noBrew, prompt: promptOverride, setPrompt: setPromptOverride } = props
+    const { open, setOpen, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, hideLoras } = props
 
     const [addOpen, setAddOpen] = useState(false)
     const [checkpointEditOpen, setCheckpointEditOpen] = useState(false)
@@ -185,26 +186,26 @@ export default function PromptModelSelectorModal(props: {
                 </Alert> : <></>
             }
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: "100%", marginTop: "5px" }}>
+            {!hideLoras && <> <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: "100%", marginTop: "5px" }}>
                 <div><b>Loras</b></div>
                 <Tooltip title={addOpen ? 'Cancel' : 'Add a LoRA'}><IconButton onClick={() => setAddOpen(!addOpen)}><Add sx={{ rotate: addOpen ? '45deg' : '' }} /></IconButton></Tooltip>
             </div>
-            <hr style={{ width: "100%" }} />
+                <hr style={{ width: "100%" }} />
 
-            {addOpen && <>
-                <LoraSelector lora="" setLora={(e) => {
-                    addLora(e.id)
-                    setAddOpen(false)
-                }} style={{ marginTop: "10px", marginBottom: '10px' }} />
-            </>}
+                {addOpen && <>
+                    <LoraSelector lora="" setLora={(e) => {
+                        addLora(e.id)
+                        setAddOpen(false)
+                    }} style={{ marginTop: "10px", marginBottom: '10px' }} />
+                </>}
 
-            <div style={{ flex: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: "5px" }}>
-                {usedLoras().map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <IconButton onClick={() => { removeLora(a) }}><Close /></IconButton>
-                    <div style={{ flex: "1" }}><LoraCard loraAlias={a} /></div>
-                </div>)}
+                <div style={{ flex: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: "5px" }}>
+                    {usedLoras().map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <IconButton onClick={() => { removeLora(a) }}><Close /></IconButton>
+                        <div style={{ flex: "1" }}><LoraCard loraAlias={a} /></div>
+                    </div>)}
 
-            </div>
+                </div></>}
         </DialogContent>
 
         <DialogActions>

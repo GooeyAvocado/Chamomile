@@ -57,6 +57,8 @@ export default function ImageModal(props: {
     imageChildren?: (collapse: boolean) => JSX.Element
     infoChildren?: JSX.Element
     moreLoading?: boolean
+    /**Callback function only used to signal to the parent component that the user has asked to use this image's prompt */
+    onUsePrompt?: () => void
 }) {
 
     const {
@@ -66,7 +68,7 @@ export default function ImageModal(props: {
         onViewAlbum, onDownload, onUpdateNotes,
         onUp, onDown, filter, setFilter, onHome, onEnd,
         onPageDown, onPageUp,
-        moreLoading
+        moreLoading, onUsePrompt: signalOnUsePrompt
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -137,6 +139,7 @@ export default function ImageModal(props: {
         setOpen(false)
         enqueueSnackbar("Prompt loaded!", { variant: 'success' })
         setPrompt(promptOverride ?? imageToPrompt(image, promptMode === 1))
+        signalOnUsePrompt?.()
     }
 
     // window.open(imageUrl(image?.id ?? 0) + ".png");
