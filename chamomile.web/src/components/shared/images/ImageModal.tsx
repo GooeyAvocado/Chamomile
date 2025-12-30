@@ -74,7 +74,7 @@ export default function ImageModal(props: {
     const { width, height } = useWindowDimensions()
     const vertical = width < (500) / 0.45 || height / width > 1.45
     const { pong } = usePingPong();
-    const { onUpscale: upscaleImage, upscaleLoading } = useUpscalers()
+    const { onUpscale: upscaleImage } = useUpscalers()
 
     const [collapse, setCollapse] = useState(collapseDefault)
     const [promptMode, setPromptMode] = useState(0)

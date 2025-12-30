@@ -1,5 +1,5 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { CardActionArea, CircularProgress } from "@mui/material";
+import { CardActionArea, CircularProgress, useTheme } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
@@ -7,7 +7,7 @@ import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Download, Gradi
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { downloadImage, imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { FilterOptions } from "../../../model/FilterOptions";
 import ImageMoreFromMenu from "./ImageMoreFromMenu";
@@ -27,12 +27,15 @@ export default function ImageTile(props: {
     onUpscale: (val: GeneratedImage) => void,
     onDownload?: () => void
     lazyLoad?: boolean
+    highlighted?: boolean
+    modalOpen?: boolean
 }) {
 
     const {
         image, onClick, onDelete, onFavorite,
         onSelect, selectMode, selected, onUnselect,
-        filter, setFilter, lazyLoad, onDownload, onUpscale
+        filter, setFilter, lazyLoad, onDownload, onUpscale,
+        highlighted, modalOpen
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -40,6 +43,19 @@ export default function ImageTile(props: {
 
     const { onUpscale: upscaleImage, imageUpscalingId, upscaleLoading } = useUpscalers();
     const [deleteAys, setDeleteAys] = useState(false)
+    const theme = useTheme();
+    const primaryColor = theme.palette.primary;
+
+    const ref = useRef<any>(null);
+
+    useEffect(() => {
+        if (highlighted) {
+            ref.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    }, [ref, modalOpen])
 
     return <>
         <ContextMenu options={[
@@ -93,11 +109,15 @@ export default function ImageTile(props: {
             { text: "Delete", icon: <Delete />, onClick: () => { setDeleteAys(true) }, disabled: selectMode },
         ]}>
             <BaseImageTile style={{
-                transform: `scale(${selectMode ? (selected ? 0.9 : 0.8) : 1})`,
+                transform: `scale(${selectMode
+                    ? (selected ? 0.9 : 0.8)
+                    : highlighted && modalOpen ? 3 : 1})`,
                 opacity: selectMode ? selected ? 1 : .5 : 1,
-                transition: "transform 0.1s ease, opacity 0.1s ease"
+                padding: highlighted ? "2px" : "0", backgroundColor: highlighted ? primaryColor.main : undefined,
+                transition: `transform ${selectMode ? "0.1s" : ".5s"} ease, opacity 0.1s ease, padding 0.1s ease`,
+                zIndex: highlighted ? 20 : 0
             }}>
-                <CardActionArea onClick={(e) => {
+                <CardActionArea ref={ref} onClick={(e) => {
                     if ((selectMode || e.shiftKey) && canSelect) {
                         if (selected) onUnselect()
                         else onSelect()
@@ -105,7 +125,10 @@ export default function ImageTile(props: {
                     else onClick()
                 }} style={{ height: "100%", width: "100%", aspectRatio: "1/1", position: "relative" }}>
                     <img src={'/outline.png'} style={{ width: "50%", height: "50%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0', margin: '25%' }} />
-                    <img loading={lazyLoad ? "lazy" : undefined} src={imageUrl(image.id)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
+                    <img
+                        loading={lazyLoad ? "lazy" : undefined} src={imageUrl(image.id)}
+                        style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }}
+                    />
                     {imageUpscalingId === image.id && <div style={{
                         width: "100%", height: "100%",
                         objectFit: 'cover', objectPosition: 'center top',
