@@ -1097,15 +1097,33 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 </TableHead>
                 <TableBody>
                     <TableRow>
-                        <TableCell>{keyCombo(["CTRL", "S"])}</TableCell>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["CTRL", "S"])}
+                            {keyCombo(["SHIFT", "D"])}
+                            {keyCombo(["Numpad 0"])}
+                        </TableCell>
                         <TableCell>Save Image</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>{keyCombo(["CTRL", "D"])}</TableCell>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["CTRL", "D"])}
+                            {keyCombo(["Numpad 5"])}
+                            {keyCombo(["Numpad *"])}
+                        </TableCell>
                         <TableCell>Toggle Image Favorite</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>{keyCombo(["DEL"])}</TableCell>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["CTRL", "U"])}
+                            {keyCombo(["Numpad +"])}
+                        </TableCell>
+                        <TableCell>Upscale</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["DEL"])}
+                            {keyCombo(["Numpad ."])}
+                        </TableCell>
                         <TableCell>Delete Image</TableCell>
                     </TableRow>
                     <TableRow>
@@ -1113,16 +1131,70 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                         <TableCell>Delete Image without asking</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>{keyCombo(["<-"])}</TableCell>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["←"])}
+                            {keyCombo(["Numpad 4"])}
+                        </TableCell>
                         <TableCell>
                             Previous Image
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>{keyCombo(["->"])}</TableCell>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["→"])}
+                            {keyCombo(["Numpad 6"])}
+                        </TableCell>
                         <TableCell>
                             Next Image
                         </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["↑"])}
+                            {keyCombo(["Numpad 8"])}
+                        </TableCell>
+                        <TableCell>
+                            <div>On Grids: Up one row</div>
+                            <div>On Home: Up 5 images</div>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["↓"])}
+                            {keyCombo(["Numpad 2"])}
+                        </TableCell>
+                        <TableCell>
+                            <div>On Grids: Down one row</div>
+                            <div>On Home: Down 5 images</div>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["Pg Up"])}
+                            {keyCombo(["Numpad 9"])}
+                        </TableCell>
+                        <TableCell>Up 10 images</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["Pg Dn"])}
+                            {keyCombo(["Numpad 3"])}
+                        </TableCell>
+                        <TableCell>Down 10 images</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["Home"])}
+                            {keyCombo(["Numpad 7"])}
+                        </TableCell>
+                        <TableCell>First image</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {keyCombo(["End"])}
+                            {keyCombo(["Numpad 1"])}
+                        </TableCell>
+                        <TableCell>Last image loaded (more will be loaded if available)</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
