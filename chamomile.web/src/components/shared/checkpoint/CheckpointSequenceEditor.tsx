@@ -6,6 +6,9 @@ import { useCheckpoints } from "../../hooks/useCheckpoints";
 import { imageUrl } from "../../../api/Images";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 import IECControls from "../IECControls/IECControls";
+import CheckpointBrowserModal from "./CheckpointBrowserModal";
+import { Model } from "../../../model/Model";
+import { useSnackbar } from "notistack";
 
 export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, currentModel, loading }: {
     open: boolean,
@@ -19,11 +22,14 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
 
     const [internalSequence, setInternalSequence] = useState<CheckpointSequence[]>([])
     const { checkpoints: models } = useCheckpoints();
+    const { enqueueSnackbar } = useSnackbar();
     const [validation, setValidation] = useState<{
         modelTitle?: string,
         chanceStay?: string,
         loadWeight?: string
     }[]>()
+
+    const [browserOpen, setBrowserOpen] = useState(false)
 
     useEffect(() => {
         if (open) { initializeInternalSequence(sequence ?? []); }
@@ -45,7 +51,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
             //Otherwise this really shouldn't happen, but we'll add the current model to the sequence
             setInternalSequence([{
                 title: currentModel,
-                chanceStay: 90,
+                chanceStay: 80,
                 loadWeight: 1
             } as CheckpointSequence, ...val ?? []]);
         }
@@ -72,6 +78,40 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
         onOk(internalSequence);
     }
 
+    const handleChange = (val: Model[]) => {
+        const newModels = val.map(a => a.id);
+        const usedModels = internalSequence?.map(a => a.title) ?? []
+        //Added LoRAs are those that are ON the new one, but NOT in the old one
+        const addedModels = newModels.filter(a => !usedModels.includes(a))
+
+        //Removed LoRAs are those that are ON the old ones but NOT in the new ones
+        const removedModels = usedModels.filter(a => !newModels.includes(a))
+
+        //We do this afterwards because usedLoRAs may update during the time we execute this
+        //And honestly I don't want to risk it. Besides I assume the user will not be using more than like
+        //5 LoRAs so while this could probably be made more efficient the cost is negligible 
+
+        const newSequence = [...(internalSequence ?? []).filter(a => !removedModels.includes(a.title)), ...addedModels.map(a => ({
+            chanceStay: 80,
+            loadWeight: 1,
+            title: a
+        } as CheckpointSequence))]
+
+        if (newSequence?.find(a => a.title === currentModel)) {
+            setInternalSequence(newSequence); //If so then we don't need to do anything 
+        } else {
+            enqueueSnackbar("Current model must be in the sequence", { variant: "warning" })
+            //Otherwise this really shouldn't happen, but we'll add the current model to the sequence
+            setInternalSequence([{
+                title: currentModel,
+                chanceStay: 80,
+                loadWeight: 1
+            } as CheckpointSequence, ...newSequence ?? []]);
+        }
+
+        setBrowserOpen(false)
+
+    }
 
     return <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Checkpoint Sequence</DialogTitle>
@@ -144,10 +184,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                                 label="Load Weight"
                                 style={{ width: '150px' }}
                                 slotProps={{
-                                    htmlInput: {
-                                        min: 1,
-                                        step: 1
-                                    },
+                                    htmlInput: { min: 1, step: 1 },
                                     input: { endAdornment: <InputAdornment position="end">x</InputAdornment> }
                                 }}
                             />
@@ -172,19 +209,17 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                 <Button
                     startIcon={<AddCircleOutline />}
                     style={{ alignSelf: 'end' }}
-                    onClick={() => {
-                        setInternalSequence([
-                            ...internalSequence,
-                            {
-                                title: "",
-                                chanceStay: 95,
-                                loadWeight: 1
-                            } as CheckpointSequence
-                        ]);
-                    }}
-                >Add another checkpoint</Button>
-
+                    onClick={() => { setBrowserOpen(true) }}
+                >Add checkpoints</Button>
             </div>
+
+            <CheckpointBrowserModal
+                open={browserOpen}
+                setOpen={setBrowserOpen}
+                initialSelected={internalSequence?.map(a => a.title)}
+                multiSelect
+                onOk={handleChange}
+            />
 
         </DialogContent>
         <DialogActions>
