@@ -30,6 +30,14 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
     }, [open]);
 
     const initializeInternalSequence = (val: CheckpointSequence[]) => {
+        //For compatibility:
+        if (val.some(a => !!(a as any).modelTitle)) {
+            val = val.map(a => ({
+                chanceStay: a.chanceStay,
+                loadWeight: a.loadWeight,
+                title: (a as any).modelTitle ?? a.title
+            }) as CheckpointSequence)
+        }
         //CHECK: Does the current sequence have the current model?
         if (val?.find(a => a.title === currentModel)) {
             setInternalSequence(val); //If so then we don't need to do anything 
