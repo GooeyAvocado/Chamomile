@@ -165,6 +165,17 @@ export default function ImageModal(props: {
 
     return <Dialog open={open && !!image} onClose={() => setOpen(false)} fullScreen
         onKeyUp={(e) => {
+            if (e.location === 3) {
+                switch (e.key) {
+                    case ".":
+                    case "Delete":
+                        if (e.shiftKey && onDeleteForce) { onDeleteForce?.() }
+                        else { onDelete?.() }
+                        break;
+                    default:
+                        break;
+                }
+            }
             switch (e.key) {
                 case "Delete":
                     if (e.shiftKey && onDeleteForce) { onDeleteForce?.() }
@@ -175,6 +186,59 @@ export default function ImageModal(props: {
             }
         }}
         onKeyDown={(e) => {
+
+            if (e.location === 3) {
+                switch (e.key) {
+                    case "4":
+                    case "ArrowLeft":
+                        throttledLeft()
+                        break;
+                    case "6":
+                    case "ArrowRight":
+                        throttledRight();
+                        break;
+                    case "9":
+                    case "PageUp":
+                        throttledPgUp()
+                        break;
+                    case "3":
+                    case "PageDown":
+                        throttledPgDn();
+                        break;
+                    case "8":
+                    case "ArrowUp":
+                        throttledUp()
+                        break;
+                    case "2":
+                    case "ArrowDown":
+                        throttledDown();
+                        break;
+                    case "7":
+                    case "Home":
+                        onHome?.();
+                        break;
+                    case "1":
+                    case "End":
+                        onEnd?.();
+                        break;
+                    case "0":
+                        if ((image?.downloadCount ?? 0) > 0) { setDownloadAys(true); }
+                        else { saveImage(); }
+                        break;
+                    case "5":
+                    case "*":
+                        onFavorite?.();
+                        break;
+                    case "+":
+                    case "U":
+                        executeUpscale();
+                        break;
+                    default:
+                        break;
+                }
+                return;
+            }
+
             switch (e.key) {
                 case "ArrowLeft":
                     throttledLeft()
@@ -293,7 +357,7 @@ export default function ImageModal(props: {
                     <ImageHotbar
                         image={image} onUsePrompt={onUsePrompt} onUpscale={executeUpscale}
                         onLeft={onLeft} onRight={onRight} onDownload={saveImage}
-                        onDelete={onDeleteForce} onFavorite={onFavorite} upscaleLoading={upscaleLoading}
+                        onDelete={onDeleteForce} onFavorite={onFavorite}
                     />
                 </div>
 
