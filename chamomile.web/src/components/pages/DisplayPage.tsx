@@ -4,17 +4,22 @@ import { useQueue } from "../hooks/useQueue"
 import ImageModal from "../shared/images/ImageModal"
 import { useSnackbar } from "notistack"
 import useApi from "../hooks/useApi"
-import { deleteImage, favImage } from "../../api/Images"
+import { deleteImage, favImage, interruptGeneration } from "../../api/Images"
 import AreYouSureModal from "../shared/modals/AreYouSureModal"
 import BrewingImageTile from "../shared/images/BrewingImageTile"
 import { Prompt } from "../../model/Prompt"
 import { Progress } from "../../model/Automatic1111/Progress"
 import { Accordion, AccordionDetails, AccordionSummary, Card, CircularProgress, IconButton, Tooltip } from "@mui/material"
-import { AutoFixHigh, Close, ExpandMore, ModelTraining, ReceiptLong } from "@mui/icons-material"
+import { AutoFixHigh, Cancel, Close, ExpandMore, ModelTraining, PlaylistPlay, ReceiptLong } from "@mui/icons-material"
 import StatusButton from "../shared/StatusButton/StatusButton"
 import VariableEditor from "../shared/variables/VariableEditor"
 import PromptModelSelectorModal from "../shared/prompt/PromptModelSelectorModal"
 import PromptBuilder from "../shared/prompt/PromptBuilder"
+import QueuedImageTile from "../shared/images/QueuedImageTile"
+import QueuedGroupImageTile from "../shared/images/QueuedGroupImageTile"
+import ModelChangeTile from "../shared/images/ModelChangeTile"
+import ContextMenu from "../shared/ContextMenu"
+import PromptOrderedModal from "../shared/prompt/PromptOrderedModal"
 
 export default function DisplayPage() {
 
@@ -53,7 +58,7 @@ export default function DisplayPage() {
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const { progress, queue, activeJob } = useQueue((val) => {
+    const { progress, queue, groupedQueue, activeJob, nextModel } = useQueue((val) => {
         setSelectedImage(val)
         setImages((prev) => {
             return [val, ...prev]
@@ -141,7 +146,7 @@ export default function DisplayPage() {
             <div style={{ fontSize: '.8em' }}>Start rendering images on another window and they will appear here</div>
         </div>
         <ImageModal
-            open={!!selectedImage} setOpen={() => { }}
+            open={images.length > 0} setOpen={() => { }}
             image={selectedImage}
             onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete}
             onLeft={onLeft} onRight={onRight} onHome={onHome} onEnd={onEnd}
@@ -153,6 +158,7 @@ export default function DisplayPage() {
                 return <BrewingImageHUD
                     progress={progress} queue={queue} activeJob={activeJob} collapsed={collapse}
                     promptboxOpen={promptboxOpen} showPromptbox={showPromptbox} togglePromptbox={togglePromptBox}
+                    index={selectedIndex} bufferSize={images.length} groupedQueue={groupedQueue} nextModel={nextModel}
                 />
             }}
         />
@@ -164,17 +170,58 @@ export default function DisplayPage() {
 
 function BrewingImageHUD(props: {
     queue: Prompt[]
+    groupedQueue: Prompt[][]
     progress: Progress | undefined
     activeJob?: Prompt,
     collapsed?: boolean
-    promptboxOpen?: boolean
-    showPromptbox?: boolean
-    togglePromptbox?: () => void
+    promptboxOpen: boolean
+    showPromptbox: boolean
+    togglePromptbox: () => void
+    index: number, bufferSize: number
+    nextModel: string
 }) {
 
-    const { progress, queue, activeJob, collapsed, promptboxOpen, showPromptbox, togglePromptbox } = props
+    const { collapsed, promptboxOpen, showPromptbox, togglePromptbox, index, bufferSize } = props
     const [modelsOpen, setModelsOpen] = useState(false);
     const [dynamicsOpen, setDynamicsOpen] = useState(false);
+
+    const { progress, queue, groupedQueue, activeJob, nextModel, cancel } = useQueue()
+
+    const [queueOpen, setQueueOpen] = useState(false);
+    const [showQueue, setShowQueue] = useState(false)
+
+    const [interruptOpen, setInterruptOpen] = useState(false)
+    const interruptApi = useApi(interruptGeneration)
+
+    const openQueue = () => {
+        setShowQueue(true)
+        requestAnimationFrame(() => { setQueueOpen(true) })
+    }
+
+    const closeQueue = () => {
+        setQueueOpen(false);
+        setTimeout(() => { setShowQueue(false) }, 300)
+    }
+
+    const onPromptboxClick = () => {
+        if (showQueue) { closeQueue() }
+        togglePromptbox();
+    }
+
+    const onQueueClick = () => {
+        if (!showQueue) {
+            //If we're showing the promptbox close the promptbox
+            if (showPromptbox) togglePromptbox();
+            openQueue()
+        }
+        else { closeQueue(); }
+    }
+
+    const onInterrupt = () => {
+        if (!activeJob) return;
+        setInterruptOpen(false);
+        interruptApi.fetch(undefined, undefined, activeJob.id)
+    }
 
 
 
@@ -182,6 +229,15 @@ function BrewingImageHUD(props: {
 
         <VariableEditor open={dynamicsOpen} setOpen={setDynamicsOpen} hidePromptPreview />
         <PromptModelSelectorModal open={modelsOpen} setOpen={setModelsOpen} hideLoras />
+
+        <PromptOrderedModal
+            jobId={activeJob?.id ?? 0}
+            onCancel={onInterrupt}
+            open={interruptOpen} prompt={activeJob}
+            setOpen={setInterruptOpen}
+            progress={progress}
+        />
+
 
         {showPromptbox && <div style={{ position: "absolute", left: "20px", top: "20px", right: "20px", zIndex: 2 }}>
             <Card style={{
@@ -194,21 +250,61 @@ function BrewingImageHUD(props: {
             </Card>
         </div>}
 
+        {showQueue && <div style={{ position: "absolute", left: "20px", top: "20px", right: "20px", zIndex: 2 }}>
+            <Card style={{
+                maxWidth: "900px", margin: "auto", padding: '20px',
+                opacity: queueOpen ? 0.95 : 0,
+                transform: queueOpen ? "scale(1)" : "scale(0.5)",
+                transition: "transform 0.2s ease, opacity 0.2s ease"
+            }}>
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(auto-fill, minmax(80px, 1fr))`,
+                    gap: '20px', overflowX: 'clip', height: "25vh", minHeight: "200px",
+                    overflowY: "auto", textAlign: 'left'
+                }}>
+                    {groupedQueue.map(p =>
+                        p.length === 0 ? <></> :
+                            p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id ?? 0)} tiny /> :
+                                <QueuedGroupImageTile prompts={p} onCancel={cancel} tiny />
+                    )}
+
+                    {nextModel && <ModelChangeTile nextModel={nextModel} />}
+                </div>
+            </Card>
+        </div>}
+
+        <div style={{
+            position: "absolute", bottom: "10px", right: "10px", zIndex: 2, textAlign: 'right',
+            opacity: '.5'
+        }}>
+            {/* <div style={{ mixBlendMode: 'color', marginBottom: '5px' }}>
+                                <ImageStrip images={imageApi.images.slice(selectedIndex, selectedIndex + 3).map(a => a.id)} maxLength={3} imageSize="16px" />
+                            </div> */}
+            <div style={{ fontSize: ".6em", color: 'white', mixBlendMode: 'color-dodge' }}>
+                {(index + 1).toLocaleString()} of {bufferSize?.toLocaleString()}
+            </div>
+        </div>
+
         <div style={{ position: 'absolute', left: "20px", top: '20px', zIndex: '2' }}>
             <Card style={{ opacity: collapsed ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}>
-                <div style={{ width: "100%", display: 'flex', alignItems: 'center', padding: "2px 7px", gap: '2px' }}>
+                <div style={{ width: "100%", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: "2px 7px", gap: '2px' }}>
                     <StatusButton />
+                    <Tooltip title="Queue">
+                        <IconButton onClick={onQueueClick} >
+                            {showQueue ? <Close /> : <PlaylistPlay />}
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title={`${showPromptbox ? "Close p" : "P"}romptbox`}>
+                        <IconButton onClick={onPromptboxClick}>{
+                            showPromptbox ? <Close /> : <ReceiptLong />
+                        }</IconButton>
+                    </Tooltip>
                     <Tooltip title="Models">
                         <IconButton onClick={() => setModelsOpen(true)} ><ModelTraining /></IconButton>
                     </Tooltip>
                     <Tooltip title="Dynamics">
                         <IconButton onClick={() => setDynamicsOpen(true)}><AutoFixHigh /></IconButton>
-                    </Tooltip>
-                    <div style={{ flex: 1 }} />
-                    <Tooltip title={`${showPromptbox ? "Close p" : "P"}romptbox`}>
-                        <IconButton onClick={togglePromptbox}>{
-                            showPromptbox ? <Close /> : <ReceiptLong />
-                        }</IconButton>
                     </Tooltip>
                 </div>
             </Card>
@@ -222,7 +318,12 @@ function BrewingImageHUD(props: {
                 </AccordionSummary>
                 <AccordionDetails>
                     <div style={{ width: '192px', marginTop: "-10px" }}>
-                        <BrewingImageTile imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image} eta={progress?.eta_relative} progress={(progress?.progress ?? 0) * 100} />
+                        <ContextMenu options={[{ icon: <Cancel />, text: "Cancel", onClick: onInterrupt }]}>
+                            <BrewingImageTile
+                                imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
+                                eta={progress?.eta_relative} onClick={() => { setInterruptOpen(true) }} progress={(progress?.progress ?? 0) * 100}
+                            />
+                        </ContextMenu>
                     </div>
                 </AccordionDetails>
             </Accordion>

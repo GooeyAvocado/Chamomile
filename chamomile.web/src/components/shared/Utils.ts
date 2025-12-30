@@ -145,7 +145,7 @@ const applyTemplatesToPrompt = (
     templates: Template[]
 ): string => {
 
-    return promptString.replace(TEMPLATE_CALL_REGEX, (_, name, paramBlob) => {
+    return promptString?.replace(TEMPLATE_CALL_REGEX, (_, name, paramBlob) => {
         const template = templates.find(t => t.name.toUpperCase() === name.toUpperCase());
         if (!template) return ""; // or leave as-is
 

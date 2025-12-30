@@ -11,9 +11,10 @@ export default function QueuedImageTile(props: {
     prompt: Prompt
     onCancel: () => void
     onView?: (id: number) => void
+    tiny?: boolean
 }) {
 
-    const { prompt, onCancel, onView } = props;
+    const { prompt, onCancel, onView, tiny } = props;
     const [previewOpen, setPreviewOpen] = useState(false);
 
     return <ContextMenu options={[{ icon: <Cancel />, text: "Cancel", onClick: onCancel }]}>
@@ -25,7 +26,7 @@ export default function QueuedImageTile(props: {
                         style={{
                             width: "100%", height: "100%", objectFit: 'cover',
                             objectPosition: 'center top', position: 'absolute',
-                            left: '0', top: '0', opacity: '0.3'
+                            left: '0', top: '0', opacity: tiny ? "0.6" : '0.3'
                         }} />
                     : <img src={'/outline.png'} style={{
                         width: "50%", height: "50%", objectFit: 'cover',
@@ -34,7 +35,7 @@ export default function QueuedImageTile(props: {
                     }} />
                 }
 
-                <Typography sx={{
+                {!tiny && <Typography sx={{
                     width: "100%",
                     heigh: '100%',
                     fontFamily: 'monospace',
@@ -49,7 +50,7 @@ export default function QueuedImageTile(props: {
 
                 }} >
                     <div>{prompt.positivePrompt}</div>
-                </Typography>
+                </Typography>}
             </CardActionArea>
 
             <PromptOrderedModal

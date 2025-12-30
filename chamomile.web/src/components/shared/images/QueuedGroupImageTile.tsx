@@ -11,9 +11,10 @@ export default function QueuedGroupImageTile(props: {
     prompts: Prompt[]
     onCancel: (id: number | number[]) => void
     onView?: (id: number) => void
+    tiny?: boolean
 }) {
 
-    const { prompts, onCancel, onView } = props;
+    const { prompts, onCancel, onView, tiny } = props;
     const [previewOpen, setPreviewOpen] = useState(false);
 
     const cancelAll = () => {
@@ -27,7 +28,7 @@ export default function QueuedGroupImageTile(props: {
     ]} style={{ position: 'relative', width: "100%", aspectRatio: 1 }}>
         <div style={{ position: "absolute", top: 0, left: 0, width: '80%' }}>
             <BaseImageTile>
-                <div style={{ padding: "5px", fontSize: '.9em', fontFamily: 'monospace' }}>x{prompts.length}</div>
+                {!tiny && <div style={{ padding: "5px", fontSize: '.9em', fontFamily: 'monospace' }}>x{prompts.length}</div>}
             </BaseImageTile>
         </div>
         <div style={{ position: "absolute", width: '100%', height: "100%", zIndex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
@@ -39,7 +40,7 @@ export default function QueuedGroupImageTile(props: {
                                 style={{
                                     width: "100%", height: "100%", objectFit: 'cover',
                                     objectPosition: 'center top', position: 'absolute',
-                                    left: '0', top: '0', opacity: '0.3'
+                                    left: '0', top: '0', opacity: tiny ? "0.4" : '0.3'
                                 }} />
                             : <img src={'/outline.png'} style={{
                                 width: "50%", height: "50%", objectFit: 'cover',
@@ -56,7 +57,10 @@ export default function QueuedGroupImageTile(props: {
                             WebkitLineClamp: 10, overflow: "hidden",
 
                         }} >
-                            <div>{prompts[0].positivePrompt}</div>
+                            {tiny
+                                ? <div style={{ textAlign: 'center', fontSize: "1.8em" }}>x{prompts.length}</div>
+                                : <div>{prompts[0].positivePrompt}</div>
+                            }
                         </Typography>
                     </CardActionArea>
                     <PromptGroupModal prompts={prompts} onCancel={onCancel} onCancelAll={cancelAll} open={previewOpen} setOpen={setPreviewOpen} onViewImage={onView} />

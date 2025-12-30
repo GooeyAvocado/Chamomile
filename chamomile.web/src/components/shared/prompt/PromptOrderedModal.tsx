@@ -10,14 +10,14 @@ export default function PromptOrderedModal(props: {
     open: boolean,
     setOpen: (val: boolean) => void
     jobId: number
-    prompt: Prompt
+    prompt?: Prompt
     onCancel: (id: number) => void,
     onViewImage?: (id: number) => void
     progress?: Progress
 }) {
 
     const { open, setOpen, jobId, prompt, onCancel, onViewImage, progress } = props;
-    const orderData = prompt.orderData
+    const orderData = prompt?.orderData
 
     const basedOn = () => {
         switch (orderData?.source) {
@@ -42,7 +42,7 @@ export default function PromptOrderedModal(props: {
                     <div style={{
                         display: 'flex', gap: '5px', alignItems: "center", marginBottom: '10px',
                         fontSize: "1.2em"
-                    }}><b>Order {prompt.id?.toLocaleString()}</b></div>
+                    }}><b>Order {prompt?.id?.toLocaleString()}</b></div>
 
                     {progress ? <Card style={{ width: "128px", height: '128px', margin: "0px auto 5px auto" }}>
                         <img
@@ -61,14 +61,14 @@ export default function PromptOrderedModal(props: {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ fontSize: ".7em", textAlign: "center" }}>Based on {basedOn()}</div>
                         <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
-                            <Tooltip title="Dimensions"><OpenWith /></Tooltip> {prompt.width} x {prompt.height}
+                            <Tooltip title="Dimensions"><OpenWith /></Tooltip> {prompt?.width} x {prompt?.height}
                         </div>
                         <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
-                            <Tooltip title="Sampler"><Window /></Tooltip> {prompt.sampler}
+                            <Tooltip title="Sampler"><Window /></Tooltip> {prompt?.sampler}
                         </div>
                         <div style={{ display: 'flex', gap: "20px", alignItems: 'center' }}>
-                            <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}><Tooltip title="Steps"><DirectionsRun /></Tooltip> {prompt.steps}</div>
-                            <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}><Tooltip title="CFG Scale"><Tune /></Tooltip> {prompt.cfgScale}</div>
+                            <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}><Tooltip title="Steps"><DirectionsRun /></Tooltip> {prompt?.steps}</div>
+                            <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}><Tooltip title="CFG Scale"><Tune /></Tooltip> {prompt?.cfgScale}</div>
                         </div>
                     </div>
                 </div>
@@ -77,7 +77,7 @@ export default function PromptOrderedModal(props: {
                         display: 'flex', gap: '5px', alignItems: "center", fontSize: ".8em", marginBottom: '10px'
                     }}> <ReceiptLong fontSize="small" /> Positive Prompt</div>
                     <HighlightedPromptDiv
-                        prompt={promptPreview(prompt, prompt.variables, [])}
+                        prompt={promptPreview(prompt ?? { positivePrompt: "" } as Prompt, prompt?.variables ?? {}, [])}
                         style={{
                             flex: "1",
                             fontSize: ".7em", fontFamily: 'monospace',
@@ -86,7 +86,7 @@ export default function PromptOrderedModal(props: {
                             padding: '10px', backgroundColor: "rgba(0,0,0,0.25", borderRadius: "10px",
                         }}
                     />
-                    {prompt.negativePrompt && prompt.negativePrompt.trim().length > 0 && <div>
+                    {prompt?.negativePrompt && prompt.negativePrompt.trim().length > 0 && <div>
                         <div style={{
                             display: 'flex', gap: '5px', alignItems: "center", fontSize: ".8em", marginBottom: '10px'
                         }}> <ThumbDown fontSize="small" /> Negative Prompt</div>
