@@ -18,7 +18,7 @@ import PromptBuilder from "../shared/prompt/PromptBuilder"
 
 export default function DisplayPage() {
 
-    const MAX_BUFFER_SIZE = 16
+    //const MAX_BUFFER_SIZE = 16
 
     const [selectedImage, setSelectedImage] = useState(undefined as GeneratedImage | undefined)
     const [images, setImages] = useState([] as GeneratedImage[])
@@ -56,7 +56,8 @@ export default function DisplayPage() {
     const { progress, queue, activeJob } = useQueue((val) => {
         setSelectedImage(val)
         setImages((prev) => {
-            return [val, ...prev].slice(0, MAX_BUFFER_SIZE)
+            return [val, ...prev]
+            //.slice(0, MAX_BUFFER_SIZE)
         })
     })
 
