@@ -2,7 +2,7 @@ import { Alert, AlertTitle, Button, CircularProgress, Dialog, DialogActions, Dia
 import { usePrompt } from "../../hooks/usePrompt"
 import useApi from "../../hooks/useApi";
 import { currentCheckpoint, setCheckpoint } from "../../../api/Checkpoint";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Add, Close, Edit, Refresh, Schedule } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import LoraSelector from "../lora/LoraSelector";
@@ -17,6 +17,8 @@ import ModelSequenceEditor from "../checkpoint/CheckpointSequenceEditor";
 import ModelCard from "../checkpoint/CheckpointCard";
 import ModelSelector from "../checkpoint/CheckpointSelector";
 import { Model } from "../../../model/Model";
+import ModelBrowserModal from "../model/ModelBrowserModal";
+import LoraBrowserModal from "../lora/LoraBrowserModal";
 
 export default function PromptModelSelectorModal(props: {
     open: boolean,
@@ -65,11 +67,11 @@ export default function PromptModelSelectorModal(props: {
         }
     }, [open])
 
-    const usedLoras = () => {
+    const usedLoras = useMemo(() => {
         const loraPattern = /<lora:([^>]*):\d*\.*\d*>/g;
         const matches = [...prompt.positivePrompt.matchAll(loraPattern)];
         return matches.map(match => match[1])
-    }
+    }, [prompt.positivePrompt])
 
     const additionalModels = (currentSequenceApi.data ?? []).filter(m => m.title !== currentModelApi.data?.checkpoint);
     const hasSequence = (currentSequenceApi.data?.length ?? 0) > 0
@@ -93,15 +95,31 @@ export default function PromptModelSelectorModal(props: {
         }, { checkpoint: val.id } as CheckpointRequest)
     }
 
-    const addLora = (alias: string) => {
-        setPrompt({ ...prompt, positivePrompt: prompt.positivePrompt.trimEnd() + ` <lora:${alias}:1>` });
-    }
-
     const removeLora = (alias: string) => {
         setPrompt({ ...prompt, positivePrompt: prompt.positivePrompt.replace(new RegExp(`<lora:${alias}:\\d*\\.*\\d*>`), "") });
     }
 
     const checkpointLoading = currentModelApi.loading || changeModelApi.loading || currentSequenceApi.loading;
+
+    const handleLoraChange = (val: Model[]) => {
+        const newLoras = val.map(a => a.id);
+        //Added LoRAs are those that are ON the new one, but NOT in the old one
+        const addedLoRAs = newLoras.filter(a => !usedLoras.includes(a))
+
+        //Removed LoRAs are those that are ON the old ones but NOT in the new ones
+        const removedLoRAs = usedLoras.filter(a => !newLoras.includes(a))
+
+        //We do this afterwards because usedLoRAs may update during the time we execute this
+        //And honestly I don't want to risk it. Besides I assume the user will not be using more than like
+        //5 LoRAs so while this could probably be made more efficient the cost is negligible 
+
+        let newPrompt = prompt.positivePrompt.trimEnd();
+        addedLoRAs.forEach(a => newPrompt = newPrompt + ` <lora:${a}:1>`)
+        removedLoRAs.forEach(a => newPrompt = newPrompt.replace(new RegExp(`<lora:${a}:\\d*\\.*\\d*>`), ""))
+        setPrompt({ ...prompt, positivePrompt: newPrompt })
+
+        setAddOpen(false)
+    }
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
 
@@ -188,19 +206,20 @@ export default function PromptModelSelectorModal(props: {
 
             {!hideLoras && <> <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: "100%", marginTop: "5px" }}>
                 <div><b>Loras</b></div>
-                <Tooltip title={addOpen ? 'Cancel' : 'Add a LoRA'}><IconButton onClick={() => setAddOpen(!addOpen)}><Add sx={{ rotate: addOpen ? '45deg' : '' }} /></IconButton></Tooltip>
+                <Tooltip title={'Select LoRAs'}><IconButton onClick={() => setAddOpen(!addOpen)}><Edit /></IconButton></Tooltip>
             </div>
                 <hr style={{ width: "100%" }} />
 
-                {addOpen && <>
-                    <LoraSelector lora="" setLora={(e) => {
-                        addLora(e.id)
-                        setAddOpen(false)
-                    }} style={{ marginTop: "10px", marginBottom: '10px' }} />
-                </>}
+                <LoraBrowserModal
+                    open={addOpen}
+                    setOpen={setAddOpen}
+                    initialSelected={usedLoras}
+                    onOk={handleLoraChange}
+                    multiSelect
+                />
 
                 <div style={{ flex: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: "5px" }}>
-                    {usedLoras().map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    {usedLoras.map(a => <div key={a} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                         <IconButton onClick={() => { removeLora(a) }}><Close /></IconButton>
                         <div style={{ flex: "1" }}><LoraCard loraAlias={a} /></div>
                     </div>)}

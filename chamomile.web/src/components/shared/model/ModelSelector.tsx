@@ -126,7 +126,7 @@ export default function ModelSelector(props: {
 
         />
         <ModelBrowserModal onOk={(val) => {
-            onSelect(val)
+            onSelect(val[0])
             setBrowserOpen(false)
         }} open={browserOpen} setOpen={setBrowserOpen} showAny={showAll} showAvailability={showAvailability}
             showNone={showNone}

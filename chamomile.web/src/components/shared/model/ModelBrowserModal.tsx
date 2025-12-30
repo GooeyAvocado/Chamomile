@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, InputAdornment, TextField, } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, TextField, } from "@mui/material";
 import { Refresh, Search } from "@mui/icons-material";
 import ModelTile from "./ModelTile";
 import ImageModalFromId from "../images/ImageModalFromId";
@@ -22,7 +22,7 @@ import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 export default function ModelBrowserModal(props: {
     open: boolean,
     setOpen: (val: boolean) => void,
-    onOk: (val: Model) => void
+    onOk: (val: Model[]) => void
     onRefresh: (deep?: boolean) => void
     loading?: boolean,
     models?: Model[]
@@ -30,13 +30,33 @@ export default function ModelBrowserModal(props: {
     showAny?: boolean
     showNone?: boolean
     showAvailability?: boolean
+    multiSelect?: boolean
+    initialSelected?: string[]
 }) {
 
-    const { onOk, open, setOpen, showAny, showNone, showAvailability, loading, onRefresh: refresh, models, modelType } = props;
+    const { onOk, open, setOpen, showAny, showNone, showAvailability, loading, onRefresh: refresh, models, modelType, multiSelect, initialSelected } = props;
 
     const [query, setQuery] = useState("")
     const [type, setType] = useState("");
     const [availability, setAvailability] = useState<0 | 1 | -1>(0);
+
+    const [selected, setSelected] = useState<Model[]>([])
+
+    const onModelClick = (a: Model) => {
+
+        if (multiSelect) {
+            if (selected.some(b => b.id === a.id)) {
+                setSelected([...selected].filter(b => b.id !== a.id))
+            } else {
+                setSelected([...selected, a])
+            }
+        }
+        else { onOk([a]) }
+    }
+
+    useEffect(() => {
+        if (open) setSelected(initialSelected?.map(a => models?.find(b => b.id === a)).filter(a => !!a) ?? [])
+    }, [open])
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='xl'>
         <DialogTitle>Select a {modelType}</DialogTitle>
@@ -65,22 +85,26 @@ export default function ModelBrowserModal(props: {
             </div>
             <div style={{ flex: '1', overflowY: 'auto' }}>
                 <GridViewMode
-                    data={models} onOk={onOk} query={query} showAny={showAny} type={type} availability={showAvailability ? availability : 1}
-                    modelType={modelType} refresh={refresh} showNone={showNone}
+                    data={models} onClick={onModelClick} query={query} showAny={showAny} type={type} availability={showAvailability ? availability : 1}
+                    modelType={modelType} refresh={refresh} showNone={showNone} selected={selected}
                 />
             </div>
 
         </DialogContent>
+        {multiSelect && <DialogActions>
+            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={() => onOk(selected)}>OK</Button>
+        </DialogActions>}
 
     </Dialog>
 
 }
 
 function GridViewMode(props: {
-    data?: Model[], query: string, onOk: (val: Model) => void, showAny?: boolean, type: string, availability: 0 | 1 | -1,
-    modelType?: ModelType, refresh: (deep?: boolean) => void, showNone?: boolean
+    data?: Model[], query: string, onClick: (val: Model) => void, showAny?: boolean, type: string, availability: 0 | 1 | -1,
+    modelType?: ModelType, refresh: (deep?: boolean) => void, showNone?: boolean, selected?: Model[]
 }) {
-    const { data, query, onOk, showAny, type, availability, modelType, refresh, showNone } = props
+    const { data, query, onClick, showAny, type, availability, modelType, refresh, showNone, selected } = props
 
     const [editorModel, setEditorModel] = useState(undefined as Model | undefined)
     const [editorOpen, setEditorOpen] = useState(false)
@@ -159,7 +183,9 @@ function GridViewMode(props: {
                     gap: '20px'
                 }}>
                     {groupedModels[tag].map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <ModelTile model={a} onClick={() => onOk(a)}
+                        <ModelTile
+                            selected={selected?.some(s => s.id === a.id)}
+                            model={a} onClick={() => onClick(a)}
                             onViewImage={() => {
                                 setViewImage(a.bannerImage ?? -1)
                                 setImageOpen(true)
@@ -190,7 +216,9 @@ function GridViewMode(props: {
                                 gap: '20px', padding: "0px 20px 20px 20px"
                             }}>
                                 {groupedModels[tag].map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    <ModelTile model={a} onClick={() => onOk(a)}
+                                    <ModelTile
+                                        selected={selected?.some(s => s.id === a.id)}
+                                        model={a} onClick={() => onClick(a)}
                                         onViewImage={() => {
                                             setViewImage(a.bannerImage ?? -1)
                                             setImageOpen(true)
