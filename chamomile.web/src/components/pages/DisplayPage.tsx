@@ -69,6 +69,16 @@ export default function DisplayPage() {
         setSelectedImage(images[selectedIndex + 1]);
     }
 
+    const onHome = selectedIndex === 0 ? undefined : () => {
+        setSelectedImage(images[0]);
+    }
+
+    const onEnd = selectedIndex === images.length - 1 ? undefined : () => {
+        setSelectedImage(images[images.length - 1]);
+    }
+
+
+
     const onDelete = () => {
         setDeleteAys(false)
         delApi.fetch(() => {
@@ -134,7 +144,7 @@ export default function DisplayPage() {
             open={!!selectedImage} setOpen={() => { }}
             image={selectedImage}
             onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete}
-            onLeft={onLeft} onRight={onRight}
+            onLeft={onLeft} onRight={onRight} onHome={onHome} onEnd={onEnd}
             onFavorite={onFavorite} onUpscale={onUpscale} collapseDefault
             onUsePrompt={() => {
                 if (!showPromptbox) { openPromptBox() }

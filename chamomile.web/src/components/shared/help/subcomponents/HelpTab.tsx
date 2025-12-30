@@ -1046,8 +1046,8 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <img src="/screenshots/display.png" width={"100%"} />
             <p>
                 The Chamomile Display is designed to keep a look at what Chamomile is generating. We generally expect this to be run on a second monitor or
-                a different computer. Once an image is generated, it keeps a small buffer of images that have been generated, and you can flip through them
-                on an image viewer. The image viewer will automatically pull a newly generated image if it's on the previous latest image.
+                a different computer. Once an image is generated, it keeps a buffer of images that have been generated, and you can flip through them
+                on an image viewer. The image viewer will automatically pull a newly generated image.
             </p>
             <p>
                 While it's meant for viewing only, you can still hit the <LabeledIcon label="Menu"><Menu /></LabeledIcon> button on the top right of the
