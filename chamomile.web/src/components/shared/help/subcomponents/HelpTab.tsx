@@ -2,7 +2,7 @@ import HelpDisplay from "./helpDisplay/HelpDisplay";
 import HelpSection from "./helpDisplay/HelpSection";
 import GithubLink from "../../githubLink/GithubLink";
 import { Alert, AlertTitle, Button, Card, CardContent, CircularProgress, IconButton, Link, Stack, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from "@mui/material";
-import { AddPhotoAlternate, ArrowForward, AutoFixHigh, BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, FileOpen, Folder, Gradient, GridView, HomeRepairService, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, Preview, ReceiptLong, Refresh, Save, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
+import { AddPhotoAlternate, ArrowForward, AutoFixHigh, BarChart, Bolt, BorderClear, CalendarMonth, Coffee, CoffeeOutlined, CopyAll, DirectionsRun, Download, ExpandMore, Explore, FileOpen, Folder, Gradient, GridView, HomeRepairService, Image, ImageSearch, LibraryAdd, Menu, ModelTraining, Monitor, MoreVert, OpenWith, Palette, Pause, PhotoLibrary, PlayArrow, PlaylistPlay, Preview, Receipt, ReceiptLong, Refresh, Save, Schedule, Settings, Star, ThumbDown, Timeline, Tune, Upload, Warning, Window, Yard } from "@mui/icons-material";
 import { usePrompt } from "../../../hooks/usePrompt";
 import { ReactNode } from "react";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
@@ -648,6 +648,8 @@ export default function HelpTab(props: {
             <ul>
                 <li><b>Sound:</b> Chamomile makes a few sounds. Do you want to hear them?</li>
                 <li><b>Defaults:</b> Set the defaults for some of the advanced prompting values.</li>
+                <li><b>Tile Sizes:</b> Set the size of tiles on any image grid from extra small, to extra large</li>
+                <li><b>Upscaling:</b> Set your upscaler and scale to use when upscaling an image</li>
                 <li>
                     <b>Globals:</b> When you re-brew a recipe or existing image, all
                     prompt parameters from the source are used. You can configure Chamomile to use
@@ -956,6 +958,10 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <div style={codeStyle}>
                 /(your web UI root)/models/RealESRGAN
             </div>
+            <p>
+                Your selected upscaler and scale are both saved to settings. You can also edit these values on the Settings slide in.
+                These configured values are used when you upscale from the image hotbar, from an image's context menu, or when hitting the key-combo
+            </p>
         </HelpSection>
 
         <HelpSection title="Usage Statistics" >
@@ -1047,11 +1053,21 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <p>
                 The Chamomile Display is designed to keep a look at what Chamomile is generating. We generally expect this to be run on a second monitor or
                 a different computer. Once an image is generated, it keeps a buffer of images that have been generated, and you can flip through them
-                on an image viewer. The image viewer will automatically pull a newly generated image.
+                on an image viewer. The image viewer will automatically pull a newly generated image if you're on the first image (the last generated image).
             </p>
             <p>
-                While it's meant for viewing only, you can still hit the <LabeledIcon label="Menu"><Menu /></LabeledIcon> button on the top right of the
-                screen to bring up more information, and to brew more of the image based on their prompt or base prompt.
+                Above the preview of the next image is a new tiny hotbar of controls for pending generations, including options to:
+                <ul>
+                    <li><LabeledIcon label="Queue"><PlaylistPlay /></LabeledIcon>: View the queue of pending images</li>
+                    <li><LabeledIcon label="Promptbox"><ReceiptLong /></LabeledIcon>: Bring up a temporary promptbox to order more images</li>
+                    <li><LabeledIcon label="Models"><ModelTraining /></LabeledIcon>: View or set the checkpoint (or checkpoint sequence) to be used for pending generations</li>
+                    <li><LabeledIcon label="Dynamics"><AutoFixHigh /></LabeledIcon>: View or set overrides/wildcards for re-brewed images, or manage templates</li>
+                </ul>
+            </p>
+            <p>
+                You can hit the <LabeledIcon label="Menu"><Menu /></LabeledIcon> button on the top right of the
+                screen to bring up more information on the current image. This brings up the side bar on the standard image viewer, including options
+                to re-brew directly or re-use the prompt in the Promptbox.
             </p>
             <p>The Chamomile Display can be launched from the <LabeledIcon label="Display"><Monitor /></LabeledIcon> option on the menu on the top right of the screen</p>
         </HelpSection>

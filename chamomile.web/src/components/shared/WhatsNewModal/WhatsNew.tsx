@@ -27,7 +27,7 @@ export default function WhatsNew({ open, setOpen }: {
 - **Conflict warning**: Chamomile will now warn if more than one LoRA has the same alias, instead of crashing and not updating the list of LoRAs
 - **More keyboard shortcuts**: This includes numpad mappings to allow for one handed operation of Chamomile
 - **More context menu options**: Right clicking on an image now allows you to upscale and download images
-- Upscale now available from image hotbar and through keyboard shortcut.
+- Upscale now available from image hotbar and through keyboard shortcut CTRL+U.
 - Middle click to re-order saved prompts
 - Blurred image background for the image viewer
 - Refresh button to refresh both Checkpoints and LoRAs on the prompt selector
@@ -40,11 +40,14 @@ export default function WhatsNew({ open, setOpen }: {
 - **Wildcards and Overrides changed to "Dynamics":** A more general term to include Templates and Template Management
 - **Order of operations changed for dynamics:** Templates are applied first, then overrides, then wildcards
 - **Improved Display page**: Display page now has quick options to modify dynamics, models, or prompt new images
+- **Multi-select LoRAs and Checkpoints**: Multi-select is now available for LoRAs for prompting, and for Checkpoints when creating checkpoint sequences
 - **Cumulative usage graphs:** Graphs are now cumulative instead of just showing daily counts.
     - There's a little switch to change back
 - **Date search improvements:** Date search is now from and to inclusive 
     - IE: from is greater or equal to midnight, and to is less than or equal to 23:59:59
-- **Upscaler and Scale now saved to settings**: Your selected upscaler and scale are now saved to settings. You can 
+- **Upscaler and Scale now saved to settings**: Your selected upscaler and scale are now saved to settings.
+- Display now switches to latest image only if last latest image is displayed.
+- Display's small buffer size has been removed and is now unbounded.
 - Image viewer now focuses the last selected image, scrolling to it if necessary.
 - Improved brewing image tile to better highlight the brewing image
 - Improved brewing/queued prompt modal
@@ -67,6 +70,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug where the filter builder may say it's not empty, even though it is
 - Fixed bug where general statistics would fail to load if all images had no generation time
 - Fixed bug where upscaling an image and navigating away from that image would re-select the image when upscaling is complete
+- Fixed bug where loading model sequences would not work (not sure if this is a bug created during development, thought to included it anyways)
 `
 
     const { settings } = useSettings();
