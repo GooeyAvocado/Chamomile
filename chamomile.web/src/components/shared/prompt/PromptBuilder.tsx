@@ -487,7 +487,7 @@ export default function PromptBuilder(props: {
                 onSave={existingPrompt ? () => setSaveAys(true) : () => setSaveOpen(true)}
                 onSaveAs={() => setSaveOpen(true)}
                 saveAsEnabled={existingPrompt}
-                fullWidth
+                fullWidth reducedOptions={reducedBrewMenu}
                 setFilter={setFilter}
                 filter={filter}
             />
