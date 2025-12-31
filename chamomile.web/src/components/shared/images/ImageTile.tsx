@@ -115,7 +115,7 @@ export default function ImageTile(props: {
                 opacity: selectMode ? selected ? 1 : .5 : 1,
                 padding: highlighted ? "2px" : "0", backgroundColor: highlighted ? primaryColor.main : undefined,
                 transition: `transform ${selectMode ? "0.1s" : ".2s"} ease, opacity 0.1s ease, padding 0.1s ease`,
-                zIndex: highlighted ? 20 : 0
+                zIndex: highlighted ? 2 : 0
             }}>
                 <CardActionArea ref={ref} onClick={(e) => {
                     if ((selectMode || e.shiftKey) && canSelect) {
