@@ -3,11 +3,7 @@ import { Prompt } from "../../../model/Prompt";
 import { usePingPong } from "../../hooks/usePingPong";
 import { usePrompt } from "../../hooks/usePrompt";
 import { Coffee, Warning } from "@mui/icons-material";
-import { enqueuePrompts, imageUrl } from "../../../api/Images";
-import useApi from "../../hooks/useApi";
-import { useSnackbar } from "notistack";
-import { useSettings } from "../../hooks/useSettings";
-import { useLoras } from "../../hooks/useLoras";
+import { imageUrl } from "../../../api/Images";
 import useWaiter from "../../hooks/useWaiter";
 
 export default function PromptReorderButton(props: {

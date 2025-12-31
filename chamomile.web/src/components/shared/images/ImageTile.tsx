@@ -24,7 +24,7 @@ export default function ImageTile(props: {
     onClick: () => void
     onFavorite: (val?: GeneratedImage) => void,
     onDelete: (val?: GeneratedImage) => void,
-    onUpscale: (val: GeneratedImage) => void,
+    onUpscale?: (val: GeneratedImage) => void,
     onDownload?: () => void
     lazyLoad?: boolean
     highlighted?: boolean

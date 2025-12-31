@@ -3,9 +3,8 @@ import { usePrompt } from "../../hooks/usePrompt"
 import useApi from "../../hooks/useApi";
 import { currentCheckpoint, setCheckpoint } from "../../../api/Checkpoint";
 import { useEffect, useMemo, useState } from "react";
-import { Add, Close, Edit, Refresh, Schedule } from "@mui/icons-material";
+import { Close, Edit, Refresh, Schedule } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
-import LoraSelector from "../lora/LoraSelector";
 import { useSnackbar } from "notistack";
 import { CheckpointRequest } from "../../../model/CheckpointRequest";
 import { Prompt } from "../../../model/Prompt";
@@ -17,7 +16,6 @@ import ModelSequenceEditor from "../checkpoint/CheckpointSequenceEditor";
 import ModelCard from "../checkpoint/CheckpointCard";
 import ModelSelector from "../checkpoint/CheckpointSelector";
 import { Model } from "../../../model/Model";
-import ModelBrowserModal from "../model/ModelBrowserModal";
 import LoraBrowserModal from "../lora/LoraBrowserModal";
 
 export default function PromptModelSelectorModal(props: {
