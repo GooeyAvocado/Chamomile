@@ -75,7 +75,7 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
         <TabbedModalActions>
             <div style={{ display: 'flex', justifyContent: "space-between", width: "100%", alignItems: 'center' }}>
                 <div style={{ marginLeft: "10px", fontSize: ".8em", opacity: ".8" }}>
-                    {grid.xVals.length} x {grid.yVals.length} ({grid.xVals.length * grid.yVals.length} images)
+                    {grid?.xVals?.length} x {grid?.yVals?.length} ({grid?.xVals?.length * grid?.yVals?.length} images)
                 </div>
                 <div style={{ display: "flex", gap: "10px" }}>
                     <Button disabled={loading} onClick={() => setOpen(false)}>Cancel</Button>
