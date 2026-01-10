@@ -1,15 +1,16 @@
 import { Button, Card, FormControl, IconButton, MenuItem, Select, TextField, Tooltip } from "@mui/material";
 import { Grid } from "../../../model/Grid";
 import PromptBuilder from "../prompt/PromptBuilder";
-import { Add, Close, CompareArrows, OpenWith, Remove } from "@mui/icons-material";
+import { Add, Close, CompareArrows, OpenWith, Remove, Window } from "@mui/icons-material";
 import { GridTypes } from "./GridTypes";
 import SamplerSelector from "../prompt/SamplerSelector";
 import SchedulerSelector from "../prompt/SchedulerSelector";
-import ModelSelector from "../checkpoint/CheckpointSelector";
+import CheckpointSelector from "../checkpoint/CheckpointSelector";
 import TabbedModal from "../modals/TabbedModal/TabbedModal";
 import TabbedModalTabContent from "../modals/TabbedModal/TabbedModalTabContent";
 import TabbedModalActions from "../modals/TabbedModal/TabbedModalActions";
 import TabbedModalTitle from "../modals/TabbedModal/TabbedModalTitle";
+import LoraSelector from "../lora/LoraSelector";
 
 export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading, generated, duplicate }: {
     open: boolean,
@@ -140,39 +141,64 @@ function GridValsEditor({
                             onChange={(e) => setVals(updateInArray(vals, i, e.target.value))}
                         /> : type.type === "sampler" ? <SamplerSelector sampler={a} setSampler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} />
                             : type.type === "scheduler" ? <SchedulerSelector scheduler={a} setScheduler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} />
-                                : type.type === "model" ? <ModelSelector model={a} setModel={a => setVals(updateInArray(vals, i, a.id))} disabled={disabled} style={{ width: "100%" }} />
-                                    : type.type === "dimensions" ?
-                                        <div style={{
-                                            flex: "1", alignItems: 'center', borderRadius: "4px",
-                                            border: "1px solid rgba(255,255,255, 0.23)", minWidth: "260px"
-                                        }}>
+                                : type.type === "model" ? <CheckpointSelector model={a} setModel={a => setVals(updateInArray(vals, i, a.id))} disabled={disabled} style={{ width: "100%" }} />
+                                    : type.type === "lora" ? <div style={{ width: "100%" }}>
 
-                                            {/* This is necessary. If this isn't in a sub-div, the padding adds to the width and makes flex:1 not be half and half */}
-                                            {/* border-box does not solve this issue either. I have no idea why, but hey, this works. So we're good */}
-                                            <div style={{ display: 'flex', gap: "10px", width: "100%", height: "56px", alignItems: 'center', padding: "0 16px" }}>
-                                                <OpenWith sx={{ margin: "-7px", marginRight: "5px" }} />
-
-                                                {/* Width */}
-                                                <TextField type="number" disabled={disabled}
-                                                    value={a.split('x')[0]} onChange={(e) => setVals(updateInArray(vals, i, [e.target.value, a.split('x')[1] ?? ""].join("x")))}
-                                                    placeholder="1024" fullWidth slotProps={{ htmlInput: { min: 1 }, }} variant="standard"
-                                                    style={{ flex: "1", minWidth: "45px" }}
-                                                    size="small"
-                                                />
-                                                <Close fontSize="inherit" />
-                                                {/* Height */}
-                                                <TextField type="number" disabled={disabled}
-                                                    value={a.split('x')[1] ?? ""} onChange={(e) => setVals(updateInArray(vals, i, [a.split('x')[0] ?? "", e.target.value].join("x")))}
-                                                    placeholder="1024" fullWidth slotProps={{ htmlInput: { min: 1 }, }} variant="standard"
-                                                    style={{ flex: "1", minWidth: "45px" }}
-                                                    size="small"
-                                                />
-                                                <div>px</div>
-
-
-                                            </div>
+                                        <div style={{ display: 'flex', gap: "10px", alignItems: 'center', width: "100%" }}>
+                                            <LoraSelector lora={a.split(":")[1] ?? ""} setLora={lora => setVals(updateInArray(vals, i,
+                                                `${lora.samplePrompt} <lora:${lora.id}:${a.split(":")[2]?.replace(">", "") ?? "1"}>`
+                                            ))} disabled={disabled} style={{ flex: 1 }} />
+                                            <TextField
+                                                type="number" disabled={disabled || a.length === 0} label="⚖️"
+                                                value={a.split(":")[2]?.replace(">", "") ?? "1"}
+                                                onChange={(e) => setVals(updateInArray(vals, i,
+                                                    `<lora:${a.split(":")[1] ?? ""}:${e.target.value}>`
+                                                ))}
+                                                style={{ width: "50px" }}
+                                                slotProps={{
+                                                    inputLabel: {
+                                                        shrink: true,
+                                                    },
+                                                    htmlInput: {
+                                                        step: 0.1,
+                                                        min: 0
+                                                    }
+                                                }}
+                                            />
                                         </div>
-                                        : <></>
+                                    </div>
+                                        : type.type === "dimensions" ?
+                                            <div style={{
+                                                flex: "1", alignItems: 'center', borderRadius: "4px",
+                                                border: "1px solid rgba(255,255,255, 0.23)", minWidth: "260px"
+                                            }}>
+
+                                                {/* This is necessary. If this isn't in a sub-div, the padding adds to the width and makes flex:1 not be half and half */}
+                                                {/* border-box does not solve this issue either. I have no idea why, but hey, this works. So we're good */}
+                                                <div style={{ display: 'flex', gap: "10px", width: "100%", height: "56px", alignItems: 'center', padding: "0 16px" }}>
+                                                    <OpenWith sx={{ margin: "-7px", marginRight: "5px" }} />
+
+                                                    {/* Width */}
+                                                    <TextField type="number" disabled={disabled}
+                                                        value={a.split('x')[0]} onChange={(e) => setVals(updateInArray(vals, i, [e.target.value, a.split('x')[1] ?? ""].join("x")))}
+                                                        placeholder="1024" fullWidth slotProps={{ htmlInput: { min: 1 }, }} variant="standard"
+                                                        style={{ flex: "1", minWidth: "45px" }}
+                                                        size="small"
+                                                    />
+                                                    <Close fontSize="inherit" />
+                                                    {/* Height */}
+                                                    <TextField type="number" disabled={disabled}
+                                                        value={a.split('x')[1] ?? ""} onChange={(e) => setVals(updateInArray(vals, i, [a.split('x')[0] ?? "", e.target.value].join("x")))}
+                                                        placeholder="1024" fullWidth slotProps={{ htmlInput: { min: 1 }, }} variant="standard"
+                                                        style={{ flex: "1", minWidth: "45px" }}
+                                                        size="small"
+                                                    />
+                                                    <div>px</div>
+
+
+                                                </div>
+                                            </div>
+                                            : <></>
                     }
                 </div>)}
 
@@ -181,12 +207,15 @@ function GridValsEditor({
         </div>
 
         <hr style={{ width: "100%" }} />
-        <Button
-            startIcon={<Add />}
-            disabled={disabled || !type || type.type === "none"}
-            onClick={() => setVals(addToArray(vals, ""))}>
-            Add new {axis === "Y" ? "row" : "column"}
-        </Button>
+        <div style={{ display: 'flex', width: "100%" }}>
+            <Button
+                startIcon={<Add />} style={{ flex: "1" }}
+                disabled={disabled || !type || type.type === "none"}
+                onClick={() => setVals(addToArray(vals, ""))}>
+                Add new {axis === "Y" ? "row" : "column"}
+            </Button>
+
+        </div>
     </Card>
 
 

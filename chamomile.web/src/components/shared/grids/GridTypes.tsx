@@ -4,7 +4,7 @@ import { Prompt } from "../../../model/Prompt";
 export interface GridType {
     code: string;
     name: string;
-    type: "none" | "string" | "multiline" | "float" | "int" | "sampler" | "model" | "dimensions" | "scheduler";
+    type: "none" | "string" | "multiline" | "float" | "int" | "sampler" | "model" | "dimensions" | "scheduler" | "lora";
     prefix: React.ReactNode;
     suffix: string;
     displayValue?: (val: string) => React.ReactNode
@@ -69,6 +69,21 @@ export const GridTypes: GridType[] = [
             return {
                 ...prompt,
                 orderData: { ...prompt.orderData, model: val }
+
+            } as Prompt
+        }
+    },
+    {
+        code: "LOR",
+        name: "Lora",
+        type: "lora",
+        prefix: <ModelTraining fontSize="inherit" />,
+        suffix: "",
+        applyToPrompt: (prompt: Prompt, val: string) => {
+            if (!val || val?.trim().length === 0) return prompt;
+            return {
+                ...prompt,
+                positivePrompt: prompt.positivePrompt + ` ${val}`,
 
             } as Prompt
         }
