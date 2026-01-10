@@ -1171,7 +1171,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                         </TableCell>
                         <TableCell>
                             <div>On Grids: Up one row</div>
-                            <div>On Home: Up 5 images</div>
+                            {/* <div>On Home: Up 5 images</div> */}
                         </TableCell>
                     </TableRow>
                     <TableRow>
@@ -1181,10 +1181,10 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                         </TableCell>
                         <TableCell>
                             <div>On Grids: Down one row</div>
-                            <div>On Home: Down 5 images</div>
+                            {/* <div>On Home: Down 5 images</div> */}
                         </TableCell>
                     </TableRow>
-                    <TableRow>
+                    {/* <TableRow>
                         <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {keyCombo(["Pg Up"])}
                             {keyCombo(["Numpad 9"])}
@@ -1197,7 +1197,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                             {keyCombo(["Numpad 3"])}
                         </TableCell>
                         <TableCell>Down 10 images</TableCell>
-                    </TableRow>
+                    </TableRow> */}
                     <TableRow>
                         <TableCell style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {keyCombo(["Home"])}

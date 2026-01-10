@@ -441,7 +441,7 @@ export default function ImageViewer(props: {
                         onDelete={() => setDeleteAys(true)} onDeleteForce={onDelete} onUpdateNotes={onNotesUpdate}
                         onFavorite={onFavorite} onDownload={onDownload}
                         onLeft={onLeft} onRight={onRight} onHome={onHome} onEnd={onEnd}
-                        onUp={() => advanceBy(-5)} onDown={() => advanceBy(5)}
+                        // onUp={() => advanceBy(-5)} onDown={() => advanceBy(5)}
                         onPageUp={() => advanceBy(-10)} onPageDown={() => advanceBy(10)}
                         onUpscale={onUpscale} onAddAlbum={onAddAlbum} onRemoveAlbum={onRemoveAlbum} onViewAlbum={onViewAlbum}
                         imageChildren={() => <div style={{
