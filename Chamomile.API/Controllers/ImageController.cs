@@ -1,13 +1,14 @@
 ﻿using Automatic1111.API;
 using Automatic1111.Common;
 using Chamomile.API.Requests;
+using Chamomile.API.Utils;
 using Chamomile.API.Workers;
 using Chamomile.Common;
 using Chamomile.Common.Exceptions;
 using Chamomile.Data;
 using Chamomile.Data.Utils;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Immutable;
+using System.Drawing;
 using static Chamomile.API.Workers.ImageGeneratorWorker;
 
 namespace Chamomile.API.Controllers
@@ -19,6 +20,7 @@ namespace Chamomile.API.Controllers
     {
 
         readonly ImagesDAO dao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
+        readonly GridsDAO gridDao = new(new EnvironmentKey("DB_URL", () => throw new InvalidOperationException("")).ToString());
         readonly A111Api api = new(new EnvironmentKey("SD_URL", () => throw new InvalidOperationException("")).ToString());
         readonly ImageGeneratorWorker worker = worker;
 
@@ -76,6 +78,48 @@ namespace Chamomile.API.Controllers
             });
         }
 
+        [HttpPost("generateGrid")]
+        public async Task<IActionResult> Generate([FromBody] GenerateGridRequest request) {
+
+            //Get the grid,
+            var grid = await gridDao.Get(request.Id);
+            if (grid == null) { return NotFound(); }
+
+            //Get the coordinates and map them to prompts
+            List<Prompt> prompts = [.. request.Coordinates.Select(coord 
+                => GridTypes.ApplyGridToPrompt(
+                    GridTypes.ApplyGridToPrompt(new Prompt() {
+                CFGScale = grid.CFGScale,
+                Height = grid.Height,
+                Width = grid.Width,
+                Name=grid.Name,
+                NegativePrompt=grid.NegativePrompt,
+                PositivePrompt=grid.Prompt,
+                Sampler=grid.Sampler,
+                ScheduleType=grid.ScheduleType,
+                Seed=grid.Seed,
+                Steps=grid.Steps,
+                Variables=[],
+                OrderData=new (){
+                    Source="GRID",
+                    GridId=grid.Id,
+                    XPos=coord.X,
+                    YPos=coord.Y,
+                    XVal=grid.XVals[coord.X],
+                    YVal=grid.YVals[coord.Y],
+                }
+
+            },grid.XValMode,grid.XVals[coord.X],grid.XVals)
+                ,grid.YValMode,grid.YVals[coord.Y],grid.YVals
+                    ))];
+
+            //Enqueue and adios
+
+            return Ok(new Dictionary<string, object>() {
+                { "jobId", worker.EnqueuePrompts(prompts) }
+            });
+        }
+
         [HttpPost("preview")]
         public async Task<IActionResult> Preview([FromBody] Prompt prompt)
         {
@@ -110,17 +154,8 @@ namespace Chamomile.API.Controllers
 
         [HttpPost("generateMany")]
         public IActionResult GenerateMany([FromBody] List<Prompt> prompts) {
-            List<long> jobIds = [];
-
-            foreach (var prompt in prompts) {
-                try {
-                    jobIds.Add(worker.EnqueuePrompt(prompt));
-                }
-                catch { }
-            }
-
             return Ok(new Dictionary<string, object>() {
-                { "jobIds", jobIds  }
+                { "jobIds", worker.EnqueuePrompts(prompts)  }
             });
         }
 

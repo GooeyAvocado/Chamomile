@@ -67,6 +67,22 @@ namespace Chamomile.API.Workers {
             return jobId;
         }
 
+        /// <summary>Enqueues many prompts</summary>
+        /// <param name="prompts"></param>
+        /// <returns></returns>
+        public List<long> EnqueuePrompts(List<Prompt> prompts) {
+
+            List<long> jobIds = [];
+            prompts.ForEach(a => _queue[Interlocked.Increment(ref _jobCounter)] = a);
+
+            _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
+
+            //We should only be getting new prompts if SD is available. CheckSD now.
+            if (_isSdPause) _ = CheckSd();
+
+            return jobIds;
+        }
+
         /// <summary>
         /// Retrieves all pending prompts in order.
         /// </summary>
