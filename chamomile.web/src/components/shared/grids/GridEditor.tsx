@@ -11,6 +11,9 @@ import TabbedModalTabContent from "../modals/TabbedModal/TabbedModalTabContent";
 import TabbedModalActions from "../modals/TabbedModal/TabbedModalActions";
 import TabbedModalTitle from "../modals/TabbedModal/TabbedModalTitle";
 import LoraSelector from "../lora/LoraSelector";
+import LoraBrowserModal from "../lora/LoraBrowserModal";
+import { useState } from "react";
+import CheckpointBrowserModal from "../checkpoint/CheckpointBrowserModal";
 
 export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading, generated, duplicate }: {
     open: boolean,
@@ -96,6 +99,8 @@ function GridValsEditor({
     disabled: boolean
 }) {
 
+    const [multiSelectOpen, setMultiSelectOpen] = useState(false);
+
     function removeFromArray<T>(array: T[], index: number) {
         return [...array.slice(0, index), ...array.slice(index + 1)]
     }
@@ -146,7 +151,7 @@ function GridValsEditor({
 
                                         <div style={{ display: 'flex', gap: "10px", alignItems: 'center', width: "100%" }}>
                                             <LoraSelector lora={a.split(":")[1] ?? ""} setLora={lora => setVals(updateInArray(vals, i,
-                                                `${lora.samplePrompt} <lora:${lora.id}:${a.split(":")[2]?.replace(">", "") ?? "1"}>`
+                                                `<lora:${lora.id}:${a.split(":")[2]?.replace(">", "") ?? "1"}>`
                                             ))} disabled={disabled} style={{ flex: 1 }} />
                                             <TextField
                                                 type="number" disabled={disabled || a.length === 0} label="⚖️"
@@ -214,8 +219,34 @@ function GridValsEditor({
                 onClick={() => setVals(addToArray(vals, ""))}>
                 Add new {axis === "Y" ? "row" : "column"}
             </Button>
-
+            {
+                type && (type.type === "model" || type.type === "lora") &&
+                <Button
+                    startIcon={<Window />} style={{ flex: "1" }}
+                    disabled={disabled}
+                    onClick={() => setMultiSelectOpen(true)}
+                >
+                    Select values
+                </Button>
+            }
         </div>
+
+        {type?.type === "lora" && <LoraBrowserModal
+            initialSelected={vals.filter(a => a.includes(":")).map(a => a.split(":")[1])}
+            multiSelect onOk={(val) => {
+                setVals([...val.map(a => `<lora:${a.id}:1>`)])
+                setMultiSelectOpen(false);
+            }} open={multiSelectOpen} setOpen={setMultiSelectOpen}
+        />}
+
+        {type?.type === "model" && <CheckpointBrowserModal
+            initialSelected={vals}
+            multiSelect onOk={(val) => {
+                setVals([...val.map(a => a.id)])
+                setMultiSelectOpen(false);
+            }} open={multiSelectOpen} setOpen={setMultiSelectOpen}
+        />}
+
     </Card>
 
 
