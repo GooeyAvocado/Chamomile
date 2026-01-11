@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { deletePrompt, getPrompts, updatePrompt } from "../../../api/Prompts";
 import { Prompt } from "../../../model/Prompt";
 import useApi from "../../hooks/useApi";
@@ -34,6 +34,8 @@ export default function PromptSelectorModal(props: {
     const { enqueueSnackbar } = useSnackbar();
     const brewApi = useApi(enqueuePrompts)
     const { settings } = useSettings();
+
+    const searchRef = useRef<HTMLInputElement>(null);
 
     const [query, setQuery] = useState("")
     const [delPrompt, setDelPrompt] = useState(undefined as undefined | Prompt)
@@ -110,12 +112,19 @@ export default function PromptSelectorModal(props: {
         }
     }, [open])
 
+    useEffect(() => {
+        if (open && searchRef.current) {
+            searchRef.current?.focus();
+        }
+    }, [open, searchRef.current])
+
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
         <DialogTitle>{promptsApi.data?.length} Recipes</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: "75vh" }}>
             <div style={{ display: 'flex', gap: '10px' }}>
                 <TextField
+                    inputRef={searchRef}
                     value={query} onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search" fullWidth
                     slotProps={{ input: { startAdornment: <InputAdornment position="start"><Search /></InputAdornment> } }}
@@ -203,7 +212,7 @@ function GridViewMode(props: {
             gap: '20px'
         }}>
             {data?.filter(a => query.trim().length === 0 ? true :
-                a.name.toLowerCase().includes(query.toLowerCase()) ||
+                a.name.toLowerCase().substring(a.name.lastIndexOf("/")).includes(query.toLowerCase()) ||
                 a.positivePrompt.toLowerCase().includes(query.toLowerCase())
             ).map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[

@@ -27,6 +27,7 @@ export default function WhatsNew({ open, setOpen }: {
 - **Conflict warning**: Chamomile will now warn if more than one LoRA has the same alias, instead of crashing and not updating the list of LoRAs
 - **More keyboard shortcuts**: This includes numpad mappings to allow for one handed operation of Chamomile
 - **More context menu options**: Right clicking on an image now allows you to upscale and download images
+- **New LoRA Grid axis type**: The Grid Editor will now let you test LoRAs and weights as an axis.
 - Upscale now available from image hotbar and through keyboard shortcut CTRL+U.
 - Middle click to re-order saved prompts
 - Blurred image background for the image viewer
@@ -38,12 +39,11 @@ export default function WhatsNew({ open, setOpen }: {
 
 ### What's changed?
 - **Grid Editor Overhaul:** Grid editor is now a tabbed dialog box to make it a bit more spacious when defining columns
-    - New Grid LoRA axes option
-    - Multi-select for checkpoint and LoRA columns
 - **Wildcards and Overrides changed to "Dynamics":** A more general term to include Templates and Template Management
 - **Order of operations changed for dynamics:** Templates are applied first, then overrides, then wildcards
 - **Improved Display page**: Display page now has quick options to modify dynamics, models, or prompt new images
-- **Multi-select LoRAs and Checkpoints**: Multi-select is now available for LoRAs for prompting, and for Checkpoints when creating checkpoint sequences
+- **Multi-select LoRAs and Checkpoints**: Multi-select is now available for grids axes, LoRAs for prompting, and for Checkpoints when creating checkpoint sequences
+- **Recipe browser improvements**: Search now auto-focused on open, search now only looks at recipe names/positive prompt instead of including folder structure in search
 - **Cumulative usage graphs:** Graphs are now cumulative instead of just showing daily counts.
     - There's a little switch to change back
 - **Date search improvements:** Date search is now from and to inclusive 
