@@ -73,7 +73,11 @@ namespace Chamomile.API.Workers {
         public List<long> EnqueuePrompts(List<Prompt> prompts) {
 
             List<long> jobIds = [];
-            prompts.ForEach(a => _queue[Interlocked.Increment(ref _jobCounter)] = a);
+            prompts.ForEach(a => {
+                var jobId = Interlocked.Increment(ref _jobCounter);
+                _queue[jobId] = a;
+                jobIds.Add(jobId);
+            });
 
             _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
 
