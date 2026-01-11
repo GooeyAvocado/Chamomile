@@ -116,7 +116,7 @@ namespace Chamomile.API.Controllers
             //Enqueue and adios
 
             return Ok(new Dictionary<string, object>() {
-                { "jobId", worker.EnqueuePrompts(prompts) }
+                { "jobIds", worker.EnqueuePrompts(prompts) }
             });
         }
 
