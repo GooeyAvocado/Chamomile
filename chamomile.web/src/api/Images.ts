@@ -11,6 +11,7 @@ import KeywordUsageDatedResult from "../model/KeywordUsageDatedResult";
 import CheckpointSequence from "../model/CheckpointSequence";
 import { Prompt } from "../model/Prompt";
 import { API_PREFIX, Delete, Get, Post, Put, Upload } from "./Common";
+import GenerateGridRequest from "../model/GenerateGridRequest";
 
 const ENDPOINT = API_PREFIX + "images/"
 
@@ -32,6 +33,13 @@ export const enqueuePrompt = (
     onError: (value: any) => void,
     val: Prompt
 ) => Post(setLoading, setItem, onError, ENDPOINT + "generate", val)
+
+export const enqueueGrid = (
+    setLoading: (value: boolean) => void,
+    setItem: (val?: { jobIds: number[] }) => void,
+    onError: (value: any) => void,
+    val: GenerateGridRequest
+) => Post(setLoading, setItem, onError, ENDPOINT + "generateGrid", val)
 
 export const previewPrompt = (
     setLoading: (value: boolean) => void,

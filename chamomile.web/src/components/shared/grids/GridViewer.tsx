@@ -9,7 +9,7 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useEffect, useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
 import useApi from "../../hooks/useApi";
-import { cancelJobs, deleteImage, deleteMultiImage, enqueuePrompts, favImage, noteImage } from "../../../api/Images";
+import { cancelJobs, deleteImage, deleteMultiImage, enqueueGrid, favImage, noteImage } from "../../../api/Images";
 import { updateImageAlbums } from "../../../api/Albums";
 import { Album } from "../../../model/Album";
 import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
@@ -24,6 +24,7 @@ import { GridType, GridTypes } from "./GridTypes";
 import BrewingImageTile from "../images/BrewingImageTile";
 import PromptOrderData from "../../../model/PromptOrderData";
 import ImageTile from "../images/ImageTile";
+import GenerateGridRequest, { GenerateGridCoords } from "../../../model/GenerateGridRequest";
 
 export default function GridViewer({
     grid, onBack, onDelete, setGrid
@@ -56,7 +57,7 @@ export default function GridViewer({
     const cancelMultiApi = useApi(cancelJobs)
     const favApi = useApi(favImage)
     const notesApi = useApi(noteImage)
-    const brewApi = useApi(enqueuePrompts)
+    const brewApi = useApi(enqueueGrid)
     const { fetch: update, loading: updateLoading } = useApi(updateGrid)
     const { fetch: create, loading: createLoading } = useApi(createGrid)
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
@@ -276,7 +277,7 @@ export default function GridViewer({
 
     const queueMissingImages = () => {
 
-        const allPrompts = [] as Prompt[]
+        const allCoords = [] as GenerateGridCoords[]
         const xType = GridTypes.find(a => a.code === grid.xValMode)
         const yType = GridTypes.find(a => a.code === grid.yValMode)
         if (!xType || !yType) {
@@ -289,28 +290,8 @@ export default function GridViewer({
                 const alreadyBrewed = !!imageMap?.[y]?.[x]
                 const alreadyQueued = !!queueMap?.[y]?.[x]
                 const inProgress = activeJob?.orderData?.xPos === x && activeJob?.orderData?.yPos === y
-
                 if (!alreadyBrewed && !alreadyQueued && !inProgress) {
-                    const prompt = {
-                        ...grid,
-                        positivePrompt: grid.prompt,
-                        variables: {},
-                        orderData: {
-                            source: "GRID",
-                            gridId: grid.id,
-                            xPos: x,
-                            yPos: y,
-                            xVal: grid.xVals[x],
-                            yVal: grid.yVals[y],
-                        } as PromptOrderData
-                    } as Prompt
-
-                    const finalPrompt = yType.applyToPrompt(
-                        xType.applyToPrompt(prompt, grid.xVals[x], grid.xVals),
-                        grid.yVals[y], grid.yVals
-                    )
-
-                    allPrompts.push(finalPrompt)
+                    allCoords.push({ x, y })
                 }
             })
         })
@@ -319,7 +300,7 @@ export default function GridViewer({
             enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
         }, () => {
             enqueueSnackbar("Could not queue images!", { variant: 'error' })
-        }, allPrompts)
+        }, { id: grid.id, coordinates: allCoords } as GenerateGridRequest)
     }
 
     const onEdit = () => {

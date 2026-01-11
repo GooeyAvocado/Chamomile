@@ -79,7 +79,7 @@ namespace Chamomile.API.Controllers
         }
 
         [HttpPost("generateGrid")]
-        public async Task<IActionResult> Generate([FromBody] GenerateGridRequest request) {
+        public async Task<IActionResult> GenerateGrid([FromBody] GenerateGridRequest request) {
 
             //Get the grid,
             var grid = await gridDao.Get(request.Id);
