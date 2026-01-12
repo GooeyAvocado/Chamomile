@@ -85,6 +85,13 @@ export default function ImageViewer(props: {
         }
     })
 
+    //Clear the selected image if the image api loads more images 
+    useEffect(() => {
+        if (!viewerOpen) {
+            setSelectedImage(undefined);
+        }
+    }, [imageApi.images]);
+
     const sentinelRef = useRef(null);
 
     useEffect(() => {
