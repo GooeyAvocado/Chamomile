@@ -1,6 +1,6 @@
 import { Assignment, AutoFixHigh, Close, Coffee, DirectionsRun, ExpandMore, ModelTraining, OpenWith, ThumbDown, Tune, Yard } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PromptButton from "./PromptButton";
 import { usePrompt } from "../../hooks/usePrompt";
 import PromptModelSelectorModal from "./PromptModelSelectorModal";
@@ -51,6 +51,8 @@ export default function PromptBuilder(props: {
     const { album } = usePrompt();
 
     const expandRef = useRef<HTMLDivElement>(null);
+    const horizontalContainerRef = useRef<HTMLDivElement>(null);
+    const [positivePromptBoxHeight, setPositivePromptBoxHeight] = useState(0);
 
     const { loras } = useLoras();
     const { data: wildcards, fetch: fetchWildcards } = useApi(getWildcards, true)
@@ -158,6 +160,20 @@ export default function PromptBuilder(props: {
         }
     }, [expanded, width]);
 
+    useEffect(() => {
+        if (!horizontalContainerRef.current) return;
+
+        const observer = new ResizeObserver(() => {
+            if (horizontalContainerRef.current) {
+                setPositivePromptBoxHeight(horizontalContainerRef.current.scrollHeight);
+            }
+        });
+
+        observer.observe(horizontalContainerRef.current);
+
+        return () => observer.disconnect();
+    }, []);
+
     const dPromptVarsRegex = /\$\{([a-zA-Z_][a-zA-Z0-9_]*)=([^}]+)\}/g;
     const matches = [...prompt.positivePrompt.matchAll(dPromptVarsRegex)];
     const dPromptVars = matches.map(m => ({
@@ -165,10 +181,12 @@ export default function PromptBuilder(props: {
         value: m[2]
     }));
 
+    const showVerticalAdornments = useMemo(() => positivePromptBoxHeight > 140, [positivePromptBoxHeight]);
+
     return <>
 
         {/* Collapsed Contents */}
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        <div ref={horizontalContainerRef} style={{ display: "flex", alignItems: "center", gap: "20px" }}>
 
             <AutocompleteTextfield disabled={preview} autocompleteZIndex={!noBrew ? 10 : undefined}
                 value={prompt.positivePrompt} onChange={(e) => {
@@ -277,7 +295,7 @@ export default function PromptBuilder(props: {
                         ),
                         endAdornment: (
                             <InputAdornment position="end">
-                                <div style={{ display: 'flex', flexDirection: vertical ? 'column' : undefined }}>
+                                <div style={{ display: 'flex', flexDirection: vertical || showVerticalAdornments ? 'column' : undefined }}>
                                     {!noBrew && <Tooltip title="Dynamics">
                                         <IconButton onClick={() => { setVarsOpen(true) }}><AutoFixHigh /></IconButton>
                                     </Tooltip>}
