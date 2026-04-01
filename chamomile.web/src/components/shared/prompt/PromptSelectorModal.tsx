@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { deletePrompt, getPrompts, updatePrompt } from "../../../api/Prompts";
 import { Prompt } from "../../../model/Prompt";
 import useApi from "../../hooks/useApi";
@@ -41,6 +41,17 @@ export default function PromptSelectorModal(props: {
     const [delPrompt, setDelPrompt] = useState(undefined as undefined | Prompt)
     const [promptFolder, setPromptFolder] = useState(undefined as undefined | string)
     const [editPrompt, setEditPrompt] = useState(undefined as undefined | Prompt)
+    const [currLocation, setCurrLocation] = useState("")
+
+    const filteredData = useMemo(() => {
+
+        if (!promptsApi.data) return []
+        if (!query || query.trim().length === 0) return promptsApi.data
+
+        return promptsApi.data?.filter(a => query.trim().length === 0 ? true :
+            a.name.toLowerCase().substring(a.name.lastIndexOf("/")).includes(query.toLowerCase())
+        )
+    }, [promptsApi.data, query])
 
     const { prompt, setPrompt, orderAmount, album, variables } = usePrompt();
 
@@ -118,9 +129,64 @@ export default function PromptSelectorModal(props: {
         }
     }, [open, searchRef.current])
 
+    // Get prompts and folders that start with currLocation
+    const promptsBelowCurrentLevel = useMemo(() => {
+        if (!promptsApi.data) return undefined
+        return promptsApi.data?.filter(p => currLocation.length === 0 ? true : p.name.startsWith(currLocation + "/"))
+    }, [promptsApi.data, currLocation]);
+
+    // Prompts at this level: no further slashes after currLocation
+    const currLocationPrompts = useMemo(() => {
+        if (!promptsBelowCurrentLevel) return []
+        return promptsBelowCurrentLevel?.filter(p => {
+            const rest = p.name.slice(currLocation.length + 1);
+            return !rest.includes("/") && rest.length > 0;
+        })
+    }, [promptsBelowCurrentLevel]);
+
+    // Folders at this level: next segment after currLocation before a slash
+
+    const folders = useMemo(() => {
+        if (!promptsBelowCurrentLevel || promptsBelowCurrentLevel.length === 0) return []
+        const folderSet = new Set<string>();
+        promptsBelowCurrentLevel?.forEach(p => {
+            const rest = p.name?.slice(currLocation.length === 0 ? 0 : currLocation.length + 1);
+            const match = rest?.match(/^([^\/]+)\//);
+            if (match) {
+                folderSet.add(match[1]);
+            }
+        });
+
+        return Array.from(folderSet);
+    }, [promptsBelowCurrentLevel])
+
 
     return <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='lg'>
-        <DialogTitle>{promptsApi.data?.length} Recipes</DialogTitle>
+        <DialogTitle style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+                {query ? 'Search results' : currLocation ? `/${currLocation}` : "Saved Recipes"}
+            </div>
+            <div style={{ opacity: .8, fontSize: '0.7em', fontWeight: 'normal' }}>
+                {query ? `${filteredData.length} recipe(s)` : <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    {/* <div>
+                        {promptsBelowCurrentLevel?.length ?? 0} Recipe(s) as
+                    </div> */}
+                    <div style={{ fontSize: ".6rem" }}>
+                        {
+                            currLocationPrompts?.length > 0 && <div>
+                                {currLocationPrompts?.length ?? 0} Recipe(s)
+                            </div>
+                        }
+                        {folders?.length > 0 && (
+                            <div>
+                                {folders.length} Folder(s)
+                            </div>
+                        )}
+                    </div>
+                </div>}
+            </div>
+
+        </DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: "75vh" }}>
             <div style={{ display: 'flex', gap: '10px' }}>
                 <TextField
@@ -135,6 +201,9 @@ export default function PromptSelectorModal(props: {
                     data={promptsApi.data} onOk={onOk} query={query}
                     setDelPrompt={setDelPrompt} setEditPrompt={setEditPrompt}
                     setPromptFolder={setPromptFolder} filter={filter} setFilter={setFilter}
+                    currLocation={currLocation} setCurrLocation={setCurrLocation}
+                    filteredData={filteredData} currLocationPrompts={currLocationPrompts}
+                    folders={folders}
                 />
             </div>
 
@@ -172,49 +241,30 @@ function GridViewMode(props: {
     onOk: (val: Prompt) => void,
     filter?: FilterOptions,
     setFilter?: (val: FilterOptions) => void
+    currLocation: string,
+    setCurrLocation: (val: string) => void
+    filteredData?: Prompt[]
+    folders?: string[],
+    currLocationPrompts?: Prompt[]
 }) {
-    const { data, query, setDelPrompt, setEditPrompt, onOk, setPromptFolder, filter, setFilter } = props
+    const {
+        data, query, setDelPrompt, setEditPrompt, onOk, setPromptFolder,
+        filter, setFilter, currLocation, setCurrLocation, filteredData,
+        folders, currLocationPrompts
+    } = props
 
-    const [currLocation, setCurrLocation] = useState("")
 
     const { onBrew } = useWaiter();
 
 
-    // Get prompts and folders that start with currLocation
-    const matching = data?.filter(p => currLocation.length === 0 ? true : p.name.startsWith(currLocation + "/"));
-
-    // Prompts at this level: no further slashes after currLocation
-    const currPrompts = matching?.filter(p => {
-        const rest = p.name.slice(currLocation.length + 1);
-        return !rest.includes("/") && rest.length > 0;
-    });
-
-    // Folders at this level: next segment after currLocation before a slash
-
-    const folders = () => {
-        if (!matching || matching.length === 0) return []
-        const folderSet = new Set<string>();
-        matching?.forEach(p => {
-            const rest = p.name?.slice(currLocation.length === 0 ? 0 : currLocation.length + 1);
-            const match = rest?.match(/^([^\/]+)\//);
-            if (match) {
-                folderSet.add(match[1]);
-            }
-        });
-
-        return Array.from(folderSet);
-    }
-
+    // If we have a query, we just show the results
     if ((query?.trim().length ?? 0) !== 0) {
         return <div style={{
             display: 'grid',
             gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
             gap: '20px'
         }}>
-            {data?.filter(a => query.trim().length === 0 ? true :
-                a.name.toLowerCase().substring(a.name.lastIndexOf("/")).includes(query.toLowerCase()) ||
-                a.positivePrompt.toLowerCase().includes(query.toLowerCase())
-            ).map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {filteredData?.map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
                     { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
@@ -231,14 +281,15 @@ function GridViewMode(props: {
         </div>
     }
 
-    const folderList = folders();
 
     return <>
         <div style={{
             display: 'grid',
             gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
-            gap: '20px', marginBottom: folderList?.length === 0 && currLocation.length === 0 ? "" : "20px"
+            gap: '20px', marginBottom: folders?.length === 0 && currLocation.length === 0 ? "" : "20px"
         }}>
+
+            {/* Up one level card */}
             {currLocation.length > 0 && <Card>
                 <CardActionArea onClick={() => setCurrLocation(currLocation.includes("/") ? currLocation.split("/").slice(0, -1).join("/") : "")}>
                     <CardContent style={{ display: 'flex', gap: "5px", alignItems: "center" }}>
@@ -247,7 +298,9 @@ function GridViewMode(props: {
                     </CardContent>
                 </CardActionArea>
             </Card>}
-            {folderList?.map(a => <div key={a} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+            {/* Folders */}
+            {folders?.map(a => <div key={a} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
                     { icon: <Coffee />, text: 'Prompt all', onClick: () => setPromptFolder((currLocation.length > 0 ? currLocation + "/" : "") + a) }
                 ]}>
@@ -268,7 +321,7 @@ function GridViewMode(props: {
             gridTemplateColumns: `repeat(auto-fill, minmax(${'128'}px, 1fr))`,
             gap: '20px'
         }}>
-            {currPrompts?.map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {currLocationPrompts?.map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
                     { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
