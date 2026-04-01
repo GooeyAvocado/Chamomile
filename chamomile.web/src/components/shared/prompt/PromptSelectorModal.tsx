@@ -198,7 +198,7 @@ export default function PromptSelectorModal(props: {
             </div>
             <div style={{ flex: '1', overflowY: 'auto' }}>
                 <GridViewMode
-                    data={promptsApi.data} onOk={onOk} query={query}
+                    onOk={onOk} query={query}
                     setDelPrompt={setDelPrompt} setEditPrompt={setEditPrompt}
                     setPromptFolder={setPromptFolder} filter={filter} setFilter={setFilter}
                     currLocation={currLocation} setCurrLocation={setCurrLocation}
@@ -234,7 +234,7 @@ export default function PromptSelectorModal(props: {
 }
 
 function GridViewMode(props: {
-    data: Prompt[], query: string,
+    query: string,
     setEditPrompt: (val: Prompt) => void,
     setPromptFolder: (val: string) => void,
     setDelPrompt: (val: Prompt) => void,
@@ -248,7 +248,7 @@ function GridViewMode(props: {
     currLocationPrompts?: Prompt[]
 }) {
     const {
-        data, query, setDelPrompt, setEditPrompt, onOk, setPromptFolder,
+        query, setDelPrompt, setEditPrompt, onOk, setPromptFolder,
         filter, setFilter, currLocation, setCurrLocation, filteredData,
         folders, currLocationPrompts
     } = props
