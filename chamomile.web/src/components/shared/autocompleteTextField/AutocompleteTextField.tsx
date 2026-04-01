@@ -239,6 +239,12 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
                     const { onChange, onClick, onKeyDown, onKeyUp, multiline, ...rest } = props;
                     return rest;
                 })()}
+                sx={{
+                    '& .MuiInputBase-inputMultiline': {
+                        resize: 'vertical',
+                        overflow: 'auto',
+                    },
+                }}
             />
             {anchorEl && (
                 <Popper
