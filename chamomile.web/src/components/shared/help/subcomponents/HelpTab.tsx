@@ -871,6 +871,11 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                     Proceed with caution if you plan to use this on a mobile or touch screen device.
                 </Alert>
 
+                <Alert severity="warning" style={{ fontSize: ".8em" }}>
+                    <AlertTitle style={{ fontSize: "1.2em" }}>Grids are still affected by model sequences</AlertTitle>
+                    If you have a model sequence, the checkpoint used for each cell may vary!
+                </Alert>
+
                 <Alert severity="info" style={{ fontSize: ".8em" }}>
                     <AlertTitle style={{ fontSize: "1.2em" }}>Images from grids are hidden</AlertTitle>
                     Only images from grids that are favorites will be shown on the home page. Images from grids will always appear on collections.
