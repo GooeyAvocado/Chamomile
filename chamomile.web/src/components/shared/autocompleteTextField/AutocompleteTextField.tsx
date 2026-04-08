@@ -87,7 +87,15 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
         const replaceSuffix = autocomplete.suffix ? currentSuffix.slice(0, currentSuffix.indexOf(autocomplete.suffix)) : currentSuffix
 
         const suggestions = query.length < (autocomplete.minSearchLength ?? 0) ? []
-            : autocomplete.data.filter(a => autocomplete.matcher?.(a, query) ?? JSON.stringify(a).includes(query));
+            : autocomplete.data.filter(a => {
+                const stringified = JSON.stringify(a);
+                const queryParts = query.split('_');
+
+                return queryParts.every(part => autocomplete.matcher
+                    ? autocomplete.matcher(a, part)
+                    : stringified.includes(part)
+                );
+            });
 
         //OK now that we know what to do, let's save this all to our context
         setCursorContext({
