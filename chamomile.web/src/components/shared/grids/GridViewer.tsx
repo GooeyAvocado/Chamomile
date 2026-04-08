@@ -289,7 +289,10 @@ export default function GridViewer({
             r.forEach((_, x) => {
                 const alreadyBrewed = !!imageMap?.[y]?.[x]
                 const alreadyQueued = !!queueMap?.[y]?.[x]
-                const inProgress = activeJob?.orderData?.xPos === x && activeJob?.orderData?.yPos === y
+                const inProgress = activeJob?.orderData?.xPos === x &&
+                    activeJob?.orderData?.yPos === y &&
+                    activeJob?.orderData?.gridId === grid.id;
+
                 if (!alreadyBrewed && !alreadyQueued && !inProgress) {
                     allCoords.push({ x, y })
                 }
