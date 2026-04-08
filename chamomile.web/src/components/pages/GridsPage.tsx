@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Navbar from "../shared/navbar/Navbar";
 import { useLocation, useNavigate } from "react-router-dom";
 import useApi from "../hooks/useApi";
 import { Grid } from "../../model/Grid";
 import { createGrid, deleteGrid, getGrid, getGrids } from "../../api/Grid";
-import { Alert, InputAdornment, TextField } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import { Alert, Button, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
+import { Add, ChevronLeft, ChevronRight, Search } from "@mui/icons-material";
 import GridTile from "../shared/grids/GridTile";
-import NewGridTile from "../shared/grids/NewGridTile";
 import { useSettings } from "../hooks/useSettings";
 import GridEditor from "../shared/grids/GridEditor";
 import { useSnackbar } from "notistack";
@@ -100,6 +99,28 @@ export default function GridsPage() {
 
     }
 
+    const [page, setPage] = useState(0)
+    const pageSize = 18;
+
+    useEffect(() => {
+        setPage(0)
+    }, [query, grids])
+
+    const filteredGrids = useMemo(() => {
+        if (!grids) return [];
+        return grids.filter(a => query.trim().length === 0 || (
+            a.name.toLowerCase().includes(query.toLowerCase()) || a.notes?.toLowerCase().includes(query.toLowerCase())
+        ));
+    }, [grids, query])
+
+    const pages = useMemo(() => {
+        if (!filteredGrids) return 0;
+        return Math.ceil(filteredGrids.length / pageSize)
+    }, [filteredGrids])
+
+    const displayGrids = useMemo(() => {
+        return filteredGrids.slice(page * pageSize, (page + 1) * pageSize);
+    }, [filteredGrids, page]);
 
 
     return <div style={{
@@ -119,10 +140,20 @@ export default function GridsPage() {
                 {isMobile && <Alert style={{ paddingTop: "20px" }} severity="warning" >
                     Grids aren't designed for mobile. Proceed with caution!
                 </Alert>}
-                <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
+                <div style={{ display: "flex", gap: "10px", marginTop: "20px", alignItems: 'center' }}>
+                    <div>
+                        <Tooltip title="Create a new grid">
+                            <Button
+                                onClick={() => { setEditorOpen(true); setEditorState(defaultGridState); }}
+                                color="primary" variant="outlined" sx={{ minWidth: 0, padding: "14px;" }}
+                            >
+                                <Add />
+                            </Button>
+                        </Tooltip>
+                    </div>
                     <TextField
                         value={query} onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search Grids"
+                        placeholder="Search grids"
                         slotProps={{
                             input: {
                                 startAdornment: <InputAdornment position="start">
@@ -130,6 +161,15 @@ export default function GridsPage() {
                                 </InputAdornment>
                             }
                         }} style={{ flex: "1" }} />
+                    <div style={{ display: 'flex', gap: "8px", alignItems: 'center' }}>
+                        <IconButton disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+                            <ChevronLeft />
+                        </IconButton>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: "32px" }}>{pages === 0 ? 0 : page + 1} / {pages}</div>
+                        <IconButton disabled={page >= pages - 1} onClick={() => setPage(p => p + 1)}>
+                            <ChevronRight />
+                        </IconButton>
+                    </div>
                 </div>
                 <div style={{ flex: "1", overflowY: 'auto', width: "100%", marginBottom: "20px", marginTop: "20px" }}>
                     {loadingGrids ?
@@ -137,9 +177,7 @@ export default function GridsPage() {
                             <img src="/brewing.gif" style={{ width: "128px", margin: "16px" }} />
                             <div>Checking the cupboard...</div>
                         </div>
-                        : (grids?.filter(a => query.trim().length === 0 || (
-                            a.name.toLowerCase().includes(query) || a.notes?.toLowerCase().includes(query)
-                        ))?.length ?? 0) === 0 && query.length > 0 ? <div style={{ display: 'flex', flexDirection: 'column', height: "100%", justifyContent: 'center', alignItems: 'center' }}>
+                        : displayGrids.length === 0 ? <div style={{ display: 'flex', flexDirection: 'column', height: "100%", justifyContent: 'center', alignItems: 'center' }}>
                             <img src="/grids.png" style={{ width: "128px", margin: "16px" }} />
                             <div>No grids found!</div>
                         </div> : <div style={{
@@ -147,10 +185,7 @@ export default function GridsPage() {
                             gridTemplateColumns: `repeat(auto-fill, minmax(${'256'}px, 1fr))`,
                             gap: '20px',
                         }}>
-                            {query.trim().length === 0 && <NewGridTile onClick={() => { setEditorOpen(true); setEditorState(defaultGridState); }} />}
-                            {grids?.filter(a => query.trim().length === 0 || (
-                                a.name.toLowerCase().includes(query) || a.notes?.toLowerCase().includes(query)
-                            ))?.map(a =>
+                            {displayGrids?.map(a =>
                                 <GridTile key={`album-${a.id}`} grid={a} onClick={() => {
                                     setGrid(a)
                                     nav(`/grid/${a.id}`)

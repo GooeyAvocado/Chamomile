@@ -1,11 +1,10 @@
 import useUserAgent from "../../hooks/useUserAgent";
 import { Album } from "../../../model/Album";
 import AlbumTile from "./AlbumTile";
-import NewAlbumTile from "./NewAlbumTile";
 import AlbumEditor from "./AlbumEditor";
-import { useState } from "react";
-import { InputAdornment, TextField } from "@mui/material";
-import { Search } from "@mui/icons-material";
+import { useEffect, useMemo, useState } from "react";
+import { Button, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
+import { Add, ChevronLeft, ChevronRight, Search } from "@mui/icons-material";
 import { useAlbums } from "../../hooks/useAlbums";
 
 
@@ -20,19 +19,46 @@ export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
     const { isMobile } = useUserAgent();
     const [newOpen, setNewOpen] = useState(false)
 
+    const [page, setPage] = useState(0)
+    const pageSize = 18;
 
-    const queryLower = query.toLowerCase();
-    const results = albums?.filter(a =>
-        query.length === 0
-            ? true
-            : a.name.toLowerCase().includes(queryLower) || a.searchQuery.toLowerCase().includes(queryLower)
-    ).filter(a => !hideAlbums?.includes(a.id ?? -1))
+    useEffect(() => {
+        setPage(0)
+    }, [query, albums])
+
+    const filteredAlbums = useMemo(() => {
+        if (!albums) return [];
+        return albums
+            .filter(a => !hideAlbums?.includes(a.id ?? -1))
+            .filter(a => query.trim().length === 0 || (
+                a.name.toLowerCase().includes(query.toLowerCase()) || a.searchQuery.toLowerCase().includes(query.toLowerCase())
+            ));
+    }, [albums, query])
+
+    const pages = useMemo(() => {
+        if (!filteredAlbums) return 0;
+        return Math.ceil(filteredAlbums.length / pageSize)
+    }, [filteredAlbums])
+
+    const displayAlbums = useMemo(() => {
+        return filteredAlbums.slice(page * pageSize, (page + 1) * pageSize);
+    }, [filteredAlbums, page]);
 
     return <div style={{ paddingTop: "20px", height: "100%", display: 'flex', flexDirection: "column", gap: "20px" }}>
-        <div style={{ display: "flex", gap: "20px" }}>
+        <div style={{ display: "flex", gap: "10px", alignItems: 'center' }}>
+            <div>
+                <Tooltip title="Create a new collection">
+                    <Button
+                        onClick={() => { setNewOpen(true); }}
+                        color="primary" variant="outlined" sx={{ minWidth: 0, padding: "14px;" }}
+                    >
+                        <Add />
+                    </Button>
+                </Tooltip>
+            </div>
             <TextField
                 value={query} onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search Collections"
+                placeholder="Search collections"
                 slotProps={{
                     input: {
                         startAdornment: <InputAdornment position="start">
@@ -40,6 +66,15 @@ export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
                         </InputAdornment>
                     }
                 }} style={{ flex: "1" }} />
+            <div style={{ display: 'flex', gap: "8px", alignItems: 'center' }}>
+                <IconButton disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+                    <ChevronLeft />
+                </IconButton>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: "32px" }}>{pages === 0 ? 0 : page + 1} / {pages}</div>
+                <IconButton disabled={page >= pages - 1} onClick={() => setPage(p => p + 1)}>
+                    <ChevronRight />
+                </IconButton>
+            </div>
         </div>
         <div style={{ flex: "1", overflow: "auto" }}>
             {loading ?
@@ -47,7 +82,7 @@ export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
                     <img src="/brewing.gif" style={{ width: "128px", margin: "16px" }} />
                     <div>Checking the cupboard...</div>
                 </div>
-                : (results?.length ?? 0) === 0 && query.length > 0 ? <div style={{ display: 'flex', flexDirection: 'column', height: "100%", justifyContent: 'center', alignItems: 'center' }}>
+                : (displayAlbums?.length ?? 0) === 0 ? <div style={{ display: 'flex', flexDirection: 'column', height: "100%", justifyContent: 'center', alignItems: 'center' }}>
                     <img src="/colorcollection-crop.png" style={{ width: "128px", margin: "16px" }} />
                     <div>No collections found!</div>
                 </div> : <div style={{
@@ -55,8 +90,7 @@ export default function AlbumsViewer({ onClick, disableNew, hideAlbums }: {
                     gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '192' : '256'}px, 1fr))`,
                     gap: '20px',
                 }}>
-                    {query.trim().length === 0 && <NewAlbumTile onClick={() => setNewOpen(true)} />}
-                    {results?.map(a =>
+                    {displayAlbums?.map(a =>
                         <AlbumTile key={`album-${a.id}`} album={a} onClick={() => onClick(a)} />
                     )}
                 </div>}
