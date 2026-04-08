@@ -84,7 +84,7 @@ namespace Chamomile.Data
 
         public async Task<List<Grid>> GetAll()
         {
-            return await adoTemplate.Query($"select * from {GRID_TABLE} ORDER BY {GRID_NM}", (cmd) => { }, GridRM);
+            return await adoTemplate.Query($"select * from {GRID_TABLE} ORDER BY {CRE_TS} DESC", (cmd) => { }, GridRM);
         }
 
         public async Task<Grid?> Get(int Id)
@@ -135,10 +135,11 @@ namespace Chamomile.Data
         {
 
             //First get all the images in this album
-            var gridImages = await ImagesDAO.GetAll(new() {
+            var gridImages = await ImagesDAO.GetAll(new()
+            {
                 Grid = Id,
                 DisablePagination = true
-            },-1,true);
+            }, -1, true);
 
             gridImages.ForEach(async (a) => await ImagesDAO.DeleteImage(a.Id));
 
