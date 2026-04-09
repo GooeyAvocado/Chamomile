@@ -49,6 +49,8 @@ export default function WhatsNew({ open, setOpen }: {
 - **Date search improvements:** Date search is now from and to inclusive 
     - IE: from is greater or equal to midnight, and to is less than or equal to 23:59:59
 - **Upscaler and Scale now saved to settings**: Your selected upscaler and scale are now saved to settings.
+- Grids and collections are now paginated, and the new grid/new collection button was moved to the left of the search bar instead of a dedicated tile.
+- Grids now order by newest first
 - Display now switches to latest image only if last latest image is displayed.
 - Display's small buffer size has been removed and is now unbounded.
 - Image viewer now focuses the last selected image, scrolling to it if necessary.
@@ -66,6 +68,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Bump backend to .NET 10 from .NET 8
 
 ### Fixed bugs
+- Fixed bug which caused grids not to order a cell if it was the current active job for another grid.
 - Fixed bug where re-ordering (not from base) from an image tile did not set the prompt origin
 - Fixed bug where favorite-ing from the hotbar didn't work.
 - Fixed bug where some image selectors did not center the image
