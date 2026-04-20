@@ -248,3 +248,7 @@ create table templates (
 )
 
 --Please also run the large object migration script Migration script here
+
+-- Add the deleted ct
+ALTER TABLE chamomile.lora ADD COLUMN deleted_ct INT4 NOT NULL DEFAULT 0;
+ALTER TABLE chamomile.models ADD COLUMN deleted_ct INT4 NOT NULL DEFAULT 0;

@@ -23,6 +23,8 @@
         public static readonly string LORA_TYPE_CD       = "lora_type_cd";
         public static readonly string LORA_TAG           = "lora_tag_tx";
 
+        public static readonly string DELETED_CT = "deleted_ct";
+
         public static readonly string IMAGES_TABLE       = $"{SCHEMA}.images img";
         public static readonly string IMAGES_ID          = "image_id";
         public static readonly string IMAGES_PROMPT      = "image_prompt_tx";

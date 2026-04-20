@@ -853,6 +853,23 @@ namespace Chamomile.Data {
         #region DELETE
 
         public async Task DeleteImage(int id) {
+
+            // get the model this image used
+            var checkpoint = await adoTemplate.QuerySingle(
+                SelectSql([CHECKPOINT_TITLE], IMAGES_TABLE, new WhereConditionGroup([new(IMAGES_ID)])),
+                (cmd) => cmd.SetInt(IMAGES_ID, id), (reader) => reader.GetString(CHECKPOINT_TITLE)
+            );
+
+            if (checkpoint == null) {
+                //IF we don't have a checkpoint then this image does not exist, so we can just return
+                return;
+            }
+
+            //Get the list of LoRAs this image is associated with
+            var LoRAs = await adoTemplate.Query(SelectSql([LORA_ALIAS], IMAGES_LORA_MAP, new WhereConditionGroup([new(IMAGES_ID)])), (cmd) => {
+                cmd.SetInt(IMAGES_ID, id);
+            }, (reader) => reader.GetString(LORA_ALIAS));
+
             //Unassign the image from any model that uses it as a sample
             await adoTemplate.Execute(UpdateSql([IMAGES_ID], MODELS_TABLE, new([new(IMAGES_ID, WhereConditionOperator.EQUALS, "@ORIGINAL_ID")])), (cmd) => {
                 cmd.SetInt(IMAGES_ID, null);
@@ -900,6 +917,18 @@ where i.image_prompt_tx = n.image_prompt_tx
 
             //Delete the image
             await adoTemplate.Execute(DeleteSql(IMAGES_TABLE, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
+
+            //Now that we have deleted the image, we need to bump the delete count for the models and the LoRAs
+            await adoTemplate.Execute($"UPDATE {MODELS_TABLE} SET {DELETED_CT} = {DELETED_CT} + 1 WHERE {CHECKPOINT_NAME} = @{CHECKPOINT_NAME}", (cmd) => {
+                cmd.SetString(CHECKPOINT_NAME, checkpoint);
+            });
+
+            //And for the LoRAs
+            await adoTemplate.Execute($"UPDATE {LORA_TABLE} SET {DELETED_CT} = {DELETED_CT} + 1 WHERE {LORA_ALIAS} IN ({string.Join(",", LoRAs.Select((l, i) => $"@{LORA_ALIAS}_{i}"))})", (cmd) => {
+                for (int i = 0; i < LoRAs.Count; i++) {
+                    cmd.SetString($"{LORA_ALIAS}_{i}", LoRAs[i]);
+                }
+            });
 
         }
 
