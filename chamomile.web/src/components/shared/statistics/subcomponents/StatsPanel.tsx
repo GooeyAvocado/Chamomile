@@ -46,7 +46,7 @@ export function StatsPanel({
 }) {
 
 
-    const max = StatisticOptions[statistic]?.getStat?.(usage[0]) ?? 0
+    const max = StatisticOptions[statistic]?.getStat?.(usage[0] ?? {}) ?? 0
     const rowHeight = rowHeightOverride ?? 36
 
     const { height: windowHeight } = useWindowDimensions();
