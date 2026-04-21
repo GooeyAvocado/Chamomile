@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import KeywordUsage from "../../../../model/KeywordUsage";
 import { Chip, CircularProgress, IconButton, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
 import ImageTileFromID from "../../images/ImageTileFromID";
-import { BarChart, ChevronLeft, ChevronRight, FirstPage, LastPage, SignalCellularAlt, TableView, Timeline } from "@mui/icons-material";
+import { BarChart, ChevronLeft, ChevronRight, FirstPage, InfoOutline, LastPage, SignalCellularAlt, TableView, Timeline } from "@mui/icons-material";
 import ImageModalFromId from "../../images/ImageModalFromId";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
@@ -14,6 +14,7 @@ import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
 import KeywordUsageDatedResult from "../../../../model/KeywordUsageDatedResult";
 import DatedUsageGraph, { GRAPH_COLORS, GRAPH_DARK_COLORS } from "./DatedUsageGraph";
 import { Statistic, StatisticOptions } from "./StatSelector";
+import KeywordUsageModal from "./KeywordUsageModal";
 
 export function StatsPanel({
     usage, filter, datedUsageApi, keywordColumnOverride,
@@ -77,6 +78,8 @@ export function StatsPanel({
     const [imageView, setImageView] = useState<number | undefined>()
     const [mode, setMode] = useState<"table" | "graph">("table")
     const [graphMode, setGraphMode] = useState<"CUMULATIVE" | "DAILY">("CUMULATIVE")
+    const [selectedUsage, setSelectedUsage] = useState<KeywordUsage>()
+    const [usageOpen, setUsageOpen] = useState(false)
 
 
     const displayData = usage.slice(pageSize * page, pageSize * (page + 1))
@@ -119,6 +122,7 @@ export function StatsPanel({
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>{StatisticOptions[statistic]?.shortName ?? statistic}</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>First use</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>Last use</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -131,14 +135,18 @@ export function StatsPanel({
                                     }} />}
                                 </TableCell>
                                 <TableCell><div style={{ position: "relative", width: "100%", height: `${rowHeight}px` }}>
-                                    <div style={{ background: "#556677", width: `${(StatisticOptions[statistic]?.getStat?.(a) ?? 0) * 100 / max}%`, height: `${rowHeight}px` }} />
+                                    <div style={{ background: StatisticOptions[statistic]?.color, width: `${(StatisticOptions[statistic]?.getStat?.(a) ?? 0) * 100 / max}%`, height: `${rowHeight}px` }} />
                                     <div style={{ position: "absolute", left: "8px", top: "0", height: `${rowHeight}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                         {renderKeywordRow ? renderKeywordRow(a) : a.keyword}
                                     </div>
                                 </div></TableCell>
                                 <TableCell>{StatisticOptions[statistic]?.formatStat?.(a)}</TableCell>
-                                <TableCell>{new Date(a.minTs).toLocaleDateString()}</TableCell>
-                                <TableCell>{new Date(a.maxTs).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(a.minTs).toLocaleDateString(undefined, { year: '2-digit', month: '2-digit', day: '2-digit' })}</TableCell>
+                                <TableCell>{new Date(a.maxTs).toLocaleDateString(undefined, { year: '2-digit', month: '2-digit', day: '2-digit' })}</TableCell>
+                                <TableCell><IconButton onClick={() => {
+                                    setSelectedUsage(a)
+                                    setUsageOpen(true)
+                                }}><ChevronRight /></IconButton></TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -154,6 +162,13 @@ export function StatsPanel({
                     renderKeywordRow={renderKeywordRow}
                 />}
         </div>
+
+        <KeywordUsageModal
+            open={usageOpen} setOpen={setUsageOpen} data={selectedUsage}
+            renderImageTile={renderImageTile ? (k) => renderImageTile?.(k, setImageView) : undefined} renderKeywordRow={renderKeywordRow}
+            getSampleImageId={getSampleImageId}
+        />
+
         {(!hideGraph || !hidePagination) && <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: "10px" }}>
 
             <div style={{ display: "flex", gap: "10px", marginLeft: "10px", alignItems: 'center', flex: "1" }}>

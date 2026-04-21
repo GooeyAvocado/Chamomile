@@ -8,7 +8,8 @@ export const StatisticOptions: Record<Statistic, {
     formatStat: (u: KeywordUsage) => string
     displayName: string
     shortName: string
-    color?: string
+    color: string
+    brightColor: string
 }> = {
     "TOTAL": {
         sorter: (a, b) => b.totalCount - a.totalCount,
@@ -16,15 +17,19 @@ export const StatisticOptions: Record<Statistic, {
         formatStat: (val) => val.totalCount.toLocaleString(),
 
         displayName: "Total generated images",
-        shortName: "Total"
+        shortName: "Total",
+        color: "#556677",
+        brightColor: "#6677AA"
     },
     "EXISTING": {
         sorter: (a, b) => b.count - a.count,
         getStat: (u) => u.count,
         formatStat: (val) => val.count.toLocaleString(),
 
-        displayName: "Saved images",
-        shortName: "Existing"
+        displayName: "Existing images",
+        shortName: "Existing",
+        color: "#6677AA",
+        brightColor: "#7890CC"
     },
     "DELETED": {
         sorter: (a, b) => b.deletedCount - a.deletedCount,
@@ -32,7 +37,9 @@ export const StatisticOptions: Record<Statistic, {
         formatStat: (val) => val.deletedCount.toLocaleString(),
 
         displayName: "Deleted images",
-        shortName: "Deleted"
+        shortName: "Deleted",
+        color: "#AA6655",
+        brightColor: "#CC7866"
     },
     "DOWNLOAD": {
         sorter: (a, b) => b.downloadCount - a.downloadCount,
@@ -40,7 +47,9 @@ export const StatisticOptions: Record<Statistic, {
         formatStat: (val) => val.downloadCount.toLocaleString(),
 
         displayName: "Downloaded images",
-        shortName: "Downloaded"
+        shortName: "Downloaded",
+        color: "#756254",
+        brightColor: "#DAC395"
     },
     "FAVORITE": {
         sorter: (a, b) => b.favoriteCount - a.favoriteCount,
@@ -48,7 +57,9 @@ export const StatisticOptions: Record<Statistic, {
         formatStat: (val) => val.favoriteCount.toLocaleString(),
 
         displayName: "Favorite images",
-        shortName: "Favorite"
+        shortName: "Favorite",
+        color: "#756F54",
+        brightColor: "#FFD700"
     },
     "UPSCALE": {
         sorter: (a, b) => b.upscaleCount - a.upscaleCount,
@@ -56,7 +67,9 @@ export const StatisticOptions: Record<Statistic, {
         formatStat: (val) => val.upscaleCount.toLocaleString(),
 
         displayName: "Upscaled images",
-        shortName: "Upscaled"
+        shortName: "Upscaled",
+        color: "#547573",
+        brightColor: "#29B6F6"
     },
     "SUCCESS_RATE": {
         sorter: (a, b) => b.successRate - a.successRate,
@@ -65,7 +78,9 @@ export const StatisticOptions: Record<Statistic, {
             .toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }),
 
         displayName: "Generation success rate",
-        shortName: "Success %"
+        shortName: "Success %",
+        color: "#6677AA",
+        brightColor: "#7890CC"
     },
     "DOWNLOAD_RATE": {
         sorter: (a, b) => b.downloadRate - a.downloadRate,
@@ -74,7 +89,9 @@ export const StatisticOptions: Record<Statistic, {
             .toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }),
 
         displayName: "Download rate",
-        shortName: "Download %"
+        shortName: "Download %",
+        color: "#756254",
+        brightColor: "#DAC395"
     },
     "FAVORITE_RATE": {
         sorter: (a, b) => b.favoriteRate - a.favoriteRate,
@@ -83,7 +100,9 @@ export const StatisticOptions: Record<Statistic, {
             .toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }),
 
         displayName: "Favorite rate",
-        shortName: "Favorite %"
+        shortName: "Favorite %",
+        color: "#756F54",
+        brightColor: "#FFD700"
     },
     "UPSCALE_RATE": {
         sorter: (a, b) => b.upscaleRate - a.upscaleRate,
@@ -92,7 +111,9 @@ export const StatisticOptions: Record<Statistic, {
             .toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }),
 
         displayName: "Upscale rate",
-        shortName: "Upscale %"
+        shortName: "Upscale %",
+        color: "#547573",
+        brightColor: "#29B6F6"
     }
 }
 
