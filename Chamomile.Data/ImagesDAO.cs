@@ -277,7 +277,7 @@ namespace Chamomile.Data {
             }
 
             if (!string.IsNullOrEmpty(filter.Model)) {
-                conditions.Add(new(CHECKPOINT_TITLE));
+                conditions.Add(new("img." + CHECKPOINT_TITLE, WhereConditionOperator.EQUALS, "@" + CHECKPOINT_TITLE));
             }
 
             if (filter.Favorite == true) {
