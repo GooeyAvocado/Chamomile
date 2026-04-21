@@ -4,7 +4,7 @@ import Markdown from "react-markdown"
 import { useEffect } from "react"
 import { useSettings } from "../../hooks/useSettings"
 
-export const CHAMOMILE_MAJOR_VERSION = 3.2
+export const CHAMOMILE_MAJOR_VERSION = 4.0
 
 export default function WhatsNew({ open, setOpen }: {
     open: boolean,
@@ -13,7 +13,6 @@ export default function WhatsNew({ open, setOpen }: {
 
     const frontendBuild = import.meta.env.VITE_BACKEND_BUILD ?? "local"
     const buildTime = import.meta.env.VITE_BUILD_TIMESTAMP ? new Date(import.meta.env.VITE_BUILD_TIMESTAMP) : new Date();
-
 
     const whatsnew = `
 ### What's new?
@@ -28,6 +27,7 @@ export default function WhatsNew({ open, setOpen }: {
 - **More keyboard shortcuts**: This includes numpad mappings to allow for one handed operation of Chamomile
 - **More context menu options**: Right clicking on an image now allows you to upscale and download images
 - **New LoRA Grid axis type**: The Grid Editor will now let you test LoRAs and weights as an axis.
+- **Better Statistics**: Statistics now include a count of deleted images, as well as a count of downloaded, upscaled, and favorite images by LoRA, Checkpoint, and keyword.
 - Upscale now available from image hotbar and through keyboard shortcut CTRL+U.
 - Middle click to re-order saved prompts
 - Blurred image background for the image viewer

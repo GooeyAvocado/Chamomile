@@ -13,12 +13,13 @@ import { KeywordFilterOptions } from "../../../../model/KeywordFilterOptions";
 import { useWindowDimensions } from "../../../hooks/useWindowDimensions";
 import KeywordUsageDatedResult from "../../../../model/KeywordUsageDatedResult";
 import DatedUsageGraph, { GRAPH_COLORS, GRAPH_DARK_COLORS } from "./DatedUsageGraph";
+import { Statistic, StatisticOptions } from "./StatSelector";
 
 export function StatsPanel({
     usage, filter, datedUsageApi, keywordColumnOverride,
     renderImageTile, renderKeywordRow, rowHeightOverride,
     renderCount, getSampleImageId, minAutoCompleteLength: propMinACL,
-    limit, children, hidePagination, hideGraph
+    limit, children, hidePagination, hideGraph, statistic
 }: {
     usage: KeywordUsage[],
     filter: FilterOptions,
@@ -33,6 +34,7 @@ export function StatsPanel({
     children?: React.ReactNode,
     hidePagination?: boolean
     hideGraph?: boolean
+    statistic: Statistic
     datedUsageApi: (
         setLoading: (value: boolean) => void,
         setItem: (value?: KeywordUsageDatedResult) => void,
@@ -42,7 +44,7 @@ export function StatsPanel({
 }) {
 
 
-    const max = usage?.[0]?.count
+    const max = StatisticOptions[statistic]?.getStat?.(usage[0]) ?? 0
     const rowHeight = rowHeightOverride ?? 36
 
     const { height: windowHeight } = useWindowDimensions();
@@ -114,7 +116,7 @@ export function StatsPanel({
                         <TableRow>
                             <TableCell sx={{ width: 48 }}></TableCell>
                             <TableCell sx={{ width: '100%' }}>{keywordColumnOverride ?? "Keyword"}</TableCell>
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Usage</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>{StatisticOptions[statistic]?.shortName ?? statistic}</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>First use</TableCell>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>Last use</TableCell>
                         </TableRow>
@@ -129,12 +131,12 @@ export function StatsPanel({
                                     }} />}
                                 </TableCell>
                                 <TableCell><div style={{ position: "relative", width: "100%", height: `${rowHeight}px` }}>
-                                    <div style={{ background: "#556677", width: `${a.count * 100 / max}%`, height: `${rowHeight}px` }} />
+                                    <div style={{ background: "#556677", width: `${(StatisticOptions[statistic]?.getStat?.(a) ?? 0) * 100 / max}%`, height: `${rowHeight}px` }} />
                                     <div style={{ position: "absolute", left: "8px", top: "0", height: `${rowHeight}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                         {renderKeywordRow ? renderKeywordRow(a) : a.keyword}
                                     </div>
                                 </div></TableCell>
-                                <TableCell>{a.count.toLocaleString()}</TableCell>
+                                <TableCell>{StatisticOptions[statistic]?.formatStat?.(a)}</TableCell>
                                 <TableCell>{new Date(a.minTs).toLocaleDateString()}</TableCell>
                                 <TableCell>{new Date(a.maxTs).toLocaleDateString()}</TableCell>
                             </TableRow>

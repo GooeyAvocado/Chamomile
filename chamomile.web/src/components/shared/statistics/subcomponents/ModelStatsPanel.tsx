@@ -3,10 +3,11 @@ import KeywordUsage from "../../../../model/KeywordUsage"
 import KeywordUsageDatedResult from "../../../../model/KeywordUsageDatedResult"
 import { Model, ModelType } from "../../../../model/Model"
 import ModelTypePill from "../../model/ModelType/ModelTypePill"
+import { Statistic } from "./StatSelector"
 import { StatsPanel } from "./StatsPanel"
 
 export default function ModelStatsPanel({
-    getDatedUsageApi, data, availability, isAvailable, modelType, filter, limit, models
+    getDatedUsageApi, data, availability, isAvailable, modelType, filter, limit, models, statistic
 }: {
     getDatedUsageApi: (
         setLoading: (value: boolean) => void,
@@ -21,8 +22,10 @@ export default function ModelStatsPanel({
     filter: FilterOptions,
     limit: number,
     models?: Model[]
+    statistic: Statistic
 }) {
     return <StatsPanel
+        statistic={statistic}
         datedUsageApi={getDatedUsageApi} minAutoCompleteLength={0}
         usage={availability === 0 ? data : availability === 1
             ? data?.filter(a => isAvailable(a.keyword))
