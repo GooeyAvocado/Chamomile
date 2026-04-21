@@ -5,7 +5,7 @@
 
         public static readonly string SCHEMA = "chamomile";
 
-        public static readonly string MODELS_TABLE = $"{SCHEMA}.models";
+        public static readonly string CHECKPOINTS_TABLE = $"{SCHEMA}.models";
 
         public static readonly string CHECKPOINT_TITLE        = "model_title_tx";
         public static readonly string CHECKPOINT_NAME         = "model_nm";
@@ -22,8 +22,6 @@
         public static readonly string LORA_AVAIL_IN      = "lora_avail_in";
         public static readonly string LORA_TYPE_CD       = "lora_type_cd";
         public static readonly string LORA_TAG           = "lora_tag_tx";
-
-        public static readonly string DELETED_CT = "deleted_ct";
 
         public static readonly string IMAGES_TABLE       = $"{SCHEMA}.images img";
         public static readonly string IMAGES_ID          = "image_id";
@@ -116,6 +114,12 @@
         public static readonly string KEYWORD_USAGE = "usage_ct";
         public static readonly string KEYWORD_USAGE_DATE = "usage_dt";
         public static readonly string KEYWORD_SAMPLE = "sample_id";
+
+        public static readonly string EXISTING_CT = "existing_ct";
+        public static readonly string DELETED_CT = "deleted_ct";
+        public static readonly string DOWNLOAD_CT = "download_ct";
+        public static readonly string FAVORITE_CT = "favorite_ct";
+        public static readonly string UPSCALE_CT = "upscale_ct";
 
         public static readonly string TEMPLATE_TABLE = $"{SCHEMA}.templates";
         public static readonly string TEMPLATE_NAME = "templ_nm";

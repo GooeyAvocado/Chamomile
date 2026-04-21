@@ -115,7 +115,7 @@ namespace Chamomile.Data {
                     .Select(a => a.Groups[1].Value)
                     .Where(a => loras.Any(b => b.ID == a))];
 
-            var model = await adoTemplate.QuerySingle(SelectSql([CHECKPOINT_TITLE], MODELS_TABLE,
+            var model = await adoTemplate.QuerySingle(SelectSql([CHECKPOINT_TITLE], CHECKPOINTS_TABLE,
                 new WhereConditionGroup([new(CHECKPOINT_NAME, WhereConditionOperator.ILIKE)])),
                 (cmd) => cmd.SetString(CHECKPOINT_NAME, "%" + image.Model + "%"),
                 (reader) => reader.GetOptionalString(CHECKPOINT_TITLE)
@@ -129,7 +129,7 @@ namespace Chamomile.Data {
                     IsAvailable = false,
                     Name = image.Model
                 };
-                await adoTemplate.Execute(InsertSql([CHECKPOINT_TITLE, CHECKPOINT_DESC, CHECKPOINT_AVAIL_IN, CHECKPOINT_NAME], MODELS_TABLE), (cmd) => {
+                await adoTemplate.Execute(InsertSql([CHECKPOINT_TITLE, CHECKPOINT_DESC, CHECKPOINT_AVAIL_IN, CHECKPOINT_NAME], CHECKPOINTS_TABLE), (cmd) => {
                     cmd.SetString(CHECKPOINT_TITLE, newModel.ID);
                     cmd.SetString(CHECKPOINT_DESC, newModel.Description);
                     cmd.SetBoolean(CHECKPOINT_AVAIL_IN, newModel.IsAvailable);
@@ -647,10 +647,13 @@ namespace Chamomile.Data {
                 SELECT
                   k.keyword as {KEYWORD},
                   COUNT(*) AS {KEYWORD_USAGE},
+                  COUNT(*) FILTER (WHERE {IMAGES_FAV_IN}) AS {FAVORITE_CT},
+                  COUNT(*) FILTER (WHERE {IMAGES_DOWNLOAD_CT} > 0) AS {DOWNLOAD_CT},
+                  COUNT(*) FILTER (WHERE {IMAGES_HIRES_IN}) AS {UPSCALE_CT},
                   MIN(k.{IMAGES_ID}) AS {KEYWORD_SAMPLE},
                   min(k.{CRE_TS}) as {MIN_TS}, max(k.{CRE_TS}) as {MAX_TS}
                 FROM (
-                  {SelectSql([IMAGES_ID,IMAGES_PROMPT, CRE_TS],IMAGES_TABLE,
+                  {SelectSql([IMAGES_ID,IMAGES_PROMPT, CRE_TS, IMAGES_FAV_IN, IMAGES_DOWNLOAD_CT, IMAGES_HIRES_IN],IMAGES_TABLE,
                     new WhereConditionGroup(ConditionsFromFilter(filter, null)), [new(CRE_TS,SortOrder.DESC)])}
                   {(limit > 0 ? $" LIMIT {limit}" : "")}
                 ) AS filtered_images
@@ -664,6 +667,9 @@ namespace Chamomile.Data {
             }, reader => new KeywordUsage() {
                 Keyword = reader.GetString(KEYWORD),
                 Count = reader.GetInt(KEYWORD_USAGE),
+                DownloadCount = reader.GetInt(DOWNLOAD_CT),
+                FavoriteCount = reader.GetInt(FAVORITE_CT),
+                UpscaleCount = reader.GetInt(UPSCALE_CT),
                 Sample = reader.GetInt(KEYWORD_SAMPLE),
                 MinTs = reader.GetDateTime(MIN_TS),
                 MaxTs = reader.GetDateTime(MAX_TS)
@@ -871,7 +877,7 @@ namespace Chamomile.Data {
             }, (reader) => reader.GetString(LORA_ALIAS));
 
             //Unassign the image from any model that uses it as a sample
-            await adoTemplate.Execute(UpdateSql([IMAGES_ID], MODELS_TABLE, new([new(IMAGES_ID, WhereConditionOperator.EQUALS, "@ORIGINAL_ID")])), (cmd) => {
+            await adoTemplate.Execute(UpdateSql([IMAGES_ID], CHECKPOINTS_TABLE, new([new(IMAGES_ID, WhereConditionOperator.EQUALS, "@ORIGINAL_ID")])), (cmd) => {
                 cmd.SetInt(IMAGES_ID, null);
                 cmd.SetInt("ORIGINAL_ID", id);
             });
@@ -919,7 +925,7 @@ where i.image_prompt_tx = n.image_prompt_tx
             await adoTemplate.Execute(DeleteSql(IMAGES_TABLE, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
 
             //Now that we have deleted the image, we need to bump the delete count for the models and the LoRAs
-            await adoTemplate.Execute($"UPDATE {MODELS_TABLE} SET {DELETED_CT} = {DELETED_CT} + 1 WHERE {CHECKPOINT_NAME} = @{CHECKPOINT_NAME}", (cmd) => {
+            await adoTemplate.Execute($"UPDATE {CHECKPOINTS_TABLE} SET {DELETED_CT} = {DELETED_CT} + 1 WHERE {CHECKPOINT_NAME} = @{CHECKPOINT_NAME}", (cmd) => {
                 cmd.SetString(CHECKPOINT_NAME, checkpoint);
             });
 

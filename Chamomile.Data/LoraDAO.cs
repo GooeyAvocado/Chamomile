@@ -45,16 +45,24 @@ namespace Chamomile.Data {
                 [
                     LORA_ALIAS, 
                     $"count(*) as {USAGE_COUNT}",
+                    $"max({DELETED_CT}) as {DELETED_CT}",
+                    $"count(*) filter(where {IMAGES_DOWNLOAD_CT} > 0) as {DOWNLOAD_CT}",
+                    $"count(*) filter(where {IMAGES_FAV_IN}) as {FAVORITE_CT}",
+                    $"count(*) filter(where {IMAGES_HIRES_IN}) as {UPSCALE_CT}",
                     $"min({CRE_TS}) as {MIN_TS}" ,
                     $"max({CRE_TS}) as {MAX_TS}"
                 ],
-                   "(" + InnerImageSql(filter,limit) + ")") 
+                   "(" + UsageInnerImageSql(filter,limit) + ")") 
                 + $" GROUP BY {LORA_ALIAS} ORDER BY {USAGE_COUNT} DESC", (cmd) => {
                     ImagesDAO.SetterFromFilter(cmd, filter);
                 }, (reader) =>
                 new KeywordUsage() {
                     Keyword = reader.GetOptionalString(LORA_ALIAS) ?? "None",
                     Count = reader.GetInt(USAGE_COUNT),
+                    DeletedCount = reader.GetOptionalInt(DELETED_CT) ?? 0,
+                    DownloadCount = reader.GetInt(DOWNLOAD_CT),
+                    FavoriteCount = reader.GetInt(FAVORITE_CT),
+                    UpscaleCount = reader.GetInt(UPSCALE_CT),
                     MinTs = reader.GetDateTime(MIN_TS),
                     MaxTs = reader.GetDateTime(MAX_TS),
                 }
@@ -70,7 +78,7 @@ namespace Chamomile.Data {
                     $"SUM(count(*)) OVER (ORDER BY date({CRE_TS}) ASC) AS {CUMULATIVE_USAGE_COUNT}",
                     $"min({IMAGES_ID}) as {IMAGES_ID}" ,
                 ],
-                   "(" + InnerImageSql(filter, limit) + ")")
+                   "(" + DatedInnerImageSql(filter, limit) + ")")
                 + $@" 
                     WHERE {LORA_ALIAS} = @{LORA_ALIAS}
                     GROUP BY {KEYWORD_USAGE_DATE} 
@@ -101,7 +109,24 @@ namespace Chamomile.Data {
 
         }
 
-        private static string InnerImageSql(FilterOptions filter, int limit) {
+        private static string UsageInnerImageSql(FilterOptions filter, int limit) {
+            return SelectSql([
+                    $"l.{LORA_ALIAS}",
+                    $"l.{DELETED_CT}",
+                    $"img.{CRE_TS}", 
+                    $"img.{IMAGES_DOWNLOAD_CT}",
+                    $"img.{IMAGES_FAV_IN}",
+                    $"img.{IMAGES_HIRES_IN}",
+                    $"img.{IMAGES_ID}"
+                ], $"(" +
+                        $"select img.*, imv.{LORA_ALIAS} from {IMAGES_TABLE} left join {IMAGES_LORA_MAP} imv on imv.{IMAGES_ID} = img.{IMAGES_ID}" +
+                    $") img " +
+                        $"left join {LORA_TABLE} l on img.{LORA_ALIAS} = l.{LORA_ALIAS}",
+                new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
+                [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
+        }
+
+        private static string DatedInnerImageSql(FilterOptions filter, int limit) {
             return SelectSql([$"IMV.{LORA_ALIAS}", $"img.{CRE_TS}", $"img.{IMAGES_ID}"], $"{IMAGES_TABLE} left join {IMAGES_LORA_MAP} imv on img.{IMAGES_ID} = imv.{IMAGES_ID}", 
                 new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");

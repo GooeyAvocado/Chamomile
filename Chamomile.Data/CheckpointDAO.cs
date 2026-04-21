@@ -11,7 +11,7 @@ namespace Chamomile.Data {
             return await adoTemplate.Query(
                 SelectSql([
                     CHECKPOINT_NAME, CHECKPOINT_TITLE, CHECKPOINT_AVAIL_IN,CHECKPOINT_DESC,IMAGES_ID,CHECKPOINT_TYPE_CD, CHECKPOINT_TAG],
-                    MODELS_TABLE,
+                    CHECKPOINTS_TABLE,
                     new([]),
                     [new OrderBy(CHECKPOINT_NAME)]
                 ),
@@ -31,7 +31,7 @@ namespace Chamomile.Data {
         public async Task<List<string>> GetAllTags() {
             var tags = "TAGS";
             return await adoTemplate.Query(
-                SelectSql([$"unnest({CHECKPOINT_TAG}) as {tags}"], MODELS_TABLE, true),
+                SelectSql([$"unnest({CHECKPOINT_TAG}) as {tags}"], CHECKPOINTS_TABLE, true),
                 (cmd) => { },
                 (reader) => reader.GetString(tags)
             );
@@ -40,18 +40,26 @@ namespace Chamomile.Data {
         public async Task<List<KeywordUsage>> GetUsage(FilterOptions filter, int limit) {
             return await adoTemplate.Query(SelectSql(
                 [
-                    CHECKPOINT_TITLE, 
-                    $"count(*) as {USAGE_COUNT}", 
+                    $"{CHECKPOINT_TITLE}", 
+                    $"count(*) as {EXISTING_CT}",
+                    $"max({DELETED_CT}) as {DELETED_CT}",
+                    $"count(*) filter(where {IMAGES_DOWNLOAD_CT} > 0) as {DOWNLOAD_CT}",
+                    $"count(*) filter(where {IMAGES_FAV_IN}) as {FAVORITE_CT}",
+                    $"count(*) filter(where {IMAGES_HIRES_IN}) as {UPSCALE_CT}",
                     $"min({CRE_TS}) as {MIN_TS}" ,
                     $"max({CRE_TS}) as {MAX_TS}"
                 ], 
-                "(" + InnerImageSql(filter,limit) + ")" ) 
-                + $" GROUP BY {CHECKPOINT_TITLE} ORDER BY {USAGE_COUNT} DESC, {CHECKPOINT_TITLE}", (cmd) =>{
+                "(" + UsageInnerImageSql(filter,limit) + ")" ) 
+                + $" GROUP BY {CHECKPOINT_TITLE} ORDER BY {EXISTING_CT} DESC, {CHECKPOINT_TITLE}", (cmd) =>{
                     ImagesDAO.SetterFromFilter(cmd, filter);
                 }, (reader) => 
                 new KeywordUsage() { 
                     Keyword = reader.GetString(CHECKPOINT_TITLE),
-                    Count= reader.GetInt(USAGE_COUNT),
+                    Count= reader.GetInt(EXISTING_CT),
+                    DeletedCount= reader.GetInt(DELETED_CT),
+                    DownloadCount= reader.GetInt(DOWNLOAD_CT),
+                    FavoriteCount= reader.GetInt(FAVORITE_CT),
+                    UpscaleCount= reader.GetInt(UPSCALE_CT),
                     MinTs = reader.GetDateTime(MIN_TS),
                     MaxTs= reader.GetDateTime(MAX_TS),
                 }
@@ -67,7 +75,7 @@ namespace Chamomile.Data {
                     $"SUM(count(*)) OVER (ORDER BY date({CRE_TS}) ASC) AS {CUMULATIVE_USAGE_COUNT}",
                     $"min({IMAGES_ID}) as {IMAGES_ID}" ,
                 ],
-                "(" + InnerImageSql(filter, limit) + ")")
+                "(" + DatedInnerImageSql(filter, limit) + ")")
                 + $@" 
                     WHERE {CHECKPOINT_TITLE} = @{CHECKPOINT_TITLE}
                     GROUP BY {KEYWORD_USAGE_DATE} 
@@ -85,17 +93,32 @@ namespace Chamomile.Data {
                 }
             );
         }
-
+                
         private async Task<List<string>> GetUnusedModels() {
             return await adoTemplate.Query($@"
                 select m.{CHECKPOINT_TITLE}
-                from {MODELS_TABLE} m left join {IMAGES_TABLE} on m.{CHECKPOINT_TITLE} = img.{CHECKPOINT_TITLE} 
+                from {CHECKPOINTS_TABLE} m left join {IMAGES_TABLE} on m.{CHECKPOINT_TITLE} = img.{CHECKPOINT_TITLE} 
                 where {CHECKPOINT_AVAIL_IN}  = false
                 group by  m.{CHECKPOINT_TITLE}
                 HAVING COUNT(img.{CHECKPOINT_TITLE}) = 0", (cmd) => { }, (reader) => reader.GetString(CHECKPOINT_TITLE));
         }
 
-        private static string InnerImageSql(FilterOptions filter, int limit) {
+        private static string UsageInnerImageSql(FilterOptions filter, int limit) {
+            return SelectSql([
+                    $"m.{CHECKPOINT_TITLE}", 
+                    $"m.{DELETED_CT}",
+                    $"img.{IMAGES_ID}",
+                    $"img.{CRE_TS}",
+                    $"img.{IMAGES_DOWNLOAD_CT}",
+                    $"img.{IMAGES_FAV_IN}",
+                    $"img.{IMAGES_HIRES_IN}",
+                ], 
+                $"{CHECKPOINTS_TABLE} m left join {IMAGES_TABLE} on m.{CHECKPOINT_TITLE} = img.{CHECKPOINT_TITLE}",
+                new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
+                [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
+        }
+
+        private static string DatedInnerImageSql(FilterOptions filter, int limit) {
             return SelectSql([CHECKPOINT_TITLE, CRE_TS, IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
                 [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
@@ -108,7 +131,7 @@ namespace Chamomile.Data {
             await adoTemplate.Execute(
                 UpdateSql(
                     [CHECKPOINT_DESC, IMAGES_ID, CHECKPOINT_TYPE_CD, CHECKPOINT_TAG],
-                    MODELS_TABLE,
+                    CHECKPOINTS_TABLE,
                     new([new(CHECKPOINT_TITLE)])
                 ), (cmd) => {
                     cmd.SetString(CHECKPOINT_DESC, checkpoint.Description);
@@ -138,13 +161,13 @@ namespace Chamomile.Data {
             // Mark every model available 
             await adoTemplate.Execute(UpdateSql([CHECKPOINT_AVAIL_IN], new() {
                 { CHECKPOINT_AVAIL_IN, "TRUE"}
-            }, MODELS_TABLE, new([])));
+            }, CHECKPOINTS_TABLE, new([])));
 
             //Mark unavailable models unavailable
             if (unavailableTitles.Count > 0) {
                 await adoTemplate.Execute(UpdateSql([CHECKPOINT_AVAIL_IN], new() {
                     { CHECKPOINT_AVAIL_IN, "FALSE"}
-                }, MODELS_TABLE, new([new(CHECKPOINT_TITLE, unavailableTitles)])));
+                }, CHECKPOINTS_TABLE, new([new(CHECKPOINT_TITLE, unavailableTitles)])));
             }
 
             //Check for unavailable models that have zero images and delete them
@@ -152,13 +175,13 @@ namespace Chamomile.Data {
             if (unusedModels.Count > 0) {
                 Console.WriteLine($"{unusedModels.Count} model(s) unused and deleted");
                 unusedModels.ForEach(m => Console.WriteLine($"    - {m}"));
-                await adoTemplate.Execute(DeleteSql(MODELS_TABLE, new([new(CHECKPOINT_TITLE, unusedModels)])));
+                await adoTemplate.Execute(DeleteSql(CHECKPOINTS_TABLE, new([new(CHECKPOINT_TITLE, unusedModels)])));
             }
 
             //Create the new models
             await adoTemplate.ExecuteBatch(InsertSql(
                 [CHECKPOINT_NAME, CHECKPOINT_TITLE, CHECKPOINT_AVAIL_IN,CHECKPOINT_DESC],
-                MODELS_TABLE
+                CHECKPOINTS_TABLE
             ), (cmd,m) => {
                 cmd.SetString(CHECKPOINT_NAME, m.model_name);
                 cmd.SetString(CHECKPOINT_TITLE,m.title);
