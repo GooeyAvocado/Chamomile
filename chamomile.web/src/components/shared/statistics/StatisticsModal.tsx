@@ -153,7 +153,7 @@ export default function StatisticsModal(props: {
                     </div>
                     : <StatsPanel
                         datedUsageApi={getKeywordUsageDated}
-                        usage={sortedKeywordData}
+                        usage={sortedKeywordData} suppressDeleted
                         filter={filter} limit={limit} statistic={stat}
                         renderCount={(total) => <Tooltip title="'Keywords' are determined by non-LoRA words split by commas, line breaks, or more than two spaces. This detection isn't perfect!">
                             <div style={{ opacity: ".7", fontSize: ".9em" }}> About {total} unique keywords</div>

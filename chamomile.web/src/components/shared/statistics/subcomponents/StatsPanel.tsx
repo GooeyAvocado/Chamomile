@@ -20,7 +20,7 @@ export function StatsPanel({
     usage, filter, datedUsageApi, keywordColumnOverride,
     renderImageTile, renderKeywordRow, rowHeightOverride,
     renderCount, getSampleImageId, minAutoCompleteLength: propMinACL,
-    limit, children, hidePagination, hideGraph, statistic
+    limit, children, hidePagination, hideGraph, statistic, suppressDeleted
 }: {
     usage: KeywordUsage[],
     filter: FilterOptions,
@@ -35,6 +35,7 @@ export function StatsPanel({
     children?: React.ReactNode,
     hidePagination?: boolean
     hideGraph?: boolean
+    suppressDeleted?: boolean
     statistic: Statistic
     datedUsageApi: (
         setLoading: (value: boolean) => void,
@@ -166,7 +167,7 @@ export function StatsPanel({
         <KeywordUsageModal
             open={usageOpen} setOpen={setUsageOpen} data={selectedUsage}
             renderImageTile={renderImageTile ? (k) => renderImageTile?.(k, setImageView) : undefined} renderKeywordRow={renderKeywordRow}
-            getSampleImageId={getSampleImageId}
+            getSampleImageId={getSampleImageId} suppressDeleted={suppressDeleted}
         />
 
         {(!hideGraph || !hidePagination) && <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: "10px" }}>
