@@ -925,16 +925,18 @@ where i.image_prompt_tx = n.image_prompt_tx
             await adoTemplate.Execute(DeleteSql(IMAGES_TABLE, new([new(IMAGES_ID)])), (cmd) => cmd.SetInt(IMAGES_ID, id));
 
             //Now that we have deleted the image, we need to bump the delete count for the models and the LoRAs
-            await adoTemplate.Execute($"UPDATE {CHECKPOINTS_TABLE} SET {DELETED_CT} = {DELETED_CT} + 1 WHERE {CHECKPOINT_NAME} = @{CHECKPOINT_NAME}", (cmd) => {
-                cmd.SetString(CHECKPOINT_NAME, checkpoint);
+            await adoTemplate.Execute($"UPDATE {CHECKPOINTS_TABLE} SET {DELETED_CT} = {DELETED_CT} + 1 WHERE {CHECKPOINT_TITLE} = @{CHECKPOINT_TITLE}", (cmd) => {
+                cmd.SetString(CHECKPOINT_TITLE, checkpoint);
             });
 
             //And for the LoRAs
-            await adoTemplate.Execute($"UPDATE {LORA_TABLE} SET {DELETED_CT} = {DELETED_CT} + 1 WHERE {LORA_ALIAS} IN ({string.Join(",", LoRAs.Select((l, i) => $"@{LORA_ALIAS}_{i}"))})", (cmd) => {
-                for (int i = 0; i < LoRAs.Count; i++) {
-                    cmd.SetString($"{LORA_ALIAS}_{i}", LoRAs[i]);
-                }
-            });
+            if (LoRAs.Count > 0) {
+                await adoTemplate.Execute($"UPDATE {LORA_TABLE} SET {DELETED_CT} = {DELETED_CT} + 1 WHERE {LORA_ALIAS} IN ({string.Join(",", LoRAs.Select((l, i) => $"@{LORA_ALIAS}_{i}"))})", (cmd) => {
+                    for (int i = 0; i < LoRAs.Count; i++) {
+                        cmd.SetString($"{LORA_ALIAS}_{i}", LoRAs[i]);
+                    }
+                });
+            }
 
         }
 

@@ -170,7 +170,16 @@ export default function DatedUsageGraph({
                                                                     keyword: pt.keyword,
                                                                     maxTs: pt.date,
                                                                     minTs: pt.date,
-                                                                    sample: pt.sample
+                                                                    sample: pt.sample,
+                                                                    deletedCount: 0,
+                                                                    downloadCount: 0,
+                                                                    favoriteCount: 0,
+                                                                    upscaleCount: 0,
+                                                                    totalCount: pt.count,
+                                                                    successRate: 0,
+                                                                    downloadRate: 0,
+                                                                    favoriteRate: 0,
+                                                                    upscaleRate: 0,
                                                                 }) : <>{pt.keyword[0].toUpperCase()}{pt.keyword.slice(1)}</>}</div>
                                                                 <div>{date.toLocaleDateString()}: {(graphMode === "CUMULATIVE" ? pt.cumulativeCount : pt.count).toLocaleString()} usages</div>
                                                             </div>

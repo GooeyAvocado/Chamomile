@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import KeywordUsage from "../../../../model/KeywordUsage";
 import { Chip, CircularProgress, IconButton, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
 import ImageTileFromID from "../../images/ImageTileFromID";
-import { BarChart, ChevronLeft, ChevronRight, FirstPage, InfoOutline, LastPage, SignalCellularAlt, TableView, Timeline } from "@mui/icons-material";
+import { BarChart, ChevronLeft, ChevronRight, FirstPage, LastPage, SignalCellularAlt, TableView, Timeline } from "@mui/icons-material";
 import ImageModalFromId from "../../images/ImageModalFromId";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
