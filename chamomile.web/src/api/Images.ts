@@ -27,13 +27,6 @@ export const uploadExistingImage = (
     queryObj: any
 ) => Upload(setLoading, setProgress, onSuccess, onError, "POST", ENDPOINT + objectToQueryString(queryObj), file)
 
-export const enqueuePrompt = (
-    setLoading: (value: boolean) => void,
-    setItem: (val?: { jobId: string }) => void,
-    onError: (value: any) => void,
-    val: Prompt
-) => Post(setLoading, setItem, onError, ENDPOINT + "generate", val)
-
 export const enqueueGrid = (
     setLoading: (value: boolean) => void,
     setItem: (val?: { jobIds: number[] }) => void,
@@ -53,7 +46,28 @@ export const enqueuePrompts = (
     setItem: (val?: { jobIds: number[] }) => void,
     onError: (value: any) => void,
     val: Prompt[]
-) => Post(setLoading, setItem, onError, ENDPOINT + "generateMany", val)
+) => Post(setLoading, setItem, onError, ENDPOINT + "generate", val)
+
+export const enqueueHighPriorityPrompts = (
+    setLoading: (value: boolean) => void,
+    setItem: (val?: { jobIds: number[] }) => void,
+    onError: (value: any) => void,
+    val: Prompt[]
+) => Post(setLoading, setItem, onError, ENDPOINT + "generateNow", val)
+
+export const moveJobsToFront = (
+    setLoading: (value: boolean) => void,
+    setItem: (val?: { jobIds: number[] }) => void,
+    onError: (value: any) => void,
+    ids: number[]
+) => Post(setLoading, setItem, onError, ENDPOINT + "moveToFront", ids);
+
+export const moveJobsToBack = (
+    setLoading: (value: boolean) => void,
+    setItem: (val?: { jobIds: number[] }) => void,
+    onError: (value: any) => void,
+    ids: number[]
+) => Post(setLoading, setItem, onError, ENDPOINT + "moveToBack", ids);
 
 export const getStatus = (
     setLoading: (value: boolean) => void,
@@ -68,20 +82,12 @@ export const changeStatus = (
     body: ImageWorkerStatus
 ) => Post(setLoading, setItem, onError, ENDPOINT + "status", body);
 
-export const cancelJob = (
-    setLoading: (value: boolean) => void,
-    setItem: (value?: Prompt[]) => void,
-    onError: (value: any) => void,
-    id: number
-) => Get(setLoading, setItem, onError, ENDPOINT + "cancel/" + id);
-
 export const cancelJobs = (
     setLoading: (value: boolean) => void,
-    setItem: (value?: Prompt[]) => void,
+    onOk: () => void,
     onError: (value: any) => void,
     ids: number[]
-) => Post(setLoading, setItem, onError, ENDPOINT + "cancel", ids);
-
+) => Post(setLoading, onOk, onError, ENDPOINT + "cancel", ids);
 
 export const clearQueue = (
     setLoading: (value: boolean) => void,

@@ -70,14 +70,6 @@ namespace Chamomile.API.Controllers
             }
         }
 
-        [HttpPost("generate")]
-        public IActionResult Generate([FromBody] Prompt prompt)
-        {
-            return Ok(new Dictionary<string, object>() {
-                { "jobId", worker.EnqueuePrompt(prompt) }
-            });
-        }
-
         [HttpPost("generateGrid")]
         public async Task<IActionResult> GenerateGrid([FromBody] GenerateGridRequest request) {
 
@@ -152,10 +144,31 @@ namespace Chamomile.API.Controllers
 
         }
 
-        [HttpPost("generateMany")]
-        public IActionResult GenerateMany([FromBody] List<Prompt> prompts) {
+        [HttpPost("generate")]
+        public IActionResult Generate([FromBody] List<Prompt> prompts) {
             return Ok(new Dictionary<string, object>() {
                 { "jobIds", worker.EnqueuePrompts(prompts)  }
+            });
+        }
+
+        [HttpPost("generateNow")]
+        public IActionResult GenerateNow([FromBody] List<Prompt> prompts) {
+            return Ok(new Dictionary<string, object>() {
+                { "jobIds", worker.EnqueuePromptsToFront(prompts)  }
+            });
+        }
+
+        [HttpPost("moveToFront")]
+        public IActionResult MoveToFront([FromBody] List<long> id) {
+            return Ok(new Dictionary<string, object>() {
+                { "jobIds", worker.MovePromptsToFront(id)  }
+            });
+        }
+
+        [HttpPost("moveToBack")]
+        public IActionResult MoveToBack([FromBody] List<long> id) {
+            return Ok(new Dictionary<string, object>() {
+                { "jobIds", worker.MovePromptsToBack(id)  }
             });
         }
 
@@ -169,20 +182,6 @@ namespace Chamomile.API.Controllers
         #endregion
 
         #region READ
-
-        [HttpGet("queue")]
-        [Obsolete("This endpoint is deprecated. Use GET /status instead.")]
-        public IActionResult GetQueue()
-        {
-            return Ok(worker.GetAllPrompts());
-        }
-
-        [HttpGet("current")]
-        [Obsolete("This endpoint is deprecated. Use GET /status instead.")]
-        public IActionResult GetCurrent()
-        {
-            return Ok(worker.CurrentPrompt);
-        }
 
         [HttpGet("status")]
         public IActionResult GetStatus()
@@ -209,14 +208,6 @@ namespace Chamomile.API.Controllers
         {
             worker.ClearQueue();
             return Ok();
-        }
-
-
-
-        [HttpGet("cancel/{id}")]
-        public IActionResult CancelJob(long id)
-        {
-            return Ok(worker.CancelPrompt(id));
         }
 
         [HttpPost("cancel")]

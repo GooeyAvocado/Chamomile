@@ -57,20 +57,6 @@ namespace Chamomile.API.Workers {
             _workerTask = Task.Run(ProcessQueueAsync);
         }
 
-        /// <summary>
-        /// Adds a prompt to the queue and returns its Job ID.
-        /// </summary>
-        public long EnqueuePrompt(Prompt prompt) {
-            long jobId = Interlocked.Increment(ref _jobCounter);
-            _queue[jobId] = prompt;
-            _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
-            
-            //We should only be getting new prompts if SD is available. CheckSD now.
-            if (_isSdPause) _ = CheckSd();
-
-            return jobId;
-        }
-
         /// <summary>Enqueues many prompts</summary>
         /// <param name="prompts"></param>
         /// <returns></returns>
@@ -118,17 +104,6 @@ namespace Chamomile.API.Workers {
                 a.Value.Id = Convert.ToInt32(a.Key);
                 return a.Value;
             })];
-        }
-
-        /// <summary>
-        /// Cancels a specific prompt if it hasn't started processing.
-        /// </summary>
-        public bool CancelPrompt(long jobId) {
-            if (_queue.TryRemove(jobId, out _)) {
-                _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
-                return true;
-            }
-            return false;
         }
 
         /// <summary>
