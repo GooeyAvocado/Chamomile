@@ -18,6 +18,10 @@ namespace Chamomile.API.Workers {
 
         private readonly ConcurrentDictionary<long, Prompt> _queue = new();
         private long _jobCounter = 0;
+        // Counter for high-priority jobs that should be placed at the front of the queue.
+        // We increment this and use the negative of the value as the job id so that
+        // high priority jobs sort before normal jobs (e.g. -1, -2, -3 ...).
+        private long _highPriorityJobCounter = 0;
         private readonly CancellationTokenSource _cts = new();
         private readonly Task _workerTask;
         private readonly IHubContext<ImageGenerateHub> _hubContext;
@@ -88,6 +92,25 @@ namespace Chamomile.API.Workers {
         }
 
         /// <summary>
+        /// Enqueues many prompts to the front of the queue (high priority)
+        /// </summary>
+        public List<long> EnqueuePromptsToFront(List<Prompt> prompts) {
+            List<long> jobIds = [];
+            prompts.ForEach(a => {
+                var hp = Interlocked.Increment(ref _highPriorityJobCounter);
+                long jobId = -hp;
+                _queue[jobId] = a;
+                jobIds.Add(jobId);
+            });
+
+            _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
+
+            if (_isSdPause) _ = CheckSd();
+
+            return jobIds;
+        }
+
+        /// <summary>
         /// Retrieves all pending prompts in order.
         /// </summary>
         public List<Prompt> GetAllPrompts() {
@@ -115,6 +138,58 @@ namespace Chamomile.API.Workers {
             foreach (var id in jobIds) {_queue.TryRemove(id, out _);}
             _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
             return true;
+        }
+
+        /// <summary>
+        /// Moves the specified prompts to the back of the queue by removing them and re-enqueuing
+        /// using the normal enqueue method. Returns the new job IDs created.
+        /// </summary>
+        public List<long> MovePromptsToBack(List<long> jobIds) {
+            var newIds = new List<long>();
+
+            foreach (var id in jobIds) {
+                if (_queue.TryRemove(id, out var prompt)) {
+                    // Directly create a new normal job id and add to the queue to avoid
+                    // duplicate QueueUpdated notifications coming from EnqueuePrompt.
+                    var newId = Interlocked.Increment(ref _jobCounter);
+                    _queue[newId] = prompt;
+                    newIds.Add(newId);
+                }
+            }
+
+            // Single notification for the batch
+            _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
+
+            // If SD was paused, check once
+            if (_isSdPause) _ = CheckSd();
+
+            return newIds;
+        }
+
+        /// <summary>
+        /// Moves the specified prompts to the front of the queue by removing them and re-enqueuing
+        /// using the high-priority enqueue method. Returns the new job IDs created (negative values).
+        /// </summary>
+        public List<long> MovePromptsToFront(List<long> jobIds) {
+            var newIds = new List<long>();
+
+            foreach (var id in jobIds) {
+                if (_queue.TryRemove(id, out var prompt)) {
+                    // Use the high priority counter to generate a unique negative id
+                    var hp = Interlocked.Increment(ref _highPriorityJobCounter);
+                    long newId = -hp;
+                    _queue[newId] = prompt;
+                    newIds.Add(newId);
+                }
+            }
+
+            // Single notification for the batch
+            _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
+
+            // If SD was paused, check once
+            if (_isSdPause) _ = CheckSd();
+
+            return newIds;
         }
 
         public void InterruptJobId(int id) {
@@ -226,8 +301,12 @@ namespace Chamomile.API.Workers {
 
                             //If we haven't cancelled and SD is no longer available
                             if (jobId != _lastInterruptedJobId && !await CheckSd()) {
-                                //Requeue the current prompt 
-                                _queue[-1] = prompt; //-1 so it's handled first next time
+                                //Requeue the current prompt using the high-priority counter so
+                                //it will be handled before normal jobs. Use a negative job id
+                                //generated from _highPriorityJobCounter (e.g. -1, -2, -3 ...).
+                                var hp = Interlocked.Increment(ref _highPriorityJobCounter);
+                                long requeueId = -hp;
+                                _queue[requeueId] = prompt;
                                 _hubContext.Clients.All.SendAsync("QueueUpdated", GetAllPrompts());
                             }
 
