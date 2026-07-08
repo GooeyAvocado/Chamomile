@@ -213,3 +213,9 @@ export const getGenStatsDated = (
     onError: (value: any) => void,
     filter: KeywordFilterOptions
 ) => Get(setLoading, setItem, onError, ENDPOINT + "datedstats" + objectToQueryString(filter));
+
+export const getTrailingAvgGenTime = (
+    setLoading: (value: boolean) => void,
+    setItem: (value?: number) => void,
+    onError: (value: any) => void
+) => Get(setLoading, (e?: { avgGenTime: number }) => { setItem(e?.avgGenTime ?? 0) }, onError, ENDPOINT + "avgGenTime");

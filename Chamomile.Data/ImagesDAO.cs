@@ -555,6 +555,33 @@ namespace Chamomile.Data {
             }
         }
 
+        /// <summary>
+        /// This is a stripped down version of getGenStatistics. This only returns the average
+        /// generation time of the last 100 images. This is so the frontend can show a more or less accurate ETA
+        /// without making a call to get the entirety of gen statistics when we load the page.
+        /// </summary>
+        /// <returns>
+        /// The average of generation times of the last 100 images. If there are no images, this will return 0.
+        /// </returns>
+        public async Task<double> GetTrailingAvgGenTime() {
+            /*
+                SELECT AVG(image_gen_ms_nb) AS avg_gen_ms
+                FROM (
+                    SELECT image_gen_ms_nb
+                    FROM images
+                    ORDER BY images_id DESC 
+                    LIMIT 100
+                ) AS latest_100;
+            */
+
+            var avgGenTime = "AVG_GEN_TIME";
+            var innerSql = SelectSql([IMAGE_GEN_MS], IMAGES_TABLE, new WhereConditionGroup([]), [new OrderBy(IMAGES_ID, SortOrder.DESC)]) + " LIMIT 100";
+            var outerSql = SelectSql([$"avg({IMAGE_GEN_MS}) as {avgGenTime}"], "(" + innerSql + ")");
+
+            var result = await adoTemplate.QuerySingle(outerSql, (cmd) => { }, (reader) => reader.GetOptionalDouble(avgGenTime) ?? 0);
+            return result;
+        }
+
         public async Task<GeneralStatistics?> GetGenStatistics(FilterOptions filter, int limit) {
 
             var favsCount = "FAVS_COUNT";

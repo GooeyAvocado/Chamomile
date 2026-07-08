@@ -333,6 +333,11 @@ namespace Chamomile.API.Controllers
             return Ok(sequence);
         }
 
+        [HttpGet("avgGenTime")]
+        public async Task<IActionResult> GetTrailingAvgGenTime() {
+            return Ok(new Dictionary<string, double> { { "avgGenTime", await dao.GetTrailingAvgGenTime() } });
+        }
+
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats([FromQuery] FilterOptions options) {
             return Ok(await dao.GetGenStatistics(options, options.LastImage ?? -1));
