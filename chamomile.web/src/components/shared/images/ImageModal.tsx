@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Button, Card, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
+import { Button, ButtonGroup, Card, CardContent, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, Coffee, CoffeeOutlined, ContentPaste, Delete, Edit, Gradient, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, Coffee, CoffeeOutlined, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useSnackbar } from "notistack";
@@ -85,6 +85,7 @@ export default function ImageModal(props: {
     const [albumsOpen, setAlbumsOpen] = useState(false)
     const [notesOpen, setNotesOpen] = useState(false)
     const [editNote, setEditNote] = useState("")
+    const [showSd, setShowSd] = useState(false)
 
     const [hideSidebar, setHideSidebar] = useState(false)
 
@@ -330,7 +331,7 @@ export default function ImageModal(props: {
                 />
 
                 <img
-                    src={imageUrl(image?.id ?? 0, image?.hiResAvailable)}
+                    src={imageUrl(image?.id ?? 0, !showSd && image?.hiResAvailable)}
                     style={{
                         maxWidth: '100%',
                         height: '100%',
@@ -365,6 +366,7 @@ export default function ImageModal(props: {
                     />
                 </div>
 
+                {/* Counter */}
                 <div style={{
                     position: "absolute", left: '10px', bottom: '10px', zIndex: 2,
                     display: 'flex', flexDirection: 'column', alignItems: 'start',
@@ -636,11 +638,37 @@ export default function ImageModal(props: {
                                 </ComplexAccordion>
 
                                 {/* HiRes Options */}
-                                <ComplexAccordion elevation={2} title={<><Gradient color={
-                                    image?.hiResAvailable ? "info" : "inherit"
-                                } /> <div>Upscale{image?.hiResAvailable && "d"}</div></>} disabled={!onUpscale || !pong?.SD}>
+                                <ComplexAccordion elevation={2} title={
+
+                                    <>
+                                        <Gradient color={image?.hiResAvailable ? "info" : "inherit"} />
+                                        <div>Upscale{image?.hiResAvailable && "d"}</div>
+                                    </>}
+
+
+                                    disabled={!onUpscale || !pong?.SD}>
+
+                                    {image?.hiResAvailable &&
+                                        <ComplexAccordionActions position="right" showOnState="any">
+
+                                            <ButtonGroup fullWidth size="small" color="info">
+                                                <Tooltip title="Original">
+                                                    <Button variant={showSd ? "contained" : undefined} onClick={() => setShowSd(true)}>
+                                                        <Image />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip title="Upscaled">
+                                                    <Button variant={showSd ? undefined : "contained"} onClick={() => setShowSd(false)}>
+                                                        <Gradient />
+                                                    </Button>
+                                                </Tooltip>
+                                            </ButtonGroup>
+
+                                        </ComplexAccordionActions>
+                                    }
 
                                     <ComplexAccordionBody>
+
                                         {!!onUpscale && pong?.SD && <HiResPanel image={image} updateImage={onUpscale} />}
                                     </ComplexAccordionBody>
                                 </ComplexAccordion>
