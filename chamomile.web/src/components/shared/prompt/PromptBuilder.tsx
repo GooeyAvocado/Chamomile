@@ -42,7 +42,7 @@ export default function PromptBuilder(props: {
 }) {
 
     const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight, filter, setFilter, reducedBrewMenu } = props
-    const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount, variables } = usePrompt()
+    const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount } = usePrompt()
     const [expanded, setExpanded] = useState(false)
     const [expandedHeight, setExpandedHeight] = useState("0px")
     const [modelsOpen, setModelsOpen] = useState(false)

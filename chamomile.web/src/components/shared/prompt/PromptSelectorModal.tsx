@@ -54,8 +54,6 @@ export default function PromptSelectorModal(props: {
     }, [promptsApi.data, query])
 
     const { prompt, setPrompt, orderAmount } = usePrompt();
-    const { shiftHeld } = useModifierKeys();
-
     const promptFolderPrompts = promptFolder ? promptsApi.data.filter(a => a.name.startsWith(promptFolder + '/')) : []
 
     const onDelete = () => {

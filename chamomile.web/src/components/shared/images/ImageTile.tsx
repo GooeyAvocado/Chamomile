@@ -3,7 +3,7 @@ import { CardActionArea, CircularProgress, useTheme } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutlineOutlined } from "@mui/icons-material";
+import { CheckBox, CheckBoxOutlineBlank, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutlineOutlined } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { downloadImage, imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";

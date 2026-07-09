@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { Button, ButtonGroup, Card, CardContent, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
+import { Button, ButtonGroup, Card, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, Coffee, CoffeeOutlined, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder, WhatshotOutlined } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, Coffee, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useSnackbar } from "notistack";
@@ -89,7 +89,7 @@ export default function ImageModal(props: {
     const [showSd, setShowSd] = useState(false)
 
     const [hideSidebar, setHideSidebar] = useState(false)
-    const { ctrlHeld, shiftHeld } = useModifierKeys();
+    const { ctrlHeld } = useModifierKeys();
 
     const THROTTLE_DELAY = 100
     const throttledLeft = useThrottle(onLeft, THROTTLE_DELAY);

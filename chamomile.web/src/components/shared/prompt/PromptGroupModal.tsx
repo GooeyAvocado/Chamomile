@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Prompt } from "../../../model/Prompt"
 import { Button, ButtonGroup, Card, CardActionArea, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
-import { AcUnit, Cancel, ChevronRight, Delete, DirectionsRun, EditNote, Numbers, OpenWith, Tune, Whatshot } from "@mui/icons-material";
+import { AcUnit, Cancel, ChevronRight, Delete, DirectionsRun, Numbers, OpenWith, Tune, Whatshot } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
 import HighlightedPromptDiv from "./HighlightedPromptDiv";
 import PromptOrderedModel from "./PromptOrderedModal";
