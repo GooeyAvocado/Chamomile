@@ -26,7 +26,9 @@ namespace Chamomile.API.Utils {
         }
 
         static string ExtractNegativePrompt(string data) {
-            var match = Regex.Match(data, @"Negative prompt:\s*(.*?)(?=\s*Steps)");
+            // Allow the negative prompt to span multiple lines by enabling Singleline mode
+            // so that '.' will match newlines. Also be case-insensitive for robustness.
+            var match = Regex.Match(data, @"Negative prompt:\s*(.*?)(?=\s*Steps)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             return match.Success ? match.Groups[1].Value.Trim() : "";
         }
 
