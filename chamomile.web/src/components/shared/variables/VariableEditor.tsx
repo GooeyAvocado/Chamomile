@@ -342,6 +342,10 @@ export default function VariableEditor(props: {
                 </div>
             </TabbedModalTabContent>
 
+            <TabbedModalTabContent label="Suffix">
+                <div>waos</div>
+            </TabbedModalTabContent>
+
             <TabbedModalActions>
                 <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', paddingBottom: '5px', paddingLeft: '5px', paddingRight: '5px' }}>
                     <IECControls

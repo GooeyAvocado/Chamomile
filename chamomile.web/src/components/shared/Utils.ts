@@ -88,12 +88,12 @@ export const availableVars = (prompt: Prompt) => {
     return [...new Set(matches)];
 }
 
-export const hydratePrompt = (prompt: Prompt, variables: any, index?: number) => {
+export const hydratePrompt = (prompt: Prompt, variables: Record<string, string>, index?: number) => {
 
     let hydrated = {}
 
     Object.keys(variables).forEach(key => {
-        const raw = variables[key] as string;
+        const raw = variables[key]
         if (!raw) return;
 
         if (key.includes("%")) {

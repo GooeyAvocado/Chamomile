@@ -8,8 +8,8 @@ export interface PromptContextType {
     setPrompt: (val: Prompt, globalOverride?: boolean) => void,
     orderAmount: number,
     setOrderAmount: (val: number) => void,
-    variables: any,
-    setVairables: (val: any) => void,
+    variables: Record<string, string>,
+    setVairables: (val: Record<string, string>) => void,
     album?: Album,
     setAlbum: (val?: Album) => void
 }

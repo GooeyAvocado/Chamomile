@@ -198,13 +198,12 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <IECControls
                     setValue={(val) => {
-                        if (Object.keys(val).length === 0) { initializeInternalSequence([]); }
-                        else { initializeInternalSequence(val as CheckpointSequence[]); }
+                        initializeInternalSequence(val)
                         setValidation([])
                     }}
                     value={internalSequence}
                     type="Checkpoint sequence"
-                    nonPlural
+                    nonPlural clearObject={[]}
                 />
                 <Button
                     startIcon={<AddCircleOutlineOutlined />}

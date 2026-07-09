@@ -2,11 +2,12 @@ import { FileDownload, FileUpload, Delete } from "@mui/icons-material"
 import { IconButton, Tooltip } from "@mui/material"
 import { useSnackbar } from "notistack"
 
-export default function IECControls({ value, setValue, type, nonPlural }: {
-    value?: object
-    setValue: (val: object) => void
+export default function IECControls<T>({ value, setValue, type, nonPlural, clearObject }: {
+    value?: T
+    setValue: (val: T) => void
     type: string
     nonPlural?: boolean
+    clearObject?: T
 }) {
 
     const { enqueueSnackbar } = useSnackbar();
@@ -59,7 +60,7 @@ export default function IECControls({ value, setValue, type, nonPlural }: {
             </Tooltip>
 
             <Tooltip title={`Clear ${nonPlural ? "" : "all "}${type}${nonPlural ? "" : "s"}`}>
-                <IconButton onClick={() => setValue({})} color="primary"><Delete /></IconButton>
+                <IconButton onClick={() => setValue(clearObject ?? {} as T)} color="primary"><Delete /></IconButton>
             </Tooltip>
         </>}
     </div>
