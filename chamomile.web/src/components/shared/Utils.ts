@@ -88,6 +88,9 @@ export const availableVars = (prompt: Prompt) => {
     return [...new Set(matches)];
 }
 
+export const POSITIVE_SUFFIX_VARIABLE = "[CHAMOMILE_POSITIVE_PROMPT_SUFFIX]"
+export const NEGATIVE_SUFFIX_VARIABLE = "[CHAMOMILE_NEGATIVE_PROMPT_SUFFIX]"
+
 export const hydratePrompt = (prompt: Prompt, variables: Record<string, string>, index?: number) => {
 
     let hydrated = {}
@@ -130,7 +133,7 @@ export const promptPreview = (prompt: Prompt, variables: any, templates: Templat
     return promptPreviewWithVars(
         promptPreviewWithVars(
             applyTemplatesToPrompt(
-                prompt.positivePrompt, templates
+                applyPositivePromptSuffix(prompt.positivePrompt, variables[POSITIVE_SUFFIX_VARIABLE]), templates
             ), overrides
         ), wildcards
     )
@@ -139,6 +142,10 @@ export const promptPreview = (prompt: Prompt, variables: any, templates: Templat
 }
 
 export const TEMPLATE_CALL_REGEX = /\[([^:\]]+):([^\]]*)\]/g
+
+const applyPositivePromptSuffix = (promptString: string, suffix?: string) => {
+    return suffix ? `${promptString}\n\n${suffix}` : promptString
+}
 
 const applyTemplatesToPrompt = (
     promptString: string,

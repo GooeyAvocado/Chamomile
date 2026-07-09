@@ -1,7 +1,7 @@
 import { Alert, AlertTitle, Autocomplete, Button, Card, CardContent, CircularProgress, IconButton, InputAdornment, MenuItem, Select, TextField, Tooltip } from "@mui/material"
 import { usePrompt } from "../../hooks/usePrompt"
-import { promptPreview, TEMPLATE_CALL_REGEX } from "../Utils"
-import { Add, Assignment, Delete, HomeRepairService, ReceiptLong } from "@mui/icons-material"
+import { NEGATIVE_SUFFIX_VARIABLE, POSITIVE_SUFFIX_VARIABLE, promptPreview, TEMPLATE_CALL_REGEX } from "../Utils"
+import { Add, Assignment, Delete, HelpOutlineOutlined, HomeRepairService, ReceiptLong } from "@mui/icons-material"
 import { useEffect, useMemo, useState } from "react"
 import { Prompt } from "../../../model/Prompt"
 import useApi from "../../hooks/useApi"
@@ -63,7 +63,12 @@ export default function VariableEditor(props: {
     }
 
     const availableCustomNames = () => {
-        return Object.keys(variables ?? {}).filter(a => !a.includes("%") && !a.startsWith("__"))
+        return Object.keys(variables ?? {}).filter(a =>
+            !a.includes("%") &&
+            !a.startsWith("__") &&
+            a !== POSITIVE_SUFFIX_VARIABLE &&
+            a !== NEGATIVE_SUFFIX_VARIABLE
+        )
     }
 
     const allTemplateCalls = (): TemplateCall[] => {
@@ -343,7 +348,62 @@ export default function VariableEditor(props: {
             </TabbedModalTabContent>
 
             <TabbedModalTabContent label="Suffix">
-                <div>waos</div>
+
+                <div style={{ marginTop: "10px" }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                        <div>Positive Prompt</div>
+                        <Tooltip title={<div>
+                            <div style={{ fontSize: '1.3em', fontWeight: "600" }}>What's this?</div>
+                            <div>
+                                The positive prompt suffix will be added at the end of ordered
+                                prompts before additional dynamics processing. Useful for specifying
+                                LoRAs against a saved base prompt
+                            </div>
+                            <div style={{ marginTop: '10px' }}>
+                                Learn more about dynamics on our Help documentation.
+                            </div>
+                        </div>}>
+                            <HelpOutlineOutlined fontSize="small" />
+                        </Tooltip>
+                    </div>
+                    <hr style={{ width: "100%" }} />
+                </div>
+                <TextField
+                    placeholder="Suffix"
+                    multiline minRows={4}
+                    value={variables[POSITIVE_SUFFIX_VARIABLE] ?? ""}
+                    onChange={(e) => {
+                        setVariables({ ...variables, [POSITIVE_SUFFIX_VARIABLE]: e.target.value })
+                    }}
+                />
+
+
+                <div style={{ marginTop: "10px" }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                        <div>Negative Prompt</div>
+                        <Tooltip title={<div>
+                            <div style={{ fontSize: '1.3em', fontWeight: "600" }}>What's this?</div>
+                            <div>
+                                The negative prompt suffix will be added at the end of ordered
+                                prompts before additional dynamics processing.
+                            </div>
+                            <div style={{ marginTop: '10px' }}>
+                                Learn more about dynamics on our Help documentation.
+                            </div>
+                        </div>}>
+                            <HelpOutlineOutlined fontSize="small" />
+                        </Tooltip>
+                    </div>
+                    <hr style={{ width: "100%" }} />
+                </div>
+                <TextField
+                    placeholder="Suffix"
+                    multiline minRows={4}
+                    value={variables[NEGATIVE_SUFFIX_VARIABLE] ?? ""}
+                    onChange={(e) => {
+                        setVariables({ ...variables, [NEGATIVE_SUFFIX_VARIABLE]: e.target.value })
+                    }}
+                />
             </TabbedModalTabContent>
 
             <TabbedModalActions>

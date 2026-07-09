@@ -12,6 +12,10 @@ using Automatic1111.Common;
 
 namespace Chamomile.API.Workers {
     public partial class ImageGeneratorWorker {
+
+        private static readonly string POSITIVE_SUFFIX_VARIABLE = "[CHAMOMILE_POSITIVE_PROMPT_SUFFIX]";
+        private static readonly string NEGATIVE_SUFFIX_VARIABLE = "[CHAMOMILE_NEGATIVE_PROMPT_SUFFIX]";
+
         private readonly ImagesDAO dao;
         private readonly TemplateDAO templateDAO;
         private readonly A111Api api;
@@ -218,16 +222,22 @@ namespace Chamomile.API.Workers {
 
                             var p = new Parameters() {
                                 batch_size = 1,
-                                cfg_scale = prompt.CFGScale ?? 7.0,
-                                prompt = await ProcessPromptText(prompt.PositivePrompt, prompt.Variables),
-                                negative_prompt = await ProcessPromptText(prompt.NegativePrompt ?? "", prompt.Variables),
-                                width = prompt.Width ?? 1024,
-                                height = prompt.Height ?? 1024,
+                                cfg_scale = prompt?.CFGScale ?? 7.0,
+                                prompt = await ProcessPromptText(
+                                   ApplyPositivePromptSuffix(prompt?.PositivePrompt ?? "", prompt?.Variables), 
+                                   prompt?.Variables
+                                ),
+                                negative_prompt = await ProcessPromptText(
+                                    ApplyNegativePromptSuffix(prompt?.NegativePrompt ?? "", prompt?.Variables), 
+                                    prompt?.Variables
+                                ),
+                                width = prompt?.Width ?? 1024,
+                                height = prompt?.Height ?? 1024,
                                 n_iter = 1,
-                                sampler_name = prompt.Sampler ?? null,
-                                scheduler = prompt.ScheduleType ?? null,
-                                seed = prompt.Seed ?? -1,
-                                steps = prompt.Steps ?? 30,
+                                sampler_name = prompt?.Sampler ?? null,
+                                scheduler = prompt?.ScheduleType ?? null,
+                                seed = prompt?.Seed ?? -1,
+                                steps = prompt?.Steps ?? 30,
                                 save_images = false,
                                 send_images = true,
                             };
@@ -258,15 +268,12 @@ namespace Chamomile.API.Workers {
                             //We don't have to wait to send this
                             _currentPrompt = null;
                             _hubContext.Clients.All.SendAsync("JobCompleted", jobId, prompt, GetAllPrompts(), savedImg);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
                             await ReRollModel(savedImg?.Model ?? "");
                             //loopCount = 0; //We *just* successfully generated an image. We can wait a little longer
 
                         }
                         catch (Exception e) {
-
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             //We don't have to wait to send this
                             Console.WriteLine(e);
                             stopwatch.Stop();
@@ -393,18 +400,32 @@ namespace Chamomile.API.Workers {
                     .Where(kvp => (kvp.Key.StartsWith("__") && kvp.Key.EndsWith("__")))
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-                prompt = ApplyVariables(ApplyVariables(prompt,overrides), wildcards);
+                prompt = ApplyVariables(
+                    ApplyVariables(prompt,overrides), 
+                    wildcards
+                );
             }
 
             return prompt;
-
         }
 
-        private string ApplyVariables(string initPrompt, Dictionary<string, string> variables) {
+        private static string ApplyPositivePromptSuffix(string prompt, Dictionary<string, string>? variables) { 
+            return variables?.ContainsKey(POSITIVE_SUFFIX_VARIABLE) == true && variables[POSITIVE_SUFFIX_VARIABLE].Trim().Length > 0
+                ? prompt + "\n\n" + variables[POSITIVE_SUFFIX_VARIABLE]
+                : prompt;
+        }
+
+        private static string ApplyNegativePromptSuffix(string prompt, Dictionary<string, string>? variables) {
+            return variables?.ContainsKey(NEGATIVE_SUFFIX_VARIABLE) == true && variables[NEGATIVE_SUFFIX_VARIABLE].Trim().Length > 0
+                ? prompt + "\n\n" + variables[NEGATIVE_SUFFIX_VARIABLE]
+                : prompt;
+        }
+
+        private static string ApplyVariables(string initPrompt, Dictionary<string, string>? variables) {
             const int RECURSION_LIMIT = 10;
             var recursionCount = 0;
             var prompt = initPrompt;
-            if (variables.Count == 0) return initPrompt;
+            if (variables == null || variables.Count == 0) return initPrompt;
 
             while (variables.Any(a => prompt.Contains(a.Key) && !string.IsNullOrWhiteSpace(a.Value))) {
 
