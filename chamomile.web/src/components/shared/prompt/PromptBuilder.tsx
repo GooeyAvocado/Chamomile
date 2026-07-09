@@ -39,9 +39,10 @@ export default function PromptBuilder(props: {
     filter?: FilterOptions
     setFilter?: (val: FilterOptions) => void
     reducedBrewMenu?: boolean
+    forceShowSeed?: boolean
 }) {
 
-    const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight, filter, setFilter, reducedBrewMenu } = props
+    const { alwaysExpand, noBrew, prompt: promptOverride, setPrompt: setPromptOverride, preview, fullHeight, filter, setFilter, reducedBrewMenu, forceShowSeed } = props
     const { prompt: globalPrompt, setPrompt: setGlobalPrompt, orderAmount, setOrderAmount } = usePrompt()
     const [expanded, setExpanded] = useState(false)
     const [expandedHeight, setExpandedHeight] = useState("0px")
@@ -438,7 +439,7 @@ export default function PromptBuilder(props: {
                         />
                     </div>
 
-                    {!noBrew && <div style={{
+                    {(!noBrew || forceShowSeed) && <div style={{
                         display: 'flex', gap: "10px", flex: "1", alignItems: 'center',
                         flexDirection: width < 465 ? "column" : undefined, height: width < 465 ? undefined : "56px"
                     }}>

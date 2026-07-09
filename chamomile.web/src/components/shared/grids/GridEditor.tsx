@@ -1,8 +1,8 @@
-import { Button, Card, FormControl, IconButton, MenuItem, Select, TextField, Tooltip } from "@mui/material";
+import { Button, Card, Divider, FormControl, IconButton, MenuItem, Select, TextField, Tooltip } from "@mui/material";
 import { Grid } from "../../../model/Grid";
 import PromptBuilder from "../prompt/PromptBuilder";
 import { Add, Close, CompareArrows, OpenWith, Remove, Window } from "@mui/icons-material";
-import { GridTypes } from "./GridTypes";
+import { GridAxisGroups, GridType, GridTypes } from "./GridTypes";
 import SamplerSelector from "../prompt/SamplerSelector";
 import SchedulerSelector from "../prompt/SchedulerSelector";
 import CheckpointSelector from "../checkpoint/CheckpointSelector";
@@ -46,7 +46,7 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
             />
             <Card elevation={3} style={{ flexShrink: 0, padding: '20px' }}>
                 <PromptBuilder
-                    alwaysExpand fullHeight noBrew prompt={{ ...grid, positivePrompt: grid.prompt, variables: {} }}
+                    alwaysExpand fullHeight noBrew prompt={{ ...grid, positivePrompt: grid.prompt, variables: {} }} forceShowSeed
                     setPrompt={(p) => setGrid({ ...grid, ...p, prompt: p.positivePrompt })} preview={(generated && !duplicate) || loading}
                 />
             </Card>
@@ -122,7 +122,31 @@ function GridValsEditor({
                 value={mode ?? ""}
                 onChange={(e) => setMode(e.target.value)}
             >
-                {GridTypes?.map(a => <MenuItem key={axis + a.code} value={a.code}>{a.name}</MenuItem>)}
+                {GridTypes.filter(a => !a.group).map(a =>
+                    <MenuItem key={axis + a.code} value={a.code} onClick={() => setMode(a.code)}>
+                        <GridTypeMenuItemBody type={a} />
+                    </MenuItem>)}
+
+                {/* We cannot use a map because for some reason <></> breaks the onChange() detection */}
+                {/* There's probably a better way to do this but I am too lazy to figure it out */}
+
+                <Divider />
+                {GridTypes.filter(a => a.group === "Prompt").map(a =>
+                    <MenuItem key={axis + a.code} value={a.code} onClick={() => setMode(a.code)}>
+                        <GridTypeMenuItemBody type={a} />
+                    </MenuItem>)}
+
+                <Divider />
+                {GridTypes.filter(a => a.group === "Models").map(a =>
+                    <MenuItem key={axis + a.code} value={a.code} onClick={() => setMode(a.code)}>
+                        <GridTypeMenuItemBody type={a} />
+                    </MenuItem>)}
+
+                <Divider />
+                {GridTypes.filter(a => a.group === "Tuning").map(a =>
+                    <MenuItem key={axis + a.code} value={a.code} onClick={() => setMode(a.code)}>
+                        <GridTypeMenuItemBody type={a} />
+                    </MenuItem>)}
             </Select>
         </FormControl>
 
@@ -250,4 +274,10 @@ function GridValsEditor({
     </Card>
 
 
+}
+
+function GridTypeMenuItemBody({ type }: { type: GridType }) {
+    return <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
+        {type.prefix} {type.name}
+    </div>
 }

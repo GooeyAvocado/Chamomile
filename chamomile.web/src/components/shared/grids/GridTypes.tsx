@@ -1,14 +1,20 @@
 import { DirectionsRun, ModelTraining, OpenWith, ReceiptLong, Schedule, Tune, Window, Yard } from "@mui/icons-material";
-import { Prompt } from "../../../model/Prompt";
+// import { Prompt } from "../../../model/Prompt";
+
+export type GridAxisInputType = "none" | "string" | "multiline" | "float" | "int" | "sampler" | "model" | "dimensions" | "scheduler" | "lora";
+export type GridAxisCode = "NON" | "POS" | "NEG" | "PSR" | "MOD" | "LOR" | "CFG" | "SEED" | "DIMN" | "STEP" | "SMPL" | "SCHD" | "PSFX" | "NSFX"
+export type GridAxisGroup = "Prompt" | "Models" | "Tuning" | ""
+
+export const GridAxisGroups = ["Prompt", "Models", "Tuning"] as GridAxisGroup[]
 
 export interface GridType {
-    code: string;
+    code: GridAxisCode;
     name: string;
-    type: "none" | "string" | "multiline" | "float" | "int" | "sampler" | "model" | "dimensions" | "scheduler" | "lora";
+    group?: GridAxisGroup
+    type: GridAxisInputType;
     prefix: React.ReactNode;
     suffix: string;
     displayValue?: (val: string) => React.ReactNode
-    applyToPrompt: (prompt: Prompt, val: string, vals: string[]) => Prompt;
 }
 
 export const GridTypes: GridType[] = [
@@ -18,159 +24,110 @@ export const GridTypes: GridType[] = [
         type: "none",
         prefix: <></>,
         suffix: "",
-        applyToPrompt: (prompt: Prompt) => prompt
-    },
-    {
-        code: "POS",
-        name: "Positive Prompt",
-        type: "multiline",
-        prefix: <ReceiptLong fontSize="inherit" />,
-        suffix: "",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return { ...prompt, positivePrompt: val } as Prompt
-        }
-    },
-    {
-        code: "NEG",
-        name: "Negative Prompt",
-        type: "multiline",
-        prefix: <ReceiptLong fontSize="inherit" />,
-        suffix: "",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return { ...prompt, negativePrompt: val } as Prompt
-        }
     },
     {
         code: "PSR",
         name: "Prompt search/replace",
+        group: "Prompt",
         type: "string",
         prefix: <ReceiptLong fontSize="inherit" />,
         suffix: "",
-        applyToPrompt: (prompt: Prompt, val: string, vals: string[]) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                positivePrompt: prompt.positivePrompt.replaceAll(vals[0], val),
-                negativePrompt: prompt.negativePrompt.replaceAll(vals[0], val)
-            } as Prompt
-        }
+    },
+    {
+        code: "POS",
+        name: "Positive Prompt",
+        group: "Prompt",
+        type: "multiline",
+        prefix: <ReceiptLong fontSize="inherit" />,
+        suffix: "",
+    },
+    {
+        code: "NEG",
+        name: "Negative Prompt",
+        group: "Prompt",
+        type: "multiline",
+        prefix: <ReceiptLong fontSize="inherit" />,
+        suffix: "",
+    },
+    {
+        code: "PSFX",
+        name: "Positive Prompt Suffix",
+        group: "Prompt",
+        type: "multiline",
+        prefix: <ReceiptLong fontSize="inherit" />,
+        suffix: "",
+    },
+    {
+        code: "NSFX",
+        name: "Negative Prompt Suffix",
+        group: "Prompt",
+        type: "multiline",
+        prefix: <ReceiptLong fontSize="inherit" />,
+        suffix: "",
     },
     {
         code: "MOD",
         name: "Checkpoint",
+        group: "Models",
         type: "model",
         prefix: <ModelTraining fontSize="inherit" />,
         suffix: "",
         displayValue: (val: string) => <>{val.replace(".safetensors", "").replaceAll("_", " ")}</>,
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                orderData: { ...prompt.orderData, model: val }
-
-            } as Prompt
-        }
     },
     {
         code: "LOR",
         name: "Lora",
+        group: "Models",
         type: "lora",
         prefix: <ModelTraining fontSize="inherit" />,
         suffix: "",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                positivePrompt: prompt.positivePrompt + ` ${val}`,
-
-            } as Prompt
-        }
     },
     {
         code: "CFG",
         name: "CFG Scale",
+        group: "Tuning",
         type: "float",
         prefix: <Tune fontSize="inherit" />,
         suffix: "",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                cfgScale: Number.parseFloat(val)
-            } as Prompt
-        }
     },
     {
         code: "SEED",
         name: "Seed",
+        group: "Tuning",
         type: "int",
         prefix: <Yard fontSize="inherit" />,
         suffix: "",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                seed: Number.parseInt(val)
-            } as Prompt
-        }
     },
     {
         code: "DIMN",
         name: "Dimensions",
+        group: "Tuning",
         type: "dimensions",
         prefix: <OpenWith fontSize="inherit" />,
         suffix: "px",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                width: Number.parseInt(val.split("x")[0] ?? "1024"),
-                height: Number.parseInt(val.split("x")[1] ?? "1024")
-            } as Prompt
-        }
     },
     {
         code: "STEP",
         name: "Steps",
+        group: "Tuning",
         type: "int",
         suffix: "",
         prefix: <DirectionsRun fontSize="inherit" />,
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                steps: Number.parseInt(val)
-            } as Prompt
-        }
     },
     {
         code: "SMPL",
         name: "Sampler",
+        group: "Tuning",
         type: "sampler",
         prefix: <Window fontSize="inherit" />,
         suffix: "",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                sampler: val
-            } as Prompt
-        }
     },
     {
         code: "SCHD",
         name: "Scheduler",
+        group: "Tuning",
         type: "scheduler",
         prefix: <Schedule fontSize="inherit" />,
         suffix: "",
-        applyToPrompt: (prompt: Prompt, val: string) => {
-            if (!val || val?.trim().length === 0) return prompt;
-            return {
-                ...prompt,
-                scheduleType: val
-            } as Prompt
-        }
     }
 ]

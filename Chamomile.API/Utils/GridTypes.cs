@@ -87,7 +87,12 @@ namespace Chamomile.API.Utils {
                 case "SCHD":
                     prompt.ScheduleType = value!;
                     return prompt;
-
+                case "PSFX":
+                    prompt.PositivePrompt = prompt.PositivePrompt + "\n\n" + value;
+                    return prompt;
+                case "NSFX":
+                    prompt.NegativePrompt = prompt.NegativePrompt + " \n\n " + value;
+                    return prompt;
                 default:
                     // Unknown grid type: noop by design
                     return prompt;
