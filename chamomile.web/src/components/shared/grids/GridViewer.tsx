@@ -97,10 +97,15 @@ export default function GridViewer({
     const onClearGrid = () => {
         setClearAys(false)
 
-        if (rerollSeed) update(undefined, undefined, {
-            ...grid,
-            seed: Math.floor(Math.random() * 1000000000)
-        } as Grid)
+        if (rerollSeed) {
+            const newGrid = {
+                ...grid,
+                seed: Math.floor(Math.random() * 1000000000)
+            } as Grid
+            update(() => {
+                setGrid(newGrid)
+            }, undefined, newGrid)
+        }
 
 
         delMultiApi.fetch(() => {
