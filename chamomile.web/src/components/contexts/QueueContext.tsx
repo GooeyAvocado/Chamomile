@@ -26,6 +26,7 @@ export interface QueueContextType {
     cancel: (jobId: number | number[]) => void
     rush: (jobId: number | number[]) => void
     delay: (jobId: number | number[]) => void
+    avgGenTime: number
     etaMs: number
 }
 
@@ -214,7 +215,8 @@ export default function QueueProvider(props: { children: any }) {
                 enqueueSnackbar(`Order${jobs.length > 1 ? "s" : ""} could not be rushed`, { variant: 'error' })
             }, jobs)
         },
-        etaMs: etaMs
+        etaMs: etaMs,
+        avgGenTime: avgGenTimeApi.data
 
     } as QueueContextType
 

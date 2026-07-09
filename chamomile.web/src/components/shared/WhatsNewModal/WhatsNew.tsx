@@ -20,14 +20,18 @@ export default function WhatsNew({ open, setOpen }: {
     - This was done for major performance improvements on Chamomile instances with large amounts of images
 - **Templates:** Parametrized prompt templates for reusable chunks of prompts. See more in the new help section.
 - **Model tags:** Checkpoints and LoRAs now have tags to help organize them better
-- **Image tile sizes are now configurable**: You can select from extra small to extra large
-- **More like this by date**: Easily see what images you generated around the same time as any given image
 - **Infinite scroll**: We now load more as soon as you hit the bottom of the scroll
+- **Rush and Delay Orders**: You can now rush (make them next in queue) or delay (make them last in queue) orders
+    - Brew buttons will now rush orders immediately if \`SHIFT\` clicked
+- **Better Statistics**: Statistics now include a count of deleted images, as well as a count of downloaded, upscaled, and favorite images by LoRA, Checkpoint, and keyword.
 - **Conflict warning**: Chamomile will now warn if more than one LoRA has the same alias, instead of crashing and not updating the list of LoRAs
+- **More like this by date**: Easily see what images you generated around the same time as any given image
 - **More keyboard shortcuts**: This includes numpad mappings to allow for one handed operation of Chamomile
 - **More context menu options**: Right clicking on an image now allows you to upscale and download images
 - **New LoRA Grid axis type**: The Grid Editor will now let you test LoRAs and weights as an axis.
-- **Better Statistics**: Statistics now include a count of deleted images, as well as a count of downloaded, upscaled, and favorite images by LoRA, Checkpoint, and keyword.
+- **Image tile sizes are now configurable**: You can select from extra small to extra large
+- **ETA for batch**: The status button now shows an estimated time remaining for the entire batch of images, as well as the current image.
+- Original non-upscaled copy of images are now visible through a switch in the upscale panel
 - Upscale now available from image hotbar and through keyboard shortcut CTRL+U.
 - Middle click to re-order saved prompts
 - Blurred image background for the image viewer
@@ -67,6 +71,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Hid the left and right arrows if we're at the beginning or end of the results respectively
 - Bump backend to .NET 10 from .NET 8
 - Bump to MUI 9
+- Bump to NodeJS 26
 
 ### Fixed bugs
 - Fixed bug that would make the application crash its tab if a menu option was pressed (Thanks MUI)
@@ -79,6 +84,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug where general statistics would fail to load if all images had no generation time
 - Fixed bug where upscaling an image and navigating away from that image would re-select the image when upscaling is complete
 - Fixed bug where loading model sequences would not work (not sure if this is a bug created during development, thought to included it anyways)
+- Fixed bug that caused a glitchy preview when an album tile was created for an empty album
 `
 
     const { settings } = useSettings();

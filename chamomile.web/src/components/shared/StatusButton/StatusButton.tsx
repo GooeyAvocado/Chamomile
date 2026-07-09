@@ -9,7 +9,7 @@ export default function StatusButton() {
 
 
     const { pong, refreshPing } = usePingPong();
-    const { activeJob, paused, queue, togglePause, clearQueue, batchTotalImages, batchImages, progress, sessionImages } = useQueue(() => { });
+    const { activeJob, paused, queue, togglePause, clearQueue, batchTotalImages, batchImages, progress, sessionImages, etaMs, avgGenTime } = useQueue(() => { });
     const [clearAys, setClearAys] = useState(false)
     const [promptAnchor, setPromptAnchor] = useState(null as any)
 
@@ -55,6 +55,17 @@ export default function StatusButton() {
         }
     }
 
+    const batchEta = etaMs / 1000
+    const batchEtaHours = Math.floor(batchEta / 3600)
+    const batchEtaMinutesRemainder = Math.floor((batchEta % 3600) / 60)
+    const batchEtaSecondsRemainder = Math.floor(batchEta % 60)
+
+
+    const imageEta = progress?.eta_relative ?? 0
+    const imageEtaMinutes = Math.floor(imageEta / 60)
+    const imageEtaSecondsRemainder = Math.floor(imageEta % 60)
+
+
 
     return <>
         <Tooltip title={currentTooltip}>
@@ -69,16 +80,25 @@ export default function StatusButton() {
             transformOrigin={{ vertical: 'top', horizontal: 'left', }}
 
         >
+            <div style={{ fontSize: ".7em", padding: "8px 18px", width: "200px" }}>
 
-            <div style={{ fontSize: ".7em", padding: "8px 18px" }}>
-                <div>Batch ({batchImages}/{batchTotalImages})</div>
+                <div style={{ display: 'flex', justifyContent: "space-between" }}>
+                    <div>Batch ({batchImages}/{batchTotalImages})</div>
+                    {!isNaN(etaMs) && <Tooltip title={`ETA based on ${((avgGenTime ?? 0) / 1000).toFixed(2)}s per image`}>
+                        <div style={{ opacity: ".7" }}>{batchEtaHours}:{batchEtaMinutesRemainder.toString().padStart(2, '0')}:{batchEtaSecondsRemainder.toString().padStart(2, '0')}</div>
+                    </Tooltip>}
+                </div>
                 <LinearProgress value={batchPercentage} variant="determinate" />
-                <div style={{ marginTop: "10px" }}>Image ({imagePercentage.toFixed(2)}%)</div>
+
+                <div style={{ marginTop: "10px", display: 'flex', justifyContent: "space-between" }}>
+                    <div>Image ({imagePercentage.toFixed(0)}%)</div>
+                    {progress && <div style={{ opacity: ".7" }}>{imageEtaMinutes}:{imageEtaSecondsRemainder.toString().padStart(2, '0')}</div>}
+                </div>
                 <LinearProgress value={imagePercentage} variant="determinate" />
-                <div style={{ marginTop: "10px" }}>{sessionImages} image(s) so far</div>
+                <div style={{ marginTop: "16px" }}>{sessionImages} image(s) so far</div>
             </div>
 
-            <Divider />
+            <Divider style={{ margin: "8px 0px" }} />
 
             {
                 !pong?.SD && <MenuItem
