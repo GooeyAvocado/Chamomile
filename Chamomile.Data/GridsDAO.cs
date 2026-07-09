@@ -84,7 +84,7 @@ namespace Chamomile.Data
 
         public async Task<List<Grid>> GetAll()
         {
-            return await adoTemplate.Query($"select * from {GRID_TABLE} ORDER BY {CRE_TS} DESC", (cmd) => { }, GridRM);
+            return await adoTemplate.Query($"select * from {GRID_TABLE} ORDER BY {GRID_ID} DESC", (cmd) => { }, GridRM);
         }
 
         public async Task<Grid?> Get(int Id)
