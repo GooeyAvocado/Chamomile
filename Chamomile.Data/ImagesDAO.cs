@@ -413,7 +413,7 @@ namespace Chamomile.Data {
             return await adoTemplate.Query(
                 SelectSql(ImageColumns,IMAGES_TABLE,
                     new WhereConditionGroup(ConditionsFromFilter(filter, lastImage)),
-                    [new OrderBy(CRE_TS, SortOrder.DESC)],
+                    [new OrderBy(IMAGES_ID, SortOrder.DESC)],
                     disablePagination ? -1 : PAGE_SIZE, 0
                 ),
                 (cmd) => SetterFromFilter(cmd, filter), ImageRM
@@ -594,7 +594,7 @@ namespace Chamomile.Data {
 
             var innerImageSql = SelectSql([
                 CRE_TS,IMAGES_FAV_IN,IMAGES_HIRES_IN,IMAGES_DOWNLOAD_CT,IMAGE_ADDTL_INFO, IMAGE_GEN_MS
-            ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1, FilterOptions.IsEmpty(filter))), [new(CRE_TS,SortOrder.DESC)])
+            ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1, FilterOptions.IsEmpty(filter))), [new(IMAGES_ID,SortOrder.DESC)])
                 + (limit > 0 ? $" LIMIT {limit}" : "");
 
             var sql = SelectSql([
@@ -681,7 +681,7 @@ namespace Chamomile.Data {
                   min(k.{CRE_TS}) as {MIN_TS}, max(k.{CRE_TS}) as {MAX_TS}
                 FROM (
                   {SelectSql([IMAGES_ID,IMAGES_PROMPT, CRE_TS, IMAGES_FAV_IN, IMAGES_DOWNLOAD_CT, IMAGES_HIRES_IN],IMAGES_TABLE,
-                    new WhereConditionGroup(ConditionsFromFilter(filter, null)), [new(CRE_TS,SortOrder.DESC)])}
+                    new WhereConditionGroup(ConditionsFromFilter(filter, null)), [new(IMAGES_ID,SortOrder.DESC)])}
                   {(limit > 0 ? $" LIMIT {limit}" : "")}
                 ) AS filtered_images
                 JOIN LATERAL extract_keywords(filtered_images.{IMAGES_ID}, filtered_images.{IMAGES_PROMPT},filtered_images.{CRE_TS}) AS k ON TRUE
@@ -717,7 +717,7 @@ namespace Chamomile.Data {
                       k.{IMAGES_ID}
                     FROM (
                         {SelectSql([IMAGES_ID, IMAGES_PROMPT, CRE_TS], IMAGES_TABLE,
-                        new WhereConditionGroup(ConditionsFromFilter(filter, null)), [new(CRE_TS, SortOrder.DESC)])}
+                        new WhereConditionGroup(ConditionsFromFilter(filter, null)), [new(IMAGES_ID, SortOrder.DESC)])}
                         {(limit > 0 ? $" LIMIT {limit}" : "")}
                     ) AS filtered_images
                     JOIN LATERAL extract_keywords(filtered_images.{IMAGES_ID}, filtered_images.{IMAGES_PROMPT},filtered_images.{CRE_TS}) AS k ON TRUE

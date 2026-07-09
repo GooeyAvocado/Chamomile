@@ -123,13 +123,13 @@ namespace Chamomile.Data {
                     $") img " +
                         $"left join {LORA_TABLE} l on img.{LORA_ALIAS} = l.{LORA_ALIAS}",
                 new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
-                [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
+                [new OrderBy(IMAGES_ID, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
 
         private static string DatedInnerImageSql(FilterOptions filter, int limit) {
             return SelectSql([$"IMV.{LORA_ALIAS}", $"img.{CRE_TS}", $"img.{IMAGES_ID}"], $"{IMAGES_TABLE} left join {IMAGES_LORA_MAP} imv on img.{IMAGES_ID} = imv.{IMAGES_ID}", 
                 new WhereConditionGroup(ImagesDAO.ConditionsFromFilter(filter, 0)),
-                [new OrderBy(CRE_TS, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
+                [new OrderBy(IMAGES_ID, SortOrder.DESC)]) + (limit > 0 ? " LIMIT " + limit : "");
         }
 
         #endregion
