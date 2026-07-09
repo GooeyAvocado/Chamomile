@@ -1,7 +1,7 @@
 import { createContext, useMemo, useState } from "react";
 import { Prompt } from "../../model/Prompt";
 import useApi from "../hooks/useApi";
-import { cancelJobs, changeStatus, clearQueue, getProgress, getStatus } from "../../api/Images";
+import { cancelJobs, changeStatus, clearQueue, getProgress, getStatus, getTrailingAvgGenTime, moveJobsToBack, moveJobsToFront } from "../../api/Images";
 import ImageWorkerStatus from "../../model/ImageWorkerStatus";
 import { useSnackbar } from "notistack";
 import usePolling from "../hooks/usePolling";
@@ -24,6 +24,9 @@ export interface QueueContextType {
     clearQueue: () => void,
     togglePause: () => void,
     cancel: (jobId: number | number[]) => void
+    rush: (jobId: number | number[]) => void
+    delay: (jobId: number | number[]) => void
+    etaMs: number
 }
 
 export const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -41,7 +44,15 @@ export default function QueueProvider(props: { children: any }) {
     const [sessionImages, setSesionImages] = useState(0)
     const [batchTotalImages, setBatchTotalImages] = useState(0)
 
+    const avgGenTimeApi = useApi(getTrailingAvgGenTime, true)
+
+    const etaMs = useMemo(() => {
+        return avgGenTimeApi.data * queue.length
+    }, [avgGenTimeApi.data, queue])
+
     const cancelApi = useApi(cancelJobs)
+    const rushApi = useApi(moveJobsToFront)
+    const delayApi = useApi(moveJobsToBack)
     const clearApi = useApi(clearQueue)
     const changeStatusApi = useApi(changeStatus)
 
@@ -108,6 +119,7 @@ export default function QueueProvider(props: { children: any }) {
         setCurrentProgress(undefined)
         setLastSuccessfulImage(image);
         setSesionImages((prev) => prev + 1);
+        avgGenTimeApi.fetch(); //Refresh the average gen time
     });
 
     useSignalR("JobFailed", (jobId: number, prompt: Prompt, queue: Prompt[], message: string) => {
@@ -180,7 +192,29 @@ export default function QueueProvider(props: { children: any }) {
         },
         batchImages: batchImages,
         batchTotalImages: batchTotalImages,
-        sessionImages: sessionImages
+        sessionImages: sessionImages,
+        delay: (jobId: number | number[]) => {
+            const jobs = Array.isArray(jobId) ? jobId : [jobId]
+            if (jobs.length === 0) return;
+
+            delayApi.fetch(() => {
+                enqueueSnackbar(`Order${jobs.length > 1 ? "s" : ""} delayed`, { variant: 'success' })
+            }, () => {
+                enqueueSnackbar(`Order${jobs.length > 1 ? "s" : ""} could not be moved`, { variant: 'error' })
+            }, jobs)
+        },
+
+        rush: (jobId: number | number[]) => {
+            const jobs = Array.isArray(jobId) ? jobId : [jobId]
+            if (jobs.length === 0) return;
+
+            rushApi.fetch(() => {
+                enqueueSnackbar(`Order${jobs.length > 1 ? "s" : ""} rushed`, { variant: 'success' })
+            }, () => {
+                enqueueSnackbar(`Order${jobs.length > 1 ? "s" : ""} could not be rushed`, { variant: 'error' })
+            }, jobs)
+        },
+        etaMs: etaMs
 
     } as QueueContextType
 

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Prompt } from "../../../model/Prompt"
-import { Button, Card, CardActionArea, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
-import { Cancel, DirectionsRun, EditNote, Numbers, OpenWith, Tune } from "@mui/icons-material";
+import { Button, ButtonGroup, Card, CardActionArea, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from "@mui/material";
+import { AcUnit, Cancel, ChevronRight, Delete, DirectionsRun, EditNote, Numbers, OpenWith, Tune, Whatshot } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
 import HighlightedPromptDiv from "./HighlightedPromptDiv";
 import PromptOrderedModel from "./PromptOrderedModal";
@@ -12,10 +12,14 @@ export default function PromptGroupModal(props: {
     prompts: Prompt[]
     onCancel: (id: number) => void,
     onCancelAll: () => void
+    onRush: (id: number) => void,
+    onRushAll: () => void
+    onDelay: (id: number) => void,
+    onDelayAll: () => void
     onViewImage?: (id: number) => void
 }) {
 
-    const { open, setOpen, prompts, onCancel, onCancelAll, onViewImage } = props;
+    const { open, setOpen, prompts, onCancel, onCancelAll, onViewImage, onDelay, onDelayAll, onRush, onRushAll } = props;
     const [internalPrompt, setInternalPrompt] = useState(undefined as Prompt | undefined)
     const [internalPromptOpen, setInternalPromptOpen] = useState(false)
     const orderData = prompts.find(a => !!a.orderData)?.orderData;
@@ -36,7 +40,7 @@ export default function PromptGroupModal(props: {
     }
 
 
-    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth='sm' fullWidth>
+    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth='sm' fullWidth >
         <DialogTitle>{prompts.length} Orders</DialogTitle>
         <DialogContent style={{ maxHeight: "65vh", display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: "flex", gap: "10px" }}>
@@ -67,7 +71,7 @@ export default function PromptGroupModal(props: {
             <div style={{ flex: '1', overflowY: 'auto', fontFamily: 'monospace', marginTop: "10px", marginBottom: '10px' }}>
                 <table style={{ textAlign: 'center', margin: 'auto' }}>
                     <thead style={{ fontWeight: 'bold', textAlign: 'center' }}><tr>
-                        <td></td>
+                        <td />
                         <td width={"40px"}>
                             <Tooltip title="Job ID"><Numbers /></Tooltip>
                         </td>
@@ -80,28 +84,34 @@ export default function PromptGroupModal(props: {
                         <td width={"50px"}>
                             <Tooltip title="CFG Scale"><Tune /></Tooltip>
                         </td>
+                        <td></td>
                     </tr></thead>
                     <tbody>
                         {prompts.map(a => <tr key={a.id}>
-                            <td style={{ display: 'flex', width: '100px' }}>
+
+                            <td>
                                 <Tooltip title="Cancel this order">
                                     <IconButton onClick={() => onCancel(a.id ?? 0)}>
                                         <Cancel />
                                     </IconButton>
                                 </Tooltip>
+                            </td>
+                            <td style={{ whiteSpace: 'nowrap', display: 'flex', gap: "10px", alignItems: 'center', marginTop: "8px" }}>{(a.id ?? 0) < 0 &&
+                                <Tooltip title="This order was rushed to the front of the queue"><Whatshot /></Tooltip>
+                            }{" "}{Math.abs(a.id ?? 0)}</td>
+                            <td>{a.width} x {a.height}px</td>
+                            <td>{a.steps}</td>
+                            <td>{a.cfgScale}</td>
+                            <td >
                                 <Tooltip title="View this order">
                                     <IconButton onClick={() => {
                                         setInternalPrompt(a)
                                         setInternalPromptOpen(true)
                                     }}>
-                                        <EditNote />
+                                        <ChevronRight />
                                     </IconButton>
                                 </Tooltip>
                             </td>
-                            <td>{a.id}</td>
-                            <td>{a.width} x {a.height}px</td>
-                            <td>{a.steps}</td>
-                            <td>{a.cfgScale}</td>
                         </tr>)}
                     </tbody>
                 </table>
@@ -114,6 +124,16 @@ export default function PromptGroupModal(props: {
                     onCancel(internalPrompt?.id ?? 0);
                     setInternalPromptOpen(false)
                 }}
+                onDelay={() => {
+                    onDelay(internalPrompt?.id ?? 0);
+                    setInternalPromptOpen(false)
+                    setOpen(false)
+                }}
+                onRush={() => {
+                    onRush(internalPrompt?.id ?? 0);
+                    setInternalPromptOpen(false)
+                    setOpen(false)
+                }}
                 open={internalPromptOpen}
                 setOpen={setInternalPromptOpen}
                 onViewImage={onViewImage}
@@ -123,11 +143,25 @@ export default function PromptGroupModal(props: {
         </DialogContent>
 
         <DialogActions>
-            <div style={{ textAlign: 'center', marginBottom: '30px', width: "100%" }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px', marginLeft: "16px", marginRight: "16px", width: "100%" }}>
+                <ButtonGroup>
+                    <Tooltip title="These orders can be worked on last">
+                        <Button onClick={() => {
+                            onDelayAll();
+                            setOpen(false);
+                        }} startIcon={<AcUnit />}>Delay</Button>
+                    </Tooltip>
+                    <Tooltip title="These orders should be worked on ASAP">
+                        <Button onClick={() => {
+                            onRushAll();
+                            setOpen(false);
+                        }} startIcon={<Whatshot />}>Rush</Button>
+                    </Tooltip>
+                </ButtonGroup>
                 <Button onClick={() => {
                     onCancelAll();
                     setOpen(false);
-                }} variant="contained">Cancel All</Button>
+                }} variant="outlined" color="error" startIcon={<Delete />}>Cancel Orders</Button>
             </div>
         </DialogActions>
 

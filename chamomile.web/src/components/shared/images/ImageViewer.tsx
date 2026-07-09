@@ -79,7 +79,7 @@ export default function ImageViewer(props: {
     const { currentUpload, lastSuccess, progress: uploadProgress } = useImageUpload();
     const location = useLocation();
 
-    const { activeJob, cancel, progress, groupedQueue, queue, nextModel } = useQueue((val) => {
+    const { activeJob, cancel, rush, delay, progress, groupedQueue, queue, nextModel } = useQueue((val) => {
         if (showBrewing && imageAlbumFilter(val) && !val.hidden) {
             imageApi.appendImage(val)
         }
@@ -396,8 +396,17 @@ export default function ImageViewer(props: {
             }}>
                 {showBrewing && groupedQueue.map(p =>
                     p.length === 0 || !promptsAlbumFilter(p) ? <></> :
-                        p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id ?? 0)} onView={setPromptViewImageID} /> :
-                            <QueuedGroupImageTile prompts={p} onCancel={cancel} onView={setPromptViewImageID} />
+                        p.length === 1
+                            ? <QueuedImageTile prompt={p[0]}
+                                onCancel={() => cancel(p[0].id ?? 0)}
+                                onDelay={() => delay(p[0].id ?? 0)}
+                                onRush={() => rush(p[0].id ?? 0)}
+                                onView={setPromptViewImageID}
+                            />
+                            : <QueuedGroupImageTile prompts={p}
+                                onCancel={cancel} onDelay={delay} onRush={rush}
+                                onView={setPromptViewImageID}
+                            />
                 )}
 
                 {showBrewing && nextModel && <ModelChangeTile nextModel={nextModel} />}

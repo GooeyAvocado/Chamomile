@@ -39,7 +39,7 @@ export default function DisplayPage() {
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const { progress, activeJob, queue, groupedQueue, cancel } = useQueue((val) => {
+    const { progress, activeJob, queue, groupedQueue, cancel, delay, rush } = useQueue((val) => {
 
         setImages((images) => {
             setSelectedImage((selectedImage) => {
@@ -222,8 +222,15 @@ export default function DisplayPage() {
             }}>
                 {groupedQueue.map(p =>
                     p.length === 0 ? <></> :
-                        p.length === 1 ? <QueuedImageTile prompt={p[0]} onCancel={() => cancel(p[0].id ?? 0)} tiny /> :
-                            <QueuedGroupImageTile prompts={p} onCancel={cancel} tiny />
+                        p.length === 1
+                            ? <QueuedImageTile prompt={p[0]} tiny
+                                onCancel={() => cancel(p[0].id ?? 0)}
+                                onDelay={() => delay(p[0].id ?? 0)}
+                                onRush={() => rush(p[0].id ?? 0)}
+                            />
+                            : <QueuedGroupImageTile prompts={p} tiny
+                                onCancel={cancel} onDelay={delay} onRush={rush}
+                            />
                 )}
             </div>
 

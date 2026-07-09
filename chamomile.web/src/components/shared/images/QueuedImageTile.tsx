@@ -3,21 +3,28 @@ import { Prompt } from "../../../model/Prompt";
 import { useState } from "react";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { Cancel } from "@mui/icons-material";
+import { AcUnit, Cancel, Whatshot } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
 import PromptOrderedModal from "../prompt/PromptOrderedModal";
 
 export default function QueuedImageTile(props: {
     prompt: Prompt
     onCancel: () => void
+    onRush: () => void
+    onDelay: () => void
     onView?: (id: number) => void
     tiny?: boolean
 }) {
 
-    const { prompt, onCancel, onView, tiny } = props;
+    const { prompt, onCancel, onRush, onDelay, onView, tiny } = props;
     const [previewOpen, setPreviewOpen] = useState(false);
 
-    return <ContextMenu options={[{ icon: <Cancel />, text: "Cancel", onClick: onCancel }]}>
+    return <ContextMenu options={[
+        { icon: <Whatshot />, text: "Rush Order", onClick: onRush },
+        { icon: <AcUnit />, text: "Delay Order", onClick: onDelay },
+        { type: "divider" },
+        { icon: <Cancel />, text: "Cancel", onClick: onCancel }
+    ]}>
         <BaseImageTile>
             <CardActionArea onClick={() => { setPreviewOpen(true) }} style={{ height: "100%", position: "relative" }}>
 
@@ -63,6 +70,14 @@ export default function QueuedImageTile(props: {
                 setOpen={setPreviewOpen}
                 onViewImage={onView}
                 prompt={prompt}
+                onDelay={() => {
+                    onDelay();
+                    setPreviewOpen(false);
+                }}
+                onRush={() => {
+                    onRush();
+                    setPreviewOpen(false);
+                }}
             />
         </BaseImageTile>
     </ContextMenu>

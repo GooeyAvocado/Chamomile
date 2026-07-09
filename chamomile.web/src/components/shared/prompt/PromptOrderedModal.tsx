@@ -1,6 +1,6 @@
 import { Prompt } from "../../../model/Prompt"
-import { Button, Card, CardActionArea, Dialog, DialogActions, DialogContent, Tooltip } from "@mui/material";
-import { DirectionsRun, OpenWith, ReceiptLong, ThumbDown, Tune, Window } from "@mui/icons-material";
+import { Button, ButtonGroup, Card, CardActionArea, Dialog, DialogActions, DialogContent, Tooltip } from "@mui/material";
+import { AcUnit, Delete, DirectionsRun, OpenWith, ReceiptLong, ThumbDown, Tune, Whatshot, Window } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
 import HighlightedPromptDiv from "./HighlightedPromptDiv";
 import { promptPreview } from "../Utils";
@@ -12,11 +12,13 @@ export default function PromptOrderedModal(props: {
     jobId: number
     prompt?: Prompt
     onCancel: (id: number) => void,
+    onRush?: (id: number) => void,
+    onDelay?: (id: number) => void,
     onViewImage?: (id: number) => void
     progress?: Progress
 }) {
 
-    const { open, setOpen, jobId, prompt, onCancel, onViewImage, progress } = props;
+    const { open, setOpen, jobId, prompt, onCancel, onRush, onDelay, onViewImage, progress } = props;
     const orderData = prompt?.orderData
 
     const basedOn = () => {
@@ -42,7 +44,7 @@ export default function PromptOrderedModal(props: {
                     <div style={{
                         display: 'flex', gap: '5px', alignItems: "center", marginBottom: '10px',
                         fontSize: "1.2em"
-                    }}><b>Order {prompt?.id?.toLocaleString()}</b></div>
+                    }}><b style={{ display: 'flex', gap: "5px", alignItems: 'center' }}>{(prompt?.id ?? 0) < 0 && <Tooltip title="This order was rushed to the front of the queue"><Whatshot /></Tooltip>}Order {Math.abs(prompt?.id ?? 0).toLocaleString()}</b></div>
 
                     {progress ? <Card style={{ width: "128px", height: '128px', margin: "0px auto 5px auto" }}>
                         <img
@@ -106,11 +108,25 @@ export default function PromptOrderedModal(props: {
         </DialogContent>
 
         <DialogActions>
-            <div style={{ textAlign: 'center', marginBottom: '30px', width: "100%" }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px', marginLeft: "16px", marginRight: "16px", width: "100%" }}>
+                <ButtonGroup>
+                    <Tooltip title="This order can be worked on last">
+                        <Button onClick={() => {
+                            onDelay?.(jobId);
+                            setOpen(false);
+                        }} startIcon={<AcUnit />} disabled={!onDelay}>Delay</Button>
+                    </Tooltip>
+                    <Tooltip title="This order should be worked on ASAP">
+                        <Button onClick={() => {
+                            onRush?.(jobId);
+                            setOpen(false);
+                        }} startIcon={<Whatshot />} disabled={!onRush}>Rush</Button>
+                    </Tooltip>
+                </ButtonGroup>
                 <Button onClick={() => {
                     onCancel(jobId);
                     setOpen(false);
-                }} variant="contained">Cancel</Button>
+                }} variant="outlined" color="error" startIcon={<Delete />}>Cancel Order</Button>
             </div>
         </DialogActions>
 

@@ -63,7 +63,7 @@ export default function GridViewer({
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
     const nav = useNavigate();
 
-    const { activeJob, queue, progress, cancel: cancelJob } = useQueue((val) => {
+    const { activeJob, queue, progress, cancel: cancelJob, delay, rush } = useQueue((val) => {
         if ((val.additionalInfo as PromptOrderData).gridId === grid.id) imageApi.appendImage(val)
     })
 
@@ -527,6 +527,8 @@ export default function GridViewer({
                                     <QueuedImageTile
                                         prompt={queueMap[y][x]}
                                         onCancel={() => { cancelJob(queueMap[y][x].id ?? 0) }}
+                                        onDelay={() => { delay(queueMap[y][x].id ?? 0) }}
+                                        onRush={() => { rush(queueMap[y][x].id ?? 0) }}
                                     />
                                 </div>
                             }

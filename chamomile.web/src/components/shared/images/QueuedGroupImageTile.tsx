@@ -3,27 +3,39 @@ import { Prompt } from "../../../model/Prompt";
 import { useState } from "react";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { Cancel } from "@mui/icons-material";
+import { AcUnit, Cancel, Whatshot } from "@mui/icons-material";
 import PromptGroupModal from "../prompt/PromptGroupModal";
 import { imageUrl } from "../../../api/Images";
 
 export default function QueuedGroupImageTile(props: {
     prompts: Prompt[]
     onCancel: (id: number | number[]) => void
+    onRush: (id: number | number[]) => void
+    onDelay: (id: number | number[]) => void
     onView?: (id: number) => void
     tiny?: boolean
 }) {
 
-    const { prompts, onCancel, onView, tiny } = props;
+    const { prompts, onCancel, onView, tiny, onRush, onDelay } = props;
     const [previewOpen, setPreviewOpen] = useState(false);
 
     const cancelAll = () => {
         onCancel(prompts.map(a => a.id ?? 0))
     }
 
+    const rushAll = () => {
+        onRush(prompts.map(a => a.id ?? 0))
+    }
+    const delayAll = () => {
+        onDelay(prompts.map(a => a.id ?? 0))
+    }
+
     const orderData = prompts.find(a => !!a.orderData)?.orderData;
 
     return <ContextMenu options={[
+        { icon: <Whatshot />, text: "Rush Order", onClick: () => rushAll() },
+        { icon: <AcUnit />, text: "Delay Order", onClick: () => delayAll() },
+        { type: "divider" },
         { icon: <Cancel />, text: "Cancel All", onClick: () => cancelAll() }
     ]} style={{ position: 'relative', width: "100%", aspectRatio: 1 }}>
         <div style={{ position: "absolute", top: 0, left: 0, width: '80%' }}>
@@ -63,7 +75,13 @@ export default function QueuedGroupImageTile(props: {
                             }
                         </Typography>
                     </CardActionArea>
-                    <PromptGroupModal prompts={prompts} onCancel={onCancel} onCancelAll={cancelAll} open={previewOpen} setOpen={setPreviewOpen} onViewImage={onView} />
+                    <PromptGroupModal prompts={prompts}
+                        onCancel={onCancel} onCancelAll={cancelAll}
+                        onDelay={onDelay} onDelayAll={delayAll}
+                        onRush={onRush} onRushAll={rushAll}
+                        open={previewOpen} setOpen={setPreviewOpen}
+                        onViewImage={onView}
+                    />
                 </BaseImageTile>
             </div>
         </div>
