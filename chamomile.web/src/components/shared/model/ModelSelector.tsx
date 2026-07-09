@@ -92,8 +92,9 @@ export default function ModelSelector(props: {
                     placeholder={NO_LORA_ALIAS === model ? "None" : model ?? ""} variant="outlined"
                     label={modelType} error={error}
                     slotProps={{
+                        ...params.slotProps,
                         input: {
-                            ...params.InputProps,
+                            ...params.slotProps.input,
                             startAdornment: (
                                 <InputAdornment position="start">
                                     {loading ? <CircularProgress color="inherit" size={25} /> : <ModelTraining />}
@@ -125,6 +126,7 @@ export default function ModelSelector(props: {
             }}
 
         />
+
         <ModelBrowserModal onOk={(val) => {
             onSelect(val[0])
             setBrowserOpen(false)

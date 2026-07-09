@@ -1,7 +1,7 @@
 import { Children, isValidElement, ReactElement, ReactNode, useState } from "react";
 import { useWindowDimensions } from "../../../../hooks/useWindowDimensions";
 import { Button, MenuItem, Select, Tab, Tabs } from "@mui/material";
-import HelpSection from "./HelpSection";
+import HelpSection, { HelpSectionProps } from "./HelpSection";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 
 export default function HelpDisplay(props: {
@@ -18,7 +18,7 @@ export default function HelpDisplay(props: {
     const selectMode = width < tabsWidth * 3
     const [selectedTab, setSelectedTab] = useState(0)
 
-    const helpSections = Children.toArray(children).filter(child => isValidElement(child) && child.type === HelpSection) as ReactElement[];
+    const helpSections = Children.toArray(children).filter(child => isValidElement(child) && child.type === HelpSection) as ReactElement<HelpSectionProps, typeof HelpSection>[];
     const helpSectionTitles = helpSections.map(a => a.props?.title) as string[];
 
     if (selectMode) {

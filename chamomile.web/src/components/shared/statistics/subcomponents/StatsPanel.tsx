@@ -203,7 +203,7 @@ export function StatsPanel({
                                 size="small"
                             />
                         )}
-                        renderTags={(value, getTagProps) =>
+                        renderValue={(value, getTagProps) =>
                             value.map((option, index) => (
                                 <Chip
                                     variant="filled"

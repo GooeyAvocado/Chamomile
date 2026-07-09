@@ -1,7 +1,7 @@
 # Vite will pick these up automatically if you're doing `npm run build`
 
 # Build the React app
-FROM node:22-slim AS frontend-builder
+FROM node:26-slim AS frontend-builder
 WORKDIR /app
 
 # Update system packages to reduce vulnerabilities

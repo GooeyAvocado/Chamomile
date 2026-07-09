@@ -15,7 +15,7 @@ export default function ImageModalAlbumsDisplay({ albums, onView, onRemove, elev
     return <>
         {!loading && albums && <>{albums.length === 0
             ? <div style={{ fontSize: ".8em" }}>This brew is not in any collections</div>
-            : <Stack gap={"5px"}>
+            : <Stack sx={{ gap: "5px" }}>
                 {albums?.map(a => <AlbumCard album={a} onRemove={onRemove} onView={onView} elevation={elevation} />)}
             </Stack>}</>
         }

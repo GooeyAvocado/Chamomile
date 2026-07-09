@@ -1,10 +1,10 @@
 import { Breakpoint, Dialog, DialogActions, DialogContent, DialogTitle, Tab, Tabs } from "@mui/material"
 import { CSSProperties, isValidElement, ReactElement, ReactNode, useState } from "react"
 import { Children } from "react";
-import TabbedModalActions from "./TabbedModalActions";
-import TabbedModalConsistentContent from "./TabbedModalConsistentContent";
-import TabbedModalTitle from "./TabbedModalTitle";
-import TabbedModalTabContent from "./TabbedModalTabContent";
+import TabbedModalActions, { TabbedModalActionsProps } from "./TabbedModalActions";
+import TabbedModalConsistentContent, { TabbedModalConsistentContentProps } from "./TabbedModalConsistentContent";
+import TabbedModalTitle, { TabbedModalTitleProps } from "./TabbedModalTitle";
+import TabbedModalTabContent, { TabbedModalTabContentProps } from "./TabbedModalTabContent";
 
 export default function TabbedModal(props: {
     children: ReactNode
@@ -23,10 +23,10 @@ export default function TabbedModal(props: {
     const [currentTab, setCurrentTab] = useState(0);
     const childrenArray = Children.toArray(children);
 
-    const actions = childrenArray.find(child => isValidElement(child) && child.type === TabbedModalActions) as ReactElement;
-    const consistentContent = childrenArray.filter(child => isValidElement(child) && child.type === TabbedModalConsistentContent) as ReactElement[];
-    const title = childrenArray.find(child => isValidElement(child) && child.type === TabbedModalTitle) as ReactElement;
-    const tabContents = childrenArray.filter(child => isValidElement(child) && child.type === TabbedModalTabContent) as ReactElement[];
+    const actions = childrenArray.find(child => isValidElement(child) && child.type === TabbedModalActions) as ReactElement<TabbedModalActionsProps, typeof TabbedModalActions>;
+    const consistentContent = childrenArray.filter(child => isValidElement(child) && child.type === TabbedModalConsistentContent) as ReactElement<TabbedModalConsistentContentProps, typeof TabbedModalConsistentContent>[];
+    const title = childrenArray.find(child => isValidElement(child) && child.type === TabbedModalTitle) as ReactElement<TabbedModalTitleProps, typeof TabbedModalTitle>;
+    const tabContents = childrenArray.filter(child => isValidElement(child) && child.type === TabbedModalTabContent) as ReactElement<TabbedModalTabContentProps, typeof TabbedModalTabContent>[];
 
     const tabs = tabContents.map((a, i) => {
         return {

@@ -1,9 +1,11 @@
 import { CSSProperties, ReactNode } from "react";
 
-export default function TabbedModalTitle(props:{
+export interface TabbedModalTitleProps {
     style?: CSSProperties
     children?: ReactNode
-}){
-    const {style,children} = props
+}
+
+export default function TabbedModalTitle(props: TabbedModalTitleProps) {
+    const { style, children } = props
     return style ? <div style={style}>{children}</div> : children
 }

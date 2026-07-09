@@ -1,4 +1,4 @@
-import { Autocomplete, InputAdornment, ListItemIcon, MenuItem, TextField } from "@mui/material";
+import { Autocomplete, InputAdornment, ListItem, ListItemIcon, TextField } from "@mui/material";
 import { getSamplers } from "../../../api/Prompts";
 import useApi from "../../hooks/useApi";
 import { Bolt, Explore, Image, Palette, Window } from "@mui/icons-material";
@@ -77,7 +77,7 @@ export default function SamplerSelector(props: {
         renderOption={(props, option) => {
             const { key, ...optionProps } = props;
             const o = option as GroupedSampler
-            return <MenuItem key={key} component="li" {...optionProps} >
+            return <ListItem key={key} component="li" {...optionProps} >
                 {o.title ? <>
                     <ListItemIcon>{o.icon}</ListItemIcon>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: "2px" }}>
@@ -89,15 +89,16 @@ export default function SamplerSelector(props: {
 
                     </div>
                 </> : o.name}
-            </MenuItem>
+            </ListItem>
 
         }}
         renderInput={(params: any) =>
             <TextField {...params}
                 placeholder={sampler ?? ""} variant="outlined"
                 slotProps={{
+                    ...params.slotProps,
                     input: {
-                        ...params.InputProps,
+                        ...params.slotProps.input,
                         startAdornment: <InputAdornment position="start" >
                             <Window />
                         </InputAdornment>,
@@ -106,7 +107,8 @@ export default function SamplerSelector(props: {
                             <div style={{ marginRight: "15px", opacity: ".8" }}>Sampler</div>
                         </InputAdornment>
                     }
-                }} />}
+                }}
+            />}
 
         slotProps={{
             popper: {

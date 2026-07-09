@@ -9,7 +9,7 @@ import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { clearFilter, downloadImage, imageToPrompt } from "../Utils";
-import { useEffect, useRef, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
 import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
@@ -441,7 +441,7 @@ export default function ImageModal(props: {
                             </div>
                         </Card>
 
-                        <Stack style={{ marginTop: "20px" }} gap={"10px"}>
+                        <Stack style={{ marginTop: "20px" }} sx={{ gap: "10px" }}>
                             <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><PhotoLibrary /> <div>Collections</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>} disabled />
@@ -563,14 +563,14 @@ export default function ImageModal(props: {
                                 checkpointTitle={image?.model ?? ""} currentImage={image} elevation={5}
                             />
 
-                            <Stack style={{ marginTop: "20px" }} gap={"10px"}>
+                            <Stack style={{ marginTop: "20px" }} sx={{ gap: "10px" }}>
                                 {/* LORAs */}
                                 {(image?.loras?.length ?? 0) !== 0 && <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>}>
                                     <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
                                         {image && <LoraStrip loras={image?.loras} maxLength={6} />}
                                     </ComplexAccordionActions>
                                     <ComplexAccordionBody>
-                                        <Stack gap={"5px"}>
+                                        <Stack sx={{ gap: "5px" }}>
                                             {image?.loras?.map(a => <LoraCard
                                                 filter={filter} setFilter={setFilter}
                                                 key={a} loraAlias={a} currentImage={image} elevation={5}

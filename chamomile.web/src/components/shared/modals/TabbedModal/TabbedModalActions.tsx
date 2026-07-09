@@ -1,9 +1,11 @@
 import { CSSProperties, ReactNode } from "react";
 
-export default function TabbedModalActions(props:{
+export interface TabbedModalActionsProps {
     style?: CSSProperties
     children?: ReactNode
-}){
-    const {style,children} = props
+}
+
+export default function TabbedModalActions(props: TabbedModalActionsProps) {
+    const { style, children } = props
     return style ? <div style={style}>{children}</div> : children
 }

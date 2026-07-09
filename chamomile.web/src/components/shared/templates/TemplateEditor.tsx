@@ -2,7 +2,7 @@ import { Button, Card, CardActionArea, Dialog, DialogContent, DialogTitle, IconB
 import Template from "../../../model/Template";
 import useApi from "../../hooks/useApi";
 import { createTemplate, deleteTemplate, updateTemplate } from "../../../api/Template";
-import { Add, Delete, HelpOutline } from "@mui/icons-material";
+import { Add, Delete, HelpOutlineOutlined } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
 import { useMemo, useState } from "react";
 import ImageBrowserModal from "../images/ImageBrowserModal";
@@ -79,7 +79,7 @@ export default function TemplateEditor({ open, onClose, mode, template, setTempl
                             Learn more about templates on our Help documentation.
                         </div>
                     </div>}>
-                        <HelpOutline fontSize="small" />
+                        <HelpOutlineOutlined fontSize="small" />
                     </Tooltip>
                 </div>
                 <hr style={{ width: "100%" }} />
@@ -158,7 +158,7 @@ export default function TemplateEditor({ open, onClose, mode, template, setTempl
                             }]
                         })
                     }}>
-                        <Typography fontSize={"1em"} fontWeight={"600"} color="primary" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <Typography color="primary" style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: "1em", fontWeight: "600" }}>
                             <Add />
                             <div>
                                 ADD A NEW PARAMETER
@@ -185,7 +185,7 @@ export default function TemplateEditor({ open, onClose, mode, template, setTempl
                             Learn more about templates on our Help documentation.
                         </div>
                     </div>}>
-                        <HelpOutline fontSize="small" />
+                        <HelpOutlineOutlined fontSize="small" />
                     </Tooltip>
                 </div>
                 <hr style={{ width: "100%" }} />

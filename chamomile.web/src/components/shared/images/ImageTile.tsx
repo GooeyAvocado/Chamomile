@@ -3,7 +3,7 @@ import { CardActionArea, CircularProgress, useTheme } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
+import { CheckBox, CheckBoxOutlineBlank, CoffeeOutlined, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutlineOutlined } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { downloadImage, imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -61,7 +61,7 @@ export default function ImageTile(props: {
         <ContextMenu options={[
             canSelect ? { text: selected ? "Unselect" : "Select", icon: selected ? <CheckBox /> : <CheckBoxOutlineBlank />, onClick: selected ? onUnselect : onSelect } : undefined,
             canSelect ? { type: "divider" } : undefined,
-            { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutline />, onClick: () => { onFavorite(image) }, disabled: selectMode },
+            { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutlineOutlined />, onClick: () => { onFavorite(image) }, disabled: selectMode },
             {
                 text: (image?.downloadCount ?? 0) > 0 ? "Download again" : "Download",
                 icon: <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : undefined} />,

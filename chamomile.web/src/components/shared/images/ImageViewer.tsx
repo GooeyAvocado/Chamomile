@@ -374,7 +374,7 @@ export default function ImageViewer(props: {
         }
 
         {imageApi.error &&
-            <Stack gap={"10px"}>
+            <Stack sx={{ gap: "10px" }}>
                 <Alert variant="standard" severity="error">
                     <AlertTitle>Could not retrieve images</AlertTitle>
                     {imageApi.error.message ? `Server responded: ${imageApi.error.message}` : "Something happened! Check the console"}

@@ -4,7 +4,7 @@ import CheckpointSequence from "../../../model/CheckpointSequence";
 import ModelSelector from "./CheckpointSelector";
 import { useCheckpoints } from "../../hooks/useCheckpoints";
 import { imageUrl } from "../../../api/Images";
-import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
+import { AddCircleOutlineOutlined, RemoveCircleOutlineOutlined } from "@mui/icons-material";
 import IECControls from "../IECControls/IECControls";
 import CheckpointBrowserModal from "./CheckpointBrowserModal";
 import { Model } from "../../../model/Model";
@@ -127,7 +127,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                             setInternalSequence(newSequence);
                             setValidation([])
                         }}>
-                            <RemoveCircleOutline />
+                            <RemoveCircleOutlineOutlined />
                         </IconButton>
 
                         <img
@@ -207,7 +207,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                     nonPlural
                 />
                 <Button
-                    startIcon={<AddCircleOutline />}
+                    startIcon={<AddCircleOutlineOutlined />}
                     style={{ alignSelf: 'end' }}
                     onClick={() => { setBrowserOpen(true) }}
                 >Add checkpoints</Button>

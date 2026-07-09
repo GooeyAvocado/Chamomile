@@ -1,4 +1,4 @@
-import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutline } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, Coffee, CoffeeOutlined, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutlineOutlined } from "@mui/icons-material";
 import { Button, Card, CircularProgress, ClickAwayListener, IconButton, ListItemIcon, Menu, MenuItem, Paper, Popper, Tooltip } from "@mui/material";
 import useUserAgent from "../../hooks/useUserAgent";
 import "./ImageHotbar.css"
@@ -48,7 +48,7 @@ export default function ImageHotbar(props: {
                     <hr />
                 </>}
                 <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
-                    <IconButton onClick={() => onFavorite?.()} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutline />}</IconButton>
+                    <IconButton onClick={() => onFavorite?.()} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutlineOutlined />}</IconButton>
                 </Tooltip>
                 <Tooltip title="Delete" enterDelay={250}>
                     <IconButton disabled={!onDelete} onClick={(e) => {

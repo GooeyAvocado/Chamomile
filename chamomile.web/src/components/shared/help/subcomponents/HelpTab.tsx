@@ -860,7 +860,7 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 </div>
             </div>
 
-            <Stack gap={"8px"}>
+            <Stack sx={{ gap: '8px' }}>
                 <Alert severity="warning" style={{ fontSize: ".8em" }}>
                     <AlertTitle style={{ fontSize: "1.2em" }}>Do not re-use axis types</AlertTitle>
                     Aside from Prompt search/replace, you should not use two of the same axis type. Only one of the values will be used.

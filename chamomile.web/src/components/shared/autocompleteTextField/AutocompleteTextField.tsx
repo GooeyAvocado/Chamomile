@@ -54,8 +54,8 @@ export default function AutocompleteTextfield({ data, autocompleteZIndex, ...pro
     autocompleteZIndex?: number
 } & React.ComponentProps<typeof TextField>) {
 
-    const inputRef = useRef<HTMLTextAreaElement | null>(null);
-    const textfieldRef = useRef<HTMLDivElement | null>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null as any as HTMLTextAreaElement);
+    const textfieldRef = useRef<HTMLDivElement>(null);
     const menuListRef = useRef<HTMLLIElement>(null);
     const [anchorEl, setAnchorEl] = useState<any>(null);
     const [cursorContext, setCursorContext] = useState<CursorContext | null>(null);

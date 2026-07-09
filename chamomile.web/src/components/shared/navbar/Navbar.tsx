@@ -2,7 +2,7 @@ import { Divider, Drawer, IconButton, ListItemIcon, ListItem, ListItemButton, Li
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import ChamomileLogo from "../ChamomileLogo";
 import StatusButton from "../StatusButton/StatusButton";
-import { Coffee, GridView, HelpOutline, Launch, Menu as MenuIcon, Monitor, PhotoLibrary, Settings } from "@mui/icons-material";
+import { Coffee, GridView, HelpOutlineOutlined, Launch, Menu as MenuIcon, Monitor, PhotoLibrary, Settings } from "@mui/icons-material";
 import { useState } from "react";
 import SettingsSlidein from "../settings/SettingsSlidein";
 import { useNavigate } from "react-router-dom";
@@ -58,7 +58,7 @@ export default function Navbar() {
             <div style={{ display: 'flex', gap: "10px", transform: "translateY(7px)" }}>
                 <StatusButton />
                 <Tooltip title="Help and About">
-                    <IconButton onClick={onHelp}><HelpOutline /></IconButton>
+                    <IconButton onClick={onHelp}><HelpOutlineOutlined /></IconButton>
                 </Tooltip>
             </div>
         </div>
@@ -104,7 +104,7 @@ export default function Navbar() {
                 <List>
                     <ListItem disablePadding >
                         <ListItemButton disableRipple onClick={() => { onHelp(); }}>
-                            <ListItemIcon><HelpOutline /></ListItemIcon>
+                            <ListItemIcon><HelpOutlineOutlined /></ListItemIcon>
                             <div style={{ padding: "5px 0px" }}>Help and About</div>
                         </ListItemButton>
                     </ListItem>
