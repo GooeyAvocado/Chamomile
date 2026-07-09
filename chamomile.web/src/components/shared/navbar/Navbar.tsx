@@ -57,7 +57,7 @@ export default function Navbar() {
             {/* This translation is for visual purposes. The steam of the chamomile cup makes it look like this is out of alignment */}
             <div style={{ display: 'flex', gap: "10px", transform: "translateY(7px)" }}>
                 <StatusButton />
-                <Tooltip title="Help and About">
+                <Tooltip title="Help">
                     <IconButton onClick={onHelp}><HelpOutlineOutlined /></IconButton>
                 </Tooltip>
             </div>
