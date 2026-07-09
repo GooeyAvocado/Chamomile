@@ -4,11 +4,12 @@ import useUserAgent from "../../hooks/useUserAgent";
 import "./ImageHotbar.css"
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Prompt } from "../../../model/Prompt";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePingPong } from "../../hooks/usePingPong";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { useUpscalers } from "../../hooks/useUpscalers";
+import useModifierKeys from "../../hooks/useModifierKeys";
 
 export default function ImageHotbar(props: {
     image?: GeneratedImage
@@ -24,6 +25,7 @@ export default function ImageHotbar(props: {
     const { onUsePrompt, image, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale } = props;
     const { isMobile } = useUserAgent()
     const { pong } = usePingPong();
+    const { ctrlHeld } = useModifierKeys();
     const sdAvailable = pong?.SD;
 
     const { upscaleLoading, imageUpscalingId } = useUpscalers();
@@ -35,6 +37,10 @@ export default function ImageHotbar(props: {
     const [promptAnchor, setPromptAnchor] = useState(null as any)
 
     const canNavigate = !!onLeft || !!onRight
+    useEffect(() => {
+        if (brewAnchor) setBrewAnchor(null)
+        if (promptAnchor) setPromptAnchor(null)
+    }, [ctrlHeld])
 
     if (isMobile) return <></>
 
@@ -73,14 +79,24 @@ export default function ImageHotbar(props: {
                     </IconButton>
                 </Tooltip>
                 <hr />
-                <Tooltip title="Brew" enterDelay={250}>
-                    <IconButton disabled={!sdAvailable} onClick={(e) => setBrewAnchor(e.currentTarget)}>
-                        <Coffee />
-                    </IconButton>
-                </Tooltip>
+                {ctrlHeld ?
+                    <PromptReorderButton
+                        prompt={imageToPrompt(image, true)}
+                        disabled={
+                            (image?.basePrompt?.trim()?.length ?? 0) === 0 ||
+                            image?.basePrompt === image?.prompt
+                        }
+                        onClick={() => setBrewAnchor(null)}
+                        source="IMAGE_BASE"
+                    />
+                    : <Tooltip title="Brew" enterDelay={250}>
+                        <IconButton disabled={!sdAvailable} onClick={(e) => setBrewAnchor(e.currentTarget)}>
+                            <Coffee />
+                        </IconButton>
+                    </Tooltip>}
                 <Tooltip title="Use this Prompt" enterDelay={250}>
                     <IconButton disabled={!onUsePrompt} onClick={(e) => setPromptAnchor(e.currentTarget)}>
-                        <ReceiptLong />
+                        {ctrlHeld ? <ReceiptLongTwoTone /> : <ReceiptLong />}
                     </IconButton>
                 </Tooltip>
                 {canNavigate && <>
@@ -163,16 +179,16 @@ export default function ImageHotbar(props: {
             transformOrigin={{ vertical: 'top', horizontal: 'left', }}
         >
             <PromptReorderButton
-                menuButonMode prompt={imageToPrompt(image, true)} textSuffix="from base"
-                iconOverride={<CoffeeOutlined />} disabled={
+                menuButonMode prompt={imageToPrompt(image, true)}
+                disabled={
                     (image?.basePrompt?.trim()?.length ?? 0) === 0 ||
                     image?.basePrompt === image?.prompt
                 }
-                onClick={() => setBrewAnchor(null)} sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id} source="IMAGE_BASE"
+                onClick={() => setBrewAnchor(null)}
+                source="IMAGE_BASE"
             />
             <PromptReorderButton
-                menuButonMode prompt={imageToPrompt(image)} onClick={() => setBrewAnchor(null)}
-                sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id} source="IMAGE"
+                menuButonMode prompt={imageToPrompt(image)} onClick={() => setBrewAnchor(null)} source="IMAGE"
             />
         </Menu>
 

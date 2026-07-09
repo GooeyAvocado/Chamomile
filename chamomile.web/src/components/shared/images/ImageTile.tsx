@@ -90,15 +90,12 @@ export default function ImageTile(props: {
             {
                 type: "custom", customContent: (onClose) => <PromptReorderButton
                     prompt={imageToPrompt(image)} source="IMAGE"
-                    sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id}
                     menuButonMode onClick={onClose} disabled={selectMode}
                 />
             },
             {
                 type: "custom", customContent: (onClose) => <PromptReorderButton
-                    prompt={imageToPrompt(image, true)} source="IMAGE_BASE"
-                    sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id} iconOverride={<CoffeeOutlined />}
-                    menuButonMode onClick={onClose} textSuffix="(base prompt)"
+                    prompt={imageToPrompt(image, true)} source="IMAGE_BASE" menuButonMode onClick={onClose}
                     disabled={selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt}
                 />
             },

@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Button, ButtonGroup, Card, CardContent, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, Coffee, CoffeeOutlined, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, ArrowForward, Coffee, CoffeeOutlined, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder, WhatshotOutlined } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useSnackbar } from "notistack";
@@ -29,6 +29,7 @@ import { FilterOptions } from "../../../model/FilterOptions";
 import ModelCard from "../checkpoint/CheckpointCard";
 import { useThrottle } from "../../hooks/useThrottle";
 import { useUpscalers } from "../../hooks/useUpscalers";
+import useModifierKeys from "../../hooks/useModifierKeys";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -88,6 +89,7 @@ export default function ImageModal(props: {
     const [showSd, setShowSd] = useState(false)
 
     const [hideSidebar, setHideSidebar] = useState(false)
+    const { ctrlHeld, shiftHeld } = useModifierKeys();
 
     const THROTTLE_DELAY = 100
     const throttledLeft = useThrottle(onLeft, THROTTLE_DELAY);
@@ -140,7 +142,7 @@ export default function ImageModal(props: {
     const onUsePrompt = (promptOverride?: Prompt) => {
         setOpen(false)
         enqueueSnackbar("Prompt loaded!", { variant: 'success' })
-        setPrompt(promptOverride ?? imageToPrompt(image, promptMode === 1))
+        setPrompt(promptOverride ?? imageToPrompt(image, promptMode === 1 || ctrlHeld))
         signalOnUsePrompt?.()
     }
 
@@ -516,13 +518,11 @@ export default function ImageModal(props: {
 
                             <div style={{ display: "flex", gap: "10px" }} >
                                 <PromptReorderButton
-                                    prompt={imageToPrompt(image, promptMode === 1)} source={promptMode === 1 ? "IMAGE_BASE" : "IMAGE"}
-                                    sample={(image?.additionalInfo?.sample ?? 0) > 0 ? image?.additionalInfo?.sample : image?.id}
-                                    iconOverride={promptMode === 1 ? <CoffeeOutlined /> : undefined}
+                                    prompt={imageToPrompt(image, promptMode === 1 || ctrlHeld)} source={promptMode === 1 || ctrlHeld ? "IMAGE_BASE" : "IMAGE"}
                                 />
-                                <Tooltip title={promptMode === 1 ? 'Use this base prompt' : 'Use this prompt'}>
+                                <Tooltip title={promptMode === 1 || ctrlHeld ? 'Use this base prompt' : 'Use this prompt'}>
                                     <IconButton onClick={() => onUsePrompt()}>
-                                        {promptMode === 1 ? <ReceiptLongTwoTone /> : <ReceiptLong />}
+                                        {promptMode === 1 || ctrlHeld ? <ReceiptLongTwoTone /> : <ReceiptLong />}
                                     </IconButton>
                                 </Tooltip>
                                 {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}

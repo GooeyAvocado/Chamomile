@@ -1,5 +1,7 @@
+export type PromptSource = "IMAGE_BASE" | "IMAGE" | "SAVED_PROMPT" | "PROMPTBOX" | "UNKNOWN" | "UPLOAD" | "GRID";
+
 export default interface PromptOrderData {
-    source: "IMAGE_BASE" | "IMAGE" | "SAVED_PROMPT" | "PROMPTBOX" | "UNKNOWN" | "UPLOAD" | "GRID"
+    source: PromptSource
     sample: number
     albums: number[]
     gridId?: number;

@@ -11,8 +11,7 @@ import { createPrompt, getWildcards, updatePrompt } from "../../../api/Prompts";
 import { useSnackbar } from "notistack";
 import PromptSelectorModal from "./PromptSelectorModal";
 import VariableEditor from "../variables/VariableEditor";
-import { enqueuePrompts, imageUrl } from "../../../api/Images";
-import { hydratePrompt } from "../Utils";
+import { imageUrl } from "../../../api/Images";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import SizePresetSelector from "./SizePresetSelector";
 import SamplerSelector from "./SamplerSelector";
@@ -27,6 +26,8 @@ import PromptBuilderClearButton from "./PromptBuilderClearButton";
 import Template from "../../../model/Template";
 import { getTemplates } from "../../../api/Template";
 import { Model } from "../../../model/Model";
+import useWaiter from "../../hooks/useWaiter";
+import useModifierKeys from "../../hooks/useModifierKeys";
 
 export default function PromptBuilder(props: {
     prompt?: Prompt,
@@ -47,8 +48,7 @@ export default function PromptBuilder(props: {
     const [modelsOpen, setModelsOpen] = useState(false)
     const [varsOpen, setVarsOpen] = useState(false)
     const [saveAys, setSaveAys] = useState(false)
-    const brewApi = useApi(enqueuePrompts)
-    const { album } = usePrompt();
+    const { onBrew: waiterBrew } = useWaiter();
 
     const expandRef = useRef<HTMLDivElement>(null);
     const horizontalContainerRef = useRef<HTMLDivElement>(null);
@@ -64,6 +64,7 @@ export default function PromptBuilder(props: {
     const { enqueueSnackbar } = useSnackbar();
     const { vertical, width } = useWindowDimensions();
     const { pong } = usePingPong();
+    const { shiftHeld } = useModifierKeys();
 
     const [sizePresetOpen, setSizePresetOpen] = useState(false)
     const [saveOpen, setSaveOpen] = useState(false)
@@ -74,31 +75,13 @@ export default function PromptBuilder(props: {
     const setPrompt = setPromptOverride ?? updateGlobalPrompt
 
     const onBrew = (amountOverride?: number) => {
-        const allPrompts = []
-        for (let index = 0; index < (amountOverride ?? orderAmount); index++) {
-            allPrompts.push(hydratePrompt({
-                ...prompt, orderData: {
-                    sample: prompt.sampleImage ?? -1,
-                    source: "PROMPTBOX",
-                    albums: album?.id ? [album?.id] : []
-                }
-            }, variables, index));
-        }
-
-        brewApi.fetch((val) => {
-            if ((amountOverride ?? orderAmount) !== val?.jobIds.length) {
-                enqueueSnackbar(`Only ${val?.jobIds.length} orders placed!`, { variant: 'warning' })
-            } else {
-                if (amountOverride === 1) {
-                    enqueueSnackbar(`Single order placed!`, { variant: 'success' })
-                } else {
-                    enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
-                }
-            }
-        }, () => {
-            enqueueSnackbar("Could not queue images!", { variant: 'error' })
-        }, allPrompts)
-
+        waiterBrew({
+            prompt: prompt,
+            amountOverride: amountOverride,
+            forcePrompt: true, //If the user prompts a non-existent LoRA in the PromptBox, who are we to stop it?
+            rush: shiftHeld,
+            source: "PROMPTBOX",
+        });
     }
 
     const onSaveAs = (val: Prompt) => {

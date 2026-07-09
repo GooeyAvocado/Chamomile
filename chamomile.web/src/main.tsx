@@ -18,57 +18,60 @@ import QueueProvider from './components/contexts/QueueContext.tsx'
 import { SettingsProvider } from './components/contexts/SettingsContext.tsx'
 import GridsPage from './components/pages/GridsPage.tsx'
 import { CheckpointProvider } from './components/contexts/CheckpointsContext.tsx'
+import { ModifierKeysProvider } from './components/hooks/useModifierKeys.ts'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
 
     {/* There are so many providers  */}
 
-    <DimensionsProvider>
-      <ThemeWrapper>
-        <SettingsProvider>
-          <PingPongProvider>
-            <PromptProvider>
-              <CheckpointProvider>
-                <LoraProvider>
-                  <AlbumsProvider>
-                    <ImageUploadProvider>
-                      <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} autoHideDuration={1500} transitionDuration={250} >
-                        <UpscalersProvider>
-                          <QueueProvider>
-                            <HashRouter>
-                              <Routes>
-                                <Route path="/grid/*" element={
-                                  <QueueWatcher>
-                                    <GridsPage />
-                                  </QueueWatcher>
-                                }
-                                />
-                                <Route path="*" element={
-                                  <QueueWatcher>
-                                    <FullPageDropzone>
-                                      <Home />
-                                    </FullPageDropzone>
-                                  </QueueWatcher>
-                                }
-                                />
-                                <Route path="/display" element={< DisplayPage />} />
-                              </Routes>
-                            </HashRouter>
-                          </QueueProvider>
+    <ModifierKeysProvider>
+      <DimensionsProvider>
+        <ThemeWrapper>
+          <SettingsProvider>
+            <PingPongProvider>
+              <PromptProvider>
+                <CheckpointProvider>
+                  <LoraProvider>
+                    <AlbumsProvider>
+                      <ImageUploadProvider>
+                        <SnackbarProvider maxSnack={4} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} autoHideDuration={1500} transitionDuration={250} >
+                          <UpscalersProvider>
+                            <QueueProvider>
+                              <HashRouter>
+                                <Routes>
+                                  <Route path="/grid/*" element={
+                                    <QueueWatcher>
+                                      <GridsPage />
+                                    </QueueWatcher>
+                                  }
+                                  />
+                                  <Route path="*" element={
+                                    <QueueWatcher>
+                                      <FullPageDropzone>
+                                        <Home />
+                                      </FullPageDropzone>
+                                    </QueueWatcher>
+                                  }
+                                  />
+                                  <Route path="/display" element={< DisplayPage />} />
+                                </Routes>
+                              </HashRouter>
+                            </QueueProvider>
 
 
-                        </UpscalersProvider>
-                      </SnackbarProvider>
-                    </ImageUploadProvider>
-                  </AlbumsProvider>
-                </LoraProvider>
-              </CheckpointProvider>
-            </PromptProvider>
-          </PingPongProvider>
-        </SettingsProvider>
-      </ThemeWrapper>
-    </DimensionsProvider>
+                          </UpscalersProvider>
+                        </SnackbarProvider>
+                      </ImageUploadProvider>
+                    </AlbumsProvider>
+                  </LoraProvider>
+                </CheckpointProvider>
+              </PromptProvider>
+            </PingPongProvider>
+          </SettingsProvider>
+        </ThemeWrapper>
+      </DimensionsProvider>
+    </ModifierKeysProvider>
 
   </StrictMode >,
 )

@@ -21,6 +21,7 @@ import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import RandomImageModal from '../images/RandomImageModal';
 import { FilterOptions } from '../../../model/FilterOptions';
+import useModifierKeys from '../../hooks/useModifierKeys';
 
 export default function PromptButton(props: {
     onBrew: (amountOverride?: number) => void
@@ -40,6 +41,8 @@ export default function PromptButton(props: {
     const [open, setOpen] = useState(false);
     const [seedWarning, setSeedWarning] = useState(false)
     const [previewOpen, setPreviewOpen] = useState(false);
+    const { shiftHeld } = useModifierKeys();
+    const [brewHovered, setBrewHovered] = useState(false)
 
     const [gridEditorState, setGridEditorState] = useState<Grid>()
     const [gridEditorOpen, setGridEditorOpen] = useState(false);
@@ -89,19 +92,28 @@ export default function PromptButton(props: {
         }, () => {
             enqueueSnackbar("Could not create grid", { variant: "error" })
         }, { ...gridEditorState, seed: Math.floor(Math.random() * 1000000000), generationDurationMs: 0 } as Grid)
-
     }
+
+    const showRush = brewHovered && shiftHeld
+
     return <>
         <ButtonGroup
             variant="contained"
             ref={anchorRef}
             fullWidth={fullWidth}
         >
-            <Tooltip title={!pong?.SD ? 'Kitchen\'s closed\n(Could not contact SD)' : 'Click to start brewing images'}>
-                <Button onClick={() => {
+            <Tooltip title={showRush ? "Brew this prompt immediately" : 'Click to start brewing images'}>
+                <Button onMouseEnter={() => setBrewHovered(true)} onMouseLeave={() => setBrewHovered(false)} onClick={() => {
                     if (prompt.seed > -1 && orderAmount > 1) setSeedWarning(true)
                     else onBrew()
-                }} disabled={!pong?.SD}>Brew</Button>
+                }} disabled={!pong?.SD}
+                    color={showRush ? 'warning' : 'primary'}
+                    variant={showRush ? 'outlined' : 'contained'}
+                >
+                    <div style={{ width: "32px" }}>
+                        {showRush ? "Rush" : "Brew"}
+                    </div>
+                </Button>
             </Tooltip>
             <Button size="small" style={{ width: '40px' }} onClick={handleToggle} >
                 <ArrowDropDownIcon />

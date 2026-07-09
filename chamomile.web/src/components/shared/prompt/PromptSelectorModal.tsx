@@ -3,7 +3,7 @@ import { deletePrompt, getPrompts, updatePrompt } from "../../../api/Prompts";
 import { Prompt } from "../../../model/Prompt";
 import useApi from "../../hooks/useApi";
 import { Card, CardActionArea, CardContent, Dialog, DialogContent, DialogTitle, InputAdornment, TextField } from "@mui/material";
-import { ArrowUpward, Coffee, Delete, Edit, Folder, ImageSearch, Search } from "@mui/icons-material";
+import { ArrowUpward, Coffee, Delete, Edit, Folder, ImageSearch, Search, Whatshot } from "@mui/icons-material";
 import PromptCard from "./PromptCard";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { useSnackbar } from "notistack";
@@ -12,12 +12,11 @@ import PromptReorderButton from "./PromptReorderButton";
 import PromptTile from "./PromptTile";
 import ContextMenu from "../ContextMenu";
 import { usePrompt } from "../../hooks/usePrompt";
-import { enqueuePrompts } from "../../../api/Images";
-import { clearFilter, hydratePrompt } from "../Utils";
-import { useSettings } from "../../hooks/useSettings";
+import { clearFilter } from "../Utils";
 import { FilterOptions } from "../../../model/FilterOptions";
 import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
-import useWaiter from "../../hooks/useWaiter";
+import useWaiter, { WaiterOrder } from "../../hooks/useWaiter";
+import useModifierKeys from "../../hooks/useModifierKeys";
 
 export default function PromptSelectorModal(props: {
     open: boolean,
@@ -32,14 +31,15 @@ export default function PromptSelectorModal(props: {
     const delPromptApi = useApi(deletePrompt)
     const updatePromptApi = useApi(updatePrompt)
     const { enqueueSnackbar } = useSnackbar();
-    const brewApi = useApi(enqueuePrompts)
-    const { settings } = useSettings();
+    const { onBrew } = useWaiter(true);
+
 
     const searchRef = useRef<HTMLInputElement>(null);
 
     const [query, setQuery] = useState("")
     const [delPrompt, setDelPrompt] = useState(undefined as undefined | Prompt)
     const [promptFolder, setPromptFolder] = useState(undefined as undefined | string)
+    const [rushFolder, setRushFolder] = useState(false)
     const [editPrompt, setEditPrompt] = useState(undefined as undefined | Prompt)
     const [currLocation, setCurrLocation] = useState("")
 
@@ -53,7 +53,8 @@ export default function PromptSelectorModal(props: {
         )
     }, [promptsApi.data, query])
 
-    const { prompt, setPrompt, orderAmount, album, variables } = usePrompt();
+    const { prompt, setPrompt, orderAmount } = usePrompt();
+    const { shiftHeld } = useModifierKeys();
 
     const promptFolderPrompts = promptFolder ? promptsApi.data.filter(a => a.name.startsWith(promptFolder + '/')) : []
 
@@ -74,36 +75,12 @@ export default function PromptSelectorModal(props: {
 
 
     const onPromptFolder = () => {
-        const orderPrompts = [] as Prompt[]
-        const allPrompts = [...promptFolderPrompts]
-        allPrompts.forEach((p) => {
-            for (let index = 0; index < orderAmount; index++) {
-                orderPrompts.push(hydratePrompt({
-                    ...p, ...{
-                        cfgScale: settings.globals.cfg ? prompt.cfgScale : p.cfgScale,
-                        sampler: settings.globals.sampler ? prompt.sampler : p.sampler,
-                        steps: settings.globals.steps ? prompt.steps : p.steps,
-                        width: settings.globals.width ? prompt.width : p.width,
-                        height: settings.globals.height ? prompt.height : p.height,
-                        negativePrompt: settings.globals.negativePrompt ? prompt.negativePrompt : p.negativePrompt
-
-                    }, orderData: {
-                        sample: p.sampleImage ?? -1,
-                        source: "SAVED_PROMPT",
-                        albums: album?.id ? [album?.id] : []
-                    }
-                }, variables, index));
-            }
+        setPromptFolder(undefined)
+        onBrew({
+            prompt: promptFolderPrompts,
+            source: "SAVED_PROMPT",
+            rush: rushFolder
         })
-
-        brewApi.fetch((val) => {
-            enqueueSnackbar(`${val?.jobIds.length} orders placed!`, { variant: 'success' })
-            setPromptFolder(undefined)
-        }, () => {
-            enqueueSnackbar("Could not queue images!", { variant: 'error' })
-        }, orderPrompts)
-
-
     }
 
     const onUpdate = (val: Prompt) => {
@@ -199,28 +176,28 @@ export default function PromptSelectorModal(props: {
             <div style={{ flex: '1', overflowY: 'auto' }}>
                 <GridViewMode
                     onOk={onOk} query={query}
-                    setDelPrompt={setDelPrompt} setEditPrompt={setEditPrompt}
+                    setDelPrompt={setDelPrompt} setEditPrompt={setEditPrompt} setRushFolder={setRushFolder}
                     setPromptFolder={setPromptFolder} filter={filter} setFilter={setFilter}
                     currLocation={currLocation} setCurrLocation={setCurrLocation}
                     filteredData={filteredData} currLocationPrompts={currLocationPrompts}
-                    folders={folders}
+                    folders={folders} onBrew={onBrew}
                 />
             </div>
 
         </DialogContent>
 
-        <AreYouSureModal open={!!delPrompt} setOpen={() => setDelPrompt(undefined)} onYes={onDelete} loading={delPromptApi.loading} title="Delete this prompt?">
+        <AreYouSureModal open={!!delPrompt} setOpen={() => setDelPrompt(undefined)} onYes={onDelete} loading={delPromptApi.loading} title="Delete this recipe?">
             <PromptCard prompt={delPrompt ?? { name: '', positivePrompt: '' } as Prompt} onClick={() => { }} />
         </AreYouSureModal>
 
 
 
-        <AreYouSureModal open={!!promptFolder} setOpen={() => setPromptFolder(undefined)} onYes={onPromptFolder} loading={brewApi.loading} title={`Prompt all under ${promptFolder}?`}>
-            This will prompt {promptFolderPrompts.length} prompt(s) including:
+        <AreYouSureModal open={!!promptFolder} setOpen={() => setPromptFolder(undefined)} onYes={onPromptFolder} title={`${rushFolder ? "Rush o" : "O"}rder all under ${promptFolder}?`}>
+            This will order {promptFolderPrompts?.length?.toLocaleString()} recipe(s) including:
             <ul style={{ maxHeight: "50vh", overflowY: 'auto' }}>
                 {promptFolderPrompts.map(a => <li>{a.name}</li>)}
             </ul>
-            Each will be prompted {orderAmount} times for a total of {promptFolderPrompts.length * orderAmount} images
+            Each will be ordered {orderAmount} times for a total of {(promptFolderPrompts?.length * orderAmount)?.toLocaleString()} orders
         </AreYouSureModal>
 
         <PromptEditorModal
@@ -237,6 +214,7 @@ function GridViewMode(props: {
     query: string,
     setEditPrompt: (val: Prompt) => void,
     setPromptFolder: (val: string) => void,
+    setRushFolder: (val: boolean) => void
     setDelPrompt: (val: Prompt) => void,
     onOk: (val: Prompt) => void,
     filter?: FilterOptions,
@@ -245,16 +223,16 @@ function GridViewMode(props: {
     setCurrLocation: (val: string) => void
     filteredData?: Prompt[]
     folders?: string[],
-    currLocationPrompts?: Prompt[]
+    currLocationPrompts?: Prompt[],
+    onBrew: (order: WaiterOrder) => void
 }) {
     const {
-        query, setDelPrompt, setEditPrompt, onOk, setPromptFolder,
+        query, setDelPrompt, setEditPrompt, onOk, setPromptFolder, setRushFolder,
         filter, setFilter, currLocation, setCurrLocation, filteredData,
-        folders, currLocationPrompts
+        folders, currLocationPrompts, onBrew
     } = props
 
-
-    const { onBrew } = useWaiter();
+    const { shiftHeld } = useModifierKeys();
 
 
     // If we have a query, we just show the results
@@ -266,7 +244,7 @@ function GridViewMode(props: {
         }}>
             {filteredData?.map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
-                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
+                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
                     filter && setFilter && (a.sampleImage ?? 0) > 0 ? { icon: <ImageSearch />, text: "Images like this", onClick: () => setFilter({ ...clearFilter(filter), sample: a.sampleImage }) } : undefined,
                     { type: "custom", customContent: () => <CopyToClipboardButton text={a.positivePrompt} menuButonMode /> },
@@ -274,7 +252,13 @@ function GridViewMode(props: {
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
                 ]}>
-                    <PromptTile prompt={a} onClick={() => onOk(a)} onMiddleClick={() => { onBrew(a, a.sampleImage, "SAVED_PROMPT") }} />
+                    <PromptTile prompt={a} onClick={() => onOk(a)} onMiddleClick={() => {
+                        onBrew({
+                            prompt: a,
+                            source: "SAVED_PROMPT",
+                            rush: shiftHeld
+                        })
+                    }} />
                 </ContextMenu>
             </div>)}
 
@@ -302,7 +286,12 @@ function GridViewMode(props: {
             {/* Folders */}
             {folders?.map(a => <div key={a} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
-                    { icon: <Coffee />, text: 'Prompt all', onClick: () => setPromptFolder((currLocation.length > 0 ? currLocation + "/" : "") + a) }
+                    {
+                        icon: shiftHeld ? <Whatshot /> : <Coffee />, text: `${shiftHeld ? "Rush o" : "O"}rder all`, onClick: () => {
+                            setPromptFolder((currLocation.length > 0 ? currLocation + "/" : "") + a)
+                            setRushFolder(shiftHeld)
+                        }
+                    }
                 ]}>
                     <Card>
                         <CardActionArea onClick={() => setCurrLocation(currLocation.length === 0 ? a : currLocation + "/" + a)}>
@@ -323,7 +312,7 @@ function GridViewMode(props: {
         }}>
             {currLocationPrompts?.map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <ContextMenu options={[
-                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} sample={a.sampleImage} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
+                    { type: "custom", customContent: (onClose) => <PromptReorderButton prompt={a} source="SAVED_PROMPT" menuButonMode onClick={onClose} /> },
                     { type: 'divider' },
                     filter && setFilter && (a.sampleImage ?? 0) > 0 ? { icon: <ImageSearch />, text: "Images like this", onClick: () => setFilter({ ...clearFilter(filter), sample: a.sampleImage }) } : undefined,
                     { type: "custom", customContent: () => <CopyToClipboardButton text={a.positivePrompt} menuButonMode /> },
@@ -331,7 +320,13 @@ function GridViewMode(props: {
                     { icon: <Edit />, text: "Edit", onClick: () => setEditPrompt(a) },
                     { icon: <Delete />, text: 'Delete', onClick: () => setDelPrompt(a) }
                 ]}>
-                    <PromptTile prompt={a} onClick={() => onOk(a)} onMiddleClick={() => { onBrew(a, a.sampleImage, "SAVED_PROMPT") }} />
+                    <PromptTile prompt={a} onClick={() => onOk(a)} onMiddleClick={() => {
+                        onBrew({
+                            prompt: a,
+                            source: "SAVED_PROMPT",
+                            rush: shiftHeld
+                        })
+                    }} />
                 </ContextMenu>
             </div>)}
 

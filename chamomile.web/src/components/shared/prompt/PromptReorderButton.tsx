@@ -2,56 +2,66 @@ import { Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, IconBu
 import { Prompt } from "../../../model/Prompt";
 import { usePingPong } from "../../hooks/usePingPong";
 import { usePrompt } from "../../hooks/usePrompt";
-import { Coffee, Warning } from "@mui/icons-material";
+import { Coffee, CoffeeOutlined, Warning, Whatshot, WhatshotOutlined } from "@mui/icons-material";
 import { imageUrl } from "../../../api/Images";
 import useWaiter from "../../hooks/useWaiter";
+import useModifierKeys from "../../hooks/useModifierKeys";
+import { useState } from "react";
 
 export default function PromptReorderButton(props: {
     prompt: Prompt,
-    iconOverride?: React.ReactNode
     menuButonMode?: boolean
-    textSuffix?: string
     disabled?: boolean
     onClick?: () => void
     source?: "IMAGE_BASE" | "IMAGE" | "SAVED_PROMPT"
-    sample?: number
 }) {
 
-    const { prompt, menuButonMode, onClick, iconOverride, textSuffix, disabled, sample, source } = props
+    const { prompt, menuButonMode, onClick, disabled, source } = props
 
     const { orderAmount } = usePrompt()
     const { pong } = usePingPong()
+    const { shiftHeld } = useModifierKeys();
 
     const {
         onBrew: onRealBrew, unavailLoraWarn, unavailLoras, setUnavailLoraWarn
-    } = useWaiter(!menuButonMode);
+    } = useWaiter();
 
+    const [isHovered, setIsHovered] = useState(false)
 
     const onBrew = (override?: Prompt) => {
-        onRealBrew(override ?? prompt, sample, source, !!override)
+        onRealBrew({
+            prompt: override ?? prompt,
+            source: source,
+            rush: shiftHeld,
+            forcePrompt: !!override
+        })
     }
 
     if (!pong?.SD || !prompt) return <></>
 
+    const icon = source === "IMAGE_BASE"
+        ? shiftHeld && (isHovered || menuButonMode) ? <WhatshotOutlined /> : <CoffeeOutlined />
+        : shiftHeld && (isHovered || menuButonMode) ? <Whatshot /> : <Coffee />
+
     return <>
         {
-            menuButonMode ? <MenuItem disabled={disabled} onClick={() => {
-                onBrew();
-                onClick?.()
-            }}>
-                <ListItemIcon>{iconOverride ?? <Coffee />}</ListItemIcon>
-                Brew {orderAmount} {textSuffix}
-            </MenuItem>
+            menuButonMode
+                ? <MenuItem disabled={disabled} onClick={() => {
+                    onBrew();
+                    onClick?.()
+                }}>
+                    <ListItemIcon>{icon}</ListItemIcon>
+                    {shiftHeld ? "Rush" : "Brew"} {orderAmount} {source === "IMAGE_BASE" ? "from base" : ""}
+                </MenuItem>
                 : <Tooltip title={<>
-                    <div>Reorder this prompt</div>
+                    <div>{shiftHeld ? "Rush r" : "R"}eorder this {source === "IMAGE_BASE" ? "base " : ""}prompt</div>
                     <div>This will place {orderAmount} order(s)</div>
-                    {textSuffix && <div>{textSuffix}</div>}
                 </>}>
-                    <IconButton disabled={disabled} onClick={() => {
+                    <IconButton onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} disabled={disabled} onClick={() => {
                         onBrew();
                         onClick?.()
                     }}>
-                        {iconOverride ?? <Coffee />}
+                        {icon}
                     </IconButton>
                 </Tooltip>
         }
@@ -60,7 +70,7 @@ export default function PromptReorderButton(props: {
             <DialogTitle>
                 <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
                     <Warning color="warning" />
-                    <div>There are unavailable LoRAs on this prompt</div>
+                    <div>There are unavailable LoRAs on this recipe</div>
                 </div>
             </DialogTitle>
             <DialogContent>
@@ -92,11 +102,11 @@ export default function PromptReorderButton(props: {
                     onBrew({ ...prompt, positivePrompt: pPrompt })
                     setUnavailLoraWarn(false)
 
-                }}>Prompt without these</Button>
+                }}>Order without these</Button>
                 <Button onClick={() => {
                     onBrew(prompt)
                     setUnavailLoraWarn(false)
-                }}>Prompt as is</Button>
+                }}>Order as is</Button>
                 <Button onClick={() => setUnavailLoraWarn(false)}>Cancel</Button>
             </DialogActions>
         </Dialog>
