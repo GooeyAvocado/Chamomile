@@ -1,4 +1,4 @@
-import { Alert, Button, Card, IconButton, LinearProgress, Switch, Tooltip } from "@mui/material";
+import { Alert, Button, Card, CardActionArea, IconButton, LinearProgress, Switch, Tooltip } from "@mui/material";
 import { Grid } from "../../../model/Grid";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { ArrowBack, BorderClear, Cancel, Coffee, CopyAll, Delete, Edit } from "@mui/icons-material";
@@ -6,7 +6,7 @@ import { FilterOptions } from "../../../model/FilterOptions";
 import { useImages } from "../../hooks/useImages";
 import { useQueue } from "../../hooks/useQueue";
 import { GeneratedImage } from "../../../model/GeneratedImage";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
 import useApi from "../../hooks/useApi";
 import { cancelJobs, deleteImage, deleteMultiImage, enqueueGrid, favImage, interruptGeneration, noteImage } from "../../../api/Images";
@@ -27,6 +27,8 @@ import ImageTile from "../images/ImageTile";
 import GenerateGridRequest, { GenerateGridCoords } from "../../../model/GenerateGridRequest";
 import ContextMenu from "../ContextMenu";
 import PromptOrderedModal from "../prompt/PromptOrderedModal";
+import { useSettings } from "../../hooks/useSettings";
+import { TileSizeToPixels } from "../../contexts/SettingsContext";
 
 export default function GridViewer({
     grid, onBack, onDelete, setGrid
@@ -65,6 +67,7 @@ export default function GridViewer({
     const { fetch: create, loading: createLoading } = useApi(createGrid)
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
     const nav = useNavigate();
+    const { settings } = useSettings();
 
     const { activeJob, queue, progress, cancel: cancelJob, delay, rush } = useQueue((val) => {
         if ((val.additionalInfo as PromptOrderData).gridId === grid.id) imageApi.appendImage(val)
@@ -79,6 +82,18 @@ export default function GridViewer({
     const [rerollSeed, setRerollSeed] = useState(true)
     const [editorState, setEditorState] = useState<Grid>()
     const [selectedImage, setSelectedImage] = useState(undefined as undefined | GeneratedImage)
+
+    const [multiSelectMode, setMultiSelectMode] = useState(false);
+    const [multiSelectImages, setMultiSelectImages] = useState([] as number[])
+
+    const multiSelectImage = (id: number) => {
+        setMultiSelectImages([...multiSelectImages, id])
+    }
+
+    const unselectMultiSelectImage = (id: number) => {
+        setMultiSelectImages([...multiSelectImages].filter(a => a !== id));
+    }
+
 
     const onDeleteImage = (override?: GeneratedImage) => {
         setDeleteAys(false)
@@ -98,6 +113,21 @@ export default function GridViewer({
         }, () => {
             enqueueSnackbar("Image could not be deleted!", { variant: 'error' })
         }, (override ?? selectedImage)?.id)
+    }
+
+    const onDeleteSelected = () => {
+        delMultiApi.fetch(() => {
+            enqueueSnackbar("Images deleted!", { variant: "success" })
+            setDeleteAys(false)
+            onDeselectAll();
+            imageApi.removeImages(multiSelectImages)
+        }, () => {
+            enqueueSnackbar("Could not delete images", { variant: "error" })
+        }, multiSelectImages)
+    }
+    const onDeselectAll = () => {
+        setMultiSelectImages([])
+        setMultiSelectMode(false)
     }
 
     const onClearGrid = () => {
@@ -399,7 +429,9 @@ export default function GridViewer({
     const xType = GridTypes.find(a => a.code === grid.xValMode)
     const yType = GridTypes.find(a => a.code === grid.yValMode)
 
-    const imageSize = 256
+    const imageSize = TileSizeToPixels(settings.tileSize)
+    const labelHeight = 50;
+    const labelMargin = 10;
 
 
     const onInterrupt = () => {
@@ -407,6 +439,35 @@ export default function GridViewer({
         SetInterruptOpen(false);
         interruptApi.fetch(undefined, undefined, activeJob.id)
     }
+
+    const selectAll = useCallback(() => {
+        const allIds = imageMap
+            .flat()
+            .filter((img): img is GeneratedImage => img != null)
+            .map(img => img.id);
+
+        setMultiSelectImages(allIds);
+    }, [imageMap]);
+
+    const selectAllInRow = useCallback((rowIndex: number) => {
+        setMultiSelectMode(true)
+        const rowIds = (imageMap[rowIndex] ?? [])
+            .filter((img): img is GeneratedImage => img != null)
+            .map(img => img.id);
+
+        setMultiSelectImages(prev => Array.from(new Set([...prev, ...rowIds])));
+    }, [imageMap]);
+
+    const selectAllInColumn = useCallback((colIndex: number) => {
+        setMultiSelectMode(true)
+        const colIds = imageMap
+            .map(row => row[colIndex])
+            .filter((img): img is GeneratedImage => img != null)
+            .map(img => img.id);
+
+        setMultiSelectImages(prev => Array.from(new Set([...prev, ...colIds])));
+    }, [imageMap]);
+
 
     return <>
         <div style={{
@@ -503,35 +564,28 @@ export default function GridViewer({
             {/* Header */}
             <div style={{ display: 'flex', gap: "20px", padding: "0px 20px", position: "sticky", top: 0, zIndex: 2 }}>
                 {/* Corner */}
-                <div style={{ width: `${imageSize * .75}px`, flexShrink: '0', textAlign: "center", }} />
+                <div style={{ width: `${labelHeight + (2 * labelMargin)}px`, flexShrink: '0', textAlign: "center", }} />
                 {/* Column labels */}
-                {grid.xVals.map(v => <div style={{
-                    width: `${imageSize}px`,
-                    flexShrink: "0", textAlign: 'center',
-                    backgroundColor: "#0D0D0D", padding: "20px 0px",
-
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    maxHeight: "95px",
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "normal"
-                }}>
-                    {xType?.displayValue?.(v) ?? v}{xType?.suffix}
-                </div>)}
+                {grid.xVals.map((v, i) => <GridAxisLabel
+                    imageSize={imageSize} type={xType} value={v}
+                    labelHeight={labelHeight} labelMargin={labelMargin}
+                    onClick={() => selectAllInColumn(i)}
+                />)}
             </div>
 
 
-            <div style={{ display: "flex" }}>
+            <div style={{ display: "flex", width: "fit-content" }}>
 
                 {/* Row labels */}
-                <div style={{ width: `${imageSize * .75}px`, flexShrink: "0", position: 'sticky', left: 0, zIndex: 1 }}>
-                    {grid.yVals.map(val => <div style={{
-                        height: `${imageSize + 40}px`, width: `${imageSize * .75}px`, flexShrink: "0",
-                        display: 'flex', flexDirection: 'column', backgroundColor: "#0D0D0D",
-                        justifyContent: 'center', alignItems: 'center'
-                    }}>{yType?.displayValue?.(val) ?? val}{yType?.suffix}</div>)}
+                <div style={{
+                    flexShrink: "0", position: 'sticky', left: 0, zIndex: 1, writingMode: "sideways-lr", textOrientation: 'mixed',
+                    display: "flex", gap: "40px", flexDirection: 'row-reverse', marginTop: "20px"
+                }}>
+                    {grid.yVals.map((v, i) => <GridAxisLabel
+                        imageSize={imageSize} value={v} type={yType} vertical
+                        labelHeight={labelHeight} labelMargin={labelMargin}
+                        onClick={() => selectAllInRow(i)}
+                    />)}
                 </div>
 
                 {/* Images */}
@@ -549,6 +603,17 @@ export default function GridViewer({
                             if (imageMap?.[y]?.[x]) {
                                 return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }} >
                                     <ImageTile
+                                        onSelect={() => {
+                                            multiSelectImage(imageMap[y][x].id)
+                                            setMultiSelectMode(true)
+                                        }}
+                                        onUnselect={() => {
+                                            unselectMultiSelectImage(imageMap[y][x].id)
+                                            if (multiSelectImages.length === 1) setMultiSelectMode(false)
+                                        }}
+                                        onSelectAll={selectAll} onDeselectAll={onDeselectAll}
+                                        onDeleteSelected={() => setDeleteAys(true)}
+                                        selectMode={multiSelectMode} selected={multiSelectImages.includes(imageMap[y][x].id)}
                                         image={imageMap[y][x]} onDelete={onDeleteImage} onFavorite={onFavorite} onDownload={onDownload}
                                         onClick={() => {
                                             setSelectedImage(imageMap[y][x])
@@ -615,8 +680,16 @@ export default function GridViewer({
             />}
         />
 
-        <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDeleteImage} loading={delApi.loading}>
-            Are you sure you want to delete this image?
+        <AreYouSureModal
+            open={deleteAys} setOpen={setDeleteAys} title={multiSelectMode ? "Delete all selected images?" : "Delete this image?"}
+            onYes={multiSelectMode ? onDeleteSelected : onDeleteImage} loading={delApi.loading}
+        >
+            {multiSelectMode ?
+                <>
+                    <div>Are you sure you want to do this?</div>
+                    <div>This will delete {multiSelectImages?.length} images</div>
+                </>
+                : <>Are you sure you want to delete this image?</>}
         </AreYouSureModal>
 
         <AreYouSureModal open={clearAys} setOpen={setClearAys} title="Clear this grid?" onYes={onClearGrid} loading={delApi.loading}>
@@ -642,6 +715,43 @@ export default function GridViewer({
 
     </>
 
+}
+
+function GridAxisLabel({ imageSize, value, type, vertical, labelHeight, labelMargin, onClick }: {
+    value: string,
+    type?: GridType
+    imageSize: number
+    labelHeight: number
+    labelMargin: number
+    vertical?: boolean
+    onClick?: () => void
+}) {
+    return <Card style={{
+        width: `${vertical ? labelHeight : imageSize}px`, height: `${vertical ? imageSize : labelHeight}px`,
+        flexShrink: "0", textAlign: 'center', margin: vertical ? `0px ${labelMargin}px` : `${labelMargin}px 0px`
+    }}>
+        <Tooltip title={<div style={{ padding: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: "5px" }}>
+                {type?.prefix}
+                <div>{type?.name}</div>
+            </div>
+            <hr />
+            <div>{type?.displayValue?.(value) ?? value}{type?.suffix}</div>
+        </div>}>
+            <CardActionArea onClick={onClick} style={{
+                padding: "16px 20px",
+                [vertical ? "width" : "height"]: `${labelHeight}px`,
+                [vertical ? "height" : "width"]: `100%`,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                wordBreak: "break-all",
+                fontSize: ".8em"
+            }}>
+                {type?.displayValue?.(value) ?? value}{type?.suffix}
+            </CardActionArea>
+        </Tooltip>
+    </Card>
 }
 
 function GridImageHUD({
