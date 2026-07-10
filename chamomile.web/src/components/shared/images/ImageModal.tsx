@@ -9,7 +9,7 @@ import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { clearFilter, downloadImage, imageToPrompt } from "../Utils";
-import { JSX, useEffect, useRef, useState } from "react";
+import { JSX, useEffect, useMemo, useRef, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
 import CopyToClipboardButton from "../copybutton/CopyToClipboardButton";
@@ -139,10 +139,12 @@ export default function ImageModal(props: {
         };
     }, [image]);
 
+    const basePromptAvailable = useMemo(() => (image?.basePrompt?.trim().length ?? 0) !== 0 && image?.basePrompt !== image?.prompt, [image])
+
     const onUsePrompt = (promptOverride?: Prompt) => {
         setOpen(false)
         enqueueSnackbar("Prompt loaded!", { variant: 'success' })
-        setPrompt(promptOverride ?? imageToPrompt(image, promptMode === 1 || ctrlHeld))
+        setPrompt(promptOverride ?? imageToPrompt(image, promptMode === 1 || (basePromptAvailable && ctrlHeld)))
         signalOnUsePrompt?.()
     }
 
@@ -364,7 +366,7 @@ export default function ImageModal(props: {
                     <ImageHotbar
                         image={image} onUsePrompt={onUsePrompt} onUpscale={executeUpscale}
                         onLeft={onLeft} onRight={onRight} onDownload={saveImage}
-                        onDelete={onDeleteForce} onFavorite={onFavorite}
+                        onDelete={onDeleteForce} onFavorite={onFavorite} basePromptAvailable={basePromptAvailable}
                     />
                 </div>
 
@@ -409,7 +411,7 @@ export default function ImageModal(props: {
                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <Tabs value={promptMode} onChange={(_, val) => setPromptMode(val)} style={{ flex: "1" }}>
                                     <Tab sx={{ textTransform: 'none' }} label="Prompt" />
-                                    {(image?.basePrompt?.trim().length ?? 0) !== 0 && image?.basePrompt !== image?.prompt && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
+                                    {basePromptAvailable && <Tab sx={{ textTransform: 'none' }} label="Base Prompt" />}
                                 </Tabs>
                                 <div style={{ display: 'flex', gap: '10px', marginRight: "10px" }}>
                                     {filter && setFilter && <IconButton disabled><ImageSearch /></IconButton>}
@@ -518,11 +520,11 @@ export default function ImageModal(props: {
 
                             <div style={{ display: "flex", gap: "10px" }} >
                                 <PromptReorderButton
-                                    prompt={imageToPrompt(image, promptMode === 1 || ctrlHeld)} source={promptMode === 1 || ctrlHeld ? "IMAGE_BASE" : "IMAGE"}
+                                    prompt={imageToPrompt(image, promptMode === 1 || (basePromptAvailable && ctrlHeld))} source={promptMode === 1 || (basePromptAvailable && ctrlHeld) ? "IMAGE_BASE" : "IMAGE"}
                                 />
-                                <Tooltip title={promptMode === 1 || ctrlHeld ? 'Use this base prompt' : 'Use this prompt'}>
+                                <Tooltip title={promptMode === 1 || (basePromptAvailable && ctrlHeld) ? 'Use this base prompt' : 'Use this prompt'}>
                                     <IconButton onClick={() => onUsePrompt()}>
-                                        {promptMode === 1 || ctrlHeld ? <ReceiptLongTwoTone /> : <ReceiptLong />}
+                                        {promptMode === 1 || (basePromptAvailable && ctrlHeld) ? <ReceiptLongTwoTone /> : <ReceiptLong />}
                                     </IconButton>
                                 </Tooltip>
                                 {onDelete && <Tooltip title='Delete this image'><IconButton onClick={onDelete}><Delete /></IconButton></Tooltip>}

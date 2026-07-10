@@ -13,6 +13,7 @@ import useModifierKeys from "../../hooks/useModifierKeys";
 
 export default function ImageHotbar(props: {
     image?: GeneratedImage
+    basePromptAvailable?: boolean
     onUsePrompt: (val: Prompt) => void,
     onLeft?: () => void
     onRight?: () => void
@@ -22,11 +23,12 @@ export default function ImageHotbar(props: {
     onUpscale?: () => void
 }) {
 
-    const { onUsePrompt, image, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale } = props;
+    const { onUsePrompt, image, basePromptAvailable, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale } = props;
     const { isMobile } = useUserAgent()
     const { pong } = usePingPong();
     const { ctrlHeld } = useModifierKeys();
     const sdAvailable = pong?.SD;
+    const useBasePrompt = basePromptAvailable && ctrlHeld
 
     const { upscaleLoading, imageUpscalingId } = useUpscalers();
 
@@ -38,8 +40,10 @@ export default function ImageHotbar(props: {
 
     const canNavigate = !!onLeft || !!onRight
     useEffect(() => {
-        if (brewAnchor) setBrewAnchor(null)
-        if (promptAnchor) setPromptAnchor(null)
+        if (useBasePrompt && sdAvailable) {
+            if (brewAnchor) setBrewAnchor(null)
+            if (promptAnchor) setPromptAnchor(null)
+        }
     }, [ctrlHeld])
 
     if (isMobile) return <></>
@@ -79,7 +83,7 @@ export default function ImageHotbar(props: {
                     </IconButton>
                 </Tooltip>
                 <hr />
-                {ctrlHeld ?
+                {sdAvailable && useBasePrompt ?
                     <PromptReorderButton
                         prompt={imageToPrompt(image, true)}
                         disabled={
@@ -94,9 +98,9 @@ export default function ImageHotbar(props: {
                             <Coffee />
                         </IconButton>
                     </Tooltip>}
-                <Tooltip title="Use this Prompt" enterDelay={250}>
+                <Tooltip title={`Use this${useBasePrompt ? " base" : ""} prompt`} enterDelay={250}>
                     <IconButton disabled={!onUsePrompt} onClick={(e) => setPromptAnchor(e.currentTarget)}>
-                        {ctrlHeld ? <ReceiptLongTwoTone /> : <ReceiptLong />}
+                        {useBasePrompt ? <ReceiptLongTwoTone /> : <ReceiptLong />}
                     </IconButton>
                 </Tooltip>
                 {canNavigate && <>
@@ -180,10 +184,7 @@ export default function ImageHotbar(props: {
         >
             <PromptReorderButton
                 menuButonMode prompt={imageToPrompt(image, true)}
-                disabled={
-                    (image?.basePrompt?.trim()?.length ?? 0) === 0 ||
-                    image?.basePrompt === image?.prompt
-                }
+                disabled={!basePromptAvailable}
                 onClick={() => setBrewAnchor(null)}
                 source="IMAGE_BASE"
             />
@@ -200,7 +201,7 @@ export default function ImageHotbar(props: {
         >
             <MenuItem
                 onClick={() => { onUsePrompt(imageToPrompt(image, true)); setPromptAnchor(null) }}
-                disabled={(image?.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt}
+                disabled={!basePromptAvailable}
             >
                 <ListItemIcon><ReceiptLongTwoTone /></ListItemIcon>
                 Use this base prompt
