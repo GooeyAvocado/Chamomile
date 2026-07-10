@@ -1,7 +1,7 @@
 import { Alert, Button, Card, IconButton, LinearProgress, Switch, Tooltip } from "@mui/material";
 import { Grid } from "../../../model/Grid";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
-import { ArrowBack, BorderClear, Coffee, CopyAll, Delete, Edit } from "@mui/icons-material";
+import { ArrowBack, BorderClear, Cancel, Coffee, CopyAll, Delete, Edit } from "@mui/icons-material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useImages } from "../../hooks/useImages";
 import { useQueue } from "../../hooks/useQueue";
@@ -9,7 +9,7 @@ import { GeneratedImage } from "../../../model/GeneratedImage";
 import { useEffect, useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
 import useApi from "../../hooks/useApi";
-import { cancelJobs, deleteImage, deleteMultiImage, enqueueGrid, favImage, noteImage } from "../../../api/Images";
+import { cancelJobs, deleteImage, deleteMultiImage, enqueueGrid, favImage, interruptGeneration, noteImage } from "../../../api/Images";
 import { updateImageAlbums } from "../../../api/Albums";
 import { Album } from "../../../model/Album";
 import ImageAlbumRequest from "../../../model/ImageAlbumRequest";
@@ -25,6 +25,8 @@ import BrewingImageTile from "../images/BrewingImageTile";
 import PromptOrderData from "../../../model/PromptOrderData";
 import ImageTile from "../images/ImageTile";
 import GenerateGridRequest, { GenerateGridCoords } from "../../../model/GenerateGridRequest";
+import ContextMenu from "../ContextMenu";
+import PromptOrderedModal from "../prompt/PromptOrderedModal";
 
 export default function GridViewer({
     grid, onBack, onDelete, setGrid
@@ -55,6 +57,7 @@ export default function GridViewer({
     const delApi = useApi(deleteImage);
     const delMultiApi = useApi(deleteMultiImage)
     const cancelMultiApi = useApi(cancelJobs)
+    const interruptApi = useApi(interruptGeneration)
     const favApi = useApi(favImage)
     const notesApi = useApi(noteImage)
     const brewApi = useApi(enqueueGrid)
@@ -70,6 +73,7 @@ export default function GridViewer({
     const [deleteAys, setDeleteAys] = useState(false)
     const [clearAys, setClearAys] = useState(false)
     const [editorOpen, setEditorOpen] = useState(false)
+    const [interruptOpen, SetInterruptOpen] = useState(false)
     const [duplicate, setDuplicate] = useState(false)
     const [viewerOpen, setViewerOpen] = useState(false)
     const [rerollSeed, setRerollSeed] = useState(true)
@@ -377,6 +381,13 @@ export default function GridViewer({
 
     const imageSize = 256
 
+
+    const onInterrupt = () => {
+        if (!activeJob) return;
+        SetInterruptOpen(false);
+        interruptApi.fetch(undefined, undefined, activeJob.id)
+    }
+
     return <>
         <div style={{
             display: "flex", paddingTop: "16px", gap: "16px",
@@ -540,11 +551,26 @@ export default function GridViewer({
                             const activeJobOrderData = activeJob?.orderData
                             if (activeJobOrderData && activeJobOrderData?.gridId === grid.id && activeJobOrderData.xPos === x && activeJobOrderData.yPos === y) {
                                 return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }}>
-                                    <BrewingImageTile
-                                        imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
-                                        eta={progress?.eta_relative}
-                                        progress={(progress?.progress ?? 0) * 100}
+                                    <ContextMenu options={[
+                                        { icon: <Cancel />, text: "Cancel", onClick: onInterrupt }
+                                    ]}>
+
+                                        <BrewingImageTile
+                                            imageSrc={(progress?.current_image?.length ?? 0) === 0 ? "" : "data:image/png;base64," + progress?.current_image}
+                                            eta={progress?.eta_relative} onClick={() => SetInterruptOpen(true)}
+                                            progress={(progress?.progress ?? 0) * 100}
+                                        />
+
+                                    </ContextMenu>
+
+                                    <PromptOrderedModal
+                                        jobId={activeJob?.id ?? 0}
+                                        onCancel={onInterrupt}
+                                        open={interruptOpen} prompt={activeJob}
+                                        setOpen={SetInterruptOpen}
+                                        progress={progress}
                                     />
+
                                 </div>
                             }
 
