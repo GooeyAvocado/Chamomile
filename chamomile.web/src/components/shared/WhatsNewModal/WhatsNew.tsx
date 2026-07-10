@@ -53,6 +53,12 @@ export default function WhatsNew({ open, setOpen }: {
 - **Date search improvements:** Date search is now from and to inclusive
     - IE: from is greater or equal to midnight, and to is less than or equal to 23:59:59
 - **Upscaler and Scale now saved to settings**: Your selected upscaler and scale are now saved to settings.
+- **Grids can now be edited after images are generated**: We now allow the following limited edits to a grid after an image is generated:
+    - Edit Row/Column value if it is empty
+    - Remove last row or column if it is empty
+    - Add more rows or columns
+- **Grid Labels Reworked**: Grid labels are now smaller and have a tooltip to display their full contents. Row labels are now rotated text to conserve space.
+- Images in grids can now be multi-selected to delete. Rows and columns are now selectable by clicking their label.
 - Grids and collections are now paginated, and the new grid/new collection button was moved to the left of the search bar instead of a dedicated tile.
 - Grids now order by newest first
 - Display now switches to latest image only if last latest image is displayed.
@@ -64,7 +70,9 @@ export default function WhatsNew({ open, setOpen }: {
     - LoRA and Checkpoint editor image selectors now have default filters to show images by default matching the checkpoint or LoRA being edited
     - Image selector has filter expanded by default
     - Image selector no longer shows brewing images
-- Grid Editor can now only be closed by the cancel button like the preview dialog
+- Grid editor can now only be closed by the cancel button like the preview dialog
+- Grid individual images can now be cancelled while brewing
+- Grid seed is now user editable
 - Backend changes to unify components for Models (Checkpoints and LoRAs) to make future improvements easier
 - Improved image loading speeds
 - Increased stability by limiting image change speed
@@ -85,6 +93,9 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug where upscaling an image and navigating away from that image would re-select the image when upscaling is complete
 - Fixed bug where loading model sequences would not work (not sure if this is a bug created during development, thought to included it anyways)
 - Fixed bug that caused a glitchy preview when an album tile was created for an empty album
+- Fixed bug that caused negative prompts with more than one line to be parsed as empty
+- Fixed bug that caused grids that were edited after being cleared to lose their re-rolled seed
+- Fixed bug that caused the row axis labels on grids to slip away if the grid was too wide
 `
 
     const { settings } = useSettings();
