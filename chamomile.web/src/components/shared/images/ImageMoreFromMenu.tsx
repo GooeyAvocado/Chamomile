@@ -19,11 +19,12 @@ export const SOURCE_FRIENDLY_NAMES = {
 } as Record<string, string>
 
 export default function ImageMoreFromMenu({
-    image, filter, setFilter
+    image, filter, setFilter, disabled
 }: {
     image: GeneratedImage,
     filter: FilterOptions
     setFilter: (val: FilterOptions) => void
+    disabled?: boolean,
 }) {
 
     const { checkpoints: models } = useCheckpoints();
@@ -38,6 +39,7 @@ export default function ImageMoreFromMenu({
         , [image.loras])
 
     return <MenuItemWithSubMenu
+        disabled={disabled}
         label="More like this by..."
         icon={<ImageSearch />}
     >

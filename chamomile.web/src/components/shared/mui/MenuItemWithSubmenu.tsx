@@ -12,6 +12,7 @@ interface MenuItemWithSubMenuProps {
     label: string;
     icon?: React.ReactNode;
     children: React.ReactNode;
+    disabled?: boolean
 }
 
 //Thanks to GPT for htis component 
@@ -19,7 +20,7 @@ interface MenuItemWithSubMenuProps {
 export const MenuItemWithSubMenu: React.FC<MenuItemWithSubMenuProps> = ({
     label,
     icon,
-    children,
+    children, disabled,
 }) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -34,7 +35,7 @@ export const MenuItemWithSubMenu: React.FC<MenuItemWithSubMenuProps> = ({
 
     return (
         <>
-            <MenuItem onClick={handleClick}>
+            <MenuItem onClick={handleClick} disabled={disabled}>
                 {icon && <ListItemIcon>{icon}</ListItemIcon>}
                 <ListItemText>{label}</ListItemText>
                 <ChevronRight fontSize="small" />

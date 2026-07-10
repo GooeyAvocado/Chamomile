@@ -8,7 +8,7 @@ import { useSnackbar } from "notistack";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import BrewingImageTile from "./BrewingImageTile";
 import useApi from "../../hooks/useApi";
-import { deleteImage, favImage, interruptGeneration, noteImage } from "../../../api/Images";
+import { deleteImage, deleteMultiImage, favImage, interruptGeneration, noteImage } from "../../../api/Images";
 import AreYouSureModal from "../modals/AreYouSureModal";
 import { Alert, AlertTitle, Button, CircularProgress, Link, Stack } from "@mui/material";
 import WelcomePane from "../welcome/WelcomePane";
@@ -59,6 +59,7 @@ export default function ImageViewer(props: {
 
     const imageApi = useImages(filter);
     const delApi = useApi(deleteImage);
+    const delMultipleApi = useApi(deleteMultiImage)
     const favApi = useApi(favImage)
     const notesApi = useApi(noteImage)
     const interruptApi = useApi(interruptGeneration)
@@ -351,6 +352,25 @@ export default function ImageViewer(props: {
         return val.some(a => a.orderData?.albums?.includes(album.id ?? 0))
     }
 
+    const onSelectAll = () => {
+        setSelectedImages?.(imageApi.images.map(a => a.id))
+    }
+
+    const onDeleteSelected = () => {
+        delMultipleApi.fetch(() => {
+            enqueueSnackbar("Images deleted!", { variant: "success" })
+            setDeleteAys(false)
+            handleDeleteSelectedSuccess()
+        }, () => {
+            enqueueSnackbar("Could not delete images", { variant: "error" })
+        }, selectedImages)
+    }
+
+    const handleDeleteSelectedSuccess = () => {
+        imageApi.removeImages(selectedImages ?? [])
+        onClearSelect?.();
+    }
+
     return <>
         {selectMode &&
             <SelectedImageActions
@@ -363,13 +383,8 @@ export default function ImageViewer(props: {
                             imageApi.updateImage({ ...i, albums: [...i?.albums, val] })
                         })
                 }}
-                onSelectAll={() => {
-                    setSelectedImages?.(imageApi.images.map(a => a.id))
-                }}
-                onDelete={() => {
-                    imageApi.removeImages(selectedImages ?? [])
-                    onClearSelect?.();
-                }}
+                onSelectAll={onSelectAll}
+                onDelete={handleDeleteSelectedSuccess}
             />
         }
 
@@ -443,6 +458,9 @@ export default function ImageViewer(props: {
                     onSelect={selectImage ? () => selectImage(a.id) : undefined} onUnselect={unselectImage ? () => unselectImage(a.id) : undefined} selectMode={selectMode}
                     onClick={onClick ? () => { onClick(a) } : () => { setSelectedImage(a); setViewerOpen(true); if (navToSelectedImage) nav(`/image`) }}
                     highlighted={selectedImage?.id === a.id} modalOpen={viewerOpen}
+                    onSelectAll={onSelectAll} onDeselectAll={onClearSelect} onDeleteSelected={() => {
+                        setDeleteAys(true)
+                    }}
                 />)}
 
                 {!onClick && <>
@@ -472,8 +490,17 @@ export default function ImageViewer(props: {
                             </div>
                         </div>}
                     />
-                    <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title="Delete this image?" onYes={onDelete} loading={delApi.loading}>
-                        Are you sure you want to delete this image?
+                    <AreYouSureModal open={deleteAys} setOpen={setDeleteAys} title={
+                        selectMode ? "Delete all selected images?" : "Delete this image?"
+                    } onYes={selectMode ? onDeleteSelected : onDelete} loading={delApi.loading}>
+                        {
+                            selectMode
+                                ? <>
+                                    <div>Are you sure you want to do this?</div>
+                                    <div>This will delete {selectedImages?.length} image(s)</div>
+                                </>
+                                : <>Are you sure you want to delete this image?</>
+                        }
                     </AreYouSureModal>
                 </>}
 

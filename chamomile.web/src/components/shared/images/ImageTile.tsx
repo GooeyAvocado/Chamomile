@@ -3,7 +3,7 @@ import { CardActionArea, CircularProgress, useTheme } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import BaseImageTile from "./BaseImageTile";
 import ContextMenu from "../ContextMenu";
-import { CheckBox, CheckBoxOutlineBlank, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutlineOutlined } from "@mui/icons-material";
+import { CheckBox, CheckBoxOutlineBlank, Delete, Deselect, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, SelectAll, Star, StarOutlineOutlined } from "@mui/icons-material";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { downloadImage, imageToPrompt } from "../Utils";
 import { usePrompt } from "../../hooks/usePrompt";
@@ -29,13 +29,16 @@ export default function ImageTile(props: {
     lazyLoad?: boolean
     highlighted?: boolean
     modalOpen?: boolean
+    onDeleteSelected?: () => void
+    onSelectAll?: () => void
+    onDeselectAll?: () => void
 }) {
 
     const {
         image, onClick, onDelete, onFavorite,
         onSelect, selectMode, selected, onUnselect,
         filter, setFilter, lazyLoad, onDownload, onUpscale,
-        highlighted, modalOpen
+        highlighted, modalOpen, onDeleteSelected, onSelectAll, onDeselectAll
     } = props;
 
     const { setPrompt } = usePrompt();
@@ -58,53 +61,67 @@ export default function ImageTile(props: {
     }, [ref, modalOpen])
 
     return <>
-        <ContextMenu options={[
-            canSelect ? { text: selected ? "Unselect" : "Select", icon: selected ? <CheckBox /> : <CheckBoxOutlineBlank />, onClick: selected ? onUnselect : onSelect } : undefined,
-            canSelect ? { type: "divider" } : undefined,
-            { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutlineOutlined />, onClick: () => { onFavorite(image) }, disabled: selectMode },
-            {
-                text: (image?.downloadCount ?? 0) > 0 ? "Download again" : "Download",
-                icon: <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : undefined} />,
-                onClick: () => {
-                    downloadImage(image)
-                    onDownload?.()
-                }
-            },
-            {
-                text: imageUpscalingId === image.id ? "Upscaling..." : image.hiResAvailable ? "Upscale again" : "Upscale",
-                icon: imageUpscalingId === image.id ? <CircularProgress size={24} color="info" /> : <Gradient color={image.hiResAvailable ? "info" : undefined} />,
-                disabled: upscaleLoading,
-                onClick: () => {
-                    upscaleImage(image, onUpscale)
-                }
-            },
-            { type: "divider" },
-            filter && setFilter ? {
-                type: "custom",
-                customContent: () => <ImageMoreFromMenu
-                    filter={filter} setFilter={setFilter}
-                    image={image}
-                />
-            } : undefined,
-            filter && setFilter ? { type: "divider" } : undefined,
-            {
-                type: "custom", customContent: (onClose) => <PromptReorderButton
-                    prompt={imageToPrompt(image)} source="IMAGE"
-                    menuButonMode onClick={onClose} disabled={selectMode}
-                />
-            },
-            {
-                type: "custom", customContent: (onClose) => <PromptReorderButton
-                    prompt={imageToPrompt(image, true)} source="IMAGE_BASE" menuButonMode onClick={onClose}
-                    disabled={selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt}
-                />
-            },
-            { type: "divider" },
-            { text: "Use this prompt", icon: <ReceiptLong />, onClick: () => { setPrompt(imageToPrompt(image)) }, disabled: selectMode },
-            { text: "Use this base prompt", icon: <ReceiptLongTwoTone />, onClick: () => { setPrompt(imageToPrompt(image, true)) }, disabled: selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image.basePrompt === image.prompt },
-            { type: "divider" },
-            { text: "Delete", icon: <Delete />, onClick: () => { setDeleteAys(true) }, disabled: selectMode },
-        ]}>
+        <ContextMenu options={
+            selected ? [
+                { text: "Unselect", icon: <CheckBox />, onClick: onUnselect },
+
+                onSelectAll || onDeselectAll ? { type: "divider" } : undefined,
+                onSelectAll ? { text: "Select All", icon: <SelectAll />, onClick: () => { onSelectAll() } } : undefined,
+                onDeselectAll ? { text: "Deselect All", icon: <Deselect />, onClick: () => { onDeselectAll() } } : undefined,
+
+                onDeleteSelected ? { type: "divider" } : undefined,
+                onDeleteSelected ? { text: "Delete All", icon: <Delete />, onClick: () => { onDeleteSelected() } } : undefined,
+
+
+            ]
+
+                : [
+                    canSelect ? { text: "Select", icon: <CheckBoxOutlineBlank />, onClick: onSelect } : undefined,
+                    canSelect ? { type: "divider" } : undefined,
+                    { text: image.favorite ? "Unfavorite" : "Favorite", icon: image.favorite ? <Star htmlColor="gold" /> : <StarOutlineOutlined />, onClick: () => { onFavorite(image) }, disabled: selectMode },
+                    {
+                        text: (image?.downloadCount ?? 0) > 0 ? "Download again" : "Download", disabled: selectMode,
+                        icon: <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : undefined} />,
+                        onClick: () => {
+                            downloadImage(image)
+                            onDownload?.()
+                        }
+                    },
+                    {
+                        text: imageUpscalingId === image.id ? "Upscaling..." : image.hiResAvailable ? "Upscale again" : "Upscale",
+                        icon: imageUpscalingId === image.id ? <CircularProgress size={24} color="info" /> : <Gradient color={image.hiResAvailable ? "info" : undefined} />,
+                        disabled: upscaleLoading || selectMode,
+                        onClick: () => {
+                            upscaleImage(image, onUpscale)
+                        }
+                    },
+                    { type: "divider" },
+                    filter && setFilter ? {
+                        type: "custom",
+                        customContent: () => <ImageMoreFromMenu
+                            filter={filter} setFilter={setFilter}
+                            image={image} disabled={selectMode}
+                        />
+                    } : undefined,
+                    filter && setFilter ? { type: "divider" } : undefined,
+                    {
+                        type: "custom", customContent: (onClose) => <PromptReorderButton
+                            prompt={imageToPrompt(image)} source="IMAGE"
+                            menuButonMode onClick={onClose} disabled={selectMode}
+                        />
+                    },
+                    {
+                        type: "custom", customContent: (onClose) => <PromptReorderButton
+                            prompt={imageToPrompt(image, true)} source="IMAGE_BASE" menuButonMode onClick={onClose}
+                            disabled={selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt}
+                        />
+                    },
+                    { type: "divider" },
+                    { text: "Use this prompt", icon: <ReceiptLong />, onClick: () => { setPrompt(imageToPrompt(image)) }, disabled: selectMode },
+                    { text: "Use this base prompt", icon: <ReceiptLongTwoTone />, onClick: () => { setPrompt(imageToPrompt(image, true)) }, disabled: selectMode || (image.basePrompt?.trim()?.length ?? 0) === 0 || image.basePrompt === image.prompt },
+                    { type: "divider" },
+                    { text: "Delete", icon: <Delete />, onClick: () => { setDeleteAys(true) }, disabled: selectMode },
+                ]}>
             <BaseImageTile style={{
                 transform: `scale(${selectMode
                     ? (selected ? 0.9 : 0.8)

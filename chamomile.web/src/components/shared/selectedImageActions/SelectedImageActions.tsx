@@ -111,7 +111,7 @@ export default function SelectedImageActions({
 
         <AreYouSureModal open={!!mode} setOpen={() => setMode(undefined)} onYes={onYes} title={title()}>
             <div>Are you sure you want to do this? </div>
-            <div>This will affect {selectedImageIds.length} image(s)</div>
+            <div>This will delete {selectedImageIds.length} image(s)</div>
         </AreYouSureModal>
 
     </Card>
