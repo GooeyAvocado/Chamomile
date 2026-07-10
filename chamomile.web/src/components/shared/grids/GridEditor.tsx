@@ -2,7 +2,7 @@ import { Button, Card, Divider, FormControl, IconButton, MenuItem, Select, TextF
 import { Grid } from "../../../model/Grid";
 import PromptBuilder from "../prompt/PromptBuilder";
 import { Add, Close, CompareArrows, OpenWith, Remove, Window } from "@mui/icons-material";
-import { GridAxisGroups, GridType, GridTypes } from "./GridTypes";
+import { GridType, GridTypes } from "./GridTypes";
 import SamplerSelector from "../prompt/SamplerSelector";
 import SchedulerSelector from "../prompt/SchedulerSelector";
 import CheckpointSelector from "../checkpoint/CheckpointSelector";
@@ -12,10 +12,11 @@ import TabbedModalActions from "../modals/TabbedModal/TabbedModalActions";
 import TabbedModalTitle from "../modals/TabbedModal/TabbedModalTitle";
 import LoraSelector from "../lora/LoraSelector";
 import LoraBrowserModal from "../lora/LoraBrowserModal";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CheckpointBrowserModal from "../checkpoint/CheckpointBrowserModal";
+import { GeneratedImage } from "../../../model/GeneratedImage";
 
-export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading, generated, duplicate }: {
+export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading, generated, duplicate, imageMap, readOnly }: {
     open: boolean,
     setOpen: (val: boolean) => void
     grid: Grid
@@ -23,11 +24,26 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
     onOk: () => void
     loading?: boolean
     generated?: boolean
+    readOnly?: boolean
+    imageMap?: GeneratedImage[][]
     duplicate?: boolean
 }) {
 
     const editing = (grid.id ?? 0) > 0
 
+    const rowHasImage = useMemo(() => {
+        if (!imageMap) return []
+        return imageMap.map(row => row.some(img => img != null));
+    }, [imageMap]);
+
+    const columnHasImage = useMemo(() => {
+        if (!imageMap) return []
+        const numCols = imageMap[0]?.length ?? 0;
+
+        return Array.from({ length: numCols }, (_, colIndex) =>
+            imageMap.some(row => row[colIndex] != null)
+        );
+    }, [imageMap]);
 
     const flipAxes = () => {
         setGrid({ ...grid, xValMode: grid.yValMode, xVals: grid.yVals, yValMode: grid.xValMode, yVals: grid.xVals })
@@ -53,22 +69,26 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Columns and Rows" style={{ display: 'flex', gap: "10px" }}>
             <div style={{ flex: "1" }}>
-                <GridValsEditor axis="X" mode={grid.xValMode} vals={grid.xVals} disabled={(generated && !duplicate) || !!loading}
+                <GridValsEditor axis="X" mode={grid.xValMode} vals={grid.xVals} editing={generated && !duplicate}
+                    readOnly={readOnly || !!loading}
                     setVals={a => setGrid({ ...grid, xVals: a })}
                     setMode={a => setGrid({ ...grid, xValMode: a })}
+                    axisImagePresence={columnHasImage}
                 />
             </div>
             <div style={{ alignSelf: 'center' }}>
                 <Tooltip title="Flip Axes">
-                    <IconButton onClick={() => flipAxes()} disabled={(generated && !duplicate) || !!loading}>
+                    <IconButton onClick={() => flipAxes()} disabled={(generated && !duplicate) || !!loading || readOnly}>
                         <CompareArrows />
                     </IconButton>
                 </Tooltip>
             </div>
             <div style={{ flex: "1" }}>
-                <GridValsEditor axis="Y" mode={grid.yValMode} vals={grid.yVals} disabled={(generated && !duplicate) || !!loading}
+                <GridValsEditor axis="Y" mode={grid.yValMode} vals={grid.yVals} editing={(generated && !duplicate)}
+                    readOnly={readOnly || !!loading}
                     setVals={a => setGrid({ ...grid, yVals: a })}
                     setMode={a => setGrid({ ...grid, yValMode: a })}
+                    axisImagePresence={rowHasImage}
                 />
             </div>
         </TabbedModalTabContent>
@@ -89,14 +109,16 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
 }
 
 function GridValsEditor({
-    mode, axis, vals, setVals, setMode, disabled
+    mode, axis, vals, setVals, setMode, editing, axisImagePresence, readOnly
 }: {
     mode: string,
     axis: "X" | "Y"
     vals: string[]
     setMode: (val: string) => void
     setVals: (vals: string[]) => void
-    disabled: boolean
+    editing?: boolean
+    readOnly?: boolean
+    axisImagePresence: boolean[]
 }) {
 
     const [multiSelectOpen, setMultiSelectOpen] = useState(false);
@@ -118,7 +140,7 @@ function GridValsEditor({
     return <Card style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "10px" }}>
         <FormControl fullWidth >
             <Select
-                disabled={disabled}
+                disabled={editing}
                 value={mode ?? ""}
                 onChange={(e) => setMode(e.target.value)}
             >
@@ -156,7 +178,15 @@ function GridValsEditor({
             {type && type.type !== "none" ? <>
 
                 {vals.map((a, i) => <div style={{ display: 'flex', gap: "10px", alignItems: 'center' }}>
-                    <IconButton onClick={() => setVals(removeFromArray(vals, i))} disabled={disabled}><Remove /></IconButton>
+                    <IconButton onClick={() => setVals(removeFromArray(vals, i))} disabled={
+                        //Remove should be disabled if:
+                        readOnly || //We're read only OR
+                        (editing && //We're editing AND
+                            (
+                                i < vals.length - 1 || //This is not the last item in the list
+                                axisImagePresence[i] //There are images present on this axis
+                            ))
+                    }><Remove /></IconButton>
                     {
                         ["float", "int", "string", "multiline"].includes(type.type) ? <TextField fullWidth
                             value={a} type={["float", "int"].includes(type.type) ? "number" : undefined}
@@ -166,19 +196,19 @@ function GridValsEditor({
                                     step: type.type === "float" ? 0.1 : type.type === "int" ? 1 : undefined,
                                     min: ["float", "int"].includes(type.type) ? 0 : undefined
                                 }
-                            }} disabled={disabled}
+                            }} disabled={readOnly || editing && axisImagePresence[i]}
                             onChange={(e) => setVals(updateInArray(vals, i, e.target.value))}
-                        /> : type.type === "sampler" ? <SamplerSelector sampler={a} setSampler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} />
-                            : type.type === "scheduler" ? <SchedulerSelector scheduler={a} setScheduler={a => setVals(updateInArray(vals, i, a))} disabled={disabled} />
-                                : type.type === "model" ? <CheckpointSelector model={a} setModel={a => setVals(updateInArray(vals, i, a.id))} disabled={disabled} style={{ width: "100%" }} />
+                        /> : type.type === "sampler" ? <SamplerSelector sampler={a} setSampler={a => setVals(updateInArray(vals, i, a))} disabled={readOnly || editing && axisImagePresence[i]} />
+                            : type.type === "scheduler" ? <SchedulerSelector scheduler={a} setScheduler={a => setVals(updateInArray(vals, i, a))} disabled={readOnly || editing && axisImagePresence[i]} />
+                                : type.type === "model" ? <CheckpointSelector model={a} setModel={a => setVals(updateInArray(vals, i, a.id))} disabled={readOnly || editing && axisImagePresence[i]} style={{ width: "100%" }} />
                                     : type.type === "lora" ? <div style={{ width: "100%" }}>
 
                                         <div style={{ display: 'flex', gap: "10px", alignItems: 'center', width: "100%" }}>
                                             <LoraSelector lora={a.split(":")[1] ?? ""} setLora={lora => setVals(updateInArray(vals, i,
                                                 `<lora:${lora.id}:${a.split(":")[2]?.replace(">", "") ?? "1"}>`
-                                            ))} disabled={disabled} style={{ flex: 1 }} />
+                                            ))} disabled={readOnly || editing && axisImagePresence[i]} style={{ flex: 1 }} />
                                             <TextField
-                                                type="number" disabled={disabled || a.length === 0} label="⚖️"
+                                                type="number" disabled={(readOnly || editing && axisImagePresence[i]) || a.length === 0} label="⚖️"
                                                 value={a.split(":")[2]?.replace(">", "") ?? "1"}
                                                 onChange={(e) => setVals(updateInArray(vals, i,
                                                     `<lora:${a.split(":")[1] ?? ""}:${e.target.value}>`
@@ -208,7 +238,7 @@ function GridValsEditor({
                                                     <OpenWith sx={{ margin: "-7px", marginRight: "5px" }} />
 
                                                     {/* Width */}
-                                                    <TextField type="number" disabled={disabled}
+                                                    <TextField type="number" disabled={readOnly || editing && axisImagePresence[i]}
                                                         value={a.split('x')[0]} onChange={(e) => setVals(updateInArray(vals, i, [e.target.value, a.split('x')[1] ?? ""].join("x")))}
                                                         placeholder="1024" fullWidth slotProps={{ htmlInput: { min: 1 }, }} variant="standard"
                                                         style={{ flex: "1", minWidth: "45px" }}
@@ -216,7 +246,7 @@ function GridValsEditor({
                                                     />
                                                     <Close fontSize="inherit" />
                                                     {/* Height */}
-                                                    <TextField type="number" disabled={disabled}
+                                                    <TextField type="number" disabled={readOnly || editing && axisImagePresence[i]}
                                                         value={a.split('x')[1] ?? ""} onChange={(e) => setVals(updateInArray(vals, i, [a.split('x')[0] ?? "", e.target.value].join("x")))}
                                                         placeholder="1024" fullWidth slotProps={{ htmlInput: { min: 1 }, }} variant="standard"
                                                         style={{ flex: "1", minWidth: "45px" }}
@@ -239,7 +269,7 @@ function GridValsEditor({
         <div style={{ display: 'flex', width: "100%" }}>
             <Button
                 startIcon={<Add />} style={{ flex: "1" }}
-                disabled={disabled || !type || type.type === "none"}
+                disabled={readOnly || !type || type.type === "none"}
                 onClick={() => setVals(addToArray(vals, ""))}>
                 Add new {axis === "Y" ? "row" : "column"}
             </Button>
@@ -247,7 +277,7 @@ function GridValsEditor({
                 type && (type.type === "model" || type.type === "lora") &&
                 <Button
                     startIcon={<Window />} style={{ flex: "1" }}
-                    disabled={disabled}
+                    disabled={editing}
                     onClick={() => setMultiSelectOpen(true)}
                 >
                     Select values

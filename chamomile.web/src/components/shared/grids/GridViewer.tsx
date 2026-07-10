@@ -637,7 +637,7 @@ export default function GridViewer({
             grid={editorState ?? grid} setGrid={setEditorState}
             open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk}
             loading={updateLoading || createLoading} generated={imageApi?.images?.length > 0}
-            duplicate={duplicate}
+            duplicate={duplicate} imageMap={imageMap} readOnly={filteredQueue.length > 0 || activeJobIsGrid}
         />
 
     </>
