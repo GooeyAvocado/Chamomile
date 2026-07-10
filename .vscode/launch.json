@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Chamomile.API/bin/Debug/net8.0/Chamomile.API.dll",
+            "program": "${workspaceFolder}/Chamomile.API/bin/Debug/net10.0/Chamomile.API.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Chamomile.API",
             "stopAtEntry": false,
