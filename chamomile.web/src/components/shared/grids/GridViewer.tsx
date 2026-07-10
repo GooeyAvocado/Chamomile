@@ -85,12 +85,14 @@ export default function GridViewer({
         delApi.fetch(() => {
             enqueueSnackbar("Image deleted!", { variant: 'success' })
             if (selectedImage) {
-                //If the count is 1, then we've deleted the last image
-                if (imageApi.count === 1) {
-                    setSelectedImage(undefined)
-                } else {
-                    onRight?.() ?? onLeft?.() ?? setSelectedImage(undefined);
-                }
+                //Legitimately find *anywhere* to send the viewer to
+                setSelectedImage([
+                    getDestinationImage("left"),
+                    getDestinationImage("up"),
+                    getDestinationImage("right"),
+                    getDestinationImage("down"),
+                ].filter(a => !!a)[0])
+
             }
             imageApi.removeImage(override ?? selectedImage ?? {} as GeneratedImage)
         }, () => {
@@ -232,22 +234,40 @@ export default function GridViewer({
     const activeJobIsGrid = activeJob?.orderData?.gridId === grid.id
     const currentCol = selectedImage?.additionalInfo?.xPos ?? 0
     const currentRow = selectedImage?.additionalInfo?.yPos ?? 0
-    const canGoLeft = currentCol !== 0 && imageMap[currentRow][currentCol - 1]
-    const canGoRight = currentCol !== grid.xVals.length - 1 && imageMap[currentRow][currentCol + 1]
 
-    const onLeft = canGoLeft ? () => {
+    //#region Navigation
+    type Direction = 'left' | 'right' | 'up' | 'down';
 
-        //Disable wrap tbh
-        // if (currentRow === 0 && currentCol === 0) return;
-        // if (currentCol === 0) setSelectedImage(imageMap[currentRow - 1][grid.xVals.length - 1]);
-        setSelectedImage(imageMap[currentRow][currentCol - 1] ?? selectedImage);
-    } : undefined
+    function getDestinationImage(direction: Direction): GeneratedImage | undefined {
+        const isHorizontal = direction === 'left' || direction === 'right';
+        const isForward = direction === 'right' || direction === 'down';
 
-    const onRight = canGoRight ? () => {
-        // if (currentRow === grid.yVals.length - 1 && currentCol === grid.xVals.length - 1) return;
-        // if (currentCol === grid.xVals.length - 1) setSelectedImage(imageMap[currentRow + 1][0]);
-        setSelectedImage(imageMap[currentRow][currentCol + 1] ?? selectedImage);
-    } : undefined
+        // Pull out the row or column we're scanning along
+        const line = isHorizontal
+            ? imageMap[currentRow]
+            : imageMap.map(row => row[currentCol]);
+
+        const currentIndex = isHorizontal ? currentCol : currentRow;
+
+        const candidates = (isForward
+            ? line.slice(currentIndex + 1)
+            : line.slice(0, currentIndex)
+        ).filter(i => !!i);
+
+        // Forward directions want the nearest one (first in slice), backward wants the nearest too (last in slice)
+        return isForward ? candidates[0] : candidates[candidates.length - 1];
+    }
+    //#endregion
+
+    const onLeft = () => {
+        const destination = getDestinationImage("left");
+        if (destination) setSelectedImage(destination)
+    }
+
+    const onRight = () => {
+        const destination = getDestinationImage("right");
+        if (destination) setSelectedImage(destination)
+    }
 
     const onHome = () => {
         const row = imageMap[currentRow] ?? [];
@@ -274,13 +294,13 @@ export default function GridViewer({
     }
 
     const onUp = () => {
-        if (currentRow === 0) return;
-        else setSelectedImage(imageMap[currentRow - 1][currentCol] ?? selectedImage)
+        const destination = getDestinationImage("up");
+        if (destination) setSelectedImage(destination)
     }
 
     const onDown = () => {
-        if (currentRow === grid.yVals.length - 1) return;
-        else setSelectedImage(imageMap[currentRow + 1][currentCol] ?? selectedImage);
+        const destination = getDestinationImage("down");
+        if (destination) setSelectedImage(destination)
     }
 
 
@@ -713,3 +733,4 @@ function GridImageHUD({
         </Card>
     </div>
 }
+
