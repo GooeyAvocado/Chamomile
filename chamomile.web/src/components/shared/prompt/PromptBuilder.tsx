@@ -445,7 +445,7 @@ export default function PromptBuilder(props: {
                     }}>
                         <TextField type="number"
                             value={prompt.seed} onChange={(e) => setPrompt({ ...prompt, seed: parseInt(e.target.value) })}
-                            placeholder="Seed"
+                            placeholder="Seed" disabled={preview}
                             fullWidth slotProps={{
                                 htmlInput: {
                                     min: -1
