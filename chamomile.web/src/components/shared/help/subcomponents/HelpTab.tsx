@@ -43,6 +43,7 @@ export default function HelpTab(props: {
         </span>
     }
     const BrewButton = <Button variant="contained" style={{ transform: "scale(.8)" }}>Brew</Button>
+    const RushButton = <Button variant="outlined" color="warning" style={{ transform: "scale(.8)" }}>Rush</Button>
     const LabeledIcon = (props: {
         children: ReactNode,
         label: string
@@ -149,12 +150,37 @@ export default function HelpTab(props: {
             </div>
         </HelpSection>
 
+        <HelpSection title="Rushing and Delaying Orders" >
+            <img src="/screenshots/rush.png" style={{ width: "80%" }} />
+            <p>
+                Got an order you'd want to order you need now? Want to leave something for later?
+                Chamomile allows you to rush or delay your orders. Rushed orders are moved to the
+                front of the queue, and will be worked on next. Delayed orders are moved to the
+                back of the queue, and will be worked on last.
+            </p>
+            <p>
+                You can rush or delay an order by
+                right clicking a queued prompt or group of prompts. You can also rush or delay
+                when viewing queued prompts or groups of prompts.
+            </p>
+
+            <p>
+                Additionally, you can rush when ordering or re-ordering prompts by holding
+                {keyCombo(["SHIFT"])}. For instance, when holding {keyCombo(["SHIFT"])} and
+                hovering over it, the {BrewButton} button turns into the {RushButton} button.
+            </p>
+        </HelpSection>
+
         <HelpSection title="System Status" >
-            <img src="/screenshots/statusbutton.png" />
+            <img src="/screenshots/statusbutton.png" style={{ width: "250px" }} />
             <p>
                 You may have noticed a play button on the top right of the screen change to two circular progress bars
-                when you brew images. This button allows you to view and change the current system status. Chamomile
-                can be in a few states including:
+                when you brew images. This button allows you to view the current system status. Chamomile shows an ETA
+                for the current generation (provided by A1111), and an ETA for the whole queue,
+                based on the average generation time of the last 100 images.
+            </p>
+            <p>
+                Additionally, you can change the system status. Chamomile can be in a few states including:
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" }}>
                 <div>
@@ -269,7 +295,7 @@ export default function HelpTab(props: {
                 Dynamics encompass ways to make your prompt more flexible and reusable without altering your base
                 prompt. These can all be specified and managed from
                 the <LabeledIcon label="Dynamics"> <AutoFixHigh /></LabeledIcon> button on the prompt box.
-                These include three main systems: Wildcards, Overrides, and Templates.
+                These include four main systems: Wildcards, Overrides, Templates, and Suffixes.
             </p>
             <ul>
                 <li>
@@ -281,7 +307,10 @@ export default function HelpTab(props: {
                     <b>Overrides</b>: Overrides allow you to specify values to replace at generation time manually.<br /><br />
                 </li>
                 <li>
-                    <b>Templates</b>: Templates allow you to create reusable, parametrized chunks of prompts.
+                    <b>Templates</b>: Templates allow you to create reusable, parametrized chunks of prompts.<br /><br />
+                </li>
+                <li>
+                    <b>Suffixes:</b> Suffixes allow you to add a suffix to the positive or negative prompt at generation time
                 </li>
             </ul>
             <p>
@@ -290,9 +319,11 @@ export default function HelpTab(props: {
             <img src="/screenshots/orderOfOperationsCondensed.png" width={"100%"} />
             <hr />
             <p>
-                Wildcards and template parameter values are saved on your prompt. Pre-selected wildcard values and
-                overrides are global and will be applied to any prompt you generate (written or saved) on the
-                Chamomile tab they're set on. These can also be exported and imported.
+                Pre-selected wildcard values, overrides, and suffixes are stored globally per Chamomile tab. These are applied
+                against any prompt you order. This includes re-ordered saved recipes, or prompts from existing images.
+            </p>
+            <p>
+                Wildcard calls and template parameter values are saved on your each prompt.
             </p>
             <p>
                 Overrides, and wildcard presets run until no instances of them exist in the prompt to generate,
@@ -456,6 +487,18 @@ export default function HelpTab(props: {
                 </div>
             </div>
 
+        </HelpSection>
+
+        <HelpSection title="Suffixes" >
+            <img src="/screenshots/suffixes.png" style={{ width: "100%" }} />
+            <p>
+                Suffixes allow you to add a suffix to your negative or positive prompts at generation time. This is especially
+                useful to quickly add a suffix to your saved prompts without needing to edit them individually before ordering.
+            </p>
+            <p>
+                Suffixes are applied first before any other dynamics. Your suffixes may be altered by other dynamics, such as
+                set values for wildcards, overrides, or templates. This means your suffix can call in these as necessary.
+            </p>
         </HelpSection>
 
         <HelpSection title="Comments on Prompts">
@@ -831,12 +874,16 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             <p>Columns and rows can be of the following types:</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px", marginBottom: "20px" }}>
                 <div style={{ display: 'flex', gap: "10px" }}>
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Prompt search/replace"><ReceiptLong /></LabeledIcon>: </b>
+                    Search for the first value and replace it with the value of the current cell
+                </div>
+                <div style={{ display: 'flex', gap: "10px" }}>
                     <b style={{ flexShrink: "0" }}><LabeledIcon label="Positive or Negative Prompt"><ReceiptLong /></LabeledIcon>: </b>
                     Replace the entire positive or negative prompt on an axis
                 </div>
                 <div style={{ display: 'flex', gap: "10px" }}>
-                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Prompt search/replace"><ReceiptLong /></LabeledIcon>: </b>
-                    Search for the first value and replace it with the value of the current cell
+                    <b style={{ flexShrink: "0" }}><LabeledIcon label="Positive or Negative Prompt Suffix"><ReceiptLong /></LabeledIcon>: </b>
+                    Add a suffix to the positive or negative prompt for the image in this cell.
                 </div>
                 <div style={{ display: 'flex', gap: "10px" }}>
                     <b style={{ flexShrink: "0" }}><LabeledIcon label="CFG Scale"><Tune /></LabeledIcon>: </b>
@@ -953,11 +1000,18 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
         <HelpSection title="Upscaling Images" >
             <img src="/screenshots/upscaling.png" width={"70%"} />
             <p>
-                Images that have been added to or generated on Chamomile can be upscaled using your web UI. You can select which upscaler to use and
-                by how much to upscale the image. The upscaled image replaces the original image.
+                Images that have been added to or generated on Chamomile can be upscaled using your web UI.
+                You can select which upscaler to use and by how much to upscale the image. You can switch
+                between the upscaled and the original image by using the switch on the top right of the upscale
+                accordion.
             </p>
             <p>
-                While your web UI might come bundled with several uspcalers, we personally recommend RealESRGAN models, which can
+                You can only store one upscaled image per original image, so if you upscale an image again, it will overwrite
+                the previous upscaled image.
+            </p>
+            <hr />
+            <p>
+                While your web UI might come bundled with several upscalers, we personally recommend RealESRGAN models, which can
                 be downloaded and placed in the following directory:
             </p>
             <div style={codeStyle}>
@@ -1078,6 +1132,27 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
         </HelpSection>
 
         <HelpSection title="Keyboard Shortcuts">
+
+            <h2 style={{ fontFamily: "Merriweather" }}>When Ordering/Reordering Images</h2>
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Key Modifier</TableCell>
+                        <TableCell>Action</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>{keyCombo(["SHIFT"])}</TableCell>
+                        <TableCell>Rush Order</TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>{keyCombo(["CTRL"])}</TableCell>
+                        <TableCell>Use Base (if available)</TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+
             <h2 style={{ fontFamily: "Merriweather" }}>On the Prompt Box</h2>
             <Table>
                 <TableHead>

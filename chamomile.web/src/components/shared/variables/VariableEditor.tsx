@@ -347,7 +347,7 @@ export default function VariableEditor(props: {
                 </div>
             </TabbedModalTabContent>
 
-            <TabbedModalTabContent label="Suffix">
+            <TabbedModalTabContent label="Suffixes">
 
                 <div style={{ marginTop: "10px" }}>
                     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
