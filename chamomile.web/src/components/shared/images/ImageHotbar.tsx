@@ -23,10 +23,11 @@ export default function ImageHotbar(props: {
     onFavorite?: () => void
     onUpscale?: () => void
     onInfo?: () => void
+    onBack?: () => void
     hide?: boolean
 }) {
 
-    const { onUsePrompt, image, basePromptAvailable, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale, onInfo, vertical, hide } = props;
+    const { onUsePrompt, image, basePromptAvailable, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale, onInfo, vertical, hide, onBack } = props;
     const { pong } = usePingPong();
     const { ctrlHeld } = useModifierKeys();
     const sdAvailable = pong?.SD;
@@ -56,7 +57,15 @@ export default function ImageHotbar(props: {
 
     return <>
 
-        {vertical ? <div style={{ display: 'flex', gap: "16px", maxWidth: "300px", justifyContent: 'center' }}>
+        {vertical ? <div style={{ display: 'flex', gap: "16px", justifyContent: 'center' }}>
+
+            <IconButton
+                disabled={!onBack} onClick={onBack}
+                size="large" style={labeledIconButtonStyle}
+            >
+                <ArrowBack />
+                <div style={labeledIconButtonLabelStyle}>Back</div>
+            </IconButton>
 
             <IconButton
                 disabled={!onInfo} onClick={onInfo}
