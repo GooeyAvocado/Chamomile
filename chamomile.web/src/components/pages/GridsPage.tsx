@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useApi from "../hooks/useApi";
 import { Grid } from "../../model/Grid";
 import { createGrid, deleteGrid, getGrid, getGrids } from "../../api/Grid";
-import { Alert, Button, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
+import { Button, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { Add, ChevronLeft, ChevronRight, Search } from "@mui/icons-material";
 import GridTile from "../shared/grids/GridTile";
 import { useSettings } from "../hooks/useSettings";
@@ -12,11 +12,8 @@ import GridEditor from "../shared/grids/GridEditor";
 import { useSnackbar } from "notistack";
 import AreYouSureModal from "../shared/modals/AreYouSureModal";
 import GridViewer from "../shared/grids/GridViewer";
-import useUserAgent from "../hooks/useUserAgent";
 
 export default function GridsPage() {
-
-    const { isMobile } = useUserAgent()
 
     const { fetch } = useApi(getGrid)
     const { fetch: refreshGrids, data: grids, loading: loadingGrids } = useApi(getGrids, true)
@@ -137,9 +134,6 @@ export default function GridsPage() {
         <div style={{ display: "flex", flexDirection: 'column', width: "100%", flex: 1, padding: "0px 5%", overflowY: "hidden" }}>
 
             {gridsOpen ? <>
-                {isMobile && <Alert style={{ paddingTop: "20px" }} severity="warning" >
-                    Grids aren't designed for mobile. Proceed with caution!
-                </Alert>}
                 <div style={{ display: "flex", gap: "10px", marginTop: "20px", alignItems: 'center' }}>
                     <div>
                         <Tooltip title="Create a new grid">

@@ -31,6 +31,9 @@ export default function WhatsNew({ open, setOpen }: {
 - **New LoRA Grid axis type**: The Grid Editor will now let you test LoRAs and weights as an axis.
 - **Image tile sizes are now configurable**: You can select from extra small to extra large
 - **ETA for batch**: The status button now shows an estimated time remaining for the entire batch of images, as well as the current image.
+- **Improved Mobile Experience**
+    - Prompts and Search now collapse to buttons on the navbar on mobile
+    - Grids now have a D-Pad on the top right
 - Original non-upscaled copy of images are now visible through a switch in the upscale panel
 - Upscale now available from image hotbar and through keyboard shortcut CTRL+U.
 - Middle click to re-order saved prompts

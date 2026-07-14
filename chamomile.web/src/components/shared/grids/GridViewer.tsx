@@ -1,7 +1,7 @@
 import { Alert, Button, Card, CardActionArea, IconButton, LinearProgress, Switch, Tooltip } from "@mui/material";
 import { Grid } from "../../../model/Grid";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
-import { ArrowBack, BorderClear, Cancel, Coffee, CopyAll, Delete, Edit } from "@mui/icons-material";
+import { ArrowBack, ArrowDownward, ArrowForward, ArrowUpward, BorderClear, Cancel, Coffee, CopyAll, Delete, Edit } from "@mui/icons-material";
 import { FilterOptions } from "../../../model/FilterOptions";
 import { useImages } from "../../hooks/useImages";
 import { useQueue } from "../../hooks/useQueue";
@@ -29,6 +29,7 @@ import ContextMenu from "../ContextMenu";
 import PromptOrderedModal from "../prompt/PromptOrderedModal";
 import { useSettings } from "../../hooks/useSettings";
 import { TileSizeToPixels } from "../../contexts/SettingsContext";
+import useUserAgent from "../../hooks/useUserAgent";
 
 export default function GridViewer({
     grid, onBack, onDelete, setGrid
@@ -68,6 +69,7 @@ export default function GridViewer({
     const updateImageAlbumsAPI = useApi(updateImageAlbums)
     const nav = useNavigate();
     const { settings } = useSettings();
+    const { isMobile } = useUserAgent();
 
     const { activeJob, queue, progress, cancel: cancelJob, delay, rush } = useQueue((val) => {
         if ((val.additionalInfo as PromptOrderData).gridId === grid.id) imageApi.appendImage(val)
@@ -673,11 +675,19 @@ export default function GridViewer({
             open={viewerOpen} setOpen={setViewerOpen} image={selectedImage} onAddAlbum={onAddAlbum} onDelete={() => { setDeleteAys(true) }}
             onDeleteForce={onDeleteImage} onDownload={onDownload} onLeft={onLeft} onRight={onRight} onFavorite={onFavorite} onRemoveAlbum={onRemoveAlbum}
             onUpdateNotes={onNotesUpdate} onUpscale={onUpscale} onViewAlbum={onViewAlbum} onUp={onUp} onDown={onDown} onHome={onHome} onEnd={onEnd}
-            imageChildren={() => <GridImageHUD
-                xPos={selectedImage?.additionalInfo?.xPos ?? 0} yPos={selectedImage?.additionalInfo?.yPos ?? 0}
-                xVal={selectedImage?.additionalInfo?.xVal ?? ""} yVal={selectedImage?.additionalInfo?.yVal ?? ""}
-                xSize={grid?.xVals?.length} ySize={grid?.yVals?.length} xType={xType} yType={yType}
-            />}
+            imageChildren={() => <>
+
+                <GridImageHUD
+                    xPos={selectedImage?.additionalInfo?.xPos ?? 0} yPos={selectedImage?.additionalInfo?.yPos ?? 0}
+                    xVal={selectedImage?.additionalInfo?.xVal ?? ""} yVal={selectedImage?.additionalInfo?.yVal ?? ""}
+                    xSize={grid?.xVals?.length} ySize={grid?.yVals?.length} xType={xType} yType={yType}
+                />
+
+                {isMobile && <GridImageDPad
+                    onUp={onUp} onDown={onDown} onLeft={onLeft} onRight={onRight}
+                />}
+
+            </>}
         />
 
         <AreYouSureModal
@@ -844,3 +854,40 @@ function GridImageHUD({
     </div>
 }
 
+function GridImageDPad({ onUp, onLeft, onRight, onDown }: {
+    onUp: () => void
+    onLeft: () => void
+    onRight: () => void
+    onDown: () => void
+}) {
+
+    const GRID_DPAD_TILE_SIZE = 24;
+
+    return <div style={{ position: 'absolute', right: "20px", top: '20px', zIndex: '2' }}>
+        <Card style={{ padding: "10px", transition: "opacity 0.2s ease" }} >
+            <div style={{ display: 'flex' }}>
+                <div style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} />
+                <IconButton style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} onClick={onUp} >
+                    <ArrowUpward />
+                </IconButton>
+                <div style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} />
+            </div>
+            <div style={{ display: 'flex' }}>
+                <IconButton style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} onClick={onLeft}>
+                    <ArrowBack />
+                </IconButton>
+                <div style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} />
+                <IconButton style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} onClick={onRight}>
+                    <ArrowForward />
+                </IconButton>
+            </div>
+            <div style={{ display: 'flex' }}>
+                <div style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} />
+                <IconButton style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} onClick={onDown}>
+                    <ArrowDownward />
+                </IconButton>
+                <div style={{ width: `${GRID_DPAD_TILE_SIZE}px`, height: `${GRID_DPAD_TILE_SIZE}px` }} />
+            </div>
+        </Card>
+    </div>
+}
