@@ -25,7 +25,7 @@ export default function VariableEditor(props: {
 }) {
 
     const { open, setOpen, hidePromptPreview } = props
-    const { variables, setVairables: setVariables, prompt, setPrompt } = usePrompt()
+    const { variables, setVariables, prompt, setPrompt } = usePrompt()
 
     const [newCustName, setNewCustName] = useState("")
     const [newWildName, setNewWildName] = useState("")

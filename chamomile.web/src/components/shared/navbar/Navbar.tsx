@@ -2,20 +2,35 @@ import { Divider, Drawer, IconButton, ListItemIcon, ListItem, ListItemButton, Li
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import ChamomileLogo from "../ChamomileLogo";
 import StatusButton from "../StatusButton/StatusButton";
-import { Coffee, GridView, HelpOutlineOutlined, Launch, Menu as MenuIcon, Monitor, PhotoLibrary, Settings } from "@mui/icons-material";
+import { Coffee, GridView, HelpOutlineOutlined, Launch, Menu as MenuIcon, Monitor, PhotoLibrary, Search, Settings } from "@mui/icons-material";
 import { useState } from "react";
 import SettingsSlidein from "../settings/SettingsSlidein";
 import { useNavigate } from "react-router-dom";
 import HelpModal from "../help/HelpModal";
+import { usePrompt } from "../../hooks/usePrompt";
+import PromptBuilder from "../prompt/PromptBuilder";
+import { FilterOptions } from "../../../model/FilterOptions";
+import FilterBuilder from "../filter/FilterBuilder";
+import { Album } from "../../../model/Album";
 
-export default function Navbar() {
+export default function Navbar({
+    showHomeActions, filter, setFilter, setAlbum
+}: {
+    showHomeActions?: boolean,
+    filter?: FilterOptions
+    setFilter?: (val: FilterOptions) => void
+    setAlbum?: (val: Album) => void
+}) {
 
     const { width } = useWindowDimensions();
     const [menuOpen, setMenuOpen] = useState(false)
 
     const [settingsOpen, setSettingsOpen] = useState(false)
     const [helpOpen, setHelpOpen] = useState(false);
+    const [filterOpen, setFilterOpen] = useState(false)
     //const [helpEverOpened, setHelpEverOpened] = useState(false);
+
+    const { setShowFloatingPromptBox, showFloatingPromptBox } = usePrompt();
 
     const nav = useNavigate();
 
@@ -56,12 +71,63 @@ export default function Navbar() {
             </div>
             {/* This translation is for visual purposes. The steam of the chamomile cup makes it look like this is out of alignment */}
             <div style={{ display: 'flex', gap: "10px", transform: "translateY(7px)" }}>
+                {showHomeActions && <>
+                    <Tooltip title="Brew">
+                        <IconButton onClick={() => setShowFloatingPromptBox(true)}><Coffee /></IconButton>
+                    </Tooltip>
+                    {filter && setFilter && <Tooltip title="Search">
+                        <IconButton onClick={() => setFilterOpen(true)}><Search /></IconButton>
+                    </Tooltip>}
+                    <hr />
+
+                </>}
                 <StatusButton />
                 <Tooltip title="Help">
                     <IconButton onClick={onHelp}><HelpOutlineOutlined /></IconButton>
                 </Tooltip>
             </div>
         </div>
+
+
+        {showHomeActions && <>
+            <Drawer
+                anchor="top" open={showFloatingPromptBox} style={{ zIndex: "1300" }}
+                onClose={() => setShowFloatingPromptBox(false)}
+                ModalProps={{ keepMounted: true }}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            maxWidth: "900px", width: "100%",
+                            margin: 'auto', padding: "20px",
+                            borderBottomLeftRadius: 8,
+                            borderBottomRightRadius: 8,
+                        },
+                    }
+                }}
+            >
+                <PromptBuilder filter={filter} setFilter={setFilter} />
+            </Drawer>
+
+            {filter && setFilter && <Drawer
+                anchor="top" open={filterOpen} style={{ zIndex: "1300" }}
+                onClose={() => setFilterOpen(false)}
+                ModalProps={{ keepMounted: true }}
+                slotProps={{
+                    paper: {
+                        sx: {
+                            maxWidth: "900px", width: "100%",
+                            margin: 'auto', padding: "20px",
+                            borderBottomLeftRadius: 8,
+                            borderBottomRightRadius: 8,
+                        },
+                    }
+                }}
+            >
+                <FilterBuilder
+                    filter={filter} setFilter={setFilter} setAlbum={setAlbum}
+                />
+            </Drawer>}
+        </>}
 
         <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} >
             <Box sx={{ width: 225, height: "100vh", display: "flex", flexDirection: 'column', overflow: "hidden" }} onClick={close} onKeyDown={close}>

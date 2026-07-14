@@ -16,7 +16,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Home() {
 
-    const { vertical, height } = useWindowDimensions();
+    const { vertical: _vertical, height } = useWindowDimensions();
     const { queue, progress } = useQueue(() => { })
     const { album, setAlbum } = usePrompt();
     const { albums } = useAlbums();
@@ -24,6 +24,8 @@ export default function Home() {
     const setTitle = usePageTitle();
     const location = useLocation();
     const nav = useNavigate();
+
+    const vertical = _vertical || height < 768
 
     useEffect(() => {
         if (location.pathname.startsWith("/album/")) {
@@ -80,7 +82,7 @@ export default function Home() {
     }, [queue, progress])
 
     return <div style={{
-        height: vertical || height < 768 ? undefined : "100vh",
+        height: "100vh",
         overflow: 'hidden', display: "flex",
         flexDirection: "column", alignItems: 'center',
         margin: "0 auto"
@@ -88,7 +90,7 @@ export default function Home() {
 
         {/* Header */}
 
-        <Navbar />
+        <Navbar showHomeActions={vertical && !albumsOpen} filter={filter} setFilter={setFilter} setAlbum={setAlbum} />
 
         <div style={{ display: "flex", flexDirection: 'column', width: "100%", flex: 1, padding: "0px 5%", overflowY: "hidden" }}>
 
@@ -113,15 +115,17 @@ export default function Home() {
                     <hr style={{ width: "100%" }} />
                 </>}
 
-                <div style={{ marginBottom: '5px', width: "100%", marginTop: "15px", display: "flex", flexDirection: "column", gap: "15px" }}>
-                    <div style={{ width: "100%" }}>
-                        <PromptBuilder filter={filter} setFilter={setFilter} />
-                    </div>
+                {vertical ? selectMode ? <></>
+                    : <div style={{ height: '10px' }} />
+                    : <div style={{ marginBottom: '5px', width: "100%", marginTop: "15px", display: "flex", flexDirection: "column", gap: "15px" }}>
+                        <div style={{ width: "100%" }}>
+                            <PromptBuilder filter={filter} setFilter={setFilter} />
+                        </div>
 
-                    {!selectMode && <FilterBuilder
-                        filter={filter} setFilter={setFilter} setAlbum={setAlbum}
-                    />}
-                </div>
+                        {!selectMode && <FilterBuilder
+                            filter={filter} setFilter={setFilter} setAlbum={setAlbum}
+                        />}
+                    </div>}
 
                 {/* Upload progress panel */}
                 <UploadPanel />

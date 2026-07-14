@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Button, ButtonGroup, Card, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ChevronLeft, ChevronRight, Close, Coffee, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, InfoOutlined, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Remove, Source, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, ChevronLeft, ChevronRight, Coffee, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, InfoOutlined, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Remove, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useSnackbar } from "notistack";
@@ -73,7 +73,7 @@ export default function ImageModal(props: {
         moreLoading, onUsePrompt: signalOnUsePrompt
     } = props;
 
-    const { setPrompt } = usePrompt();
+    const { setPrompt, setShowFloatingPromptBox } = usePrompt();
     const { enqueueSnackbar } = useSnackbar();
     const { width, height } = useWindowDimensions()
     const vertical = width < (500) / 0.45 || height / width > 1.45
@@ -148,6 +148,7 @@ export default function ImageModal(props: {
         setOpen(false)
         enqueueSnackbar("Prompt loaded!", { variant: 'success' })
         setPrompt(promptOverride ?? imageToPrompt(image, promptMode === 1 || (basePromptAvailable && ctrlHeld)))
+        setShowFloatingPromptBox(true)
         signalOnUsePrompt?.()
     }
 

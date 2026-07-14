@@ -9,9 +9,11 @@ export interface PromptContextType {
     orderAmount: number,
     setOrderAmount: (val: number) => void,
     variables: Record<string, string>,
-    setVairables: (val: Record<string, string>) => void,
+    setVariables: (val: Record<string, string>) => void,
     album?: Album,
     setAlbum: (val?: Album) => void
+    showFloatingPromptBox?: boolean
+    setShowFloatingPromptBox: (val: boolean) => void
 }
 
 export const PromptContext = createContext<PromptContextType | undefined>(undefined)
@@ -22,6 +24,7 @@ export default function PromptProvider(props: { children: any }) {
 
     const [orderAmount, setOrderAmount] = useState(settings.defaults.amount)
     const [album, setAlbum] = useState(undefined as Album | undefined);
+    const [showFloatingPromptBox, setShowFloatingPromptBox] = useState(false)
 
     const [prompt, setPrompt] = useState({
         cfgScale: settings.defaults.cfg,
@@ -38,8 +41,8 @@ export default function PromptProvider(props: { children: any }) {
     const [variables, setVariables] = useState({} as any)
 
     return <PromptContext.Provider value={{
-        orderAmount: orderAmount, setOrderAmount: setOrderAmount,
-        prompt: prompt, setPrompt: (val, override) => {
+        orderAmount, setOrderAmount,
+        prompt, setPrompt: (val, override) => {
             setPrompt(override ? val : {
 
                 ...val, ...{
@@ -53,8 +56,9 @@ export default function PromptProvider(props: { children: any }) {
                 }
             })
         },
-        setVairables: setVariables, variables: variables,
-        album: album, setAlbum: setAlbum
+        setVariables, variables,
+        album, setAlbum,
+        setShowFloatingPromptBox, showFloatingPromptBox
     } as PromptContextType}>
         {props.children}
     </PromptContext.Provider>
