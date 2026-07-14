@@ -1,7 +1,7 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Button, ButtonGroup, Card, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ArrowForward, Coffee, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, Menu, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, ChevronLeft, ChevronRight, Close, Coffee, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, InfoOutlined, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Source, Star, StarBorder } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useSnackbar } from "notistack";
@@ -80,6 +80,7 @@ export default function ImageModal(props: {
     const { pong } = usePingPong();
     const { onUpscale: upscaleImage } = useUpscalers()
 
+    const [_verticalCollapse, setVerticalCollapse] = useState(true)
     const [collapse, setCollapse] = useState(collapseDefault)
     const [promptMode, setPromptMode] = useState(0)
     const [downloadAys, setDownloadAys] = useState(false)
@@ -87,6 +88,8 @@ export default function ImageModal(props: {
     const [notesOpen, setNotesOpen] = useState(false)
     const [editNote, setEditNote] = useState("")
     const [showSd, setShowSd] = useState(false)
+
+    const verticalCollapse = vertical && _verticalCollapse
 
     const [hideSidebar, setHideSidebar] = useState(false)
     const { ctrlHeld } = useModifierKeys();
@@ -312,7 +315,7 @@ export default function ImageModal(props: {
             {/* Image side */}
             <div style={{
                 textAlign: 'center', flex: "1", maxHeight: vertical
-                    ? collapse ? '100vh' : '50vh' : undefined,
+                    ? (collapse || verticalCollapse) ? '100vh' : '50vh' : undefined,
                 position: 'relative',
                 backgroundColor: collapse ? 'black' : '#333',
                 transition: 'background-color 0.5s ease, max-height 0.5s ease',
@@ -347,15 +350,19 @@ export default function ImageModal(props: {
 
 
                 <IconButton onClick={() => setCollapse(false)} style={{ position: 'absolute', right: '20px', top: '20px', zIndex: 3, opacity: collapse ? 1 : 0, transition: 'opacity 0.5s ease' }}>
-                    <Menu />
+                    <InfoOutlined />
                 </IconButton>
 
                 {onLeft && <div style={{ position: 'absolute', left: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center', zIndex: 2 }}>
-                    <IconButton onClick={onLeft}><ArrowBack /></IconButton>
+                    <IconButton onClick={onLeft}><ChevronLeft /></IconButton>
                 </div>}
 
                 {onRight && <div style={{ position: 'absolute', right: '20px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center', zIndex: 2 }}>
-                    <IconButton onClick={onRight}><ArrowForward /></IconButton>
+                    <IconButton onClick={onRight}><ChevronRight /></IconButton>
+                </div>}
+
+                {vertical && <div style={{ position: 'absolute', left: '20px', top: "20px", zIndex: 2 }}>
+                    <IconButton onClick={() => setOpen(false)}><ArrowBack /></IconButton>
                 </div>}
 
                 {moreLoading && <div style={{ position: 'absolute', right: '26px', top: 0, height: '100%', display: 'flex', flexDirection: 'column', alignContent: 'center', justifyContent: 'center', zIndex: 2 }}>
@@ -365,8 +372,9 @@ export default function ImageModal(props: {
                 <div style={{ position: "absolute", left: '0', bottom: '0', display: 'flex', width: '100%', justifyContent: 'center', zIndex: 2 }}>
                     <ImageHotbar
                         image={image} onUsePrompt={onUsePrompt} onUpscale={executeUpscale}
-                        onLeft={onLeft} onRight={onRight} onDownload={saveImage}
+                        onLeft={onLeft} onRight={onRight} onDownload={saveImage} onInfo={() => setVerticalCollapse(false)}
                         onDelete={onDeleteForce} onFavorite={onFavorite} basePromptAvailable={basePromptAvailable}
+                        vertical={vertical} hide={!_verticalCollapse && vertical}
                     />
                 </div>
 
@@ -385,7 +393,7 @@ export default function ImageModal(props: {
 
             {/* info Panel */}
             <Card style={vertical
-                ? { width: '100%', zIndex: 2, maxHeight: collapse ? 0 : "50vh", transition: "max-height 0.5s ease" }
+                ? { width: '100%', zIndex: 2, maxHeight: collapse || verticalCollapse ? 0 : "50vh", transition: "max-height 0.5s ease" }
                 : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease", zIndex: '2' }}>
                 {hideSidebar ? <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
 
@@ -512,9 +520,12 @@ export default function ImageModal(props: {
                         <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom: '10px' }}>
                             <div style={{ display: "flex", gap: "10px" }} >
                                 <IconButton onClick={() => {
-                                    if (collapseDefault) setCollapse(!collapse)
+                                    if (vertical) setVerticalCollapse(true)
+                                    else if (collapseDefault) setCollapse(!collapse)
                                     else setOpen(false)
-                                }}><ArrowBack /></IconButton>
+                                }}>{
+                                        vertical ? <Close /> : <ArrowBack />
+                                    }</IconButton>
                                 {onFavorite && <Tooltip title={`${image?.favorite ? "Unfavorite" : "Favoirte"} this image`}><IconButton onClick={() => { onFavorite() }}>{image?.favorite ? <Star htmlColor="gold" /> : <StarBorder />}</IconButton></Tooltip>}
                             </div>
 

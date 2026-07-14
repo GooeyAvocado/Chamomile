@@ -1,19 +1,20 @@
-import { ArrowBack, ArrowForward, Coffee, Delete, Download, Gradient, ReceiptLong, ReceiptLongTwoTone, Star, StarOutlineOutlined } from "@mui/icons-material";
+import { ArrowBack, ArrowForward, Coffee, Delete, Download, Gradient, InfoOutlined, ReceiptLong, ReceiptLongTwoTone, Star, StarOutlineOutlined } from "@mui/icons-material";
 import { Button, Card, CircularProgress, ClickAwayListener, IconButton, ListItemIcon, Menu, MenuItem, Paper, Popper, Tooltip } from "@mui/material";
-import useUserAgent from "../../hooks/useUserAgent";
 import "./ImageHotbar.css"
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Prompt } from "../../../model/Prompt";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePingPong } from "../../hooks/usePingPong";
 import PromptReorderButton from "../prompt/PromptReorderButton";
 import { imageToPrompt } from "../Utils";
 import { useUpscalers } from "../../hooks/useUpscalers";
 import useModifierKeys from "../../hooks/useModifierKeys";
+import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 
 export default function ImageHotbar(props: {
     image?: GeneratedImage
     basePromptAvailable?: boolean
+    vertical?: boolean
     onUsePrompt: (val: Prompt) => void,
     onLeft?: () => void
     onRight?: () => void
@@ -21,16 +22,18 @@ export default function ImageHotbar(props: {
     onDownload?: () => void
     onFavorite?: () => void
     onUpscale?: () => void
+    onInfo?: () => void
+    hide?: boolean
 }) {
 
-    const { onUsePrompt, image, basePromptAvailable, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale } = props;
-    const { isMobile } = useUserAgent()
+    const { onUsePrompt, image, basePromptAvailable, onDelete, onFavorite, onLeft, onRight, onDownload, onUpscale, onInfo, vertical, hide } = props;
     const { pong } = usePingPong();
     const { ctrlHeld } = useModifierKeys();
     const sdAvailable = pong?.SD;
     const useBasePrompt = basePromptAvailable && ctrlHeld
 
-    const { upscaleLoading, imageUpscalingId } = useUpscalers();
+    const { imageUpscalingId } = useUpscalers();
+    const { width } = useWindowDimensions();
 
     const [deletePopperAnchor, setDeletePopperAnchor] = useState(null as any)
     const [downloadAgainPopperAnchor, setDownloadAgainPopperAnchor] = useState(null as any)
@@ -46,74 +49,115 @@ export default function ImageHotbar(props: {
         }
     }, [ctrlHeld])
 
-    if (isMobile) return <></>
+    if (hide || width < 400) return <></>
+
+    const labeledIconButtonStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: "10px", aspectRatio: "1/1" }
+    const labeledIconButtonLabelStyle: React.CSSProperties = { fontSize: '.5em' }
 
     return <>
-        <Card style={{ marginBottom: '5px', transition: 'opacity 0.2s ease-in-out' }} className="hover-hotbar">
-            <div style={{ display: 'flex', gap: '10px', padding: "5px" }}>
-                {canNavigate && <>
-                    <Tooltip title="Previous" enterDelay={250}>
-                        <IconButton onClick={onLeft} disabled={!onLeft}><ArrowBack /></IconButton>
+
+        {vertical ? <div style={{ display: 'flex', gap: "16px", maxWidth: "300px", justifyContent: 'center' }}>
+
+            <IconButton
+                disabled={!onInfo} onClick={onInfo}
+                size="large" style={labeledIconButtonStyle}
+            >
+                <InfoOutlined />
+                <div style={labeledIconButtonLabelStyle}>Info</div>
+            </IconButton>
+
+            <IconButton
+                onClick={() => onFavorite?.()} disabled={!onFavorite}
+                size="large" style={labeledIconButtonStyle}
+            >
+                {image?.favorite ? <Star htmlColor="gold" /> : <StarOutlineOutlined />}
+                <div style={labeledIconButtonLabelStyle}>Favorite</div>
+            </IconButton>
+
+            <IconButton
+                disabled={!onUpscale || !sdAvailable || imageUpscalingId === image?.id} onClick={(e) => {
+                    image?.hiResAvailable ? setUpscaleAgainPopperAnchor(e.currentTarget) : onUpscale?.()
+                }}
+                size="large" style={labeledIconButtonStyle}
+            >
+                {imageUpscalingId === image?.id ? <CircularProgress size={24} color="info" /> : <Gradient color={image?.hiResAvailable ? "info" : "action"} />}
+                <div style={labeledIconButtonLabelStyle}>Upscale</div>
+            </IconButton>
+
+
+            <IconButton
+                disabled={!onDelete} onClick={(e) => { setDeletePopperAnchor(e.currentTarget) }}
+                size="large" style={labeledIconButtonStyle}
+            >
+                <Delete />
+                <div style={labeledIconButtonLabelStyle}>Delete</div>
+            </IconButton>
+
+        </div>
+
+            : <Card style={{ marginBottom: '5px', transition: 'opacity 0.2s ease-in-out' }} className="hover-hotbar">
+                <div style={{ display: 'flex', gap: '10px', padding: "5px" }}>
+                    {canNavigate && <>
+                        <Tooltip title="Previous" enterDelay={250}>
+                            <IconButton onClick={onLeft} disabled={!onLeft}><ArrowBack /></IconButton>
+                        </Tooltip>
+                        <hr />
+                    </>}
+                    <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
+                        <IconButton onClick={() => onFavorite?.()} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutlineOutlined />}</IconButton>
                     </Tooltip>
-                    <hr />
-                </>}
-                <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
-                    <IconButton onClick={() => onFavorite?.()} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutlineOutlined />}</IconButton>
-                </Tooltip>
-                <Tooltip title="Delete" enterDelay={250}>
-                    <IconButton disabled={!onDelete} onClick={(e) => {
-                        setDeletePopperAnchor(e.currentTarget)
-                    }}>
-                        <Delete />
-                    </IconButton>
-                </Tooltip>
-                <hr />
-                <Tooltip title="Download" enterDelay={250}>
-                    <IconButton disabled={!onDownload} onClick={(e) => {
-                        (image?.downloadCount ?? 0) > 0 ? setDownloadAgainPopperAnchor(e.currentTarget) : onDownload?.()
-                    }}>
-                        <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : "action"} />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Upscale" enterDelay={250}>
-                    <IconButton disabled={!onUpscale || !sdAvailable || upscaleLoading} onClick={(e) => {
-                        image?.hiResAvailable ? setUpscaleAgainPopperAnchor(e.currentTarget) : onUpscale?.()
-                    }}>
-                        {imageUpscalingId === image?.id ? <CircularProgress size={24} color="info" /> : <Gradient color={image?.hiResAvailable ? "info" : "action"} />}
-                    </IconButton>
-                </Tooltip>
-                <hr />
-                {sdAvailable && useBasePrompt ?
-                    <PromptReorderButton
-                        prompt={imageToPrompt(image, true)}
-                        disabled={
-                            (image?.basePrompt?.trim()?.length ?? 0) === 0 ||
-                            image?.basePrompt === image?.prompt
-                        }
-                        onClick={() => setBrewAnchor(null)}
-                        source="IMAGE_BASE"
-                    />
-                    : <Tooltip title="Brew" enterDelay={250}>
-                        <IconButton disabled={!sdAvailable} onClick={(e) => setBrewAnchor(e.currentTarget)}>
-                            <Coffee />
+                    <Tooltip title="Delete" enterDelay={250}>
+                        <IconButton disabled={!onDelete} onClick={(e) => {
+                            setDeletePopperAnchor(e.currentTarget)
+                        }}>
+                            <Delete />
                         </IconButton>
-                    </Tooltip>}
-                <Tooltip title={`Use this${useBasePrompt ? " base" : ""} prompt`} enterDelay={250}>
-                    <IconButton disabled={!onUsePrompt} onClick={(e) => setPromptAnchor(e.currentTarget)}>
-                        {useBasePrompt ? <ReceiptLongTwoTone /> : <ReceiptLong />}
-                    </IconButton>
-                </Tooltip>
-                {canNavigate && <>
-                    <hr />
-                    <Tooltip title="Next" enterDelay={250}>
-                        <IconButton onClick={onRight} disabled={!onRight}><ArrowForward /></IconButton>
                     </Tooltip>
-                </>}
-            </div>
-
-
-
-        </Card>
+                    <hr />
+                    <Tooltip title="Download" enterDelay={250}>
+                        <IconButton disabled={!onDownload} onClick={(e) => {
+                            (image?.downloadCount ?? 0) > 0 ? setDownloadAgainPopperAnchor(e.currentTarget) : onDownload?.()
+                        }}>
+                            <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : "action"} />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Upscale" enterDelay={250}>
+                        <IconButton disabled={!onUpscale || !sdAvailable} onClick={(e) => {
+                            image?.hiResAvailable ? setUpscaleAgainPopperAnchor(e.currentTarget) : onUpscale?.()
+                        }}>
+                            {imageUpscalingId === image?.id ? <CircularProgress size={24} color="info" /> : <Gradient color={image?.hiResAvailable ? "info" : "action"} />}
+                        </IconButton>
+                    </Tooltip>
+                    <hr />
+                    {sdAvailable && useBasePrompt ?
+                        <PromptReorderButton
+                            prompt={imageToPrompt(image, true)}
+                            disabled={
+                                (image?.basePrompt?.trim()?.length ?? 0) === 0 ||
+                                image?.basePrompt === image?.prompt
+                            }
+                            onClick={() => setBrewAnchor(null)}
+                            source="IMAGE_BASE"
+                        />
+                        : <Tooltip title="Brew" enterDelay={250}>
+                            <IconButton disabled={!sdAvailable} onClick={(e) => setBrewAnchor(e.currentTarget)}>
+                                <Coffee />
+                            </IconButton>
+                        </Tooltip>}
+                    <Tooltip title={`Use this${useBasePrompt ? " base" : ""} prompt`} enterDelay={250}>
+                        <IconButton disabled={!onUsePrompt} onClick={(e) => setPromptAnchor(e.currentTarget)}>
+                            {useBasePrompt ? <ReceiptLongTwoTone /> : <ReceiptLong />}
+                        </IconButton>
+                    </Tooltip>
+                    {canNavigate && <>
+                        <hr />
+                        <Tooltip title="Next" enterDelay={250}>
+                            <IconButton onClick={onRight} disabled={!onRight}><ArrowForward /></IconButton>
+                        </Tooltip>
+                    </>}
+                </div>
+            </Card>
+        }
 
         {/* Download Again Popper  */}
         <Popper
