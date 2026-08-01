@@ -70,7 +70,7 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
         <TabbedModalTabContent label="Columns and Rows" style={{ display: 'flex', gap: "10px" }}>
             <div style={{ flex: "1" }}>
                 <GridValsEditor axis="X" mode={grid.xValMode} vals={grid.xVals} editing={generated && !duplicate}
-                    readOnly={readOnly || !!loading}
+                    readOnly={readOnly || !!loading} duplicate={duplicate}
                     setVals={a => setGrid({ ...grid, xVals: a })}
                     setMode={a => setGrid({ ...grid, xValMode: a })}
                     axisImagePresence={columnHasImage}
@@ -85,7 +85,7 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
             </div>
             <div style={{ flex: "1" }}>
                 <GridValsEditor axis="Y" mode={grid.yValMode} vals={grid.yVals} editing={(generated && !duplicate)}
-                    readOnly={readOnly || !!loading}
+                    readOnly={readOnly || !!loading} duplicate={duplicate}
                     setVals={a => setGrid({ ...grid, yVals: a })}
                     setMode={a => setGrid({ ...grid, yValMode: a })}
                     axisImagePresence={rowHasImage}
@@ -109,7 +109,7 @@ export default function GridEditor({ grid, setGrid, open, setOpen, onOk, loading
 }
 
 function GridValsEditor({
-    mode, axis, vals, setVals, setMode, editing, axisImagePresence, readOnly
+    mode, axis, vals, setVals, setMode, editing, axisImagePresence, readOnly, duplicate
 }: {
     mode: string,
     axis: "X" | "Y"
@@ -117,6 +117,7 @@ function GridValsEditor({
     setMode: (val: string) => void
     setVals: (vals: string[]) => void
     editing?: boolean
+    duplicate?: boolean
     readOnly?: boolean
     axisImagePresence: boolean[]
 }) {
@@ -287,7 +288,7 @@ function GridValsEditor({
 
         {type?.type === "lora" && <LoraBrowserModal
             initialSelected={vals.filter(a => a.includes(":")).map(a => a.split(":")[1])}
-            lockedSelected={vals.map((v, i) => axisImagePresence[i] ? v : undefined).filter(a => !!a && a?.includes(":")).map(a => a?.split(":")[1] ?? "")}
+            lockedSelected={duplicate ? undefined : vals.map((v, i) => axisImagePresence[i] ? v : undefined).filter(a => !!a && a?.includes(":")).map(a => a?.split(":")[1] ?? "")}
             multiSelect onOk={(val) => {
                 setVals([...val.map(a => `<lora:${a.id}:1>`)])
                 setMultiSelectOpen(false);
@@ -296,7 +297,7 @@ function GridValsEditor({
 
         {type?.type === "model" && <CheckpointBrowserModal
             initialSelected={vals}
-            lockedSelected={vals.map((v, i) => axisImagePresence[i] ? v : undefined).filter(a => !!a) as string[]}
+            lockedSelected={duplicate ? undefined : vals.map((v, i) => axisImagePresence[i] ? v : undefined).filter(a => !!a) as string[]}
             multiSelect onOk={(val) => {
                 setVals([...val.map(a => a.id)])
                 setMultiSelectOpen(false);
