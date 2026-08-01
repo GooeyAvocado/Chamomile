@@ -2,18 +2,19 @@ import { Card, CardActionArea, Typography } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
 import ModelTypePill from "./ModelType/ModelTypePill";
 import ContextMenu from "../ContextMenu";
-import { Check, DoNotDisturbAlt, Edit, Image } from "@mui/icons-material";
+import { Check, DoNotDisturbAlt, Edit, Image, Lock } from "@mui/icons-material";
 import { Model } from "../../../model/Model";
 
 export default function ModelTile(props: {
     model: Model
     selected?: boolean
+    locked?: boolean
     onClick: () => void
     onEdit?: () => void
     onViewImage?: () => void
 }) {
 
-    const { model, onClick, onEdit, onViewImage, selected } = props
+    const { model, onClick, onEdit, onViewImage, selected, locked } = props
 
     return <Card style={selected ? { transform: "scale(0.9)", transition: "transform 0.1s ease" } : { transition: "transform 0.1s ease" }}>
         <ContextMenu options={[
@@ -21,7 +22,7 @@ export default function ModelTile(props: {
             { type: 'divider' },
             { text: 'View Image', onClick: onViewImage, disabled: model.bannerImage === undefined || model.bannerImage === null, icon: <Image /> },
         ]}>
-            <CardActionArea onClick={onClick}>
+            <CardActionArea onClick={locked ? undefined : onClick}>
                 <div style={{ alignItems: 'center', position: 'relative' }}>
                     <div style={{ maxWidth: "100%", aspectRatio: 1 / 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <img
@@ -39,7 +40,7 @@ export default function ModelTile(props: {
                         }}
                     />}
 
-                    {selected && <div
+                    {(selected || locked) && <div
                         style={{
                             position: "absolute", top: "0px", left: "0px", bottom: "0px", right: "0px",
                             maxWidth: '100%', aspectRatio: 1 / 1,
@@ -47,7 +48,7 @@ export default function ModelTile(props: {
                             objectFit: 'cover', objectPosition: 'center top', backgroundColor: "rgba(0,0,0,0.5"
                         }}
                     >
-                        <Check fontSize="inherit" style={{ fontSize: "5em" }} />
+                        {locked ? <Lock fontSize="inherit" style={{ fontSize: "5em" }} /> : <Check fontSize="inherit" style={{ fontSize: "5em" }} />}
                     </div>
                     }
 

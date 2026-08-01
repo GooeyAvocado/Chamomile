@@ -31,16 +31,22 @@ export default function ModelBrowserModal(props: {
     showNone?: boolean
     showAvailability?: boolean
     multiSelect?: boolean
+    /**These are all models that are initially selected when we open */
     initialSelected?: string[]
+    /**These are all models that MUST remain selected */
+    lockedSelected?: string[]
 }) {
 
-    const { onOk, open, setOpen, showAny, showNone, showAvailability, loading, onRefresh: refresh, models, modelType, multiSelect, initialSelected } = props;
+    const { onOk, open, setOpen, showAny, showNone, showAvailability, loading, onRefresh: refresh, models, modelType, multiSelect, initialSelected, lockedSelected } = props;
 
     const [query, setQuery] = useState("")
     const [type, setType] = useState("");
     const [availability, setAvailability] = useState<0 | 1 | -1>(0);
 
     const [selected, setSelected] = useState<Model[]>([])
+    const locked = useMemo(() =>
+        lockedSelected?.map(a => models?.find(b => b.id === a)).filter(a => !!a) ?? []
+        , [lockedSelected])
 
     const onModelClick = (a: Model) => {
 
@@ -86,7 +92,7 @@ export default function ModelBrowserModal(props: {
             <div style={{ flex: '1', overflowY: 'auto' }}>
                 <GridViewMode
                     data={models} onClick={onModelClick} query={query} showAny={showAny} type={type} availability={showAvailability ? availability : 1}
-                    modelType={modelType} refresh={refresh} showNone={showNone} selected={selected}
+                    modelType={modelType} refresh={refresh} showNone={showNone} selected={selected} locked={locked}
                 />
             </div>
 
@@ -102,9 +108,9 @@ export default function ModelBrowserModal(props: {
 
 function GridViewMode(props: {
     data?: Model[], query: string, onClick: (val: Model) => void, showAny?: boolean, type: string, availability: 0 | 1 | -1,
-    modelType?: ModelType, refresh: (deep?: boolean) => void, showNone?: boolean, selected?: Model[]
+    modelType?: ModelType, refresh: (deep?: boolean) => void, showNone?: boolean, selected?: Model[], locked?: Model[]
 }) {
-    const { data, query, onClick, showAny, type, availability, modelType, refresh, showNone, selected } = props
+    const { data, query, onClick, showAny, type, availability, modelType, refresh, showNone, selected, locked } = props
 
     const [editorModel, setEditorModel] = useState(undefined as Model | undefined)
     const [editorOpen, setEditorOpen] = useState(false)
@@ -185,6 +191,7 @@ function GridViewMode(props: {
                     {groupedModels[tag].map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <ModelTile
                             selected={selected?.some(s => s.id === a.id)}
+                            locked={locked?.some(s => s.id === a.id)}
                             model={a} onClick={() => onClick(a)}
                             onViewImage={() => {
                                 setViewImage(a.bannerImage ?? -1)
@@ -218,6 +225,7 @@ function GridViewMode(props: {
                                 {groupedModels[tag].map(a => <div key={a.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                     <ModelTile
                                         selected={selected?.some(s => s.id === a.id)}
+                                        locked={locked?.some(s => s.id === a.id)}
                                         model={a} onClick={() => onClick(a)}
                                         onViewImage={() => {
                                             setViewImage(a.bannerImage ?? -1)

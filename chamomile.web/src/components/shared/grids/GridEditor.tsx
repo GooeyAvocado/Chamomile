@@ -277,7 +277,7 @@ function GridValsEditor({
                 type && (type.type === "model" || type.type === "lora") &&
                 <Button
                     startIcon={<Window />} style={{ flex: "1" }}
-                    disabled={editing}
+                    disabled={readOnly}
                     onClick={() => setMultiSelectOpen(true)}
                 >
                     Select values
@@ -287,6 +287,7 @@ function GridValsEditor({
 
         {type?.type === "lora" && <LoraBrowserModal
             initialSelected={vals.filter(a => a.includes(":")).map(a => a.split(":")[1])}
+            lockedSelected={vals.map((v, i) => axisImagePresence[i] ? v : undefined).filter(a => !!a && a?.includes(":")).map(a => a?.split(":")[1] ?? "")}
             multiSelect onOk={(val) => {
                 setVals([...val.map(a => `<lora:${a.id}:1>`)])
                 setMultiSelectOpen(false);
@@ -295,6 +296,7 @@ function GridValsEditor({
 
         {type?.type === "model" && <CheckpointBrowserModal
             initialSelected={vals}
+            lockedSelected={vals.map((v, i) => axisImagePresence[i] ? v : undefined).filter(a => !!a) as string[]}
             multiSelect onOk={(val) => {
                 setVals([...val.map(a => a.id)])
                 setMultiSelectOpen(false);

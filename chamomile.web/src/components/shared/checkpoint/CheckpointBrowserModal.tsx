@@ -10,6 +10,8 @@ export default function CheckpointBrowserModal(props: {
     open: boolean
     setOpen: (val: boolean) => void
     initialSelected?: string[]
+    /**These are all models that MUST remain selected */
+    lockedSelected?: string[]
     multiSelect?: boolean
 }) {
 
@@ -27,6 +29,7 @@ export default function CheckpointBrowserModal(props: {
         open={props.open}
         setOpen={props.setOpen}
         initialSelected={props.initialSelected}
+        lockedSelected={props.lockedSelected}
         multiSelect={props.multiSelect}
     />
 }

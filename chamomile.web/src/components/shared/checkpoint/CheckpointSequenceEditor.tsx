@@ -216,6 +216,7 @@ export default function ModelSequenceEditor({ open, setOpen, onOk, sequence, cur
                 open={browserOpen}
                 setOpen={setBrowserOpen}
                 initialSelected={internalSequence?.map(a => a.title)}
+                lockedSelected={[currentModel]}
                 multiSelect
                 onOk={handleChange}
             />
