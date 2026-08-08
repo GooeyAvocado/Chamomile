@@ -17,7 +17,8 @@ import { StatsPanel } from "./subcomponents/StatsPanel"
 import GeneralStatsDisplay from "./subcomponents/GeneralStatsDisplay"
 import SourceStats from "./subcomponents/SourceStats"
 import ModelStatsPanel from "./subcomponents/ModelStatsPanel"
-import StatisticSelector, { Statistic, StatisticOptions } from "./subcomponents/StatSelector"
+import StatisticSelector, { Statistic, StatisticOptions, UNTRACKABLE_STATS } from "./subcomponents/StatSelector"
+import { filterEmpty } from "../Utils"
 
 export default function StatisticsModal(props: {
     open: boolean,
@@ -35,6 +36,8 @@ export default function StatisticsModal(props: {
     const { checkpoints } = useCheckpoints();
     const { loras } = useLoras();
     const stacked = width < 450
+
+    const isFilterEmpty = filterEmpty(filter) && limit === -1
 
     const checkpointAvailable = (val: string) => checkpoints?.find(a => a.id === val)?.isAvailable ?? false
     const loraAvailable = (val: string) => val === "None" || (loras?.find(a => a.id === val)?.isAvailable ?? false)
@@ -55,6 +58,7 @@ export default function StatisticsModal(props: {
     useEffect(() => {
         if (open && (filterDirty || loraData == null || modelData == null)) {
             refreshData();
+            if (!filterEmpty(filter) && UNTRACKABLE_STATS.includes(stat)) { setStat("EXISTING") }
         }
     }, [open])
 
@@ -62,7 +66,13 @@ export default function StatisticsModal(props: {
         if (open) refreshData();
     }, [limit])
 
-    useEffect(() => { setFilterDirty(true) }, [filter])
+    useEffect(() => {
+        setFilterDirty(true)
+    }, [filter])
+
+    useEffect(() => {
+        if (limit !== -1 && UNTRACKABLE_STATS.includes(stat)) { setStat("EXISTING") }
+    }, [limit])
 
     const sortedModelData = useMemo(() => [...modelData ?? []].sort(StatisticOptions[stat].sorter), [stat, modelData])
     const sortedLoraData = useMemo(() => [...loraData ?? []].sort(StatisticOptions[stat].sorter), [stat, loraData])
@@ -89,6 +99,7 @@ export default function StatisticsModal(props: {
                 }]} filter={filter} limit={limit} hidePagination renderCount={() => <>Show usage graph</>}
             >
                 <GeneralStatsDisplay
+                    filterEmpty={isFilterEmpty}
                     limit={limit}
                     data={generalData}
                     loraData={loraData}
@@ -101,7 +112,7 @@ export default function StatisticsModal(props: {
         <TabbedModalTabContent label="Checkpoints">
             <div style={{ padding: "8px", display: 'flex', gap: "8px" }}>
                 <AvailabilitySelector availability={availability} setAvailability={setAvailability} />
-                <StatisticSelector statistic={stat} setStatistic={setStat} />
+                <StatisticSelector statistic={stat} setStatistic={setStat} suppressDeletedOption={!isFilterEmpty} />
             </div>
             {open ? (modelLoading || !modelData) ? <LoadingSpinner text="Loading checkpoint usage information" /> :
                 <ModelStatsPanel
@@ -114,12 +125,13 @@ export default function StatisticsModal(props: {
                     modelType="Checkpoint"
                     models={checkpoints}
                     statistic={stat}
+                    suppressDeleted={!isFilterEmpty}
                 /> : ""}
         </TabbedModalTabContent>
         <TabbedModalTabContent label="LoRAs">
             <div style={{ padding: "8px", display: 'flex', gap: "8px" }}>
                 <AvailabilitySelector availability={availability} setAvailability={setAvailability} />
-                <StatisticSelector statistic={stat} setStatistic={setStat} />
+                <StatisticSelector statistic={stat} setStatistic={setStat} suppressDeletedOption={!isFilterEmpty} />
             </div>
             {open ? (loraLoading || !loraData) ? <LoadingSpinner text="Loading LoRA usage information" /> : <ModelStatsPanel
                 availability={availability}
@@ -131,15 +143,16 @@ export default function StatisticsModal(props: {
                 modelType="LoRA"
                 models={loras}
                 statistic={stat}
+                suppressDeleted={!isFilterEmpty}
             /> : ""}
         </TabbedModalTabContent>
         <TabbedModalTabContent label="Keywords">
             <div style={{ padding: "8px", display: 'flex', gap: "8px" }}>
                 <AvailabilitySelector availability={availability} setAvailability={setAvailability} />
-                <StatisticSelector statistic={stat} setStatistic={setStat} />
+                <StatisticSelector statistic={stat} setStatistic={setStat} suppressDeletedOption={!isFilterEmpty} />
             </div>
             {open ? (keywordLoading || !keywordData) ? <LoadingSpinner text="Keyword usage information" /> : <>
-                {["DELETED", "SUCCESS_RATE"].includes(stat)
+                {UNTRACKABLE_STATS.includes(stat)
                     ? <div style={{
                         flex: "1", display: 'flex', flexDirection: 'column', justifyContent: 'center',
                         alignItems: 'center', width: "100%", gap: "30px"

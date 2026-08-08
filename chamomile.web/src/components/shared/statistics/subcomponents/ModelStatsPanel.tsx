@@ -7,7 +7,7 @@ import { Statistic } from "./StatSelector"
 import { StatsPanel } from "./StatsPanel"
 
 export default function ModelStatsPanel({
-    getDatedUsageApi, data, availability, isAvailable, modelType, filter, limit, models, statistic
+    getDatedUsageApi, data, availability, isAvailable, modelType, filter, limit, models, statistic, suppressDeleted
 }: {
     getDatedUsageApi: (
         setLoading: (value: boolean) => void,
@@ -23,8 +23,10 @@ export default function ModelStatsPanel({
     limit: number,
     models?: Model[]
     statistic: Statistic
+    suppressDeleted?: boolean
 }) {
     return <StatsPanel
+        suppressDeleted={suppressDeleted}
         statistic={statistic}
         datedUsageApi={getDatedUsageApi} minAutoCompleteLength={0}
         usage={availability === 0 ? data : availability === 1

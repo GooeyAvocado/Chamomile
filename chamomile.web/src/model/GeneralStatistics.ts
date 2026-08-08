@@ -7,5 +7,6 @@ export default interface GeneralStatistics {
     totalDownloads: number
     totalCount: number
     avgGenTime: number
+    maxImageId: number
     countBySource: Record<string, number>
 }

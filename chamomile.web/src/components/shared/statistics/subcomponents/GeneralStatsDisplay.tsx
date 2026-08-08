@@ -7,16 +7,17 @@ import { useCheckpoints } from "../../../hooks/useCheckpoints"
 import ImageModalFromId from "../../images/ImageModalFromId"
 import StatsNumber from "./StatsNumber"
 import { Card, CardActionArea, CircularProgress } from "@mui/material"
-import { Download, Gradient, Schedule, Star } from "@mui/icons-material"
+import { DoneAll, Download, Gradient, Schedule, Star } from "@mui/icons-material"
 
 export default function GeneralStatsDisplay({
-    data, loraData, modelData, keywordData, limit
+    data, loraData, modelData, keywordData, limit, filterEmpty
 }: {
     limit: number
     data: GeneralStatistics
     loraData: KeywordUsage[]
     modelData: KeywordUsage[]
     keywordData: KeywordUsage[]
+    filterEmpty?: boolean
 }) {
 
     const { checkpoints: models } = useCheckpoints();
@@ -29,10 +30,10 @@ export default function GeneralStatsDisplay({
     const mostUsedLora = loras?.find(a => a.id === loraData?.[0]?.keyword) ?? loras?.find(a => a.id === loraData?.[1]?.keyword)
 
     return <>
-        <div style={{ flex: "1", overflowY: 'auto', display: "flex", gap: "10px", flexDirection: 'column', textAlign: 'center', marginTop: "32px" }}>
+        <div style={{ flex: "1", overflowY: 'auto', display: "flex", gap: "10px", flexDirection: 'column', textAlign: 'center', marginTop: "32px", justifyContent: "center" }}>
 
             {/* Total */}
-            <StatsNumber val={limit < 0 ? data?.totalCount : Math.min(limit, data?.totalCount)} label="Images" />
+            <StatsNumber val={limit < 0 ? data?.totalCount : Math.min(limit, data?.totalCount)} label="Images" fontSize="3.5em" />
 
             {/* Most used */}
             <div style={{ display: 'flex', gap: "24px", justifyContent: 'center', width: "100%", marginTop: "24px" }}>
@@ -57,7 +58,7 @@ export default function GeneralStatsDisplay({
 
             </div>
 
-            <div style={{ display: 'flex', gap: "24px", justifyContent: 'center', width: "100%", marginTop: "12px" }}>
+            <div style={{ display: 'flex', gap: "24px", justifyContent: 'center', width: "100%", marginTop: "12px", padding: "0px 60px" }}>
 
                 <IconTile
                     icon={<Download fontSize="inherit" color="primary" />}
@@ -83,9 +84,15 @@ export default function GeneralStatsDisplay({
                     label="Avg generation time"
                 />
 
+                {filterEmpty && <IconTile
+                    icon={<DoneAll fontSize="inherit" />}
+                    value={((data?.totalCount / data?.maxImageId) * 100).toFixed(2) + "%"}
+                    label="Success rate"
+                />}
+
             </div>
 
-            <div style={{ display: "flex", gap: "12px", margin: "auto", opacity: ".8", fontFamily: "merriweather" }}>
+            <div style={{ display: "flex", gap: "12px", margin: "30px auto 0px auto", opacity: ".8", fontFamily: "merriweather" }}>
                 <div>{new Date(data?.minTs).toLocaleDateString()}</div>
                 <div> - </div>
                 <div>{new Date(data?.maxTs).toLocaleDateString()}</div>

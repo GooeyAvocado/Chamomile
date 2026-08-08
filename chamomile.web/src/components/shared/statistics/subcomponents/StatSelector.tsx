@@ -117,6 +117,9 @@ export const StatisticOptions: Record<Statistic, {
     }
 }
 
+//These are stats that are untrackable for filters and keywords
+export const UNTRACKABLE_STATS = ["DELETED", "SUCCESS_RATE", "TOTAL"] as Statistic[]
+
 export default function StatisticSelector(props: {
     statistic: Statistic
     setStatistic: (val: Statistic) => void
@@ -137,7 +140,7 @@ export default function StatisticSelector(props: {
             disabled={disabled}
         >
             {Object.keys(StatisticOptions).map((a) =>
-                props.suppressDeletedOption && a === "DELETED" ? null :
+                props.suppressDeletedOption && UNTRACKABLE_STATS.includes(a as Statistic) ? null :
                     <MenuItem key={a} value={a}>{StatisticOptions[a as Statistic].displayName ?? a}</MenuItem>
             )}
         </Select>
