@@ -264,3 +264,25 @@ ALTER TABLE images
 
 CREATE INDEX idx_images_grid_id_image_id
 ON images (grid_id, image_id);
+
+
+--Ensure no image is in an album twice before running this line
+DELETE FROM album_map a
+USING album_map b
+WHERE a.image_id = b.image_id
+  AND a.album_id = b.album_id
+  AND a.ctid < b.ctid;
+
+
+ALTER TABLE album_map
+  ADD CONSTRAINT pk_album_map PRIMARY KEY (image_id, album_id);
+
+-- Ensure no image has LoRAs more than once before running the PK line
+DELETE FROM images_lora_map a
+USING images_lora_map b
+WHERE a.image_id = b.image_id
+  AND a.lora_alias_tx = b.lora_alias_tx
+  AND a.ctid < b.ctid;
+
+ALTER TABLE images_lora_map
+  ADD CONSTRAINT pk_images_lora_map PRIMARY KEY (image_id, lora_alias_tx);
