@@ -286,3 +286,7 @@ WHERE a.image_id = b.image_id
 
 ALTER TABLE images_lora_map
   ADD CONSTRAINT pk_images_lora_map PRIMARY KEY (image_id, lora_alias_tx);
+
+-- Index the other way for the album meta view.
+CREATE INDEX idx_album_map_album_id_image_id
+ON album_map (album_id, image_id);
