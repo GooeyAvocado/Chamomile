@@ -138,7 +138,7 @@ export default function ModelCard(props: {
             {!tiny && !modelUnavailable() && <div style={{ flexShrink: '0' }}><IconButton onClick={openMenu}><MoreVert /></IconButton></div>}
         </Card>
 
-        {!modelUnavailable() && <ModelEditorModal open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk} model={model} modelType={modelType} />}
+        {!modelUnavailable() && <ModelEditorModal open={editorOpen} setOpen={setEditorOpen} onOk={onEditorOk} model={model} modelType={modelType} currentImage={currentImage} />}
 
         {!onClick && !modelUnavailable() && <>
             <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
@@ -151,10 +151,10 @@ export default function ModelCard(props: {
                     <ListItemIcon><Image /></ListItemIcon>
                     View sample image
                 </MenuItem>
-                <MenuItem onClick={updateImage} disabled={!currentImage}>
+                {currentImage && <MenuItem onClick={updateImage}>
                     <ListItemIcon><AddPhotoAlternate /></ListItemIcon>
                     Set this as sample image
-                </MenuItem>
+                </MenuItem>}
                 {filter && setFilter && [
                     <Divider />,
                     <MenuItem onClick={() => {

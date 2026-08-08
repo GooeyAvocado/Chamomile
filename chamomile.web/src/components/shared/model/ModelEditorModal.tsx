@@ -8,6 +8,8 @@ import { Model, ModelType } from "../../../model/Model";
 import useApi from "../../hooks/useApi";
 import { getLoraTags } from "../../../api/Loras";
 import { getCheckpointTags } from "../../../api/Checkpoint";
+import { useWindowDimensions } from "../../hooks/useWindowDimensions";
+import { GeneratedImage } from "../../../model/GeneratedImage";
 
 export default function ModelEditorModal(props: {
     open: boolean,
@@ -15,8 +17,9 @@ export default function ModelEditorModal(props: {
     onOk: (val: Model) => void,
     model?: Model
     modelType?: ModelType
+    currentImage?: GeneratedImage
 }) {
-    const { model, onOk, open, setOpen, modelType } = props
+    const { model, onOk, open, setOpen, modelType, currentImage } = props
 
     const [internalModel, setInternalModel] = useState(model as Model)
     const [imageBrowserOpen, setImageBrowserOpen] = useState(false)
@@ -31,7 +34,7 @@ export default function ModelEditorModal(props: {
 
     if (!model) { return <></> }
 
-    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth='sm' fullWidth>
+    return <Dialog open={open} onClose={() => setOpen(false)} maxWidth={"xs"} >
         <DialogTitle style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
             <div>
                 <div>{model.name}</div>
@@ -39,48 +42,49 @@ export default function ModelEditorModal(props: {
             </div>
             {internalModel.type?.length > 0 && <ModelTypePill type={internalModel.type} />}
         </DialogTitle>
-        <DialogContent>
-            <Card style={{ width: "256px", height: '256px', margin: "0px auto 30px auto" }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
-                <img
-                    key={internalModel.bannerImage}
-                    src={internalModel?.bannerImage ? imageUrl(internalModel.bannerImage) : '/outline.png'}
-                    style={{
-                        width: '256px', height: '256px',
-                        objectFit: 'cover', objectPosition: 'center top'
-                    }}
-                />
-            </CardActionArea></Card>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: "20px" }}>
-                <div style={{ flex: 1 }}>
-                    <ModelTypeSelector modelType={internalModel.type} setModelType={(e) => setInternalModel({ ...internalModel, type: e })} />
-                </div>
-                <div style={{ flex: 1 }}>
-                    <Autocomplete
-                        multiple options={[...(tagsApi.data?.sort((a, b) => a.localeCompare(b)) ?? [])]}
-                        loading={tagsApi.loading} value={internalModel.tags}
-                        freeSolo onChange={(_, val) => {
-                            setInternalModel({ ...internalModel, tags: val })
-                        }} renderValue={(value: readonly string[], getItemProps) =>
-                            value.map((option: string, index: number) => {
-                                const { key, ...itemProps } = getItemProps({ index });
-                                return (
-                                    <Chip
-                                        variant="filled"
-                                        label={option} key={key} {...itemProps} />
-                                );
-                            })
-                        }
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="Tags"
-                            />
-                        )}
+        <DialogContent style={{ width: "350px", display: 'flex', flexDirection: "column", gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: "8px", alignItems: 'center' }}>
+                <Card style={{ width: "256px", height: '256px', margin: "0px auto 0px auto" }}><CardActionArea onClick={() => setImageBrowserOpen(true)}>
+                    <img
+                        key={internalModel.bannerImage}
+                        src={internalModel?.bannerImage ? imageUrl(internalModel.bannerImage) : '/outline.png'}
+                        style={{
+                            width: '256px', height: '256px',
+                            objectFit: 'cover', objectPosition: 'center top'
+                        }}
                     />
-                </div>
+                </CardActionArea></Card>
+                {currentImage && <Button variant="outlined" size="small" onClick={() => {
+                    setInternalModel({ ...internalModel, bannerImage: currentImage.id })
+                }}>Use this image</Button>}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <hr style={{ width: "100%" }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: "10px" }}>
 
+                <ModelTypeSelector modelType={internalModel.type} setModelType={(e) => setInternalModel({ ...internalModel, type: e })} />
+
+                <Autocomplete
+                    multiple options={[...(tagsApi.data?.sort((a, b) => a.localeCompare(b)) ?? [])]}
+                    loading={tagsApi.loading} value={internalModel.tags}
+                    freeSolo onChange={(_, val) => {
+                        setInternalModel({ ...internalModel, tags: val })
+                    }} renderValue={(value: readonly string[], getItemProps) =>
+                        value.map((option: string, index: number) => {
+                            const { key, ...itemProps } = getItemProps({ index });
+                            return (
+                                <Chip
+                                    variant="filled"
+                                    label={option} key={key} {...itemProps} />
+                            );
+                        })
+                    }
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label="Tags"
+                        />
+                    )}
+                />
 
                 <TextField
                     label="Notes"
