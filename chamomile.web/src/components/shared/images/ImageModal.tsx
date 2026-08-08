@@ -393,7 +393,7 @@ export default function ImageModal(props: {
             <Card style={vertical
                 ? { width: '100%', zIndex: 2, maxHeight: collapse || verticalCollapse ? 0 : "50vh", transition: "max-height 0.5s ease" }
                 : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease", zIndex: '2' }}>
-                {hideSidebar ? <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
+                {!hideSidebar ? <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
 
                     {/* Buttons */}
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom: '10px' }}>
@@ -456,11 +456,11 @@ export default function ImageModal(props: {
                         <Stack style={{ marginTop: "20px" }} sx={{ gap: "10px" }}>
                             <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><PhotoLibrary /> <div>Collections</div></>} disabled />
-                            <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><Gradient color={
                                 image?.hiResAvailable ? "info" : "inherit"
                             } /><div>Upscale</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled />
+                            <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>} disabled />
                         </Stack>
 
 
@@ -603,50 +603,6 @@ export default function ImageModal(props: {
                                     </ComplexAccordionBody>
                                 </ComplexAccordion>
 
-                                <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>}>
-                                    <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
-                                        <span style={{
-                                            whiteSpace: "pre-line", overflow: "hidden",
-                                            textOverflow: "ellipsis", maxWidth: "300px",
-                                            fontFamily: 'monospace', fontSize: '.6em',
-                                            WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-                                            display: "-webkit-box"
-                                        }}>
-                                            {image?.notes}
-                                        </span>
-                                    </ComplexAccordionActions>
-                                    {onUpdateNotes && <ComplexAccordionActions position="right" showOnState="expanded">
-                                        <IconButton disabled={notesOpen} onClick={() => {
-                                            setNotesOpen(true)
-                                            setEditNote(image?.notes ?? "")
-                                        }}><Edit /></IconButton>
-                                    </ComplexAccordionActions>}
-                                    <ComplexAccordionBody>
-                                        <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>
-                                            {!notesOpen
-                                                ? (image?.notes?.length ?? 0) === 0 ? "Image has no notes" : image?.notes
-                                                : <>
-                                                    <TextField
-                                                        value={editNote} onChange={(e) => setEditNote(e.target.value)}
-                                                        fullWidth multiline placeholder="Set a note" minRows={5} maxRows={5}
-                                                        slotProps={{ htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } } }}
-                                                    />
-                                                    <div style={{ display: 'flex', justifyContent: "end", gap: "10px", marginTop: "10px" }}>
-                                                        <Button onClick={() => {
-                                                            setNotesOpen(false)
-                                                            if (editNote.trim() !== (image?.notes ?? "").trim()) {
-                                                                onUpdateNotes?.(editNote)
-                                                            }
-                                                        }}>
-                                                            OK
-                                                        </Button>
-                                                    </div>
-                                                </>
-                                            }
-                                        </div>
-                                    </ComplexAccordionBody>
-                                </ComplexAccordion>
-
                                 {/* HiRes Options */}
                                 <ComplexAccordion elevation={2} title={
 
@@ -695,6 +651,49 @@ export default function ImageModal(props: {
                                     </ComplexAccordionBody>
                                 </ComplexAccordion>
 
+                                <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>}>
+                                    <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
+                                        <span style={{
+                                            whiteSpace: "pre-line", overflow: "hidden",
+                                            textOverflow: "ellipsis", maxWidth: "300px",
+                                            fontFamily: 'monospace', fontSize: '.6em',
+                                            WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                                            display: "-webkit-box"
+                                        }}>
+                                            {image?.notes}
+                                        </span>
+                                    </ComplexAccordionActions>
+                                    {onUpdateNotes && <ComplexAccordionActions position="right" showOnState="expanded">
+                                        <IconButton disabled={notesOpen} onClick={() => {
+                                            setNotesOpen(true)
+                                            setEditNote(image?.notes ?? "")
+                                        }}><Edit /></IconButton>
+                                    </ComplexAccordionActions>}
+                                    <ComplexAccordionBody>
+                                        <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>
+                                            {!notesOpen
+                                                ? (image?.notes?.length ?? 0) === 0 ? "Image has no notes" : image?.notes
+                                                : <>
+                                                    <TextField
+                                                        value={editNote} onChange={(e) => setEditNote(e.target.value)}
+                                                        fullWidth multiline placeholder="Set a note" minRows={5} maxRows={5}
+                                                        slotProps={{ htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } } }}
+                                                    />
+                                                    <div style={{ display: 'flex', justifyContent: "end", gap: "10px", marginTop: "10px" }}>
+                                                        <Button onClick={() => {
+                                                            setNotesOpen(false)
+                                                            if (editNote.trim() !== (image?.notes ?? "").trim()) {
+                                                                onUpdateNotes?.(editNote)
+                                                            }
+                                                        }}>
+                                                            OK
+                                                        </Button>
+                                                    </div>
+                                                </>
+                                            }
+                                        </div>
+                                    </ComplexAccordionBody>
+                                </ComplexAccordion>
 
 
                             </Stack>
