@@ -16,7 +16,20 @@ namespace Chamomile.Data {
         private static readonly List<string> ImageColumns = [IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
                 IMAGES_SAMPLER, IMAGES_SCHEDULE_TP, IMAGES_CFG_SCL, IMAGES_DOWNLOAD_CT, IMAGES_NOTES,
                 IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
-                CHECKPOINT_TITLE, CRE_TS, IMAGE_GEN_MS, IMAGE_HIDDEN,IMAGE_ADDTL_INFO];
+                CHECKPOINT_TITLE, CRE_TS, IMAGE_GEN_MS, IMAGE_HIDDEN,IMAGE_ADDTL_INFO,
+        ];
+
+        private static readonly List<string> ImageQueryColumns = [IMAGES_ID, IMAGES_PROMPT, IMAGES_BASE_PROMPT, IMAGES_NEG_PROMPT, IMAGES_STEPS,
+                IMAGES_SAMPLER, IMAGES_SCHEDULE_TP, IMAGES_CFG_SCL, IMAGES_DOWNLOAD_CT, IMAGES_NOTES,
+                IMAGES_SEED, IMAGES_HEIGHT, IMAGES_WIDTH, IMAGES_FAV_IN, IMAGES_HIRES_IN,
+                CHECKPOINT_TITLE, CRE_TS, IMAGE_GEN_MS, IMAGE_HIDDEN,IMAGE_ADDTL_INFO,
+                $@"(SELECT array_agg(ilm.{LORA_ALIAS})
+                    FROM {IMAGES_LORA_MAP} ilm
+                    WHERE ilm.{IMAGES_ID} = img.{IMAGES_ID}) AS {LORA_ALIAS}",
+                $@"(SELECT array_agg(am.{ALBUM_ID})
+                    FROM {ALBUM_MAP} am
+                    WHERE am.{IMAGES_ID} = img.{IMAGES_ID}) AS {ALBUM_ID}"
+        ];
 
         private async Task<GeneratedImage> ImageRM(Getter reader) {
             var imageId = reader.GetInt(IMAGES_ID);
@@ -43,24 +56,10 @@ namespace Chamomile.Data {
                 Hidden = reader.GetBoolean(IMAGE_HIDDEN),
                 additionalInfo = JsonSerializer.Deserialize<Dictionary<string, object>>(reader.GetOptionalString(IMAGE_ADDTL_INFO) ?? "{}"),
 
+                //isNull checks for containsKey so we don't have to worry about the column not being present in the query
+                Loras = reader.IsNull(LORA_ALIAS) ? [] : new((string[])reader.GetOptionalValue(LORA_ALIAS)!),
+                Albums = reader.IsNull(ALBUM_ID) ? [] : new((int[])reader.GetOptionalValue(ALBUM_ID)!),
 
-                Loras = await adoTemplate.Query(
-                    SelectSql(
-                        [LORA_ALIAS],
-                        IMAGES_LORA_MAP,
-                        new WhereConditionGroup([new(IMAGES_ID)])),
-                        (cmd) => cmd.SetInt(IMAGES_ID, reader.GetInt(IMAGES_ID)),
-                        (reader) => reader.GetString(LORA_ALIAS)
-                    ),
-
-                Albums = await adoTemplate.Query(
-                    SelectSql(
-                        [ALBUM_ID],
-                        ALBUM_MAP,
-                        new WhereConditionGroup([new(IMAGES_ID)])),
-                        (cmd) => cmd.SetInt(IMAGES_ID, reader.GetInt(IMAGES_ID)),
-                        (reader) => reader.GetInt(ALBUM_ID)
-                    )
             };
         }
 
@@ -413,13 +412,16 @@ namespace Chamomile.Data {
 
         public async Task<List<GeneratedImage>> GetAll(FilterOptions filter, int lastImage, bool disablePagination = false) {
             return await adoTemplate.Query(
-                SelectSql(ImageColumns,IMAGES_TABLE,
+                SelectSql(
+                    ImageQueryColumns,
+                    IMAGES_TABLE,
                     new WhereConditionGroup(ConditionsFromFilter(filter, lastImage)),
                     [new OrderBy(IMAGES_ID, SortOrder.DESC)],
                     disablePagination ? -1 : PAGE_SIZE, 0
                 ),
                 (cmd) => SetterFromFilter(cmd, filter), ImageRM
             );
+
         }
 
         public async Task<int> GetAllCount(FilterOptions filter) {
@@ -432,7 +434,7 @@ namespace Chamomile.Data {
             return await adoTemplate.QuerySingle(
                 $@"
                     WITH t AS (SELECT count(*) AS c FROM images)
-                    SELECT *
+                    SELECT {string.Join(", ", ImageQueryColumns)}
                     FROM {IMAGES_TABLE}
                     OFFSET floor(random() * (SELECT c FROM t))
                     LIMIT 1;
@@ -443,7 +445,7 @@ namespace Chamomile.Data {
 
         public async Task<GeneratedImage?> Get(int id) {
             return await adoTemplate.QuerySingle(
-                SelectSql(ImageColumns, IMAGES_TABLE,
+                SelectSql(ImageQueryColumns, IMAGES_TABLE,
                     new WhereConditionGroup([new(IMAGES_ID)])
                 ),
                 (cmd) => cmd.SetInt(IMAGES_ID, id), ImageRM
