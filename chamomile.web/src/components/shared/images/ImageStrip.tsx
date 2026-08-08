@@ -1,32 +1,50 @@
 import { Card } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
+import { useMemo } from "react";
+
+export type ImageStripImage = {
+    id?: number,
+    tooltip?: string
+}
 
 export default function ImageStrip({ images, maxLength, layout, imageSize }: {
-    images: (number | undefined)[]
+    images: (number | ImageStripImage | undefined)[]
     maxLength?: number
     layout?: "HORIZONTAL" | "VERTICAL"
     imageSize?: string
 }) {
 
-    //get the images that are not undefined
-    const definedImages = images.filter(a => !!a) as number[];
-    const undefinedImageCount = images.length - definedImages.length
+    const size = imageSize ?? "32px";
 
-    const displayImages = maxLength && definedImages.length > maxLength
-        ? definedImages.slice(0, maxLength)
-        : definedImages;
+    const { displayImages, plus } = useMemo(() => {
+        const defined = images.filter((a) => typeof a === "number" || !!a?.id)
+            .map(a => typeof a === "number" ? {
+                id: a,
+                tooltip: undefined
+            } : a) as ImageStripImage[];
+        const undefinedCount = images.length - defined.length;
+        const display = maxLength && defined.length > maxLength ? defined.slice(0, maxLength) : defined;
+        const plusCount = (defined.length - display.length) + undefinedCount;
 
-    const plus = (definedImages.length - displayImages.length) + undefinedImageCount;
-    const size = imageSize ?? "32px"
+        return { displayImages: display, plus: plusCount };
+    }, [images, maxLength]);
 
     return <div style={{ display: 'flex', gap: "5px", flexDirection: layout === "VERTICAL" ? "column" : undefined }}>
-        {displayImages.map(a => <Card key={a}>
+        {displayImages.map(a => <Card key={a.id}>
             <div style={{ width: size, aspectRatio: 1 / 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: "relative" }}>
-                <img src={imageUrl(a)} style={{ width: "100%", height: "100%", objectFit: 'cover', objectPosition: 'center top', position: 'absolute', left: '0', top: '0' }} />
-                <img
+                <img title={a.tooltip}
+                    src={imageUrl(a.id)}
+                    style={{
+                        width: "100%", height: "100%",
+                        objectFit: 'cover', objectPosition: 'center top',
+                        position: 'absolute', left: '0', top: '0'
+                    }} />
+
+                {/* No idea why we did this */}
+                {/* <img
                     src={imageUrl(a)}
                     style={{ width: "50%" }}
-                />
+                /> */}
             </div>
         </Card>)}
         {plus > 0 && <Card>
