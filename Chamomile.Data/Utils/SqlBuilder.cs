@@ -2,7 +2,7 @@
     public class SqlBuilder {
 
         public enum WhereConditionOperator {
-            EQUALS, GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL, LESS_OR_EQUAL, IN, NOT_EQUALS, NOT_IN, LIKE, ILIKE, NOT_LIKE, NOT_ILIKE, IS_NULL, IS_NOT_NULL
+            EQUALS, GREATER_THAN, LESS_THAN, GREATER_OR_EQUAL, LESS_OR_EQUAL, IN, NOT_EQUALS, NOT_IN, LIKE, ILIKE, NOT_LIKE, NOT_ILIKE, ANY, IS_NULL, IS_NOT_NULL
         };
 
         public enum WhereConditionUnion {
@@ -74,6 +74,7 @@
                 WhereConditionOperator.NOT_LIKE => "NOT LIKE",
                 WhereConditionOperator.IS_NULL => "IS NULL",
                 WhereConditionOperator.IS_NOT_NULL => "IS NOT NULL",
+                WhereConditionOperator.ANY => $"=ANY({value})",
                 _ => throw new NotImplementedException(),
             }} {((int)operation < 12 ? value : "")}";
 
