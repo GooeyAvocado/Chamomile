@@ -113,7 +113,9 @@ namespace Chamomile.Data {
 
             image.Loras = [.. LoraRegex().Matches(image.Prompt)
                     .Select(a => a.Groups[1].Value)
-                    .Where(a => loras.Any(b => b.ID == a))];
+                    .Where(a => loras.Any(b => b.ID == a))
+                    .Distinct() //Fix a data issue if a user puts a LoRA more than once in a prompt (Wildcards may do this)
+                ];
 
             var model = await adoTemplate.QuerySingle(SelectSql([CHECKPOINT_TITLE], CHECKPOINTS_TABLE,
                 new WhereConditionGroup([new(CHECKPOINT_NAME, WhereConditionOperator.ILIKE)])),
