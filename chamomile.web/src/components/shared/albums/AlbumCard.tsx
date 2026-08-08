@@ -59,6 +59,7 @@ export default function AlbumCard({ album: albumId, onView, onRemove, elevation 
 
         {onRemove && <AreYouSureModal open={ays} setOpen={setAys} onYes={() => {
             onRemove?.(album)
+            setAys(false)
         }} title="Remove?">
             Are you sure you want to remove this image from the collection?
         </AreYouSureModal>}

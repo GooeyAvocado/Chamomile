@@ -99,6 +99,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Fixed bug that caused negative prompts with more than one line to be parsed as empty
 - Fixed bug that caused grids that were edited after being cleared to lose their re-rolled seed
 - Fixed bug that caused the row axis labels on grids to slip away if the grid was too wide
+- Fixed bug that caused the confirmation dialog to remain open after clicking yes to remove an image from an album
 `
 
     const { settings } = useSettings();
