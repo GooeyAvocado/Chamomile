@@ -30,6 +30,7 @@ import ModelCard from "../checkpoint/CheckpointCard";
 import { useThrottle } from "../../hooks/useThrottle";
 import { useUpscalers } from "../../hooks/useUpscalers";
 import useModifierKeys from "../../hooks/useModifierKeys";
+import AdditionalInfoRendererMini from "./AdditionalInformationRendererMini";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -594,7 +595,7 @@ export default function ImageModal(props: {
                                     <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
                                         {image && <AlbumStrip albums={image?.albums} maxLength={6} />}
                                     </ComplexAccordionActions>
-                                    {onAddAlbum && <ComplexAccordionActions position="right" showOnState="expanded">
+                                    {onAddAlbum && <ComplexAccordionActions position="right" showOnState="any">
                                         <IconButton onClick={() => setAlbumsOpen(true)}><Add /></IconButton>
                                     </ComplexAccordionActions>}
                                     <ComplexAccordionBody>
@@ -683,6 +684,9 @@ export default function ImageModal(props: {
                                 </ComplexAccordion>
 
                                 <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled={Object.keys(image?.additionalInfo ?? {}).length === 0}>
+                                    <ComplexAccordionActions position="right" showOnState="collapsed">
+                                        <AdditionalInfoRendererMini additionalInformation={image?.additionalInfo} />
+                                    </ComplexAccordionActions>
                                     <ComplexAccordionBody>
                                         <AdditionalInfoRenderer
                                             filter={filter} setFilter={setFilter} imageId={image?.id ?? 0}
