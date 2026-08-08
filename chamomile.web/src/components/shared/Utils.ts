@@ -248,3 +248,17 @@ export const downloadImage = (image?: GeneratedImage) => {
     a.click();
     document.body.removeChild(a);
 }
+
+export const filterEmpty = (filter: FilterOptions) => !filter ||
+    Object.keys(filter).length === 0 ||
+    (
+        (filter.favorite ?? false) === false
+        && (filter.upscaled ?? false) === false
+        && (filter.downloaded ?? false) === false
+        && (filter.fromDate ?? "") === ''
+        && (filter.toDate ?? "") === ''
+        && (filter.lora ?? "") === ''
+        && (filter.model ?? "") === ''
+        && (filter.query?.trim() ?? "") === ''
+        && (filter.sample ?? 0) < 1
+    )

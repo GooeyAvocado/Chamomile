@@ -9,7 +9,7 @@ import AlbumEditor from "../albums/AlbumEditor";
 import { Album } from "../../../model/Album";
 import StatsButton from "../StatsButton/StatsButton";
 import PromptboxImageSample from "../prompt/preview/PromptboxImageSample";
-import { clearFilter } from "../Utils";
+import { clearFilter, filterEmpty } from "../Utils";
 import ModelSelector from "../checkpoint/CheckpointSelector";
 
 export default function FilterBuilder(props: {
@@ -39,19 +39,7 @@ export default function FilterBuilder(props: {
         setToDate(filter.toDate ?? "")
     }, [filter])
 
-    const filterEmpty = !filter ||
-        Object.keys(filter).length === 0 ||
-        (
-            (filter.favorite ?? false) === false
-            && (filter.upscaled ?? false) === false
-            && (filter.downloaded ?? false) === false
-            && (filter.fromDate ?? "") === ''
-            && (filter.toDate ?? "") === ''
-            && (filter.lora ?? "") === ''
-            && (filter.model ?? "") === ''
-            && (filter.query?.trim() ?? "") === ''
-            && (filter.sample ?? 0) < 1
-        )
+    const empty = filterEmpty(filter)
 
     const onBlur = () => {
         if (filter.query?.trim() !== query.trim()) { setFilter({ ...filter, query: query.trim() }) }
@@ -93,7 +81,7 @@ export default function FilterBuilder(props: {
                                         <LibraryAdd />
                                     </IconButton>
                                 </Tooltip>}
-                                {!filterEmpty && <Tooltip title="Clear filter">
+                                {!empty && <Tooltip title="Clear filter">
                                     <IconButton
                                         onClick={() => { setFilter(clearFilter(filter)) }}>
                                         <Close />
