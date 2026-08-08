@@ -595,13 +595,15 @@ namespace Chamomile.Data {
             var count = "COUNT";
             var source = "SOURCE";
             var avgGenTime = "AVG_GEN_TIME";
+            var maxId = "MAX_ID";
 
             var innerImageSql = SelectSql([
-                CRE_TS,IMAGES_FAV_IN,IMAGES_HIRES_IN,IMAGES_DOWNLOAD_CT,IMAGE_ADDTL_INFO, IMAGE_GEN_MS
+                IMAGES_ID,CRE_TS,IMAGES_FAV_IN,IMAGES_HIRES_IN,IMAGES_DOWNLOAD_CT,IMAGE_ADDTL_INFO, IMAGE_GEN_MS
             ], IMAGES_TABLE, new WhereConditionGroup(ConditionsFromFilter(filter, -1, FilterOptions.IsEmpty(filter))), [new(IMAGES_ID,SortOrder.DESC)])
                 + (limit > 0 ? $" LIMIT {limit}" : "");
 
             var sql = SelectSql([
+                $"max({IMAGES_ID}) as {maxId}",
                 $"min({ CRE_TS}) as { MIN_TS}",
 	            $"max({ CRE_TS}) as { MAX_TS}",
 	            $"count(*) filter(where { IMAGES_FAV_IN} = true) as { favsCount}",
@@ -620,6 +622,7 @@ namespace Chamomile.Data {
                 MaxTs = reader.GetOptionalDateTime(MAX_TS),
                 MinTs = reader.GetOptionalDateTime(MIN_TS),
                 TotalDownloads = reader.GetOptionalInt(totalDownloads) ?? 0,
+                MaxImageId = reader.GetOptionalDouble(maxId) ?? 0,
                 UpscaledCount = reader.GetInt(hiresCount),
                 TotalCount = reader.GetInt(count),
                 AvgGenTime = reader.GetOptionalDouble(avgGenTime) ?? 0,
