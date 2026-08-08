@@ -462,7 +462,7 @@ export default function PromptBuilder(props: {
                         />
 
                         {/* Amount */}
-                        <TextField type="number" disabled={preview}
+                        {!noBrew && <TextField type="number" disabled={preview}
                             value={orderAmount} onChange={(e) => setOrderAmount(Math.max(parseInt(e.target.value), 1))}
                             placeholder="Steps"
                             fullWidth slotProps={{
@@ -473,7 +473,7 @@ export default function PromptBuilder(props: {
                             }}
                             style={{ flex: "1", minWidth: "200px" }}
                             onKeyDown={onKeyDown}
-                        />
+                        />}
 
                     </div>}
                 </div>
