@@ -605,6 +605,7 @@ export default function GridViewer({
                             if (imageMap?.[y]?.[x]) {
                                 return <div style={{ width: `${imageSize}px`, height: `${imageSize}px`, aspectRatio: "1/1", flexShrink: "0" }} >
                                     <ImageTile
+                                        lazyLoad
                                         onSelect={() => {
                                             multiSelectImage(imageMap[y][x].id)
                                             setMultiSelectMode(true)
