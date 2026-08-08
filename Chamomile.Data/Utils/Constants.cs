@@ -105,6 +105,7 @@
         public static readonly string GRID_XVAL = "grid_xval";
         public static readonly string GRID_YVAL_CD = "grid_yval_cd";
         public static readonly string GRID_YVAL = "grid_yval";
+        public static readonly string GRID_TOP_IMAGE_IDS = "top_image_ids";
 
         public static readonly string CRE_TS = "cre_ts";
         public static readonly string MIN_TS = "min_ts";

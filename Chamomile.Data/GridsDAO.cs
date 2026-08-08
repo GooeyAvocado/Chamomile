@@ -40,11 +40,7 @@ namespace Chamomile.Data
                 YValMode = reader.GetString(GRID_YVAL_CD),
                 YVals = [.. (reader.GetValue(GRID_YVAL) as string[] ?? [])],
                 Created = reader.GetDateTime(CRE_TS),
-                FirstFour = await adoTemplate.Query(SelectSql([IMAGES_ID], IMAGES_TABLE, new WhereConditionGroup([new("(" + IMAGE_ADDTL_INFO + "->> 'gridId')::int", WhereConditionOperator.EQUALS, "@" + GRID_ID)])) + " LIMIT 4", (cmd) =>
-                {
-                    cmd.SetInt(GRID_ID, reader.GetInt(GRID_ID));
-                }, (rm) => rm.GetInt(0))
-
+                FirstFour = [.. (reader.GetOptionalValue(GRID_TOP_IMAGE_IDS) as int[] ?? [])]
             };
         }
 
@@ -84,7 +80,26 @@ namespace Chamomile.Data
 
         public async Task<List<Grid>> GetAll()
         {
-            return await adoTemplate.Query($"select * from {GRID_TABLE} ORDER BY {GRID_ID} DESC", (cmd) => { }, GridRM);
+
+            var sql = $"""
+SELECT
+    g.*,
+    COALESCE(i.{GRID_TOP_IMAGE_IDS}, ARRAY[]::int[]) AS {GRID_TOP_IMAGE_IDS}
+FROM {GRID_TABLE} g
+LEFT JOIN LATERAL (
+    SELECT array_agg({IMAGES_ID} ORDER BY {IMAGES_ID} ASC) AS {GRID_TOP_IMAGE_IDS}
+    FROM (
+        SELECT {IMAGES_ID}
+        FROM {IMAGES_TABLE}
+        WHERE {GRID_ID} = g.{GRID_ID}
+        ORDER BY {IMAGES_ID} ASC
+        LIMIT 4
+    ) sub
+) i ON true
+ORDER BY GRID_ID DESC;
+""";
+
+            return await adoTemplate.Query(sql, (cmd) => { }, GridRM);
         }
 
         public async Task<Grid?> Get(int Id)

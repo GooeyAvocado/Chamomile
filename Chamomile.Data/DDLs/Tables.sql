@@ -252,3 +252,15 @@ create table templates (
 -- Add the deleted ct
 ALTER TABLE chamomile.lora ADD COLUMN deleted_ct INT4 NOT NULL DEFAULT 0;
 ALTER TABLE chamomile.models ADD COLUMN deleted_ct INT4 NOT NULL DEFAULT 0;
+
+-- Grid ID calcualted for speed optimization
+ALTER TABLE images
+  ADD COLUMN grid_id int GENERATED ALWAYS AS ((img_addtl_info_mv ->> 'gridId')::int) STORED;
+
+CREATE INDEX idx_images_grid_id ON images (grid_id);
+
+ALTER TABLE images
+  ADD CONSTRAINT fk_images_grid_id FOREIGN KEY (grid_id) REFERENCES grids (grid_id);
+
+CREATE INDEX idx_images_grid_id_image_id
+ON images (grid_id, image_id);

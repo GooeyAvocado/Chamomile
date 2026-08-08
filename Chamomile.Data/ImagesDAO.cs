@@ -293,7 +293,7 @@ namespace Chamomile.Data {
             }
 
             if (filter.Grid != null && filter.Grid >= 0) {
-                conditions.Add(new("(" + IMAGE_ADDTL_INFO + "->> 'gridId')::Int", WhereConditionOperator.EQUALS, "@" + GRID_ID));
+                conditions.Add(new(GRID_ID));
             }
 
             if (filter.Sample != null && filter.Sample >= 0) {
