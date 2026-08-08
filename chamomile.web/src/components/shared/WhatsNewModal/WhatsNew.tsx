@@ -45,6 +45,7 @@ export default function WhatsNew({ open, setOpen }: {
 - Clear prompt button
 
 ### What's changed?
+- **Performance Improvements:** Better performance on image retrieval, albums, and especially on grids
 - **Grid Editor Overhaul:** Grid editor is now a tabbed dialog box to make it a bit more spacious when defining columns
 - **Wildcards and Overrides changed to "Dynamics":** A more general term to include Templates and Template Management
 - **Order of operations changed for dynamics:** Templates are applied first, then overrides, then wildcards
