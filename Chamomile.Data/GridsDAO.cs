@@ -40,7 +40,7 @@ namespace Chamomile.Data
                 YValMode = reader.GetString(GRID_YVAL_CD),
                 YVals = [.. (reader.GetValue(GRID_YVAL) as string[] ?? [])],
                 Created = reader.GetDateTime(CRE_TS),
-                FirstFour = [.. (reader.GetOptionalValue(GRID_TOP_IMAGE_IDS) as int[] ?? [])]
+                FirstFour = reader.ContainsKey(GRID_TOP_IMAGE_IDS) ? [.. (reader.GetOptionalValue(GRID_TOP_IMAGE_IDS) as int[] ?? [])] : [],
             };
         }
 
