@@ -8,7 +8,6 @@ import { Model, ModelType } from "../../../model/Model";
 import useApi from "../../hooks/useApi";
 import { getLoraTags } from "../../../api/Loras";
 import { getCheckpointTags } from "../../../api/Checkpoint";
-import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import { GeneratedImage } from "../../../model/GeneratedImage";
 
 export default function ModelEditorModal(props: {
