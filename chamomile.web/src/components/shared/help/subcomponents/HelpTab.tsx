@@ -273,7 +273,7 @@ export default function HelpTab(props: {
         </HelpSection>
 
         <HelpSection title="Model Management" >
-            <img src="/screenshots/modelEdit.png" width={"50%"} />
+            <img src="/screenshots/modelEdit.png" width={"25%"} />
             <p>
                 As part of adding models to Chamomile, you should also take the time to set your model type, a sample image, and some notes.
                 Your LoRA can also store activation tags, though these are purely for notes (for now).
@@ -1018,10 +1018,10 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
             </p>
         </HelpSection>
 
-        <HelpSection title="Usage Statistics" >
+        <HelpSection title="Statistics" >
             <img src="/screenshots/stats.png" style={{ width: "70%" }} />
             <p>
-                You can view usage statistics by clicking
+                You can view statistics by clicking
                 the <LabeledIcon label="Statistics"><BarChart /></LabeledIcon> button at the end
                 of the search box. These statistics are based on your search query. If it is
                 blank, it'll show global overall statistics. You can further refine this to
@@ -1029,19 +1029,39 @@ man made of blue slime, slime man, slime, melting, liquid hair, __species__, blu
                 images to analyze.
             </p>
             <p>
-                You can view five different statistics:
+                You can view statistics for:
             </p>
             <ul>
-                <li><b>General:</b> A small dashboard including image counts, your most common checkpoint, LoRA, and keyword, and the date range of image generation</li>
-                <li><b>Checkpoint:</b> SD Checkpoints used in generation</li>
-                <li><b>LoRAs:</b> LoRAs used in generation, including a statistic for no LoRAs used</li>
-                <li><b>Keywords:</b> Usage statistics on keywords* in your prompts</li>
-                <li><b>Source:</b> A table showing where the prompts you've sent in are sourced form. See Prompt Source for more info</li>
+                <li><b>Checkpoints</b></li>
+                <li><b>LoRAs</b></li>
+                <li><b>Keywords*</b></li>
             </ul>
             <div style={{ fontSize: ".8em", fontStyle: 'italic', opacity: ".8" }}>
                 *Keywords are determined by splitting your prompts by commas, line breaks, or more than one
                 space after having removed all LoRAs and parentheses. It's not perfect!
             </div>
+            <p>
+                Each of these lets you view:
+            </p>
+            <ul>
+                <li><b>Total Generated Images*</b>: Image count (including deleted ones)</li>
+                <li><b>Existing Images</b>: Count of kept images</li>
+                <li><b>Deleted Images*</b>: Count of deleted images</li>
+                <li><b>Downloaded Images</b>: Count of images that have been downloaded</li>
+                <li><b>Favorite Images</b>: Count of images that have been favorited</li>
+                <li><b>Upscaled Images</b>: Count of images upscaled</li>
+                <li><b>Generation Success Rate*</b>: Ratio of existing images to total generated images</li>
+                <li><b>Download Rate</b>: Ratio of downloaded images to existing images</li>
+                <li><b>Favorite Rate</b>: Ratio of favorite images to existing images</li>
+                <li><b>Upscaled Rate</b>: Ratio of upscaled images to existing images</li>
+            </ul>
+            <div style={{ fontSize: ".8em", fontStyle: 'italic', opacity: ".8" }}>
+                *These statistics are only available if no filters or limits are set.
+            </div>
+            <p>
+                Additionally, you can see general statistics for all images that match the current filter (if any),
+                and a count of images by source.
+            </p>
             <p>
                 You can also view usage statistics over time for image generation, checkpoints, LoRAs, and keywords. Simply
                 click the <LabeledIcon label="Chart"><Timeline /></LabeledIcon> button on the bottom left of the dialog,

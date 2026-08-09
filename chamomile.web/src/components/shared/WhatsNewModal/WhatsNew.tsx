@@ -68,6 +68,8 @@ export default function WhatsNew({ open, setOpen }: {
 - Display now switches to latest image only if last latest image is displayed.
 - Display's small buffer size has been removed and is now unbounded.
 - Image viewer now focuses the last selected image, scrolling to it if necessary.
+- Notes moved to new "Metadata" accordion in image viewer
+- Negative prompt now collapsible on image viewer
 - Improved brewing image tile to better highlight the brewing image
 - Improved brewing/queued prompt modal
 - Image selector improvements:
