@@ -262,3 +262,38 @@ export const filterEmpty = (filter: FilterOptions) => !filter ||
         && (filter.query?.trim() ?? "") === ''
         && (filter.sample ?? 0) < 1
     )
+
+export function getRelativeTime(targetDate: Date, locale = 'en') {
+    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+
+    // Calculate differences in milliseconds
+
+    const msPerUnit = [
+        { unit: "month", value: 2678400000 },
+        { unit: "day", value: 86400000 },
+        { unit: "hour", value: 3600000 },
+        { unit: "minute", value: 60000 },
+        { unit: "second", value: 1000 },
+    ] as { unit: Intl.RelativeTimeFormatUnit, value: number }[]
+
+    const elapsed = targetDate.getTime() - Date.now();
+
+    // Find the largest appropriate unit
+    for (const unit of msPerUnit) {
+        if (Math.abs(elapsed) >= unit.value || unit.unit === 'second') {
+            switch (unit.unit) {
+                case "month":
+                    return "A long time ago";
+                case "second":
+                    return "Just now";
+
+                default:
+                    return rtf.format(
+                        Math.round(elapsed / unit.value),
+                        unit.unit
+                    );
+            }
+
+        }
+    }
+}

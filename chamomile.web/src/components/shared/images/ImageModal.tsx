@@ -1,14 +1,14 @@
 import { GeneratedImage } from "../../../model/GeneratedImage";
 import { Button, ButtonGroup, Card, CircularProgress, Dialog, IconButton, Link, Skeleton, Stack, Tab, Tabs, TextField, Tooltip } from "@mui/material";
 import { imageUrl } from "../../../api/Images";
-import { Add, ArrowBack, ChevronLeft, ChevronRight, Coffee, ContentPaste, Delete, Edit, Gradient, Image, ImageSearch, InfoOutlined, ModelTraining, Notes, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Remove, Source, Star, StarBorder } from "@mui/icons-material";
+import { Add, ArrowBack, CalendarMonth, ChevronLeft, ChevronRight, Coffee, ContentPaste, Delete, DirectionsRun, Edit, Gradient, Image, ImageSearch, InfoOutlined, Margin, ModelTraining, OpenWith, PhotoLibrary, ReceiptLong, ReceiptLongTwoTone, Remove, Schedule, Source, Star, StarBorder, Tune, Window, Yard } from "@mui/icons-material";
 import LoraCard from "../lora/LoraCard";
 import { usePrompt } from "../../hooks/usePrompt";
 import { useSnackbar } from "notistack";
 import { useWindowDimensions } from "../../hooks/useWindowDimensions";
 import HiResPanel from "../upscaler/HiResPanel";
 import PromptReorderButton from "../prompt/PromptReorderButton";
-import { clearFilter, downloadImage, imageToPrompt } from "../Utils";
+import { clearFilter, downloadImage, getRelativeTime, imageToPrompt } from "../Utils";
 import { JSX, useEffect, useMemo, useRef, useState } from "react";
 import ImageHotbar from "./ImageHotbar";
 import { Prompt } from "../../../model/Prompt";
@@ -31,6 +31,7 @@ import { useThrottle } from "../../hooks/useThrottle";
 import { useUpscalers } from "../../hooks/useUpscalers";
 import useModifierKeys from "../../hooks/useModifierKeys";
 import AdditionalInfoRendererMini from "./AdditionalInformationRendererMini";
+import { CSSProperties } from "@mui/material/styles";
 
 export default function ImageModal(props: {
     image?: GeneratedImage,
@@ -454,68 +455,22 @@ export default function ImageModal(props: {
 
 
                         {/* Model */}
-                        <div style={{ marginTop: "20px" }}><b>Checkpoint</b></div>
-                        <Card style={{ padding: '10px' }} elevation={3}>
-                            <div style={{ height: "36px", display: 'flex', gap: '20px', alignItems: 'center' }}>
-                                <Skeleton variant="rectangular" width={32} height={32} style={{ borderRadius: '4px' }} />
-                                <Skeleton animation="wave" variant="text" width={"200px"} height={"50px"} />
-                            </div>
-                        </Card>
 
-                        <Stack style={{ marginTop: "20px" }} sx={{ gap: "10px" }}>
+                        <Stack style={{ marginTop: "10px" }} sx={{ gap: "10px" }}>
+                            <Card style={{ padding: '10px' }} elevation={3}>
+                                <div style={{ height: "36px", display: 'flex', gap: '20px', alignItems: 'center' }}>
+                                    <Skeleton variant="rectangular" width={32} height={32} style={{ borderRadius: '4px' }} />
+                                    <Skeleton animation="wave" variant="text" width={"200px"} height={"50px"} />
+                                </div>
+                            </Card>
                             <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><PhotoLibrary /> <div>Collections</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><Gradient color={
                                 image?.hiResAvailable ? "info" : "inherit"
                             } /><div>Upscale</div></>} disabled />
                             <ComplexAccordion elevation={2} title={<><Source /><div>Source</div></>} disabled />
-                            <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>} disabled />
+                            <ComplexAccordion elevation={2} title={<><Margin /> <div>Metadata</div></>} disabled />
                         </Stack>
-
-
-                        {/* Metadata */}
-                        <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
-                            <div style={{ minWidth: "75px", flex: "1" }}>
-                                <div style={{ marginTop: "20px" }}><b>Seed</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
-                            </div>
-                            <div style={{ minWidth: "75px", flex: "1" }}>
-                                <div style={{ marginTop: "20px" }}><b>Steps</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
-                            </div>
-                            <div style={{ minWidth: "75px", flex: "1" }}>
-                                <div style={{ marginTop: "20px" }}><b>CFG Scale</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
-                            </div>
-                            <div style={{ minWidth: "75px", flex: "1" }}>
-                                <div style={{ marginTop: "20px" }}><b>Sampler</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
-                            </div>
-
-                            <div style={{ minWidth: "75px", flex: "1" }}>
-                                <div style={{ marginTop: "20px" }}><b>Scheduler</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
-                            </div>
-
-                        </div>
-
-                        <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
-                            {/* Creation Date */}
-                            <div style={{ minWidth: "75px", flex: "1" }}>
-                                <div style={{ marginTop: "20px" }}><b>Created</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>
-                                    -
-                                </div>
-                            </div>
-
-                            {/* Duration */}
-                            {image?.generationDurationMs && <div style={{ minWidth: "75px", flex: "1" }}>
-                                <div style={{ marginTop: "20px" }}><b>Generation Duration</b></div>
-                                <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>-</div>
-                            </div>}
-
-
-                        </div>
                     </div>
 
 
@@ -592,13 +547,16 @@ export default function ImageModal(props: {
                             </Card>}
 
                             {/* Model */}
-                            <div style={{ marginTop: "20px" }}><b>Checkpoint</b></div>
-                            <ModelCard
-                                filter={filter} setFilter={setFilter}
-                                checkpointTitle={image?.model ?? ""} currentImage={image} elevation={5}
-                            />
+                            {/* <div style={{ marginTop: "10px" }}><b>Checkpoint</b></div> */}
 
-                            <Stack style={{ marginTop: "20px" }} sx={{ gap: "10px" }}>
+
+                            <Stack style={{ marginTop: "10px" }} sx={{ gap: "10px" }}>
+
+                                <ModelCard
+                                    filter={filter} setFilter={setFilter}
+                                    checkpointTitle={image?.model ?? ""} currentImage={image} elevation={5}
+                                />
+
                                 {/* LORAs */}
                                 {(image?.loras?.length ?? 0) !== 0 && <ComplexAccordion elevation={2} title={<><ModelTraining /> <div>LoRAs</div></>}>
                                     <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
@@ -674,46 +632,81 @@ export default function ImageModal(props: {
                                     </ComplexAccordionBody>
                                 </ComplexAccordion>
 
-                                <ComplexAccordion elevation={2} title={<><Notes /> <div>Notes</div></>}>
+                                <ComplexAccordion elevation={2} title={<><Margin /> <div>Metadata</div></>}>
                                     <ComplexAccordionActions position="left" showOnState="collapsed" style={{ display: 'flex', gap: "5px" }}>
-                                        <span style={{
-                                            whiteSpace: "pre-line", overflow: "hidden",
-                                            textOverflow: "ellipsis", maxWidth: "300px",
-                                            fontFamily: 'monospace', fontSize: '.6em',
-                                            WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-                                            display: "-webkit-box"
-                                        }}>
-                                            {image?.notes}
-                                        </span>
+                                        {image?.notes ?
+
+                                            <span style={{
+                                                whiteSpace: "pre-line", overflow: "hidden",
+                                                textOverflow: "ellipsis", maxWidth: "300px",
+                                                fontFamily: 'monospace', fontSize: '.6em',
+                                                WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                                                display: "-webkit-box"
+                                            }}>
+                                                {image?.notes}
+                                            </span> :
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: "4px" }}>
+                                                <MetadataPill icon={<OpenWith fontSize="inherit" />} label="Dimensions" value={`${image?.width}x${image?.height}`} />
+                                                <MetadataPill icon={<Window fontSize="inherit" />} label="Sampler" value={image?.sampler} />
+                                                <MetadataPill icon={<DirectionsRun fontSize="inherit" />} label="Steps" value={image?.steps} />
+                                                <MetadataPill icon={<Tune fontSize="inherit" />} label="Steps" value={image?.cfgScale?.toFixed(2)} />
+                                                <MetadataPill icon={<Yard fontSize="inherit" />} label="Seed" value={image?.seed} />
+                                                <MetadataPill icon={<Schedule fontSize="inherit" />} label="Generation Duration" value={
+                                                    image?.generationDurationMs ? `${((image.generationDurationMs) / 1000.0).toFixed(1)}s` : undefined}
+                                                />
+                                                <MetadataPill icon={<CalendarMonth fontSize="inherit" />} label="Creation date" value={
+                                                    image?.created ?
+                                                        getRelativeTime(new Date(image?.created))
+                                                        : undefined}
+                                                />
+
+
+                                            </div>
+                                        }
                                     </ComplexAccordionActions>
-                                    {onUpdateNotes && <ComplexAccordionActions position="right" showOnState="expanded">
-                                        <IconButton disabled={notesOpen} onClick={() => {
-                                            setNotesOpen(true)
-                                            setEditNote(image?.notes ?? "")
-                                        }}><Edit /></IconButton>
-                                    </ComplexAccordionActions>}
-                                    <ComplexAccordionBody>
-                                        <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px" }}>
-                                            {!notesOpen
-                                                ? (image?.notes?.length ?? 0) === 0 ? "Image has no notes" : image?.notes
-                                                : <>
-                                                    <TextField
-                                                        value={editNote} onChange={(e) => setEditNote(e.target.value)}
-                                                        fullWidth multiline placeholder="Set a note" minRows={5} maxRows={5}
-                                                        slotProps={{ htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } } }}
-                                                    />
-                                                    <div style={{ display: 'flex', justifyContent: "end", gap: "10px", marginTop: "10px" }}>
-                                                        <Button onClick={() => {
-                                                            setNotesOpen(false)
-                                                            if (editNote.trim() !== (image?.notes ?? "").trim()) {
-                                                                onUpdateNotes?.(editNote)
-                                                            }
-                                                        }}>
-                                                            OK
-                                                        </Button>
-                                                    </div>
-                                                </>
-                                            }
+                                    <ComplexAccordionBody style={{ padding: "0px 10px" }}>
+
+                                        <MetadataTables
+                                            filter={filter}
+                                            image={image}
+                                            setFilter={setFilter}
+                                        />
+
+
+                                        {/* Notes */}
+                                        <div style={{ marginTop: "8px" }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>Notes</div>
+                                                {onUpdateNotes &&
+                                                    <IconButton disabled={notesOpen} onClick={() => {
+                                                        setNotesOpen(true)
+                                                        setEditNote(image?.notes ?? "")
+                                                    }}><Edit /></IconButton>
+                                                }
+                                            </div>
+                                            <hr style={{ margin: "4px 0px" }} />
+                                            <div style={{ fontSize: ".7em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', padding: "10px 0px" }}>
+                                                {!notesOpen
+                                                    ? (image?.notes?.length ?? 0) === 0 ? "Image has no notes" : image?.notes
+                                                    : <>
+                                                        <TextField
+                                                            value={editNote} onChange={(e) => setEditNote(e.target.value)}
+                                                            fullWidth multiline placeholder="Set a note" minRows={5} maxRows={5}
+                                                            slotProps={{ htmlInput: { style: { fontSize: '.8em', fontFamily: 'monospace' } } }}
+                                                        />
+                                                        <div style={{ display: 'flex', justifyContent: "end", gap: "10px", marginTop: "10px" }}>
+                                                            <Button onClick={() => {
+                                                                setNotesOpen(false)
+                                                                if (editNote.trim() !== (image?.notes ?? "").trim()) {
+                                                                    onUpdateNotes?.(editNote)
+                                                                }
+                                                            }}>
+                                                                OK
+                                                            </Button>
+                                                        </div>
+                                                    </>
+                                                }
+                                            </div>
                                         </div>
                                     </ComplexAccordionBody>
                                 </ComplexAccordion>
@@ -722,59 +715,7 @@ export default function ImageModal(props: {
                             </Stack>
 
 
-                            {/* Metadata */}
-                            <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
-                                <div style={{ minWidth: "75px", flex: "1" }}>
-                                    <div style={{ marginTop: "20px" }}><b>Seed</b></div>
-                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.seed}</div>
-                                </div>
-                                <div style={{ minWidth: "75px", flex: "1" }}>
-                                    <div style={{ marginTop: "20px" }}><b>Steps</b></div>
-                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.steps}</div>
-                                </div>
-                                <div style={{ minWidth: "75px", flex: "1" }}>
-                                    <div style={{ marginTop: "20px" }}><b>CFG Scale</b></div>
-                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.cfgScale.toFixed(2)}</div>
-                                </div>
-                                <div style={{ minWidth: "75px", flex: "1" }}>
-                                    <div style={{ marginTop: "20px" }}><b>Sampler</b></div>
-                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.sampler}</div>
-                                </div>
 
-                                <div style={{ minWidth: "75px", flex: "1" }}>
-                                    <div style={{ marginTop: "20px" }}><b>Scheduler</b></div>
-                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{image?.scheduleType}</div>
-                                </div>
-
-                            </div>
-
-                            <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: "10px", fontSize: ".8em", marginTop: '10px' }}>
-                                {/* Creation Date */}
-                                <div style={{ minWidth: "75px", flex: "1" }}>
-                                    <div style={{ marginTop: "20px" }}><b>Created</b></div>
-                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>
-                                        {setFilter ?
-                                            <Link onClick={() => {
-                                                setFilter?.({
-                                                    ...clearFilter(filter ?? {}),
-                                                    fromDate: image?.created?.split("T")?.[0],
-                                                    toDate: image?.created?.split("T")?.[0]
-                                                })
-                                            }}>{new Date(image?.created ?? 0).toLocaleString()}</Link> :
-                                            new Date(image?.created ?? 0).toLocaleString()
-                                        }
-
-                                    </div>
-                                </div>
-
-                                {/* Duration */}
-                                {image?.generationDurationMs && <div style={{ minWidth: "75px", flex: "1" }}>
-                                    <div style={{ marginTop: "20px" }}><b>Generation Duration</b></div>
-                                    <div style={{ fontSize: ".9em", fontFamily: 'monospace' }}>{(image?.generationDurationMs / 1000.0)}s</div>
-                                </div>}
-
-
-                            </div>
                         </div>
 
                         {props.infoChildren}
@@ -795,4 +736,89 @@ export default function ImageModal(props: {
 
     </Dialog >
 
+}
+
+function MetadataTables({ image, filter, setFilter }: {
+    image?: GeneratedImage
+    filter?: FilterOptions,
+    setFilter?: (filter: FilterOptions) => void
+}) {
+
+    const tableStyle: React.CSSProperties = { width: "100%", borderCollapse: "collapse" }
+    const tableRowStyle: React.CSSProperties = { borderBottom: "1px solid white" }
+    const tableRowLastStyle: React.CSSProperties = {}
+    const rowHeaderCellStyle: React.CSSProperties = { width: "66px" }
+    const valueCellStyle: React.CSSProperties = { fontFamily: "monospace", fontSize: ".9em" }
+
+
+    return <div style={{ display: 'flex', gap: "8px", fontSize: ".7em" }}>
+        <Card style={{ flex: '1', padding: "8px" }}>
+            <table style={tableStyle}>
+                <tr style={tableRowStyle}>
+                    <td style={rowHeaderCellStyle}><b>Seed</b></td>
+                    <td style={valueCellStyle}>{image?.seed}</td>
+                </tr>
+                <tr style={tableRowStyle}>
+                    <td style={rowHeaderCellStyle}><b>Steps</b></td>
+                    <td style={valueCellStyle}>{image?.steps}</td>
+                </tr>
+                <tr style={tableRowLastStyle}>
+                    <td style={rowHeaderCellStyle}><b>CFG</b></td>
+                    <td style={valueCellStyle}>{image?.cfgScale?.toFixed(2)}</td>
+                </tr>
+            </table>
+        </Card>
+        <Card style={{ flex: '1', padding: "8px" }}>
+            <table style={tableStyle}>
+                <tr style={tableRowStyle}>
+                    <td style={rowHeaderCellStyle}><b>Sampler</b></td>
+                    <td style={valueCellStyle}>{image?.sampler}</td>
+                </tr>
+                <tr style={tableRowStyle}>
+                    <td style={rowHeaderCellStyle}><b>Gen Time</b></td>
+                    <td style={valueCellStyle}>{((image?.generationDurationMs ?? 0) / 1000.0).toFixed(2)}s</td>
+                </tr>
+                <tr style={tableRowLastStyle}>
+                    <td style={rowHeaderCellStyle}><b>Created</b></td>
+                    <td style={valueCellStyle}>{setFilter ?
+                        <Link onClick={() => {
+                            setFilter?.({
+                                ...clearFilter(filter ?? {}),
+                                fromDate: image?.created?.split("T")?.[0],
+                                toDate: image?.created?.split("T")?.[0]
+                            })
+                        }}>
+                            {new Date(image?.created ?? 0).toLocaleString(undefined, { month: "2-digit", day: "2-digit", year: "numeric", hour: "numeric", minute: "numeric" })}
+                        </Link> :
+                        new Date(image?.created ?? 0).toLocaleString()
+                    }</td>
+                </tr>
+            </table>
+        </Card>
+    </div>
+
+}
+
+function MetadataPill({ icon, label, value }: {
+    icon: React.ReactElement
+    label: string,
+    value?: string | number
+}) {
+
+    const cardStyle: CSSProperties = {
+        padding: "2px 6px", display: 'flex',
+        gap: "4px", alignItems: 'center',
+        fontSize: ".5em", color: "lightgray",
+        border: "1px solid lightgray",
+        borderRadius: "4px", justifyContent: 'left'
+    }
+
+    if (!value) return <></>
+
+    return <Tooltip title={label}>
+        <div style={cardStyle}>
+            {icon}
+            <div>{value}</div>
+        </div>
+    </Tooltip>
 }
