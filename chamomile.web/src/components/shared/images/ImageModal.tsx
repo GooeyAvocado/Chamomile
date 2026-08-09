@@ -174,11 +174,10 @@ export default function ImageModal(props: {
         setOpen(false)
     }
 
-    const executeUpscale = () => {
-        if (!onUpscale || !image) return;
+    const executeUpscale = onUpscale && image ? () => {
         enqueueSnackbar("Upscaling...", { variant: "info" })
         upscaleImage(image, onUpscale)
-    }
+    } : undefined;
 
     return <Dialog disablePortal={disablePortal} open={open && !!image} onClose={() => setOpen(false)} fullScreen
         onKeyUp={(e) => {
@@ -248,7 +247,7 @@ export default function ImageModal(props: {
                         break;
                     case "+":
                     case "U":
-                        executeUpscale();
+                        executeUpscale?.();
                         break;
                     default:
                         break;
@@ -306,7 +305,7 @@ export default function ImageModal(props: {
                 case "U":
                     if (e.ctrlKey) {
                         e.preventDefault();
-                        executeUpscale();
+                        executeUpscale?.();
                     }
                     break;
                 default:
@@ -790,7 +789,7 @@ function MetadataTables({ image, filter, setFilter }: {
                         }}>
                             {new Date(image?.created ?? 0).toLocaleString(undefined, { month: "2-digit", day: "2-digit", year: "numeric", hour: "numeric", minute: "numeric" })}
                         </Link> :
-                        new Date(image?.created ?? 0).toLocaleString()
+                        new Date(image?.created ?? 0).toLocaleString(undefined, { month: "2-digit", day: "2-digit", year: "numeric", hour: "numeric", minute: "numeric" })
                     }</td>
                 </tr>
             </table>

@@ -55,6 +55,8 @@ export default function ImageHotbar(props: {
     const labeledIconButtonStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: "10px", aspectRatio: "1/1" }
     const labeledIconButtonLabelStyle: React.CSSProperties = { fontSize: '.5em' }
 
+    const disableUpscale = !onUpscale || !sdAvailable;
+
     return <>
 
         {vertical ? <div style={{ display: 'flex', gap: "16px", justifyContent: 'center' }}>
@@ -84,7 +86,8 @@ export default function ImageHotbar(props: {
             </IconButton>
 
             <IconButton
-                disabled={!onUpscale || !sdAvailable || imageUpscalingId === image?.id} onClick={(e) => {
+                disabled={!onUpscale || !sdAvailable || imageUpscalingId === image?.id}
+                onClick={(e) => {
                     image?.hiResAvailable ? setUpscaleAgainPopperAnchor(e.currentTarget) : onUpscale?.()
                 }}
                 size="large" style={labeledIconButtonStyle}
@@ -112,17 +115,21 @@ export default function ImageHotbar(props: {
                         </Tooltip>
                         <hr />
                     </>}
-                    <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
+
+                    {onFavorite && <Tooltip title={image?.favorite ? "Unfavorite" : "Favorite"} enterDelay={250}>
                         <IconButton onClick={() => onFavorite?.()} disabled={!onFavorite}>{image?.favorite ? <Star htmlColor="gold" /> : <StarOutlineOutlined />}</IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete" enterDelay={250}>
+                    </Tooltip>}
+
+                    {onDelete && <Tooltip title="Delete" enterDelay={250}>
                         <IconButton disabled={!onDelete} onClick={(e) => {
                             setDeletePopperAnchor(e.currentTarget)
                         }}>
                             <Delete />
                         </IconButton>
-                    </Tooltip>
-                    <hr />
+                    </Tooltip>}
+
+                    {(onFavorite || onDelete) && <hr />}
+
                     <Tooltip title="Download" enterDelay={250}>
                         <IconButton disabled={!onDownload} onClick={(e) => {
                             (image?.downloadCount ?? 0) > 0 ? setDownloadAgainPopperAnchor(e.currentTarget) : onDownload?.()
@@ -130,14 +137,20 @@ export default function ImageHotbar(props: {
                             <Download color={(image?.downloadCount ?? 0) > 0 ? "primary" : "action"} />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Upscale" enterDelay={250}>
-                        <IconButton disabled={!onUpscale || !sdAvailable} onClick={(e) => {
+
+                    {!disableUpscale && <Tooltip title="Upscale" enterDelay={250}>
+                        <IconButton disabled={imageUpscalingId === image?.id} onClick={(e) => {
                             image?.hiResAvailable ? setUpscaleAgainPopperAnchor(e.currentTarget) : onUpscale?.()
                         }}>
-                            {imageUpscalingId === image?.id ? <CircularProgress size={24} color="info" /> : <Gradient color={image?.hiResAvailable ? "info" : "action"} />}
+                            {imageUpscalingId === image?.id ? <CircularProgress size={24} color="info" /> :
+                                <Gradient color={image?.hiResAvailable ? "info" : "inherit"}
+                                />}
                         </IconButton>
-                    </Tooltip>
+
+                    </Tooltip>}
+
                     <hr />
+
                     {sdAvailable && useBasePrompt ?
                         <PromptReorderButton
                             prompt={imageToPrompt(image, true)}
@@ -153,11 +166,13 @@ export default function ImageHotbar(props: {
                                 <Coffee />
                             </IconButton>
                         </Tooltip>}
+
                     <Tooltip title={`Use this${useBasePrompt ? " base" : ""} prompt`} enterDelay={250}>
                         <IconButton disabled={!onUsePrompt} onClick={(e) => setPromptAnchor(e.currentTarget)}>
                             {useBasePrompt ? <ReceiptLongTwoTone /> : <ReceiptLong />}
                         </IconButton>
                     </Tooltip>
+
                     {canNavigate && <>
                         <hr />
                         <Tooltip title="Next" enterDelay={250}>
