@@ -89,6 +89,7 @@ export default function ImageModal(props: {
     const [notesOpen, setNotesOpen] = useState(false)
     const [editNote, setEditNote] = useState("")
     const [showSd, setShowSd] = useState(false)
+    const [showNegative, setShowNegative] = useState(false)
 
     const verticalCollapse = vertical && _verticalCollapse
 
@@ -106,6 +107,7 @@ export default function ImageModal(props: {
     useEffect(() => {
         if ((image?.basePrompt?.trim()?.length ?? 0) === 0 || image?.basePrompt === image?.prompt) setPromptMode(0)
         setNotesOpen(false)
+        setShowNegative(false)
     }, [image])
 
     const movementRef = useRef(0);
@@ -393,7 +395,7 @@ export default function ImageModal(props: {
             <Card style={vertical
                 ? { width: '100%', zIndex: 2, maxHeight: collapse || verticalCollapse ? 0 : "50vh", transition: "max-height 0.5s ease" }
                 : { maxWidth: collapse ? 0 : "500px", width: "50vw", transition: "max-width 0.5s ease", zIndex: '2' }}>
-                {!hideSidebar ? <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
+                {hideSidebar ? <div style={{ height: vertical ? "50vh" : "100vh", overflowY: 'hidden', padding: "20px", display: "flex", flexDirection: 'column' }}>
 
                     {/* Buttons */}
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "10px", marginBottom: '10px' }}>
@@ -432,16 +434,23 @@ export default function ImageModal(props: {
                         </Card>
 
                         {/* Negative Prompt */}
+                        <Card elevation={5} style={{ marginTop: "8px" }}>
+                            <div style={{ display: 'flex', alignItems: "center", padding: "0px 10px", marginTop: "8px" }}>
+                                <b style={{ flex: "1" }}>Negative Prompt</b>
+                                <IconButton disabled><ContentPaste fontSize="small" /></IconButton>
+                            </div>
+                            <hr style={{ margin: "4px 0px" }} />
+                            <div style={{
+                                fontSize: ".6em", fontFamily: 'monospace', padding: "10px"
+                            }}>
+                                <Skeleton animation="wave" />
+                                <Skeleton animation="wave" />
+                                <div style={{ textAlign: 'right', padding: "8px" }}>
+                                    <Link>Show more</Link>
+                                </div>
+                            </div>
 
-                        <div style={{ marginTop: "20px", display: 'flex', alignItems: "center" }}>
-                            <b style={{ flex: "1" }}>Negative Prompt</b>
-                            <IconButton disabled><ContentPaste fontSize="small" /></IconButton>
-                        </div>
-                        <div style={{ padding: '5px 10px 0px 0px' }}>
-                            <Skeleton animation="wave" />
-                            <Skeleton animation="wave" />
-                            <Skeleton animation="wave" />
-                        </div>
+                        </Card>
 
 
                         {/* Model */}
@@ -560,13 +569,27 @@ export default function ImageModal(props: {
                             </Card>
 
                             {/* Negative Prompt */}
-                            {(image?.negativePrompt?.trim().length ?? 0) !== 0 && <>
-                                <div style={{ marginTop: "20px", display: 'flex', alignItems: "center" }}>
+                            {(image?.negativePrompt?.trim().length ?? 0) !== 0 && <Card elevation={5} style={{ marginTop: "8px" }}>
+                                <div style={{ display: 'flex', alignItems: "center", padding: "0px 10px", marginTop: "8px" }}>
                                     <b style={{ flex: "1" }}>Negative Prompt</b>
-                                    <CopyToClipboardButton text={image?.negativePrompt} style={{ paddingRight: "16px" }} />
+                                    <CopyToClipboardButton text={image?.negativePrompt} />
                                 </div>
-                                <div style={{ fontSize: ".6em", fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{image?.negativePrompt}</div>
-                            </>}
+                                <hr style={{ margin: "4px 0px" }} />
+                                <div style={{
+                                    fontSize: ".6em", fontFamily: 'monospace', padding: "10px"
+                                }}>
+                                    <div style={showNegative ? { whiteSpace: 'pre-wrap', wordWrap: 'break-word' } : {
+                                        whiteSpace: 'pre-wrap', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical', wordBreak: 'break-word'
+                                    }}>
+                                        {image?.negativePrompt}
+                                    </div>
+                                    <div style={{ textAlign: 'right', padding: "8px" }}>
+                                        <Link style={{ cursor: "pointer" }} onClick={() => { setShowNegative(!showNegative) }}>Show {showNegative ? "less" : "more"}</Link>
+                                    </div>
+                                </div>
+
+                            </Card>}
 
                             {/* Model */}
                             <div style={{ marginTop: "20px" }}><b>Checkpoint</b></div>
