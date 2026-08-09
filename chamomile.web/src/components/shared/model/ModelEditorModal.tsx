@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Card, CardActionArea, Chip, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Autocomplete, Button, Card, CardActionArea, Chip, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { imageUrl } from "../../../api/Images";
 import ImageBrowserModal from "../images/ImageBrowserModal";
@@ -35,9 +35,13 @@ export default function ModelEditorModal(props: {
 
     return <Dialog open={open} onClose={() => setOpen(false)} maxWidth={"xs"} >
         <DialogTitle style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
-            <div>
-                <div>{model.name}</div>
-                <div style={{ fontSize: '12px', color: '#888' }}>{model.id}</div>
+            <div style={{ maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Tooltip title={model.name} arrow>
+                    <Typography noWrap style={{ fontWeight: 600 }}>{model.name}</Typography>
+                </Tooltip>
+                <Tooltip title={model.id} arrow>
+                    <Typography noWrap style={{ fontSize: '12px', color: '#888' }}>{model.id}</Typography>
+                </Tooltip>
             </div>
             {internalModel.type?.length > 0 && <ModelTypePill type={internalModel.type} />}
         </DialogTitle>
